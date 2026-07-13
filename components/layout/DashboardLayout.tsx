@@ -26,6 +26,7 @@ export default function DashboardLayout({ children, sidebar }: Props) {
               alt="NextAura Logo"
               width={40}
               height={40}
+              style={{ width: "auto", height: "auto" }}
             />
             <h1 className="metal-text text-sm font-bold tracking-wide">
               NEXTAURA

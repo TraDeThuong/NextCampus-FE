@@ -1,47 +1,127 @@
 import { ReactNode } from "react";
 
 interface MetalCardProps {
-  children: ReactNode;
-  className?: string;
+    children: ReactNode;
+    className?: string;
 }
 
 export default function MetalCard({
-  children,
-  className = "",
+    children,
+    className = "",
 }: MetalCardProps) {
-  return (
-    <div
-      className={`
-        group relative overflow-hidden rounded-3xl border border-white/15
-        bg-gradient-to-br
-        from-white/10 via-slate-300/10 to-slate-900/80
-        backdrop-blur-xl
-        transition-all duration-500
-        hover:-translate-y-2
-        hover:shadow-[0_18px_40px_rgba(0,79,158,0.25)]
-        ${className}
-      `}
-    >
-      {/* reflective layer */}
-      <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.18)_0%,transparent_25%,transparent_65%,rgba(255,255,255,0.06)_100%)]" />
+    return (
+        <div
+            className={`
+                group relative overflow-hidden
 
-      {/* shimmer only on hover */}
-      <div
-        className="
-          absolute top-0 left-[-30%] h-full w-[30%]
-          bg-white/20 blur-xl skew-x-[-20deg]
-          opacity-0
-          group-hover:opacity-100
-          group-hover:animate-shimmer
-        "
-      />
+                rounded-[28px]
 
-      {/* border shine */}
-      <div className="absolute inset-[1px] rounded-3xl border border-white/10" />
+                border border-white/10
 
-      <div className="relative z-10 transition-transform duration-500 group-hover:scale-[1.02]">
-        {children}
-      </div>
-    </div>
-  );
+                bg-[linear-gradient(145deg,#101827_0%,#1a2235_20%,#0f172a_55%,#050816_100%)]
+
+                shadow-[0_12px_40px_rgba(0,0,0,.45)]
+
+                transition-all duration-500
+
+                hover:-translate-y-1
+                hover:border-cyan-400/20
+                hover:shadow-[0_20px_50px_rgba(21,174,245,.22)]
+
+                ${className}
+            `}
+        >
+            {/* Metallic base */}
+
+            <div
+                className="
+                    absolute inset-0
+
+                    bg-[linear-gradient(
+                        135deg,
+                        rgba(255,255,255,.10) 0%,
+                        rgba(255,255,255,.03) 18%,
+                        transparent 40%,
+                        rgba(255,255,255,.02) 70%,
+                        rgba(0,0,0,.25) 100%
+                    )]
+                "
+            />
+
+            {/* Chrome line top */}
+
+            <div
+                className="
+                    absolute left-6 right-6 top-0 h-px
+
+                    bg-gradient-to-r
+                    from-transparent
+                    via-white/90
+                    to-transparent
+                "
+            />
+
+            {/* Blue edge glow */}
+
+            <div
+                className="
+                    absolute inset-0
+
+                    opacity-0
+
+                    transition-opacity
+                    duration-500
+
+                    group-hover:opacity-100
+
+                    bg-[radial-gradient(circle_at_top,rgba(21,174,245,.18),transparent_55%)]
+                "
+            />
+
+            {/* Metallic reflection */}
+
+            <div
+                className="
+                    absolute
+                    -left-[40%]
+                    top-0
+
+                    h-full
+                    w-[30%]
+
+                    -skew-x-[20deg]
+
+                    bg-white/10
+
+                    blur-2xl
+
+                    opacity-0
+
+                    transition-all
+                    duration-1000
+
+                    group-hover:left-[130%]
+                    group-hover:opacity-100
+                "
+            />
+
+            {/* Inner border */}
+
+            <div
+                className="
+                    absolute inset-[1px]
+
+                    rounded-[27px]
+
+                    border border-white/5
+                "
+            />
+
+            {/* Content */}
+
+            <div className="relative z-10">
+                {children}
+            </div>
+        </div>
+    );
 }

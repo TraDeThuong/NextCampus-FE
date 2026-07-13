@@ -1,5 +1,6 @@
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import InternSidebar from "@/components/layout/InternSidebar";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export default function Layout({
     children,
@@ -7,8 +8,10 @@ export default function Layout({
     children: React.ReactNode;
 }) {
     return (
-        <DashboardLayout sidebar={<InternSidebar />}>
-            {children}
-        </DashboardLayout>
+        <ProtectedRoute allowedRoles={["INTERN"]}>
+            <DashboardLayout sidebar={<InternSidebar />}>
+                {children}
+            </DashboardLayout>
+        </ProtectedRoute>
     );
 }

@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 
 import { authService } from "@/services/auth.service";
 import { LoginPayload, ApiErrorResponse } from "@/types/auth";
+import { useAuth } from "@/hooks/auth/useAuth";
 
 export type LoginFormValues = LoginPayload & {
     remember: boolean;
@@ -15,6 +16,7 @@ export type LoginFormValues = LoginPayload & {
 
 export function useLogin() {
     const router = useRouter();
+    const { login } = useAuth();
 
     const {
         register,
@@ -29,36 +31,30 @@ export function useLogin() {
     });
 
     const loginMutation = useMutation({
-        mutationFn: (variables: LoginFormValues) => 
+        mutationFn: (variables: LoginFormValues) =>
             authService.login({
                 email: variables.email,
                 password: variables.password,
             }),
-        
+
         onSuccess: (result, variables) => {
-            // 3. Extract accessToken, refreshToken, and user from login response
             const { accessToken, refreshToken, user } = result.data;
 
-            // Handle "Remember Me" preference
-            if (variables.remember) {
-                localStorage.setItem("accessToken", accessToken);
-                localStorage.setItem("refreshToken", refreshToken);
-            } else {
-                sessionStorage.setItem("accessToken", accessToken);
-                sessionStorage.setItem("refreshToken", refreshToken);
-            }
+            login(
+                { accessToken, refreshToken },
+                user,
+                variables.remember
+            );
 
             toast.success(`Welcome back, ${user.fullName}!`);
-            
-            // 3. Map role to dashboard path dynamically
-            // Replace router.push("/dashboard") with router.push(`/${user.role.toLowerCase()}/dashboard`)
+
             const targetDashboard = `/${user.role.toLowerCase()}/dashboard`;
             router.push(targetDashboard);
         },
 
         onError: (error: AxiosError<ApiErrorResponse>) => {
             toast.error(
-                error.response?.data?.message ?? 
+                error.response?.data?.message ??
                 "Authentication failed. Please try again."
             );
         },

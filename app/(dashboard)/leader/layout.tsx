@@ -1,5 +1,6 @@
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import LeaderSidebar from "@/components/layout/LeaderSidebar";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export default function Layout({
     children,
@@ -7,8 +8,10 @@ export default function Layout({
     children: React.ReactNode;
 }) {
     return (
-        <DashboardLayout sidebar={<LeaderSidebar />}>
-            {children}
-        </DashboardLayout>
+        <ProtectedRoute allowedRoles={["LEADER"]}>
+            <DashboardLayout sidebar={<LeaderSidebar />}>
+                {children}
+            </DashboardLayout>
+        </ProtectedRoute>
     );
 }

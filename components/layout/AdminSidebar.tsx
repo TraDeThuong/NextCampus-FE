@@ -8,7 +8,9 @@ import {
   Rocket,
   MessageCircle,
   FileText,
+  UserRoundPen
 } from "lucide-react";
+
 import { usePathname } from "next/navigation";
 
 const menus = [
@@ -18,6 +20,7 @@ const menus = [
   { name: "Onboarding", href: "/admin/onboarding", icon: Rocket },
   { name: "Discord", href: "/admin/discord", icon: MessageCircle },
   { name: "Policies", href: "/admin/policies", icon: FileText },
+  { name: "Profile", href: "/admin/profile", icon: UserRoundPen}
 ];
 
 export default function AdminSidebar() {

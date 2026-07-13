@@ -3,6 +3,7 @@ import "./globals.css";
 import ReactQueryProvider from "@/providers/ReactQueryProvider";
 import { ReactNode } from "react";
 import ToastProvider from "@/providers/ToastProvider";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const headingFont = Black_Ops_One({
   subsets: ["latin"],
@@ -24,8 +25,10 @@ export default function RootLayout({ children } : {children: ReactNode}) {
     >
       <body>
         <ReactQueryProvider>
-          {children}
-          <ToastProvider />
+          <AuthProvider>
+            {children}
+            <ToastProvider />
+          </AuthProvider>
         </ReactQueryProvider>
       </body>
     </html>

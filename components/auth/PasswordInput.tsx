@@ -2,45 +2,48 @@
 
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { FieldError, UseFormRegister } from "react-hook-form";
-
-type LoginFormValues = {
-    email: string;
-    password: string;
-    remember: boolean;
-};
+import type { UseFormRegister, FieldError, RegisterOptions } from "react-hook-form";
 
 type PasswordInputProps = {
-    register: UseFormRegister<LoginFormValues>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    register: UseFormRegister<any>;
     error?: FieldError["message"];
+    name?: string;
+    label?: string;
+    placeholder?: string;
+    rules?: RegisterOptions;
 };
 
 export default function PasswordInput({
     register,
     error,
+    name = "password",
+    label = "Password",
+    placeholder = "Enter your password",
+    rules,
 }: PasswordInputProps) {
     const [showPassword, setShowPassword] = useState(false);
 
     return (
         <div className="space-y-2">
             <label
-                htmlFor="password"
+                htmlFor={name}
                 className="block text-sm font-medium text-foreground/90"
             >
-                Password
+                {label}
             </label>
 
             <div className="relative flex items-center">
                 <input
-                    id="password"
+                    id={name}
                     type={showPassword ? "text" : "password"}
-                    placeholder="Enter your password"
-                    className={`w-full rounded-xl border bg-transparent py-3 pl-4 pr-12 text-sm text-foreground outline-none transition-all placeholder:text-muted/60 
-                        ${error 
-                            ? "border-danger focus:border-danger focus:ring-4 focus:ring-danger/10" 
+                    placeholder={placeholder}
+                    className={`w-full rounded-xl border bg-transparent py-3 pl-4 pr-12 text-sm text-foreground outline-none transition-all placeholder:text-muted/60
+                        ${error
+                            ? "border-danger focus:border-danger focus:ring-4 focus:ring-danger/10"
                             : "border-border focus:border-primary-light focus:ring-4 focus:ring-primary-light/10"
                         }`}
-                    {...register("password", { required: "Password is required" })}
+                    {...register(name, rules || { required: `${label} is required` })}
                 />
 
                 <button

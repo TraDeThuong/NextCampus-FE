@@ -9,6 +9,7 @@ export default function LoginHeader() {
                 width={72}
                 height={72}
                 className="mx-auto"
+                style={{ width: "auto", height: "auto" }}
             />
 
             <h1 className="mt-6 text-3xl font-bold metal-text">
