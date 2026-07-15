@@ -1,4 +1,4 @@
-// PATCH /users/change-password
+// POST /auth/change-password
 
 "use client";
 
@@ -6,13 +6,12 @@ import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 
-import { changePasswordService } from "@/services/user.service";
-import type { ChangePasswordPayload, ApiError } from "@/types/user";
+import { authService } from "@/services/auth.service";
+import type { ChangePasswordPayload } from "@/types/auth";
+import type { ApiError } from "@/types/user";
 import type { MessageSuccessResponse } from "@/types/auth";
 
-type ChangePasswordFormValues = ChangePasswordPayload & {
-    confirmPassword: string;
-};
+type ChangePasswordFormValues = ChangePasswordPayload;
 
 export function useChangePassword() {
     const {
@@ -26,7 +25,7 @@ export function useChangePassword() {
         },
     } = useForm<ChangePasswordFormValues>({
         defaultValues: {
-            currentPassword: "",
+            oldPassword: "",
             newPassword: "",
             confirmPassword: "",
         },
@@ -34,7 +33,7 @@ export function useChangePassword() {
 
     const mutation = useMutation<MessageSuccessResponse, ApiError, ChangePasswordPayload>({
         mutationFn: (payload: ChangePasswordPayload) =>
-            changePasswordService(payload),
+            authService.changePassword(payload),
 
         onSuccess: () => {
             toast.success("Password changed successfully.");
@@ -52,8 +51,9 @@ export function useChangePassword() {
 
     const onSubmit = (data: ChangePasswordFormValues) => {
         mutation.mutate({
-            currentPassword: data.currentPassword,
+            oldPassword: data.oldPassword,
             newPassword: data.newPassword,
+            confirmPassword: data.confirmPassword,
         });
     };
 

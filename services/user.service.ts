@@ -5,7 +5,6 @@ import {
   UserQueryParams,
   CreateUserPayload,
   UpdateUserPayload,
-  ChangePasswordPayload,
 } from "@/types/user";
 import { MessageSuccessResponse } from "@/types/auth";
 
@@ -55,12 +54,12 @@ export const deleteUserService = async (id: string): Promise<UserSuccessResponse
 };
 
 // 7. PATCH /users/change-password — Đổi mật khẩu
-export const changePasswordService = async (
-  payload: ChangePasswordPayload,
-): Promise<MessageSuccessResponse> => {
-  const response = await api.patch<MessageSuccessResponse>(
-    "/users/change-password",
-    payload,
-  );
-  return response.data;
-};
+// export const changePasswordService = async (
+//   payload: ChangePasswordPayload,
+// ): Promise<MessageSuccessResponse> => {
+//   const response = await api.patch<MessageSuccessResponse>(
+//     "/users/change-password",
+//     payload,
+//   );
+//   return response.data;
+// };

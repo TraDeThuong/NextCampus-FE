@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useCreateApplication } from "@/hooks/auth/useCreateApplication";
+import { useCreateApplication } from "@/hooks/application/useCreateApplication";
 
 export default function TestApiPage() {
     const [result, setResult] = useState<any>(null);

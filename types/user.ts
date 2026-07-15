@@ -66,8 +66,3 @@ export interface UpdateUserPayload {
   isActive?: boolean;
   role?: "LEADER" | "INTERN";
 }
-
-export interface ChangePasswordPayload {
-  currentPassword: string;
-  newPassword: string;
-}

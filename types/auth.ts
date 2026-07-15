@@ -83,3 +83,9 @@ export interface MessageSuccessResponse {
 export interface UpdateProfilePayload {
     fullName: string;
 }
+
+export interface ChangePasswordPayload {
+  oldPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}

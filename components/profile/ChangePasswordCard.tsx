@@ -49,7 +49,7 @@ export default function ChangePasswordCard() {
                             <input
                                 type="password"
                                 placeholder="Enter your current password"
-                                {...register("currentPassword", {
+                                {...register("oldPassword", {
                                     required:
                                         "Current password is required",
                                 })}
@@ -57,9 +57,9 @@ export default function ChangePasswordCard() {
                             />
                         </div>
 
-                        {errors.currentPassword && (
+                        {errors.oldPassword && (
                             <p className="mt-2 text-sm text-red-500">
-                                {errors.currentPassword.message}
+                                {errors.oldPassword.message}
                             </p>
                         )}
                     </div>

@@ -26,7 +26,7 @@ export default function MetalCard({
 
                 hover:-translate-y-1
                 hover:border-cyan-400/20
-                hover:shadow-[0_20px_50px_rgba(21,174,245,.22)]
+                hover:shadow-[0_16px_36px_rgba(21,174,245,.12)]
 
                 ${className}
             `}
@@ -74,7 +74,7 @@ export default function MetalCard({
 
                     group-hover:opacity-100
 
-                    bg-[radial-gradient(circle_at_top,rgba(21,174,245,.18),transparent_55%)]
+                    bg-[radial-gradient(circle_at_top,rgba(21,174,245,.08),transparent_40%)]
                 "
             />
 

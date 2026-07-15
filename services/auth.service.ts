@@ -9,7 +9,8 @@ import {
     MessageSuccessResponse,
     ForgotPasswordPayload,
     ResetPasswordPayload,
-    UpdateProfilePayload
+    UpdateProfilePayload,
+    ChangePasswordPayload
 } from "@/types/auth";
 
 // All auth endpoints return JSON. 
@@ -59,4 +60,9 @@ export const authService = {
         const response = await api.post<MessageSuccessResponse>("/auth/reset-password", payload);
         return response.data;
     },
+
+    changePassword: async (payload: ChangePasswordPayload): Promise<MessageSuccessResponse> => {
+        const response = await api.post<MessageSuccessResponse>("/auth/change-password", payload);
+        return response.data;
+},
 };
