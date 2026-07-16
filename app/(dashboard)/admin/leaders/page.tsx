@@ -1,5 +1,3 @@
-import { CreateUserForm } from "@/components/admin/CreateUserForm";
-
 export default function ManageLeaders() { 
     return (
         <div>
@@ -10,7 +8,6 @@ export default function ManageLeaders() {
             <p> Chinh sua va xoa leader </p>
             <p> Giao task cho Leader (de leader giao xuong cho nhom intern ma leader nay quan ly)</p>
             <p> .... </p>
-            <CreateUserForm/>
         </div> )
 }
 

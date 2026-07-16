@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,32 +18,26 @@ import {
 
 import { useVerifyInvite } from "@/hooks/application/useVerifyInvite";
 import { useCreateApplication } from "@/hooks/application/useCreateApplication";
+import { useDepartments } from "@/hooks/department/useDepartments";
+import { usePositions } from "@/hooks/department/usePositions";
 import { getActiveRegulationService } from "@/services/regulation.service";
 import Spinner from "@/components/ui/Spinner";
 
 const formSchema = z.object({
   fullName: z.string().min(1, "Full name is required").max(100),
   phone: z.string().min(9, "Phone must be at least 9 digits").max(15),
-  department: z.string().min(1, "Department is required"),
-  position: z.string().min(1, "Position is required"),
+  departmentId: z.string().min(1, "Department is required"),
+  positionId: z.string().min(1, "Position is required"),
   startDate: z.string().min(1, "Start date is required"),
   duration: z.coerce.number().int().positive("Must be a positive number"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-const DEPARTMENTS = [
-  "Engineering", "Design", "Marketing", "Data", "QA", "HR", "Product",
-];
-
-const POSITIONS = [
-  "Backend Intern", "Frontend Intern", "Mobile Intern",
-  "UI/UX Intern", "Graphic Intern", "Marketing Intern",
-  "Data Intern", "DevOps Intern", "QA Intern", "HR Intern", "Product Intern",
-];
-
 const inputClass =
   "w-full rounded-2xl border border-zinc-800 bg-zinc-950/50 py-3 pl-11 pr-4 text-sm text-white outline-none transition-all duration-300 hover:border-zinc-700 focus:border-sky-500/50 focus:shadow-[0_0_25px_rgba(21,174,245,0.15)] placeholder:text-zinc-600";
+
+const selectClass = `${inputClass} appearance-none`;
 
 export default function FormPage() {
   const params = useParams<{ token: string }>();
@@ -59,21 +54,36 @@ export default function FormPage() {
 
   const email = verifyData?.data?.email ?? "";
 
+  const { data: deptData, isLoading: deptLoading } = useDepartments();
+  const departments = deptData?.data ?? [];
+
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       fullName: "",
       phone: "",
-      department: "",
-      position: "",
+      departmentId: "",
+      positionId: "",
       startDate: "",
       duration: undefined as any,
     },
   });
+
+  const selectedDepartmentId = watch("departmentId");
+  const { data: posData, isLoading: posLoading } =
+    usePositions(selectedDepartmentId || undefined);
+  const positions = posData?.data ?? [];
+
+  // Reset position when department changes
+  useEffect(() => {
+    setValue("positionId", "");
+  }, [selectedDepartmentId, setValue]);
 
   async function onSubmit(data: FormValues) {
     const reg = await getActiveRegulationService().catch(() => null);
@@ -84,8 +94,8 @@ export default function FormPage() {
         fullName: data.fullName,
         email,
         phone: data.phone,
-        department: data.department,
-        position: data.position,
+        departmentId: data.departmentId,
+        positionId: data.positionId,
         startDate: data.startDate,
         duration: data.duration,
         token,
@@ -154,22 +164,48 @@ export default function FormPage() {
           />
         </Field>
 
-        <Field label="Department" icon={Building2} error={errors.department?.message}>
-          <select {...register("department")} className={`${inputClass} appearance-none`}>
-            <option value="">Select department...</option>
-            {DEPARTMENTS.map((d) => (
-              <option key={d} value={d}>{d}</option>
-            ))}
-          </select>
+        <Field label="Department" icon={Building2} error={errors.departmentId?.message}>
+          <div className="relative">
+            <select
+              {...register("departmentId")}
+              disabled={deptLoading}
+              className={selectClass}
+            >
+              <option value="">Select department...</option>
+              {departments.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+            {deptLoading && (
+              <Loader2 className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-zinc-500" />
+            )}
+          </div>
         </Field>
 
-        <Field label="Position" icon={Briefcase} error={errors.position?.message}>
-          <select {...register("position")} className={`${inputClass} appearance-none`}>
-            <option value="">Select position...</option>
-            {POSITIONS.map((p) => (
-              <option key={p} value={p}>{p}</option>
-            ))}
-          </select>
+        <Field label="Position" icon={Briefcase} error={errors.positionId?.message}>
+          <div className="relative">
+            <select
+              {...register("positionId")}
+              disabled={!selectedDepartmentId || posLoading}
+              className={selectClass}
+            >
+              <option value="">
+                {!selectedDepartmentId
+                  ? "Select department first..."
+                  : "Select position..."}
+              </option>
+              {positions.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+            {posLoading && (
+              <Loader2 className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-zinc-500" />
+            )}
+          </div>
         </Field>
 
         <Field label="Start Date" icon={Calendar} error={errors.startDate?.message}>

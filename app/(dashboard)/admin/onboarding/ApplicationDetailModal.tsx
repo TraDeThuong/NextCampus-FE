@@ -174,12 +174,12 @@ export default function ApplicationDetail({ id }: Props) {
             <DetailRow
               icon={Building2}
               label="Department"
-              value={app.department}
+              value={app.department?.name ?? "—"}
             />
             <DetailRow
               icon={Briefcase}
               label="Position"
-              value={app.position}
+              value={app.position?.name ?? "—"}
             />
             <DetailRow
               icon={Calendar}

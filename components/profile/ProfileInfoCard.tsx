@@ -136,7 +136,15 @@ export default function ProfileInfoCard({
 
                     {
                         isDirty && (
-                            <div className="flex justify-end">
+                            <div className="flex justify-end gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => reset()}
+                                    className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 transition hover:border-white/20 hover:text-white"
+                                >
+                                    Cancel
+                                </button>
+
                                 <Button
                                     type="submit"
                                     disabled={isPending}

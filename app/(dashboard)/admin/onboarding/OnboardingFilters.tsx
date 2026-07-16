@@ -82,8 +82,8 @@ export default function OnboardingFilters() {
           <input
             type="text"
             placeholder="Department..."
-            defaultValue={searchParams.get("department") ?? ""}
-            onChange={(e) => updateParam("department", e.target.value)}
+            defaultValue={searchParams.get("departmentId") ?? ""}
+            onChange={(e) => updateParam("departmentId", e.target.value)}
             className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted"
           />
         </div>
@@ -97,8 +97,8 @@ export default function OnboardingFilters() {
           <input
             type="text"
             placeholder="Position..."
-            defaultValue={searchParams.get("position") ?? ""}
-            onChange={(e) => updateParam("position", e.target.value)}
+            defaultValue={searchParams.get("positionId") ?? ""}
+            onChange={(e) => updateParam("positionId", e.target.value)}
             className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted"
           />
         </div>

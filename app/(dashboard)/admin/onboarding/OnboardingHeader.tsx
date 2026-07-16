@@ -17,24 +17,12 @@ export default function OnboardingHeader({
       <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         {/* Left */}
         <div className="max-w-2xl">
-          <div
-            className="
-              mb-4 inline-flex items-center gap-2
-              rounded-full
-              border border-white/10
-              bg-white/5
-              px-4 py-2
-              text-xs font-medium uppercase tracking-[0.3em]
-              text-(--primary-light)
-            "
-          >
-            <Sparkles className="h-3.5 w-3.5" />
-            Launchpad
-          </div>
-
-          <h1 className="chrome-text metal-text text-4xl font-bold md:text-5xl">
+          <h1 className="chrome-text metal-text text-xl font-bold md:text-2xl">
             Onboarding Management
           </h1>
+          <p className="text-xs md:text-sm text-slate-400 font-medium tracking-wide mt-2">
+            Manage, track, and streamline the integration process for new interns.
+          </p>
         </div>
 
         {/* Right */}

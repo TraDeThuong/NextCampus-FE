@@ -71,8 +71,8 @@ export default function OnboardingRow({ invite }: Props) {
   const candidate = invite.application
     ? invite.application.fullName
     : invite.email;
-  const department = invite.application?.department ?? "—";
-  const position = invite.application?.position ?? "—";
+  const department = invite.application?.department?.name ?? "—";
+  const position = invite.application?.position?.name ?? "—";
   const appStatus = invite.application?.status ?? null;
 
   function handleCopyLink() {

@@ -31,6 +31,25 @@ export interface ApiErrorResponse {
 }
 
 // GET /auth/me
+export interface MeIntern {
+    id: string;
+    phone: string;
+    department: string;
+    position: string;
+    startDate: string;
+    duration: number;
+    discordUsername: string | null;
+    discordRoleGranted: boolean;
+    status: string;
+}
+
+export interface MeNotificationSetting {
+    id: string;
+    webEnabled: boolean;
+    emailEnabled: boolean;
+    discordEnabled: boolean;
+}
+
 export interface MeUser {
     id: string;
     email: string;
@@ -40,6 +59,8 @@ export interface MeUser {
     avatarUrl: string | null;
     createdAt: string;
     updatedAt: string;
+    intern: MeIntern | null;
+    notificationSetting: MeNotificationSetting | null;
 }
 
 export interface MeSuccessResponse {

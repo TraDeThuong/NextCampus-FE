@@ -52,8 +52,8 @@ export default function OnboardingTable() {
     const email = searchParams.get("email");
     const inviteStatus = searchParams.get("inviteStatus");
     const applicationStatus = searchParams.get("applicationStatus");
-    const department = searchParams.get("department");
-    const position = searchParams.get("position");
+    const department = searchParams.get("departmentId");
+    const position = searchParams.get("positionId");
     const page = searchParams.get("page");
     const limit = searchParams.get("limit");
 
@@ -64,8 +64,8 @@ export default function OnboardingTable() {
     if (applicationStatus)
       p.applicationStatus =
         applicationStatus as GetApplicationInvitesParams["applicationStatus"];
-    if (department) p.department = department;
-    if (position) p.position = position;
+    if (department) p.departmentId = department;
+    if (position) p.positionId = position;
     if (page) p.page = Number(page);
     if (limit) p.limit = Number(limit);
 

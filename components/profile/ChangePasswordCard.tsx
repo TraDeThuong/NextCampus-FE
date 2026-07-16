@@ -5,6 +5,8 @@ import { Lock, KeyRound } from "lucide-react";
 import { useChangePassword } from "@/hooks/profile/useChangePassword";
 import MetalCard from "../ui/MetalCard";
 import Button from "../ui/Button";
+import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
 
 export default function ChangePasswordCard() {
     const {
@@ -16,6 +18,8 @@ export default function ChangePasswordCard() {
         isDirty,
         reset,
     } = useChangePassword();
+
+    const [showPassword, setShowPassword] = useState(false);
 
     return (
         <MetalCard>
@@ -47,7 +51,7 @@ export default function ChangePasswordCard() {
                             <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
                             <input
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 placeholder="Enter your current password"
                                 {...register("oldPassword", {
                                     required:
@@ -75,7 +79,7 @@ export default function ChangePasswordCard() {
                             <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
                             <input
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 placeholder="Enter your new password"
                                 {...register("newPassword", {
                                     required:
@@ -114,7 +118,7 @@ export default function ChangePasswordCard() {
                             <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
                             <input
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 placeholder="Confirm your new password"
                                 {...register("confirmPassword", {
                                     required:
@@ -137,7 +141,7 @@ export default function ChangePasswordCard() {
 
                     <div
                         className={`
-                            flex justify-end overflow-hidden
+                            flex justify-end gap-3 overflow-hidden
                             transition-all duration-300
 
                             ${
@@ -147,6 +151,30 @@ export default function ChangePasswordCard() {
                             }
                         `}
                     >
+                        <button
+                            type="button"
+                            onClick={() => {
+                                reset();
+                                setShowPassword(false);
+                            }}
+                            className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 transition hover:border-white/20 hover:text-white"
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword((prev) => !prev)}
+                            className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 transition hover:border-white/20 hover:text-white"
+                        >
+                            {showPassword ? (
+                                <EyeOff className="h-4 w-4" />
+                            ) : (
+                                <Eye className="h-4 w-4" />
+                            )}
+                            {showPassword ? "Hide" : "Show"}
+                        </button>
+
                         <Button
                             type="submit"
                             disabled={isPending}

@@ -7,8 +7,8 @@ export interface Application {
   fullName: string;
   email: string;
   phone: string;
-  department: string;
-  position: string;
+  department: { id: string; name: string } | null;
+  position: { id: string; name: string } | null;
   startDate: string;
   duration: number;
   status: ApplicationStatus;
@@ -76,8 +76,8 @@ export interface VerifyInviteSuccessResponse {
 
 export interface ApplicationQueryParams {
   status?: ApplicationStatus;
-  department?: string;
-  position?: string;
+  departmentId?: string;
+  positionId?: string;
   email?: string;
   startDateFrom?: string;
   startDateTo?: string;
@@ -93,8 +93,8 @@ export interface CreateApplicationPayload {
   fullName: string;
   email: string;
   phone: string;
-  department: string;
-  position: string;
+  departmentId: string;
+  positionId: string;
   startDate: string;
   duration: number;
   token: string;
@@ -125,8 +125,8 @@ export interface ApplicationInviteRow {
     fullName: string;
     email: string;
     phone: string;
-    department: string;
-    position: string;
+    department: { id: string; name: string } | null;
+    position: { id: string; name: string } | null;
     status: ApplicationStatus;
     startDate: string;
     duration: number;
@@ -153,8 +153,8 @@ export interface GetApplicationInvitesParams {
   email?: string;
   inviteStatus?: ApplicationInviteStatus;
   applicationStatus?: ApplicationStatus;
-  department?: string;
-  position?: string;
+  departmentId?: string;
+  positionId?: string;
   createdFrom?: string;
   createdTo?: string;
   sortBy?: "createdAt" | "expiresAt" | "email";
