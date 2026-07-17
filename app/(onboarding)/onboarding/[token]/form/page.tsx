@@ -29,7 +29,7 @@ const formSchema = z.object({
   departmentId: z.string().min(1, "Department is required"),
   positionId: z.string().min(1, "Position is required"),
   startDate: z.string().min(1, "Start date is required"),
-  duration: z.coerce.number().int().positive("Must be a positive number"),
+  duration: z.number({ message: "Must be a positive number" }).int().positive("Must be a positive number"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -215,7 +215,7 @@ export default function FormPage() {
         <Field label="Duration (months)" icon={Clock} error={errors.duration?.message}>
           <input
             type="number"
-            {...register("duration")}
+            {...register("duration", { valueAsNumber: true })}
             placeholder="3"
             min={1}
             className={inputClass}

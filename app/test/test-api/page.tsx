@@ -18,6 +18,9 @@ export default function TestApiPage() {
                 positionId: "00000000-0000-0000-0000-000000000001",
                 startDate: "2026-07-15",
                 duration: 3,
+                token: "test-token",
+                regulationId: "00000000-0000-0000-0000-000000000001",
+                acceptedRegulations: true,
             },
             {
                 onSuccess(data) {
