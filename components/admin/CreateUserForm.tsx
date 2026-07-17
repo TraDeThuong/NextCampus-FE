@@ -15,7 +15,7 @@ export const CreateUserForm = () => {
     if (!email) return alert("Vui lòng nhập email");
 
     // Kích hoạt gọi API thông qua mutation
-    mutate({ email, role });
+    mutate({ email, roleName: role });
   };
 
   return (
