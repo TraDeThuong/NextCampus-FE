@@ -1,10 +1,12 @@
 "use client";
 
+import { useMemo } from "react";
 import { Search } from "lucide-react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 
 import FilterSelect from "@/components/ui/FilterSelect";
 import MetalCard from "@/components/ui/MetalCard";
+import { useDepartments } from "@/hooks/department/useDepartments";
 
 const INVITE_STATUS_OPTIONS = [
   { value: "ACTIVE", label: "Active" },
@@ -23,6 +25,28 @@ export default function OnboardingFilters() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
+
+  const { data: deptData } = useDepartments();
+  const departments = useMemo(() => deptData?.data ?? [], [deptData]);
+
+  const positionOptions = useMemo(() => {
+    const seen = new Set<string>();
+    const result: { value: string; label: string }[] = [];
+    for (const dept of departments) {
+      for (const pos of dept.positions ?? []) {
+        if (!seen.has(pos.id)) {
+          seen.add(pos.id);
+          result.push({ value: pos.id, label: pos.name });
+        }
+      }
+    }
+    return result;
+  }, [departments]);
+
+  const departmentOptions = useMemo(
+    () => departments.map((d) => ({ value: d.id, label: d.name })),
+    [departments],
+  );
 
   function updateParam(key: string, value: string) {
     const params = new URLSearchParams(searchParams.toString());
@@ -74,34 +98,18 @@ export default function OnboardingFilters() {
         />
 
         {/* Department */}
-        <div className="flex flex-col gap-3">
-          <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">
-            Department
-          </label>
-
-          <input
-            type="text"
-            placeholder="Department..."
-            defaultValue={searchParams.get("departmentId") ?? ""}
-            onChange={(e) => updateParam("departmentId", e.target.value)}
-            className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted"
-          />
-        </div>
+        <FilterSelect
+          label="Department"
+          filterField="departmentId"
+          options={departmentOptions}
+        />
 
         {/* Position */}
-        <div className="flex flex-col gap-3">
-          <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">
-            Position
-          </label>
-
-          <input
-            type="text"
-            placeholder="Position..."
-            defaultValue={searchParams.get("positionId") ?? ""}
-            onChange={(e) => updateParam("positionId", e.target.value)}
-            className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted"
-          />
-        </div>
+        <FilterSelect
+          label="Position"
+          filterField="positionId"
+          options={positionOptions}
+        />
       </div>
     </MetalCard>
   );

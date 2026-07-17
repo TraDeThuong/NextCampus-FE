@@ -1,14 +1,15 @@
-export default function ManageLeaders() { 
-    return (
-        <div>
-            <h1 className = "metal-text">Manage Leaders</h1>
-            <p> Bang hien thi danh sach leader: name, email, .... </p>
-            <p> Tao leader (tao moi hoac chi dinh nhan vien cong ty lam leader) </p>
-            <p> Xem chi tiet ho so Leader, Xem danh sach Intern ma leader nay quan ly</p>
-            <p> Chinh sua va xoa leader </p>
-            <p> Giao task cho Leader (de leader giao xuong cho nhom intern ma leader nay quan ly)</p>
-            <p> .... </p>
-        </div> )
-}
+import LeaderHeader from "./LeaderHeader";
+import LeaderStats from "./LeaderStats";
+import LeaderFilter from "./LeaderFilter";
+import LeaderTable from "./LeaderTable";
 
-        
+export default function ManageLeaders() {
+    return (
+        <div className="space-y-6">
+            <LeaderHeader />
+            <LeaderStats />
+            <LeaderFilter />
+            <LeaderTable />
+        </div>
+    );
+}

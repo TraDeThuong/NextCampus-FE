@@ -59,7 +59,8 @@ export interface UserQueryParams {
 export interface CreateUserPayload {
   email: string;
   password?: string;
-  role: "LEADER" | "INTERN";
+  roleName?: "ADMIN" | "LEADER" | "INTERN";
+  roleId?: string;
 }
 
 export interface UpdateUserPayload {

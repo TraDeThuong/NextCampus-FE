@@ -57,7 +57,7 @@ const Table: CompoundTable = function Table({
       <div
         role="table"
         className={`
-          overflow-hidden rounded-3xl
+          rounded-3xl
           border border-border
           bg-card
           shadow-glass
