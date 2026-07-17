@@ -22,6 +22,7 @@ export default function RootLayout({ children } : {children: ReactNode}) {
     <html
       lang="en"
       className={`${headingFont.variable} ${bodyFont.variable}`}
+      suppressHydrationWarning
     >
       <body>
         <ReactQueryProvider>
