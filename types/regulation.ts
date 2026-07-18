@@ -33,3 +33,11 @@ export interface UpdateRegulationPayload {
   isActive?: boolean;
 }
 
+export interface RegulationQueryParams {
+  page?: number;
+  limit?: number;
+  title?: string;
+  isActive?: boolean;
+}
+
+

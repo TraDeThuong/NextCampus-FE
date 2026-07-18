@@ -14,6 +14,8 @@ import { getActiveRegulationService } from "@/services/regulation.service";
 import type { Regulation } from "@/types/regulation";
 import MetalCard from "@/components/ui/MetalCard";
 
+import DOMPurify from "isomorphic-dompurify";
+
 export default function PoliciesPage() {
   const params = useParams<{ token: string }>();
   const router = useRouter();
@@ -60,6 +62,8 @@ export default function PoliciesPage() {
       </div>
     );
   }
+
+  const sanitizedContent = DOMPurify.sanitize(regulation.content);
 
 return (
   <div className="w-full space-y-6 m-10mx-auto w-full max-w-7xl space-y-6 px-4 py-8 md:px-6 lg:px-10">
@@ -162,7 +166,7 @@ return (
           prose-li:text-zinc-300
         "
         dangerouslySetInnerHTML={{
-          __html: regulation.content,
+          __html: sanitizedContent,
         }}
       />
     </MetalCard>

@@ -18,7 +18,7 @@ import { useUpsertNotificationTemplate } from "@/hooks/notificationTemplate/useU
 import { useResetNotificationTemplate } from "@/hooks/notificationTemplate/useResetNotificationTemplate";
 import Button from "@/components/ui/Button";
 import { TEMPLATE_CATALOG } from "./TemplateSidebar";
-
+import DOMPurify from "isomorphic-dompurify";
 import { toast } from "react-hot-toast";
 
 // ─── Types ────────────────────────────────────────────────────────────────
@@ -504,7 +504,7 @@ export default function TemplateEditor({ type, template }: Props) {
                   <p
                     className="text-sm text-slate-200 font-semibold preview-html"
                     dangerouslySetInnerHTML={{
-                      __html: interpolatePreview(previewTitle),
+                      __html: DOMPurify.sanitize(interpolatePreview(previewTitle), { ADD_ATTR: ["style", "target"] }),
                     }}
                   />
                 </div>
@@ -514,7 +514,7 @@ export default function TemplateEditor({ type, template }: Props) {
                   <div
                     className="email-paper preview-html text-sm"
                     dangerouslySetInnerHTML={{
-                      __html: interpolatePreview(previewContent),
+                      __html: DOMPurify.sanitize(interpolatePreview(previewContent), { ADD_ATTR: ["style", "target"] }),
                     }}
                   />
                 </div>
@@ -529,7 +529,7 @@ export default function TemplateEditor({ type, template }: Props) {
                   <p
                     className="text-sm text-slate-200 font-semibold preview-html"
                     dangerouslySetInnerHTML={{
-                      __html: interpolatePreview(previewTitle),
+                      __html: DOMPurify.sanitize(interpolatePreview(previewTitle), { ADD_ATTR: ["style", "target"] }),
                     }}
                   />
                 </div>
@@ -542,7 +542,7 @@ export default function TemplateEditor({ type, template }: Props) {
                   <p
                     className="text-sm text-slate-300 leading-relaxed preview-html"
                     dangerouslySetInnerHTML={{
-                      __html: interpolatePreview(previewContent),
+                      __html: DOMPurify.sanitize(interpolatePreview(previewContent), { ADD_ATTR: ["style", "target"] }),
                     }}
                   />
                 </div>

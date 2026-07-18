@@ -4,6 +4,7 @@ import type {
   RegulationListResponse,
   CreateRegulationPayload,
   UpdateRegulationPayload,
+  RegulationQueryParams,
 } from "@/types/regulation";
 import type { MessageSuccessResponse } from "@/types/auth";
 
@@ -13,8 +14,8 @@ export const getActiveRegulationService = async (): Promise<RegulationSuccessRes
 };
 
 export const regulationService = {
-  getRegulations: async (): Promise<RegulationListResponse> => {
-    const response = await api.get<RegulationListResponse>("/regulations");
+  getRegulations: async (params?: RegulationQueryParams): Promise<RegulationListResponse> => {
+    const response = await api.get<RegulationListResponse>("/regulations", { params });
     return response.data;
   },
 

@@ -17,10 +17,12 @@ import { notificationService } from "@/services/notification.service";
 import { getUsersService } from "@/services/user.service";
 import type { User } from "@/types/user";
 import Button from "@/components/ui/Button";
+import DOMPurify from "isomorphic-dompurify";
 
 type Channel = "web" | "email";
 
 export default function SendNotificationTab() {
+  const isSubmittingRef = useRef(false);
   const [email, setEmail] = useState("");
   const [recipient, setRecipient] = useState<User | null>(null);
   const [searching, setSearching] = useState(false);
@@ -99,6 +101,8 @@ export default function SendNotificationTab() {
   }
 
   async function handleSend() {
+    if (isSubmittingRef.current) return;
+
     const isEmailValid = email.includes("@") && email.trim().length > 3;
     if (!isEmailValid) {
       toast.error("Please enter a valid email address");
@@ -127,6 +131,7 @@ export default function SendNotificationTab() {
       }
     }
 
+    isSubmittingRef.current = true;
     setSending(true);
     try {
       await notificationService.sendCustomNotification({
@@ -151,6 +156,7 @@ export default function SendNotificationTab() {
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to dispatch notification.");
     } finally {
+      isSubmittingRef.current = false;
       setSending(false);
     }
   }
@@ -455,7 +461,9 @@ export default function SendNotificationTab() {
               <div className="rounded-xl bg-slate-950/80 p-6 flex justify-center border border-white/5">
                 <div
                   className="email-paper preview-html text-sm"
-                  dangerouslySetInnerHTML={{ __html: previewContent }}
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(previewContent, { ADD_ATTR: ["style", "target"] }),
+                  }}
                 />
               </div>
             </div>
@@ -478,7 +486,9 @@ export default function SendNotificationTab() {
                 </span>
                 <p
                   className="text-sm text-slate-300 leading-relaxed preview-html"
-                  dangerouslySetInnerHTML={{ __html: previewContent }}
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(previewContent, { ADD_ATTR: ["style", "target"] }),
+                  }}
                 />
               </div>
             </div>
