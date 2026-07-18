@@ -1,9 +1,6 @@
-import React from 'react'
+import TemplatesPage from "./TemplatesPage";
 
-export default function page() {
-  return (
-    <div>
-      Email Page template
-    </div>
-  )
+export default function EmailsPage() {
+  return <TemplatesPage />;
 }
+
