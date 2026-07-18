@@ -1,7 +1,8 @@
 "use client";
 
+import axios from "axios";
 import { createContext, useReducer, useEffect, useCallback, type ReactNode } from "react";
-import { setAccessToken, clearAccessToken, clearRememberedEmail } from "@/lib/token";
+import { setAccessToken, clearAccessToken } from "@/lib/token";
 import { authService } from "@/services/auth.service";
 import type { LoginUser, AuthTokens } from "@/types/auth";
 
@@ -61,29 +62,25 @@ export const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [state, dispatch] = useReducer(authReducer, initialState);
 
-    /**
-     * On mount: attempt a silent token refresh using the HTTP-only cookie.
-     *
-     * - If the cookie is present and valid → we get a new accessToken,
-     *   store it in memory, and fetch the user profile.
-     * - If the cookie is absent or expired → the user is not authenticated.
-     *
-     * This replaces the old pattern of reading a token from localStorage.
-     */
     useEffect(() => {
-        authService
-            .refresh()
+        axios
+            .post(
+                `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+                {},
+                { withCredentials: true }
+            )
             .then((res) => {
-                const { accessToken } = res.data;
-                setAccessToken(accessToken);
-                return authService.me();
-            })
-            .then((res) => {
-                const { id, email, fullName, role, avatarUrl } = res.data;
-                dispatch({ type: "SET_USER", user: { id, email, fullName, role, avatarUrl } });
+                const data = res.data?.data;
+                if (data?.accessToken && data?.user) {
+                    setAccessToken(data.accessToken);
+                    dispatch({ type: "SET_USER", user: data.user });
+                } else {
+                    clearAccessToken();
+                    dispatch({ type: "SET_LOADING", isLoading: false });
+                }
             })
             .catch(() => {
-                // No valid cookie → not authenticated, stay on login page
+                // No valid cookie → not authenticated
                 clearAccessToken();
                 dispatch({ type: "SET_LOADING", isLoading: false });
             });
@@ -99,7 +96,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
             await authService.logout();
         } finally {
-            clearRememberedEmail();
             dispatch({ type: "LOGOUT" });
         }
     }, []);
