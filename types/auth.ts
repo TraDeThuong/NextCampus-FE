@@ -72,7 +72,9 @@ export interface MeSuccessResponse {
 // POST /auth/refresh — no body needed, refreshToken sent via cookie automatically
 export interface RefreshSuccessResponse {
     success: boolean;
-    data: AuthTokens;
+    data: AuthTokens & {
+        user: LoginUser;
+    };
 }
 
 // POST /auth/forgot-password
