@@ -86,6 +86,7 @@ function Header({ children }: HeaderProps) {
         text-xs font-semibold uppercase tracking-[0.15em]
         text-[var(--primary-light)]
         backdrop-blur-xl
+        rounded-t-[23px]
       "
     >
       {children}

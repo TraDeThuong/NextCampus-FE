@@ -175,3 +175,52 @@
 .chrome-text {
   display: inline-block;
 }
+
+/* =========================
+   Quill Editor Custom Styling (Dark Mode)
+========================= */
+.ql-toolbar.ql-snow {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  background-color: rgba(255, 255, 255, 0.03) !important;
+  border-top-left-radius: 12px !important;
+  border-top-right-radius: 12px !important;
+  border-bottom: none !important;
+}
+.ql-toolbar.ql-snow .ql-stroke {
+  stroke: #94a3b8 !important;
+  transition: stroke 0.2s;
+}
+.ql-toolbar.ql-snow .ql-stroke:hover {
+  stroke: #ffffff !important;
+}
+.ql-toolbar.ql-snow .ql-fill {
+  fill: #94a3b8 !important;
+  transition: fill 0.2s;
+}
+.ql-toolbar.ql-snow .ql-fill:hover {
+  fill: #ffffff !important;
+}
+.ql-toolbar.ql-snow .ql-picker {
+  color: #94a3b8 !important;
+}
+.ql-toolbar.ql-snow .ql-picker-options {
+  background-color: #0f172a !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px;
+}
+.ql-container.ql-snow {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  border-bottom-left-radius: 12px !important;
+  border-bottom-right-radius: 12px !important;
+  background-color: rgba(255, 255, 255, 0.02) !important;
+  color: #f8fafc !important;
+  font-family: inherit !important;
+  font-size: 0.875rem !important;
+}
+.ql-editor {
+  min-height: 180px;
+}
+.ql-editor.ql-blank::before {
+  color: #475569 !important;
+  font-style: normal !important;
+}
