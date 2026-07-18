@@ -1,9 +1,8 @@
 "use client";
 
 import { createContext, useReducer, useEffect, useCallback, type ReactNode } from "react";
-import { getAccessToken } from "@/lib/token";
+import { setAccessToken, clearAccessToken, clearRememberedEmail } from "@/lib/token";
 import { authService } from "@/services/auth.service";
-import { setTokens, clearTokens } from "@/lib/token";
 import type { LoginUser, AuthTokens } from "@/types/auth";
 
 interface AuthState {
@@ -12,41 +11,37 @@ interface AuthState {
     isLoading: boolean;
 }
 
-// Actions that update the authentication state.
 type AuthAction =
     | { type: "SET_USER"; user: LoginUser }
-    | { type: "LOGIN"; tokens: AuthTokens; user: LoginUser; remember: boolean }
+    | { type: "LOGIN"; token: AuthTokens; user: LoginUser }
     | { type: "LOGOUT" }
     | { type: "SET_LOADING"; isLoading: boolean }
     | { type: "UPDATE_USER"; user: Partial<LoginUser> };
 
 interface AuthContextValue {
     state: AuthState;
-    login: (tokens: AuthTokens, user: LoginUser, remember: boolean) => void;
+    login: (token: AuthTokens, user: LoginUser) => void;
     logout: () => Promise<void>;
     updateUser: (user: Partial<LoginUser>) => void;
 }
 
-// Handles all authentication state updates.
 function authReducer(state: AuthState, action: AuthAction): AuthState {
     switch (action.type) {
         case "SET_USER":
             return { ...state, user: action.user, isAuthenticated: true, isLoading: false };
 
-        // Save tokens and update authentication state after login.
         case "LOGIN":
-            setTokens(action.tokens.accessToken, action.tokens.refreshToken, action.remember);
+            // Store access token in memory — never in localStorage/sessionStorage
+            setAccessToken(action.token.accessToken);
             return { user: action.user, isAuthenticated: true, isLoading: false };
 
-        // Clear tokens and reset authentication state.
         case "LOGOUT":
-            clearTokens();
+            clearAccessToken();
             return { user: null, isAuthenticated: false, isLoading: false };
 
         case "UPDATE_USER":
             return { ...state, user: state.user ? { ...state.user, ...action.user } : null };
 
-        // Update loading status.
         case "SET_LOADING":
             return { ...state, isLoading: action.isLoading };
 
@@ -58,52 +53,55 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
 const initialState: AuthState = {
     user: null,
     isAuthenticated: false,
-    isLoading: true, // Wait until the authentication check is complete.
+    isLoading: true,
 };
 
-// Authentication context shared across the application.
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [state, dispatch] = useReducer(authReducer, initialState);
 
-    // On mount: check for an existing access token and restore the user session.
+    /**
+     * On mount: attempt a silent token refresh using the HTTP-only cookie.
+     *
+     * - If the cookie is present and valid → we get a new accessToken,
+     *   store it in memory, and fetch the user profile.
+     * - If the cookie is absent or expired → the user is not authenticated.
+     *
+     * This replaces the old pattern of reading a token from localStorage.
+     */
     useEffect(() => {
-        const token = getAccessToken();
-        if (!token) {
-            dispatch({ type: "SET_LOADING", isLoading: false });
-            return;
-        }
-
         authService
-            .me()
+            .refresh()
+            .then((res) => {
+                const { accessToken } = res.data;
+                setAccessToken(accessToken);
+                return authService.me();
+            })
             .then((res) => {
                 const { id, email, fullName, role, avatarUrl } = res.data;
                 dispatch({ type: "SET_USER", user: { id, email, fullName, role, avatarUrl } });
             })
             .catch(() => {
-                clearTokens();
-                dispatch({ type: "LOGOUT" });
+                // No valid cookie → not authenticated, stay on login page
+                clearAccessToken();
+                dispatch({ type: "SET_LOADING", isLoading: false });
             });
     }, []);
 
-    // Store tokens and update the authentication state after a successful login.
-    const login = useCallback((tokens: AuthTokens, user: LoginUser, remember: boolean) => {
-        dispatch({ type: "LOGIN", tokens, user, remember });
+    // Store accessToken in memory and update auth state after a successful login.
+    const login = useCallback((token: AuthTokens, user: LoginUser) => {
+        dispatch({ type: "LOGIN", token, user });
     }, []);
 
-    // Notify the server, then clear the local authentication state.
+    // Notify the server (cookie is sent automatically), then clear local state.
     const logout = useCallback(async () => {
         try {
-            const { getRefreshToken } = await import("@/lib/token");
-            const refreshToken = getRefreshToken();
-
-            if (refreshToken) {
-                await authService.logout({ refreshToken });
-            }
+            await authService.logout();
         } finally {
+            clearRememberedEmail();
             dispatch({ type: "LOGOUT" });
-        } dispatch({ type: "LOGOUT" });
+        }
     }, []);
 
     const updateUser = useCallback((user: Partial<LoginUser>) => {

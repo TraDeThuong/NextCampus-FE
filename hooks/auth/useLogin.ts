@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -7,44 +8,68 @@ import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
 import { authService } from "@/services/auth.service";
-import { LoginPayload, ApiErrorResponse } from "@/types/auth";
+import { ApiErrorResponse } from "@/types/auth";
 import { useAuth } from "@/hooks/auth/useAuth";
+import { getRememberedEmail, saveRememberedEmail, clearRememberedEmail } from "@/lib/token";
 
-export type LoginFormValues = LoginPayload & {
+export interface LoginFormValues {
+    email: string;
+    password: string;
     remember: boolean;
-};
+}
 
 export function useLogin() {
     const router = useRouter();
     const { login } = useAuth();
 
+    const savedEmail = typeof window !== "undefined" ? getRememberedEmail() : null;
+
     const {
         register,
         handleSubmit,
         formState: { errors },
+        setValue,
     } = useForm<LoginFormValues>({
         defaultValues: {
-            email: "",
+            email: savedEmail ?? "",
             password: "",
-            remember: false,
+            remember: !!savedEmail,
         },
     });
 
+    // Sync the pre-filled email after hydration
+    useEffect(() => {
+        if (savedEmail) {
+            setValue("email", savedEmail);
+            setValue("remember", true);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     const loginMutation = useMutation({
         mutationFn: (variables: LoginFormValues) =>
+            // Pass rememberMe to the server so it can set the correct cookie duration.
+            // remember=true  → persistent cookie (maxAge = 7d)
+            // remember=false → session cookie (cleared when browser closes)
             authService.login({
                 email: variables.email,
                 password: variables.password,
+                rememberMe: variables.remember,
             }),
 
         onSuccess: (result, variables) => {
-            const { accessToken, refreshToken, user } = result.data;
+            const { accessToken } = result.data;
+            const { user } = result.data;
 
-            login(
-                { accessToken, refreshToken },
-                user,
-                variables.remember
-            );
+            // Persist or clear the pre-fill email based on user's choice
+            if (variables.remember) {
+                saveRememberedEmail(variables.email);
+            } else {
+                clearRememberedEmail();
+            }
+
+            // No `remember` param — cookie duration is already set by the server
+            login({ accessToken }, user);
 
             toast.success(`Welcome back, ${user.fullName}!`);
 

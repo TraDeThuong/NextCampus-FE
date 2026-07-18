@@ -1,22 +1,23 @@
 export interface LoginPayload {
     email: string;
     password: string;
+    rememberMe?: boolean;
 }
 
+// Only accessToken is returned in the response body.
+// refreshToken lives exclusively in the HTTP-only cookie managed by the server.
 export interface AuthTokens {
     accessToken: string;
-    refreshToken: string;
 }
 
 export interface LoginUser {
     id: string;
     email: string;
     fullName: string;
-    role: "ADMIN" | "LEADER" | "INTERN" | string; // Hỗ trợ cả chữ hoa/thường tùy API
+    role: "ADMIN" | "LEADER" | "INTERN" | string;
     avatarUrl: string | null;
 }
 
-// Update LoginSuccessResponse.data to include user
 export interface LoginSuccessResponse {
     success: boolean;
     data: AuthTokens & {
@@ -68,19 +69,10 @@ export interface MeSuccessResponse {
     data: MeUser;
 }
 
-// POST /auth/refresh
-export interface RefreshPayload {
-    refreshToken: string;
-}
-
+// POST /auth/refresh — no body needed, refreshToken sent via cookie automatically
 export interface RefreshSuccessResponse {
     success: boolean;
     data: AuthTokens;
-}
-
-// POST /auth/logout
-export interface LogoutPayload {
-    refreshToken: string;
 }
 
 // POST /auth/forgot-password

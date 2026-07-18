@@ -3,9 +3,7 @@ import {
     LoginPayload,
     LoginSuccessResponse,
     MeSuccessResponse,
-    RefreshPayload,
     RefreshSuccessResponse,
-    LogoutPayload,
     MessageSuccessResponse,
     ForgotPasswordPayload,
     ResetPasswordPayload,
@@ -13,26 +11,14 @@ import {
     ChangePasswordPayload
 } from "@/types/auth";
 
-// All auth endpoints return JSON. 
+// All auth endpoints return JSON.
 // Axios automatically parses the JSON response, so response.data contains the response object.
-
+// The refreshToken is never sent in request bodies — it travels exclusively
+// via the HTTP-only cookie that the browser attaches automatically.
 
 export const authService = {
     login: async (payload: LoginPayload): Promise<LoginSuccessResponse> => {
-        const response = await api.post<LoginSuccessResponse>("/auth/login", payload, {
-            headers: {
-                "Accept": "application/json", // Accept: tells the server which response format the client expects (e.g., JSON).
-            }
-        });
-        return response.data;
-    },
-
-    updateMe: async (payload: UpdateProfilePayload): Promise<MeSuccessResponse> => {
-        const response = await api.put<MeSuccessResponse>(
-            "/auth/me",
-            payload
-        );
-
+        const response = await api.post<LoginSuccessResponse>("/auth/login", payload);
         return response.data;
     },
 
@@ -41,13 +27,20 @@ export const authService = {
         return response.data;
     },
 
-    refresh: async (payload: RefreshPayload): Promise<RefreshSuccessResponse> => {
-        const response = await api.post<RefreshSuccessResponse>("/auth/refresh", payload);
+    updateMe: async (payload: UpdateProfilePayload): Promise<MeSuccessResponse> => {
+        const response = await api.put<MeSuccessResponse>("/auth/me", payload);
         return response.data;
     },
 
-    logout: async (payload: LogoutPayload): Promise<MessageSuccessResponse> => {
-        const response = await api.post<MessageSuccessResponse>("/auth/logout", payload);
+    // No body required — refreshToken is sent automatically via the HTTP-only cookie.
+    refresh: async (): Promise<RefreshSuccessResponse> => {
+        const response = await api.post<RefreshSuccessResponse>("/auth/refresh");
+        return response.data;
+    },
+
+    // No body required — refreshToken is sent automatically via the HTTP-only cookie.
+    logout: async (): Promise<MessageSuccessResponse> => {
+        const response = await api.post<MessageSuccessResponse>("/auth/logout");
         return response.data;
     },
 
@@ -64,5 +57,5 @@ export const authService = {
     changePassword: async (payload: ChangePasswordPayload): Promise<MessageSuccessResponse> => {
         const response = await api.post<MessageSuccessResponse>("/auth/change-password", payload);
         return response.data;
-},
+    },
 };

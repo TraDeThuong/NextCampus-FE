@@ -1,16 +1,17 @@
 import axios from "axios";
-import { getAccessToken, getRefreshToken, setTokens, clearTokens } from "./token";
+import { getAccessToken, setAccessToken, clearAccessToken } from "./token";
 
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
     headers: {
         "Content-Type": "application/json",
     },
+    // Required for the HTTP-only refreshToken cookie to be sent on cross-origin requests.
     withCredentials: true,
     timeout: 10000,
 });
 
-// Request interceptor — attach access token
+// Request interceptor — attach in-memory access token
 api.interceptors.request.use((config) => {
     const token = getAccessToken();
     if (token) {
@@ -19,7 +20,7 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// Refresh queue to avoid race conditions
+// Refresh queue to avoid race conditions when multiple requests fail simultaneously
 let isRefreshing = false;
 let failedQueue: Array<{
     resolve: (token: string) => void;
@@ -37,20 +38,21 @@ function processQueue(error: unknown, token: string | null) {
     failedQueue = [];
 }
 
-// Response interceptor — handle 401 with token refresh
+// Response interceptor — silent token refresh on 401
+// The refreshToken is sent automatically via the HTTP-only cookie (withCredentials: true).
+// No token is ever read from or written to localStorage.
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
 
-        // Don't try to refresh if the failed request is the refresh endpoint itself
         if (
             error.response?.status === 401 &&
             !originalRequest._retry &&
             !originalRequest.url?.includes("/auth/refresh")
         ) {
             if (isRefreshing) {
-                // Queue this request until refresh completes
+                // Queue concurrent requests until refresh completes
                 return new Promise((resolve, reject) => {
                     failedQueue.push({
                         resolve: (token: string) => {
@@ -65,28 +67,21 @@ api.interceptors.response.use(
             originalRequest._retry = true;
             isRefreshing = true;
 
-            const refreshToken = getRefreshToken();
-            if (!refreshToken) {
-                clearTokens();
-                if (typeof window !== "undefined") {
-                    window.location.href = "/login";
-                }
-                return Promise.reject(error);
-            }
-
             try {
+                // POST /auth/refresh — no body; refreshToken cookie sent automatically
                 const response = await axios.post(
                     `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
-                    { refreshToken }
+                    {},
+                    { withCredentials: true }
                 );
-                const { accessToken, refreshToken: newRefreshToken } = response.data.data;
-                setTokens(accessToken, newRefreshToken, true);
+                const { accessToken } = response.data.data;
+                setAccessToken(accessToken);
                 processQueue(null, accessToken);
                 originalRequest.headers.Authorization = `Bearer ${accessToken}`;
                 return api(originalRequest);
             } catch (refreshError) {
                 processQueue(refreshError, null);
-                clearTokens();
+                clearAccessToken();
                 if (typeof window !== "undefined") {
                     window.location.href = "/login";
                 }
