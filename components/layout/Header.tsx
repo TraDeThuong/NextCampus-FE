@@ -7,6 +7,7 @@ import { LogOut, User } from "lucide-react";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { useLogout } from "@/hooks/auth/useLogout";
 import Spinner from "../ui/Spinner";
+import NotificationBell from "../notification/NotificationBell";
 
 type HeaderProps = {
   role: string;
@@ -59,6 +60,9 @@ export default function Header({ role }: HeaderProps) {
               {language === "vn" ? "VN" : "EN"}
             </span>
           </button>
+
+          {/* Notification Bell */}
+          <NotificationBell />
 
           {/* Profile */}
           <Link
