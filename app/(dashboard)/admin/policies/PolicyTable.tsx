@@ -1,7 +1,10 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+import { useMemo } from "react";
 import { AlertTriangle } from "lucide-react";
 import { useRegulations } from "@/hooks/regulation/useRegulations";
+import type { RegulationQueryParams } from "@/types/regulation";
 import Table from "@/components/ui/Table";
 import Modal from "@/components/ui/Modal";
 import MetalCard from "@/components/ui/MetalCard";
@@ -11,7 +14,24 @@ import PolicyRow from "./PolicyRow";
 const COLUMNS = "minmax(250px, 3fr) 80px 150px 150px 120px 60px";
 
 export default function PolicyTable() {
-  const { data, isPending, isError } = useRegulations();
+  const searchParams = useSearchParams();
+
+  const params: RegulationQueryParams = useMemo(() => {
+    const p: RegulationQueryParams = {};
+    const title = searchParams.get("title");
+    const isActive = searchParams.get("isActive");
+    const page = searchParams.get("page");
+    const limit = searchParams.get("limit");
+
+    if (title) p.title = title;
+    if (isActive) p.isActive = isActive === "true";
+    if (page) p.page = Number(page);
+    if (limit) p.limit = Number(limit);
+
+    return p;
+  }, [searchParams]);
+
+  const { data, isPending, isError } = useRegulations(params);
 
   const regulations = data?.items ?? [];
 

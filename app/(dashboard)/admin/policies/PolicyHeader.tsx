@@ -11,8 +11,11 @@ import Modal from "@/components/ui/Modal";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 
 const policySchema = z.object({
-  title: z.string().min(1, "Title is required").max(100),
-  content: z.string().min(1, "Content is required"),
+  title: z.string().trim().min(1, "Title is required").max(100),
+  content: z.string().trim().min(1, "Content is required").max(150000, "Content is too long").refine(
+    (val) => val.replace(/<[^>]*>/g, "").trim().length > 0,
+    { message: "Content cannot be empty" }
+  ),
   isActive: z.boolean(),
 });
 
