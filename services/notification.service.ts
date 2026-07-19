@@ -43,6 +43,13 @@ export const notificationService = {
     return response.data;
   },
 
+  getUnreadCount: async (): Promise<{ success: boolean; count: number }> => {
+    const response = await api.get<{ success: boolean; count: number }>(
+      "/notifications/unread-count",
+    );
+    return response.data;
+  },
+
   markAsRead: async (id: string): Promise<NotificationSuccessResponse> => {
     const response = await api.patch<NotificationSuccessResponse>(
       `/notifications/${id}/read`,
@@ -53,6 +60,13 @@ export const notificationService = {
   markAllAsRead: async (): Promise<MessageSuccessResponse> => {
     const response = await api.patch<MessageSuccessResponse>(
       "/notifications/read-all",
+    );
+    return response.data;
+  },
+
+  clearReadNotifications: async (): Promise<MessageSuccessResponse> => {
+    const response = await api.delete<MessageSuccessResponse>(
+      "/notifications/clear-read",
     );
     return response.data;
   },

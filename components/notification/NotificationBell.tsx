@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Bell } from "lucide-react";
 import { useNotifications } from "@/hooks/notification/useNotifications";
+import { useUnreadCount } from "@/hooks/notification/useUnreadCount";
 import { useNotificationSocket } from "@/hooks/notification/useNotificationSocket";
 import useOutsideClick from "@/hooks/useOutsideClick";
 import NotificationDropdown from "./NotificationDropdown";
@@ -13,9 +14,7 @@ export default function NotificationBell() {
 
   useNotificationSocket();
 
-  const { data } = useNotifications({ limit: 10, sortBy: "createdAt", order: "desc" });
-  const notifications = data?.data ?? [];
-  const unreadCount = notifications.filter((item) => !item.isRead).length;
+  const { data: unreadCount = 0 } = useUnreadCount();
 
   return (
     <div ref={containerRef} className="relative">

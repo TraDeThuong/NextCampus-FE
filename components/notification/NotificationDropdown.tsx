@@ -1,10 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import { Check, BellOff, Info, AlertTriangle, CheckCircle2, ShieldAlert } from "lucide-react";
+import { Check, BellOff, Info, AlertTriangle, CheckCircle2, ShieldAlert, Trash2 } from "lucide-react";
 import { useNotifications } from "@/hooks/notification/useNotifications";
 import { useMarkAsRead } from "@/hooks/notification/useMarkAsRead";
 import { useMarkAllAsRead } from "@/hooks/notification/useMarkAllAsRead";
+import { useDeleteNotification } from "@/hooks/notification/useDeleteNotification";
+import { useClearReadNotifications } from "@/hooks/notification/useClearReadNotifications";
 import type { Notification } from "@/types/notification";
 import Spinner from "@/components/ui/Spinner";
 
@@ -16,12 +17,24 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
   const { data, isLoading } = useNotifications({ limit: 10, sortBy: "createdAt", order: "desc" });
   const { mutate: markAsRead } = useMarkAsRead();
   const { mutate: markAllAsRead } = useMarkAllAsRead();
+  const { mutate: deleteNotification } = useDeleteNotification();
+  const { mutate: clearReadNotifications } = useClearReadNotifications();
 
   const notifications = data?.data ?? [];
   const unreadNotifications = notifications.filter((n) => !n.isRead);
+  const readNotifications = notifications.filter((n) => n.isRead);
 
   const handleMarkAllRead = () => {
     markAllAsRead();
+  };
+
+  const handleClearRead = () => {
+    clearReadNotifications();
+  };
+
+  const handleDeleteItem = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation(); // Ngăn mở/đánh dấu đọc khi click vào nút xóa
+    deleteNotification(id);
   };
 
   const getIconForType = (type: string) => {
@@ -65,16 +78,29 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
           )}
         </div>
 
-        {unreadNotifications.length > 0 && (
-          <button
-            onClick={handleMarkAllRead}
-            className="flex items-center gap-1 text-xs text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer"
-            title="Đánh dấu tất cả là đã đọc"
-          >
-            <Check size={14} />
-            <span>Đã đọc tất cả</span>
-          </button>
-        )}
+        <div className="flex items-center gap-3">
+          {unreadNotifications.length > 0 && (
+            <button
+              onClick={handleMarkAllRead}
+              className="flex items-center gap-1 text-xs text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer"
+              title="Đánh dấu tất cả là đã đọc"
+            >
+              <Check size={14} />
+              <span>Đã đọc</span>
+            </button>
+          )}
+
+          {readNotifications.length > 0 && (
+            <button
+              onClick={handleClearRead}
+              className="flex items-center gap-1 text-xs text-slate-400 hover:text-red-400 transition-colors cursor-pointer"
+              title="Xóa các thông báo đã đọc"
+            >
+              <Trash2 size={13} />
+              <span>Dọn dẹp</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Content */}
@@ -96,17 +122,17 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
                 if (!item.isRead) markAsRead(item.id);
                 if (onClose) onClose();
               }}
-              className={`group flex items-start gap-3 p-3 rounded-xl transition-all duration-200 cursor-pointer ${
+              className={`group relative flex items-start gap-3 p-3 rounded-xl transition-all duration-200 cursor-pointer ${
                 item.isRead
                   ? "bg-transparent hover:bg-white/5 opacity-70"
                   : "bg-white/5 hover:bg-white/10 border-l-2 border-cyan-400"
               }`}
             >
-              <div className="mt-0.5 rounded-lg bg-white/5 p-2 border border-white/10">
+              <div className="mt-0.5 rounded-lg bg-white/5 p-2 border border-white/10 shrink-0">
                 {getIconForType(item.type)}
               </div>
 
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 pr-6">
                 <div className="flex items-center justify-between gap-2">
                   <p className={`text-xs font-semibold truncate ${item.isRead ? "text-slate-300" : "text-white"}`}>
                     {item.title}
@@ -121,8 +147,19 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
                 </p>
               </div>
 
+              {/* Action buttons on hover */}
+              <div className="absolute right-2 top-2 hidden group-hover:flex items-center gap-1 bg-[#0B1020] p-1 rounded-lg border border-white/10 shadow-lg">
+                <button
+                  onClick={(e) => handleDeleteItem(e, item.id)}
+                  className="text-slate-400 hover:text-red-400 transition-colors p-1 cursor-pointer"
+                  title="Xóa thông báo này"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+
               {!item.isRead && (
-                <span className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(21,174,245,0.8)] shrink-0 mt-1" />
+                <span className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(21,174,245,0.8)] shrink-0 mt-1 group-hover:hidden" />
               )}
             </div>
           ))

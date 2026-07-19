@@ -40,32 +40,38 @@ export function useNotificationSocket() {
 
         eventSource.onmessage = (event) => {
           try {
-            // Heartbeats hoặc comments trống được lọc tự động bởi EventSource
             if (!event.data) return;
-            const notification: Notification = JSON.parse(event.data);
+            const parsed = JSON.parse(event.data);
 
-            // Invalidate React Query cache
+            // Invalidate React Query cache (cả danh sách và unread-count) trên tất cả các Tab
             queryClient.invalidateQueries({ queryKey: ["notifications"] });
 
-            // Hiển thị Toast nổi
-            toast.custom(
-              (t) => (
-                <div
-                  onClick={() => toast.dismiss(t.id)}
-                  className={`${
-                    t.visible ? "animate-in fade-in slide-in-from-top-5 duration-200" : "animate-out fade-out slide-out-to-top-5 duration-150"
-                  } max-w-sm w-full bg-[#0B1020]/95 border border-cyan-400/40 shadow-[0_0_25px_rgba(21,174,245,0.35)] rounded-2xl p-4 backdrop-blur-xl cursor-pointer hover:border-cyan-400 transition-all text-white`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-full bg-cyan-400 animate-pulse" />
-                    <p className="text-xs font-bold metal-text tracking-wide uppercase">Thông báo mới</p>
+            // Phân loại loại event
+            const type = parsed.type || (parsed.id ? "NOTIFICATION_NEW" : null);
+            const payload = parsed.payload || (parsed.id ? parsed : null);
+
+            if (type === "NOTIFICATION_NEW" && payload) {
+              const notification = payload as Notification;
+              // Hiển thị Toast nổi
+              toast.custom(
+                (t) => (
+                  <div
+                    onClick={() => toast.dismiss(t.id)}
+                    className={`${
+                      t.visible ? "animate-in fade-in slide-in-from-top-5 duration-200" : "animate-out fade-out slide-out-to-top-5 duration-150"
+                    } max-w-sm w-full bg-[#0B1020]/95 border border-cyan-400/40 shadow-[0_0_25px_rgba(21,174,245,0.35)] rounded-2xl p-4 backdrop-blur-xl cursor-pointer hover:border-cyan-400 transition-all text-white`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="h-2.5 w-2.5 rounded-full bg-cyan-400 animate-pulse" />
+                      <p className="text-xs font-bold metal-text tracking-wide uppercase">Thông báo mới</p>
+                    </div>
+                    <p className="mt-1.5 text-sm font-semibold text-white truncate">{notification.title}</p>
+                    <p className="mt-1 text-xs text-slate-300 line-clamp-2 leading-relaxed">{notification.content}</p>
                   </div>
-                  <p className="mt-1.5 text-sm font-semibold text-white truncate">{notification.title}</p>
-                  <p className="mt-1 text-xs text-slate-300 line-clamp-2 leading-relaxed">{notification.content}</p>
-                </div>
-              ),
-              { duration: 5000 }
-            );
+                ),
+                { duration: 5000 }
+              );
+            }
           } catch (err) {
             console.error("[NotificationStream] Error parsing message:", err);
           }
