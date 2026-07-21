@@ -1,5 +1,11 @@
 
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Đánh giá tuần",
+};
+
 export default function page() {
   return (
     <div>
@@ -8,5 +14,6 @@ export default function page() {
        <p> Form de Intern tu cham diem hang tuan cua minh </p>
        <p> Xem nhung tuan truoc, diem minh tu cham va leader cham </p>
     </div>
-  )
+  );
 }
+

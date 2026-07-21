@@ -1,6 +1,11 @@
+import type { Metadata } from "next";
 import PolicyHeader from "./PolicyHeader";
 import PolicyFilter from "./PolicyFilter";
 import PolicyTable from "./PolicyTable";
+
+export const metadata: Metadata = {
+  title: "Chính sách & Quy định",
+};
 
 export default function ManagePolicies() {
   return (
@@ -11,4 +16,5 @@ export default function ManagePolicies() {
     </div>
   );
 }
+
 

@@ -1,8 +1,11 @@
-"use client";
-
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import AuthCard from "@/components/auth/AuthCard";
 import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
+
+export const metadata: Metadata = {
+    title: "Đặt lại mật khẩu",
+};
 
 export default function ResetPasswordPage() {
     return (
@@ -20,3 +23,4 @@ export default function ResetPasswordPage() {
         </AuthCard>
     );
 }
+

@@ -1,3 +1,9 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Báo cáo hằng ngày",
+};
+
 export default function page() {
   return (
     <div>
@@ -5,5 +11,6 @@ export default function page() {
       <p> Bang hien thi danh sach report hang tuan, hang ngay </p>
       <p> Chinh sua report </p>
     </div>
-  )
+  );
 }
+

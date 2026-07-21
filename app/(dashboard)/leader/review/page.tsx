@@ -1,3 +1,9 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Duyệt báo cáo",
+};
+
 export default function page() {
   return (
     <div>
@@ -5,5 +11,6 @@ export default function page() {
       <p> Xem pr cua intern, nhan xet, gui mail tu dong, va notification den Intern de intern chinh sua task </p>
       <p> table </p>
     </div>
-  )
+  );
 }
+
