@@ -236,9 +236,9 @@ export default function LeaderStatsOverview() {
       <MetalCard className="p-6">
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <div>
-            <h3 className="text-xl font-bold text-foreground flex items-center gap-2 metal-text">
-              <Users className="h-6 w-6 text-primary-light" />
-              Tiến Độ Chi Tiết Thực Tập Sinh Trong Nhóm
+            <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
+              <Users className="h-6 w-6 text-primary-light shrink-0" />
+              <span className="metal-text">Tiến Độ Chi Tiết Thực Tập Sinh Trong Nhóm</span>
             </h3>
             <p className="text-xs text-muted mt-1">
               Giám sát tiến độ hoàn thành công việc và điểm số trung bình của từng cá nhân

@@ -58,4 +58,9 @@ export const authService = {
         const response = await api.post<MessageSuccessResponse>("/auth/change-password", payload);
         return response.data;
     },
+
+    revokeSession: async (token: string): Promise<MessageSuccessResponse> => {
+        const response = await api.post<MessageSuccessResponse>("/auth/revoke-session", { token });
+        return response.data;
+    },
 };
