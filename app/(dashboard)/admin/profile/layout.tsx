@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Quy trình Onboarding",
+  title: "Hồ sơ cá nhân",
 };
 
-export default function OnboardingLayout({
+export default function AdminProfileLayout({
   children,
 }: {
   children: React.ReactNode;

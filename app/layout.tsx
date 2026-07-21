@@ -4,6 +4,16 @@ import ReactQueryProvider from "@/providers/ReactQueryProvider";
 import { ReactNode } from "react";
 import ToastProvider from "@/providers/ToastProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: {
+    default: "NexCampus - Hệ thống Quản lý Thực tập sinh",
+    template: "%s | NexCampus",
+  },
+  description: "Hệ thống quản lý thực tập sinh và theo dõi tiến độ công việc NexCampus.",
+};
+
 
 const headingFont = Black_Ops_One({
   subsets: ["latin"],

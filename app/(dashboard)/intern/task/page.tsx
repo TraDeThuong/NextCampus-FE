@@ -1,3 +1,9 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Công việc của tôi",
+};
+
 export default function page() {
   return (
     <div>
@@ -6,5 +12,6 @@ export default function page() {
       <p> Xem chi tiet task </p>
       <p> Lam xong task thi dien daily report </p>
     </div>
-  )
+  );
 }
+

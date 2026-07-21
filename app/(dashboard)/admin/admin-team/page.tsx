@@ -7,10 +7,17 @@
 // Filter 
 // Admin 
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Quản trị hệ thống",
+};
+
 export default function page() {
   return (
     <div>
       Admin Team 
     </div>
-  )
+  );
 }
+
