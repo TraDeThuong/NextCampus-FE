@@ -207,9 +207,9 @@ export default function AdminStatsOverview() {
       <MetalCard className="p-6">
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <div>
-            <h3 className="text-xl font-bold text-foreground flex items-center gap-2 metal-text">
-              <UserCheck className="h-6 w-6 text-indigo-400" />
-              Hiệu Suất Tiến Độ Theo Từng Nhóm Leader
+            <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
+              <UserCheck className="h-6 w-6 text-indigo-400 shrink-0" />
+              <span className="metal-text">Hiệu Suất Tiến Độ Theo Từng Nhóm Leader</span>
             </h3>
             <p className="text-xs text-muted mt-1">
               Hiển thị danh sách nhóm Leader quản lý ({displayedLeaderTeams.length}/{leaderTeams.length} nhóm)

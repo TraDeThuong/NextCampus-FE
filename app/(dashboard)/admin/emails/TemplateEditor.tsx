@@ -29,7 +29,7 @@ const schema = z.object({
   webTitle: z.string().max(200).optional(),
   webContent: z.string().max(2000).optional(),
   emailSubject: z.string().max(200).optional(),
-  emailContent: z.string().max(5000).optional(),
+  emailContent: z.string().max(10000).optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -52,18 +52,27 @@ const SAMPLE_VALUES: Record<string, string> = {
   position: "NodeJS Developer Intern",
   department: "Product Engineering",
   resetLink: "https://nexcampus.vn/reset-password?token=reset-token-xyz789",
+  time: "21/07/2026 22:00:00",
+  ip: "113.161.12.34",
+  location: "TP. Hồ Chí Minh, Việt Nam",
+  device: "Desktop",
+  os: "Windows 11",
+  browser: "Google Chrome",
+  revokeUrl: "https://nexcampus.vn/security-alert?token=sample-revoke-token-123",
 };
 
 function interpolatePreview(template: string): string {
   let processed = template;
 
   // 1. Replace variables inside href="..." or href='...' raw, to avoid breaking HTML syntax
-  processed = processed.replace(/(href=["'])\{\{(\w+)\}\}(["'])/g, (match, prefix, key, suffix) => {
-    const val = SAMPLE_VALUES[key] !== undefined ? SAMPLE_VALUES[key] : `{{${key}}}`;
-    return prefix + val + suffix;
+  processed = processed.replace(/(href=["'])(.*?)(["'])/gi, (match, prefix, content, suffix) => {
+    const cleanContent = content.replace(/\{\{(\w+)\}\}/g, (_, key) => {
+      return SAMPLE_VALUES[key] !== undefined ? SAMPLE_VALUES[key] : "#";
+    });
+    return prefix + cleanContent + suffix;
   });
 
-  // 2. Wrap remaining variables with styled <mark> tags for visibility
+  // 2. Wrap remaining variables outside href attributes with styled <mark> tags
   processed = processed.replace(/\{\{(\w+)\}\}/g, (_, key) => {
     return SAMPLE_VALUES[key] !== undefined
       ? `<mark class="bg-cyan-500/20 text-cyan-300 rounded px-0.5 font-mono">${SAMPLE_VALUES[key]}</mark>`
@@ -100,7 +109,7 @@ function VariableChips({
           className="rounded-lg border border-cyan-400/20 bg-cyan-500/10 px-2.5 py-1 font-mono text-xs text-cyan-300 transition hover:border-cyan-400/40 hover:bg-cyan-500/20 active:scale-95"
           title={`Insert {{${v}}}`}
         >
-          {`{{${v}}}`}
+          {"{{" + v + "}}"}
         </button>
       ))}
     </div>
@@ -125,12 +134,21 @@ export default function TemplateEditor({ type, template }: Props) {
 
   if (!meta) return null;
 
+  // Helper to determine effective email content (fallback to catalog if old DB template lacks new variables)
+  const getEffectiveEmailContent = (t: NotificationTemplate | null, m: typeof meta) => {
+    if (!t?.emailContentTemplate) return m.defaults.emailContentTemplate ?? "";
+    if (t.type === "PASSWORD_RESET" && !t.emailContentTemplate.includes("{{ip}}")) {
+      return m.defaults.emailContentTemplate ?? "";
+    }
+    return t.emailContentTemplate;
+  };
+
   // Effective defaults: DB record values, else catalog defaults
   const defaults = {
     webTitle: template?.titleTemplate ?? meta?.defaults.titleTemplate ?? "",
     webContent: template?.contentTemplate ?? meta?.defaults.contentTemplate ?? "",
     emailSubject: template?.emailSubjectTemplate ?? meta?.defaults.emailSubjectTemplate ?? "",
-    emailContent: template?.emailContentTemplate ?? meta?.defaults.emailContentTemplate ?? "",
+    emailContent: getEffectiveEmailContent(template, meta),
   };
 
   const {
@@ -158,7 +176,7 @@ export default function TemplateEditor({ type, template }: Props) {
       webTitle: template?.titleTemplate ?? meta?.defaults.titleTemplate ?? "",
       webContent: template?.contentTemplate ?? meta?.defaults.contentTemplate ?? "",
       emailSubject: template?.emailSubjectTemplate ?? meta?.defaults.emailSubjectTemplate ?? "",
-      emailContent: template?.emailContentTemplate ?? meta?.defaults.emailContentTemplate ?? "",
+      emailContent: getEffectiveEmailContent(template, meta),
     });
   }, [type, template, meta, resetForm]);
 
@@ -225,11 +243,20 @@ export default function TemplateEditor({ type, template }: Props) {
       }
     }
 
+    const titleTemplate =
+      data.webTitle?.trim() ||
+      data.emailSubject?.trim() ||
+      meta.defaults.emailSubjectTemplate ||
+      "Notification";
+
+    const contentTemplate =
+      data.webContent?.trim() || "Notification";
+
     upsert({
       type,
       payload: {
-        titleTemplate: data.webTitle || "",
-        contentTemplate: data.webContent || "",
+        titleTemplate,
+        contentTemplate,
         emailSubjectTemplate: data.emailSubject || null,
         emailContentTemplate: data.emailContent || null,
       },
@@ -587,7 +614,7 @@ export default function TemplateEditor({ type, template }: Props) {
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <>
-                <Save className="h-4 w-4" />
+                <Save className="h-4 w-4 mr-2" />
                 Save Changes
               </>
             )}

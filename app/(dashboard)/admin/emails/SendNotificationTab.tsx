@@ -388,7 +388,7 @@ export default function SendNotificationTab() {
             {sending ? (
               <div className="h-4 w-4 animate-spin rounded-full border border-t-transparent border-white" />
             ) : (
-              <Send className="h-4 w-4" />
+              <Send className="h-4 w-4 mr-2" />
             )}
             Send Notification
           </Button>
