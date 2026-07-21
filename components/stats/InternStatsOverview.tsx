@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 
 export default function InternStatsOverview() {
-  const { data: response, isLoading, isError } = useInternStats();
+  const { data: response, isLoading, isError, refetch } = useInternStats();
 
   if (isLoading) {
     return (
@@ -30,8 +30,14 @@ export default function InternStatsOverview() {
 
   if (isError || !response?.success) {
     return (
-      <div className="rounded-2xl border border-danger/30 bg-danger/10 p-6 text-center text-danger">
-        Lỗi khi tải dữ liệu thống kê cá nhân. Vui lòng thử lại sau.
+      <div className="rounded-2xl border border-danger/30 bg-danger/10 p-6 text-center text-danger space-y-3">
+        <p className="font-semibold">Lỗi khi tải dữ liệu thống kê cá nhân. Vui lòng kiểm tra lại kết nối mạng.</p>
+        <button
+          onClick={() => refetch()}
+          className="px-4 py-2 rounded-xl bg-danger text-white text-xs font-bold hover:opacity-90 transition-all cursor-pointer"
+        >
+          Thử lại
+        </button>
       </div>
     );
   }

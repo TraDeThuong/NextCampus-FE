@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 
 export default function LeaderStatsOverview() {
-  const { data: response, isLoading, isError } = useLeaderStats();
+  const { data: response, isLoading, isError, refetch } = useLeaderStats();
 
   const [modalConfig, setModalConfig] = useState<{
     isOpen: boolean;
@@ -43,8 +43,14 @@ export default function LeaderStatsOverview() {
 
   if (isError || !response?.success) {
     return (
-      <div className="rounded-2xl border border-danger/30 bg-danger/10 p-6 text-center text-danger">
-        Lỗi khi tải dữ liệu thống kê Leader. Vui lòng thử lại sau.
+      <div className="rounded-2xl border border-danger/30 bg-danger/10 p-6 text-center text-danger space-y-3">
+        <p className="font-semibold">Lỗi khi tải dữ liệu thống kê Leader. Vui lòng kiểm tra lại kết nối mạng.</p>
+        <button
+          onClick={() => refetch()}
+          className="px-4 py-2 rounded-xl bg-danger text-white text-xs font-bold hover:opacity-90 transition-all cursor-pointer"
+        >
+          Thử lại
+        </button>
       </div>
     );
   }
