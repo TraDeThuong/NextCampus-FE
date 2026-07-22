@@ -110,11 +110,17 @@ export default function LeaderRow({ leader }: LeaderRowProps) {
                             onBlur={() => setEditingDept(false)}
                             autoFocus
                             disabled={updatingField === "department"}
-                            className="w-full rounded-lg border border-cyan-400/30 bg-[#0f172a] px-2 py-1 text-xs text-white outline-none"
+                            className="w-full rounded-lg border border-cyan-400/30 bg-[#0f172a] px-2 py-1 text-xs text-white outline-none cursor-pointer"
                         >
-                            <option value="">Not set</option>
+                            <option value="" className="bg-[#0b1020] text-slate-300">
+                                Not set
+                            </option>
                             {departments.map((d) => (
-                                <option key={d.id} value={d.id}>
+                                <option
+                                    key={d.id}
+                                    value={d.id}
+                                    className="bg-[#0b1020] text-slate-200"
+                                >
                                     {d.name}
                                 </option>
                             ))}
@@ -220,14 +226,18 @@ export default function LeaderRow({ leader }: LeaderRowProps) {
                     <select
                         value={leader.user.isActive ? "true" : "false"}
                         onChange={(e) => toggleActive(e.target.value === "true")}
-                        className={`rounded-lg border px-2 py-1 text-xs font-medium outline-none cursor-pointer ${
+                        className={`rounded-lg border px-2 py-1 text-xs font-medium outline-none cursor-pointer transition-colors ${
                             leader.user.isActive
-                                ? "border-emerald-400/20 bg-emerald-500/10 text-emerald-300"
-                                : "border-red-400/20 bg-red-500/10 text-red-300"
+                                ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-400 font-semibold"
+                                : "border-red-400/30 bg-red-500/10 text-red-400 font-semibold"
                         }`}
                     >
-                        <option value="true">Active</option>
-                        <option value="false">Inactive</option>
+                        <option value="true" className="bg-[#0b1020] text-emerald-400 font-medium">
+                            Active
+                        </option>
+                        <option value="false" className="bg-[#0b1020] text-red-400 font-medium">
+                            Inactive
+                        </option>
                     </select>
                 </div>
 

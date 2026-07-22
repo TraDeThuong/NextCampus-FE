@@ -120,7 +120,7 @@ export default function LeaderStatsOverview() {
           icon={<FileCheck className="h-6 w-6 text-amber-400" />}
           href="/leader/review?status=PENDING"
           trend={{
-            text: stats.submissions.pending > 0 ? "🔴 Cần duyệt ngay" : "✓ Hoàn thành duyệt",
+            text: stats.submissions.pending > 0 ? "Cần duyệt ngay" : "Hoàn thành duyệt",
             positive: stats.submissions.pending === 0,
           }}
         />
@@ -132,7 +132,7 @@ export default function LeaderStatsOverview() {
           icon={<ShieldAlert className="h-6 w-6 text-rose-400" />}
           href="/leader/tasks"
           trend={{
-            text: overdueAssignments.length > 0 ? "⚠ Cần nhắc nhở TTS" : "✓ Đúng tiến độ",
+            text: overdueAssignments.length > 0 ? "Cần nhắc nhở TTS" : "Đúng tiến độ",
             positive: overdueAssignments.length === 0,
           }}
         />
@@ -159,8 +159,8 @@ export default function LeaderStatsOverview() {
         >
           <div className="flex items-start justify-between">
             <div>
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-amber-400 bg-amber-500/20 px-2.5 py-0.5 rounded-full border border-amber-500/30">
-                🔴 Cần xử lý ngay
+              <span className="inline-flex items-center justify-center text-[11px] font-bold uppercase tracking-wider leading-none text-amber-400 bg-amber-500/20 px-2.5 py-1.5 rounded-full border border-amber-500/30">
+                Cần xử lý ngay
               </span>
               <h3 className="text-2xl font-black text-amber-300 mt-2">
                 {stats.submissions.pending} Bài Nộp Chờ Duyệt
@@ -186,8 +186,8 @@ export default function LeaderStatsOverview() {
         >
           <div className="flex items-start justify-between">
             <div>
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-rose-400 bg-rose-500/20 px-2.5 py-0.5 rounded-full border border-rose-500/30">
-                🟡 Cảnh báo tiến độ
+              <span className="inline-flex items-center justify-center text-[11px] font-bold uppercase tracking-wider leading-none text-rose-400 bg-rose-500/20 px-2.5 py-1.5 rounded-full border border-rose-500/30">
+                Cảnh báo tiến độ
               </span>
               <h3 className="text-2xl font-black text-rose-300 mt-2">
                 {overdueAssignments.length} Task Quá Hạn
@@ -212,8 +212,8 @@ export default function LeaderStatsOverview() {
         >
           <div className="flex items-start justify-between">
             <div>
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-indigo-400 bg-indigo-500/20 px-2.5 py-0.5 rounded-full border border-indigo-500/30">
-                🔵 Đánh giá định kỳ
+              <span className="inline-flex items-center justify-center text-[11px] font-bold uppercase tracking-wider leading-none text-indigo-400 bg-indigo-500/20 px-2.5 py-1.5 rounded-full border border-indigo-500/30">
+                Đánh giá định kỳ
               </span>
               <h3 className="text-2xl font-black text-indigo-300 mt-2">
                 Chấm Điểm Đánh Giá Tuần
@@ -299,20 +299,20 @@ export default function LeaderStatsOverview() {
 
                     <div>
                       {intern.healthStatus === "HEALTHY" && (
-                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
-                          🟢 Đúng tiến độ
+                        <span className="inline-flex items-center justify-center text-xs font-semibold leading-none text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1.5 rounded-lg">
+                          Đúng tiến độ
                         </span>
                       )}
 
                       {intern.healthStatus === "WARNING" && (
-                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg">
-                          🟡 Cần chú ý ({intern.overdueCount} task trễ)
+                        <span className="inline-flex items-center justify-center text-xs font-semibold leading-none text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1.5 rounded-lg">
+                          Cần chú ý ({intern.overdueCount} task trễ)
                         </span>
                       )}
 
                       {intern.healthStatus === "DANGER" && (
-                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/30 px-2.5 py-1 rounded-lg">
-                          🔴 Nguy cơ chậm ({intern.overdueCount} task trễ)
+                        <span className="inline-flex items-center justify-center text-xs font-semibold leading-none text-rose-400 bg-rose-500/10 border border-rose-500/30 px-2.5 py-1.5 rounded-lg">
+                          Nguy cơ chậm ({intern.overdueCount} task trễ)
                         </span>
                       )}
                     </div>
