@@ -168,6 +168,7 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
+
 }
 
 .metal-text,
@@ -223,4 +224,28 @@
 .ql-editor.ql-blank::before {
   color: #475569 !important;
   font-style: normal !important;
+}
+
+/* RichTextEditor resizing support */
+.rich-text-editor .ql-container.ql-snow {
+  resize: vertical !important;
+  overflow: hidden !important;
+  min-height: 200px !important;
+  max-height: 600px !important;
+  height: 250px;
+}
+.rich-text-editor .ql-editor {
+  height: 100% !important;
+  min-height: 100% !important;
+}
+
+/* =========================
+   Hide scrollbar utilities
+========================= */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
 }

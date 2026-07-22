@@ -6,10 +6,11 @@ export default function LoginHeader() {
             <Image
                 src="/logo.png"
                 alt="Logo"
-                width={72}
-                height={72}
+                width={598}
+                height={500}
                 className="mx-auto"
-                style={{ width: "auto", height: "auto" }}
+                style={{ height: "72px", width: "auto" }}
+                priority
             />
 
             <h1 className="mt-6 text-3xl font-bold metal-text">
