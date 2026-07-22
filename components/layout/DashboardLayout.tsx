@@ -18,15 +18,16 @@ export default function DashboardLayout({ children, sidebar }: Props) {
     <div className="relative h-screen overflow-hidden bg-background text-foreground">
       <div className="flex h-screen">
         {/* Sidebar Fixed */}
-        <aside className="fixed left-0 top-0 z-30 flex h-screen w-30 shrink-0 flex-col border-r border-white/10 bg-white/5 px-6 py-8 backdrop-blur-2xl shadow-2xl">
+        <aside className="fixed left-0 top-0 z-30 flex h-screen w-30 shrink-0 flex-col overflow-y-auto no-scrollbar border-r border-white/10 bg-white/5 px-6 py-8 backdrop-blur-2xl shadow-2xl">
           {/* Logo */}
           <div className="mb-10 flex flex-col items-center gap-3">
             <Image
               src="/logo.png"
               alt="NextAura Logo"
-              width={40}
-              height={40}
-              style={{ width: "auto", height: "auto" }}
+              width={598}
+              height={500}
+              style={{ height: "40px", width: "auto" }}
+              priority
             />
             <h1 className="metal-text text-sm font-bold tracking-wide">
               NEXTAURA

@@ -34,7 +34,7 @@ export default function RootLayout({ children } : {children: ReactNode}) {
       className={`${headingFont.variable} ${bodyFont.variable}`}
       suppressHydrationWarning
     >
-      <body>
+      <body suppressHydrationWarning>
         <ReactQueryProvider>
           <AuthProvider>
             {children}

@@ -255,7 +255,7 @@ export default function InviteInternModal({
                 disabled={isPending}
                 variant="glass"
               >
-                <Send className="h-4 w-4" />
+                <Send className="h-4 w-4 mr-2" />
 
                 {isPending ? "Sending..." : "Send Invite"}
               </Button>

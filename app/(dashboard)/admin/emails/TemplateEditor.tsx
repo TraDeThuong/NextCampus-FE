@@ -232,6 +232,23 @@ export default function TemplateEditor({ type, template }: Props) {
 
   function onSave(data: FormValues) {
     if (!meta) return;
+
+    // Helper to check missing variables in title/content
+    const checkChannelVariables = (titleStr: string = "", contentStr: string = "", channelName: string) => {
+      const combined = `${titleStr} ${contentStr}`;
+      const missing: string[] = [];
+      for (const variable of meta.variables) {
+        if (!combined.includes(`{{${variable}}}`)) {
+          missing.push(`{{${variable}}}`);
+        }
+      }
+      if (missing.length > 0) {
+        toast.error(`Missing required variables in ${channelName} template: ${missing.join(", ")}`);
+        return false;
+      }
+      return true;
+    };
+
     if ((meta.channels as readonly string[]).includes("web")) {
       if (!data.webTitle?.trim()) {
         toast.error("Web notification title is required");
@@ -239,6 +256,23 @@ export default function TemplateEditor({ type, template }: Props) {
       }
       if (!data.webContent?.trim()) {
         toast.error("Web notification content is required");
+        return;
+      }
+      if (!checkChannelVariables(data.webTitle, data.webContent, "Web")) {
+        return;
+      }
+    }
+
+    if ((meta.channels as readonly string[]).includes("email")) {
+      if (!data.emailSubject?.trim()) {
+        toast.error("Email subject is required");
+        return;
+      }
+      if (!data.emailContent?.trim()) {
+        toast.error("Email content is required");
+        return;
+      }
+      if (!checkChannelVariables(data.emailSubject, data.emailContent, "Email")) {
         return;
       }
     }
@@ -446,7 +480,7 @@ export default function TemplateEditor({ type, template }: Props) {
                 rows={5}
                 placeholder={webContent ? `Falls back to:\n"${webContent}"` : "Inherits Web Content"}
                 onFocus={() => (lastFocusedRef.current = "emailContent")}
-                className={`${inputClass} resize-none`}
+                className={`${inputClass} resize-y min-h-[150px] max-h-[500px]`}
               />
             </div>
           </>

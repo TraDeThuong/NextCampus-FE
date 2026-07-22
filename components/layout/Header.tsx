@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { LogOut, User } from "lucide-react";
@@ -17,6 +18,11 @@ export default function Header({ role }: HeaderProps) {
     const [language, setLanguage] = useState<"vn" | "en">("vn");
     const { state } = useAuth();
     const { logoutMutate, isLoading } = useLogout();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const toggleLanguage = () => {
         setLanguage((prev) => (prev === "vn" ? "en" : "vn"));
@@ -29,13 +35,14 @@ export default function Header({ role }: HeaderProps) {
   return (
     <>
       {/* FULL PAGE SPINNER: Xuất hiện khi đang xử lý logout */}
-      {isLoading && (
+      {mounted && isLoading && createPortal(
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md">
           <Spinner size="lg" />
           <p className="mt-4 text-white/80 text-sm font-medium tracking-wide animate-pulse">
             Logging out, please wait...
           </p>
-        </div>
+        </div>,
+        document.body
       )}
 
       <header className="sticky top-0 z-20 h-20 border-b border-white/10 bg-white/5 backdrop-blur-xl px-8 flex items-center justify-between">
