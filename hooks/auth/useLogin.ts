@@ -78,10 +78,17 @@ export function useLogin() {
         },
 
         onError: (error: AxiosError<ApiErrorResponse>) => {
-            toast.error(
-                error.response?.data?.message ??
-                "Authentication failed. Please try again."
-            );
+            setValue("password", "");
+            const code = error.response?.data?.code;
+            const message = error.response?.data?.message;
+
+            if (code === "USER_INACTIVE" || message?.toLowerCase().includes("inactive")) {
+                toast.error("Tài khoản của bạn đã bị khóa hoặc ngừng hoạt động.");
+            } else if (message === "Invalid credentials" || error.response?.status === 401) {
+                toast.error("Tài khoản hoặc mật khẩu không chính xác.");
+            } else {
+                toast.error(message || "Đăng nhập thất bại. Vui lòng thử lại.");
+            }
         },
     });
 
@@ -89,10 +96,25 @@ export function useLogin() {
         loginMutation.mutate(data);
     };
 
+    const formatLoginError = () => {
+        if (!loginMutation.error) return undefined;
+        const code = loginMutation.error.response?.data?.code;
+        const msg = loginMutation.error.response?.data?.message;
+
+        if (code === "USER_INACTIVE" || msg?.toLowerCase().includes("inactive")) {
+            return "Tài khoản của bạn đã bị khóa hoặc ngừng hoạt động.";
+        }
+        if (msg === "Invalid credentials" || loginMutation.error.response?.status === 401) {
+            return "Tên đăng nhập hoặc mật khẩu không chính xác.";
+        }
+        return msg;
+    };
+
     return {
         register,
         errors,
         isSubmitting: loginMutation.isPending,
+        loginError: formatLoginError(),
         handleSubmit: handleSubmit(onSubmit),
     };
 }

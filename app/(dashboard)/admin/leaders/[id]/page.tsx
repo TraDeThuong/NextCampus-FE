@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, notFound } from "next/navigation";
 import Image from "next/image";
 import {
     ArrowLeft,
@@ -41,17 +41,7 @@ export default function LeaderDetailPage() {
     }
 
     if (isError || !leader) {
-        return (
-            <div className="flex flex-col items-center justify-center gap-4 py-32">
-                <p className="text-slate-400">Leader not found.</p>
-                <button
-                    onClick={() => router.back()}
-                    className="text-sm text-cyan-400 hover:text-cyan-300"
-                >
-                    ← Go back
-                </button>
-            </div>
-        );
+        notFound();
     }
 
     return (
@@ -128,12 +118,16 @@ function LeaderHeader({ leader }: { leader: Leader }) {
                             }
                             className={`rounded-lg border px-2.5 py-1 text-xs font-medium outline-none cursor-pointer ${
                                 leader.user.isActive
-                                    ? "border-emerald-400/20 bg-emerald-500/10 text-emerald-300"
-                                    : "border-red-400/20 bg-red-500/10 text-red-300"
+                                    ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-400 font-semibold"
+                                    : "border-red-400/30 bg-red-500/10 text-red-400 font-semibold"
                             }`}
                         >
-                            <option value="true">Active</option>
-                            <option value="false">Inactive</option>
+                            <option value="true" className="bg-[#0b1020] text-emerald-400 font-medium">
+                                Active
+                            </option>
+                            <option value="false" className="bg-[#0b1020] text-red-400 font-medium">
+                                Inactive
+                            </option>
                         </select>
                     </div>
                 </div>

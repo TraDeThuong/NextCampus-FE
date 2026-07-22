@@ -49,7 +49,10 @@ api.interceptors.response.use(
         if (
             error.response?.status === 401 &&
             !originalRequest._retry &&
-            !originalRequest.url?.includes("/auth/refresh")
+            !originalRequest.url?.includes("/auth/login") &&
+            !originalRequest.url?.includes("/auth/refresh") &&
+            !originalRequest.url?.includes("/auth/forgot-password") &&
+            !originalRequest.url?.includes("/auth/reset-password")
         ) {
             if (isRefreshing) {
                 // Queue concurrent requests until refresh completes
@@ -88,6 +91,20 @@ api.interceptors.response.use(
                 return Promise.reject(refreshError);
             } finally {
                 isRefreshing = false;
+            }
+        }
+
+        if (error.response?.status === 403) {
+            const errorCode = error.response?.data?.code;
+            if (
+                (errorCode === "USER_INACTIVE" || 
+                error.response?.data?.message?.toLowerCase().includes("inactive")) &&
+                !originalRequest.url?.includes("/auth/login")
+            ) {
+                clearAccessToken();
+                if (typeof window !== "undefined") {
+                    window.location.href = "/login?reason=inactive";
+                }
             }
         }
 

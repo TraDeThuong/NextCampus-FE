@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, notFound } from "next/navigation";
 import {
     ArrowLeft,
     Mail,
@@ -43,17 +43,7 @@ export default function InternDetailPage() {
     }
 
     if (isError || !intern) {
-        return (
-            <div className="flex flex-col items-center justify-center gap-4 py-32">
-                <p className="text-slate-400">Intern not found.</p>
-                <button
-                    onClick={() => router.back()}
-                    className="text-sm text-cyan-400 hover:text-cyan-300"
-                >
-                    ← Go back
-                </button>
-            </div>
-        );
+        notFound();
     }
 
     return (
@@ -133,11 +123,17 @@ function InternHeader({ intern }: { intern: Intern }) {
                                     payload: { status: v },
                                 });
                             }}
-                            className={`rounded-lg border px-2.5 py-1 text-xs font-medium outline-none ${statusBadge[status]}`}
+                            className={`rounded-lg border px-2.5 py-1 text-xs font-medium outline-none cursor-pointer ${statusBadge[status]}`}
                         >
-                            <option value="ACTIVE">Active</option>
-                            <option value="COMPLETED">Completed</option>
-                            <option value="DROPPED">Dropped</option>
+                            <option value="ACTIVE" className="bg-[#0b1020] text-emerald-400 font-medium">
+                                Active
+                            </option>
+                            <option value="COMPLETED" className="bg-[#0b1020] text-blue-400 font-medium">
+                                Completed
+                            </option>
+                            <option value="DROPPED" className="bg-[#0b1020] text-red-400 font-medium">
+                                Dropped
+                            </option>
                         </select>
 
                         {status === "ACTIVE" && (

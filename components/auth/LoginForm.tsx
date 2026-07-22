@@ -1,5 +1,7 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+import { AlertTriangle } from "lucide-react";
 import { useLogin } from "@/hooks/auth/useLogin";
 import LoginHeader from "./LoginHeader";
 import PasswordInput from "./PasswordInput";
@@ -8,13 +10,29 @@ import Link from "next/link";
 import Spinner from "../ui/Spinner";
 
 export default function LoginForm() {
-    const { register, errors, isSubmitting, handleSubmit } = useLogin();
+    const { register, errors, isSubmitting, loginError, handleSubmit } = useLogin();
+    const searchParams = useSearchParams();
+    const isInactive = searchParams.get("reason") === "inactive";
 
     return (
         <>
             <LoginHeader />
 
-            <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+            {isInactive && (
+                <div className="mt-4 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-3.5 text-sm text-red-300">
+                    <AlertTriangle className="h-5 w-5 shrink-0 text-red-400" />
+                    <span>Tài khoản của bạn đã bị khóa hoặc ngừng hoạt động.</span>
+                </div>
+            )}
+
+            {loginError && !isInactive && (
+                <div className="mt-4 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-3.5 text-sm text-red-300 animate-fadeIn">
+                    <AlertTriangle className="h-5 w-5 shrink-0 text-red-400" />
+                    <span>{loginError}</span>
+                </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="mt-4 space-y-5">
                 {/* Email Field */}
                 <div className="space-y-2">
                     <label 

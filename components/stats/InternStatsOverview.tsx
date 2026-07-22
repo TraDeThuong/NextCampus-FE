@@ -96,11 +96,11 @@ export default function InternStatsOverview() {
         <StatsCard
           title="Báo Cáo Hôm Nay"
           value={stats.dailyReportTodaySubmitted ? "Đã Nộp" : "Chưa Nộp"}
-          subtitle={stats.dailyReportTodaySubmitted ? "✓ Đúng hạn" : "🔴 Cần nộp trước 18:00"}
+          subtitle={stats.dailyReportTodaySubmitted ? "Đúng hạn" : "Cần nộp trước 18:00"}
           icon={<FileCheck className="h-6 w-6 text-amber-400" />}
           href="/intern/daily-report"
           trend={{
-            text: stats.dailyReportTodaySubmitted ? "🟢 Hoàn thành" : "🔴 Nộp ngay",
+            text: stats.dailyReportTodaySubmitted ? "Hoàn thành" : "Nộp ngay",
             positive: stats.dailyReportTodaySubmitted,
           }}
         />

@@ -63,9 +63,15 @@ export default function LeaderFilter() {
                         }
                         className="appearance-none w-full rounded-2xl border border-border bg-card px-5 py-3 text-sm font-medium text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong"
                     >
-                        <option value="">All Departments</option>
+                        <option value="" className="bg-[#0b1020] text-slate-300">
+                            All Departments
+                        </option>
                         {departments.map((d) => (
-                            <option key={d.id} value={d.id}>
+                            <option
+                                key={d.id}
+                                value={d.id}
+                                className="bg-[#0b1020] text-slate-200"
+                            >
                                 {d.name}
                             </option>
                         ))}

@@ -197,7 +197,7 @@ export default function AdminStatsOverview() {
           icon={<FileText className="h-6 w-6 text-amber-400" />}
           href="/admin/onboarding?status=PENDING"
           trend={{
-            text: stats.applications.pending > 0 ? "🔴 Cần duyệt ngay" : "✓ Đã xử lý xong",
+            text: stats.applications.pending > 0 ? "Cần duyệt ngay" : "Đã xử lý xong",
             positive: stats.applications.pending === 0,
           }}
         />

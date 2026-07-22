@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/auth/useAuth";
 import AuthCard from "./AuthCard";
 import LoginForm from "./LoginForm";
+import Spinner from "../ui/Spinner";
 
 export default function Login() {
     const { state } = useAuth();
@@ -24,7 +25,9 @@ export default function Login() {
 
     return (
         <AuthCard>
-            <LoginForm />
+            <Suspense fallback={<div className="flex justify-center py-12"><Spinner size="lg" /></div>}>
+                <LoginForm />
+            </Suspense>
         </AuthCard>
     );
 }

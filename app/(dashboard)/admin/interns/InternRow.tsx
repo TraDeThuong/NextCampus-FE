@@ -248,11 +248,17 @@ export default function InternRow({ intern }: InternRowProps) {
                             onBlur={() => setEditingStatus(false)}
                             autoFocus
                             disabled={updatingField === "status"}
-                            className="rounded-lg border border-cyan-400/30 bg-[#0f172a] px-2 py-1 text-xs text-white outline-none"
+                            className="rounded-lg border border-cyan-400/30 bg-[#0f172a] px-2 py-1 text-xs text-white outline-none cursor-pointer"
                         >
-                            <option value="ACTIVE">Active</option>
-                            <option value="COMPLETED">Completed</option>
-                            <option value="DROPPED">Dropped</option>
+                            <option value="ACTIVE" className="bg-[#0b1020] text-emerald-400 font-medium">
+                                Active
+                            </option>
+                            <option value="COMPLETED" className="bg-[#0b1020] text-blue-400 font-medium">
+                                Completed
+                            </option>
+                            <option value="DROPPED" className="bg-[#0b1020] text-red-400 font-medium">
+                                Dropped
+                            </option>
                         </select>
                     ) : (
                         <button
