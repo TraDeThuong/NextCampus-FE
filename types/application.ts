@@ -2,6 +2,15 @@
 
 export type ApplicationStatus = "PENDING" | "APPROVED" | "REJECTED";
 
+export interface ApplicationAttachment {
+  id: string;
+  fileName: string;
+  fileUrl: string;
+  fileSize: number;
+  mimeType: string;
+  createdAt: string;
+}
+
 export interface Application {
   id: string;
   fullName: string;
@@ -23,6 +32,7 @@ export interface Application {
     email: string;
     fullName: string | null;
   } | null;
+  attachments?: ApplicationAttachment[];
 }
 
 export type ApplicationInviteStatus = "ACTIVE" | "USED" | "EXPIRED" | "REVOKED";
@@ -100,6 +110,7 @@ export interface CreateApplicationPayload {
   token: string;
   regulationId: string;
   acceptedRegulations: boolean;
+  files?: File[];
 }
 
 export interface CreateInvitePayload {
