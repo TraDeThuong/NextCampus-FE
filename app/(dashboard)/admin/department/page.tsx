@@ -1,5 +1,7 @@
 
 import type { Metadata } from "next";
+import DepartmentHeader from "./DepartmentHeader";
+import DepartmentTable from "./DepartmentTable";
 
 export const metadata: Metadata = {
   title: "Quản lý Phòng ban",
@@ -7,9 +9,11 @@ export const metadata: Metadata = {
 
 export default function page() {
   return (
-    <div>
-      <h1 className = "metal-text"> Department </h1>
+    <div className="space-y-6">
+      <DepartmentHeader />
+      <DepartmentTable />
     </div>
   );
 }
+
 
