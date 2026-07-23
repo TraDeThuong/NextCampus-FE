@@ -1,11 +1,12 @@
 "use client";
 
-import { Loader2, Check, X, AlertTriangle } from "lucide-react";
+import { Check, X, AlertTriangle } from "lucide-react";
 
 import { useApplications } from "@/hooks/application/useApplications";
 import { useReviewApplication } from "@/hooks/application/useReviewApplication";
 import type { Application } from "@/types/application";
 import MetalCard from "@/components/ui/MetalCard";
+import Spinner from "@/components/ui/Spinner";
 import Modal from "@/components/ui/Modal";
 
 export default function PendingInternsTable() {
@@ -22,7 +23,7 @@ export default function PendingInternsTable() {
         return (
             <MetalCard>
                 <div className="flex items-center justify-center py-16">
-                    <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+                    <Spinner />
                 </div>
             </MetalCard>
         );

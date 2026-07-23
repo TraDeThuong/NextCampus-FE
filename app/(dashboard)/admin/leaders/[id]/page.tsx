@@ -10,7 +10,6 @@ import {
     Building2,
     User,
     Circle,
-    Loader2,
 } from "lucide-react";
 
 import { useLeaderDetail } from "@/hooks/leader/useLeaderDetail";
@@ -267,7 +266,7 @@ function InternsCard({ leader }: { leader: Leader }) {
 
                 {isLoading ? (
                     <div className="flex justify-center py-8">
-                        <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+                        <Spinner size="sm" />
                     </div>
                 ) : interns.length === 0 ? (
                     <p className="mt-4 text-sm text-slate-500">

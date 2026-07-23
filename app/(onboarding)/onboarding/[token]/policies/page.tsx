@@ -4,7 +4,6 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   AlertTriangle,
-  Loader2,
   ShieldCheck,
   FileText,
   CircleCheck,
@@ -13,6 +12,7 @@ import {
 import { getActiveRegulationService } from "@/services/regulation.service";
 import type { Regulation } from "@/types/regulation";
 import MetalCard from "@/components/ui/MetalCard";
+import Spinner from "@/components/ui/Spinner";
 
 import DOMPurify from "isomorphic-dompurify";
 
@@ -36,7 +36,7 @@ export default function PoliciesPage() {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="flex items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/70 px-6 py-4 text-zinc-300 shadow-xl backdrop-blur-xl">
-          <Loader2 className="h-5 w-5 animate-spin text-cyan-400" />
+          <Spinner size="sm" />
           <span>Loading internship policies...</span>
         </div>
       </div>

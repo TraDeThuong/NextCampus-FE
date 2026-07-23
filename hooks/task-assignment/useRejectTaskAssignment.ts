@@ -1,0 +1,23 @@
+"use client";
+
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-hot-toast";
+import { taskAssignmentService } from "@/services/task-assignment.service";
+
+export function useRejectTaskAssignment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => taskAssignmentService.rejectAssignment(id),
+
+    onSuccess: (_data, id) => {
+      toast.success("Assignment rejected successfully.");
+      queryClient.invalidateQueries({ queryKey: ["task-assignments"] });
+      queryClient.invalidateQueries({ queryKey: ["task-assignment", id] });
+    },
+
+    onError: () => {
+      toast.error("Failed to reject assignment.");
+    },
+  });
+}

@@ -16,6 +16,7 @@ interface StatsCardProps {
   href?: string;
   badgeColor?: string;
   className?: string;
+  onCardClick?: () => void;
 }
 
 export default function StatsCard({
@@ -26,6 +27,7 @@ export default function StatsCard({
   trend,
   href,
   className = "",
+  onCardClick,
 }: StatsCardProps) {
   const content = (
     <MetalCard className={`p-6 ${href ? "cursor-pointer group/card" : ""} ${className}`}>
@@ -78,6 +80,10 @@ export default function StatsCard({
 
   if (href) {
     return <Link href={href} className="block">{content}</Link>;
+  }
+
+  if (onCardClick) {
+    return <button type="button" onClick={onCardClick} className="block w-full text-left">{content}</button>;
   }
 
   return content;
