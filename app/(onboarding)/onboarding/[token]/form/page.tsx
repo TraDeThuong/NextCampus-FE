@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,6 +14,9 @@ import {
   Clock,
   Loader2,
   AlertTriangle,
+  Paperclip,
+  X,
+  FileText,
 } from "lucide-react";
 
 import { useVerifyInvite } from "@/hooks/application/useVerifyInvite";
@@ -23,13 +26,20 @@ import { usePositions } from "@/hooks/department/usePositions";
 import { getActiveRegulationService } from "@/services/regulation.service";
 import Spinner from "@/components/ui/Spinner";
 
+const MAX_FILES = 5;
+const MAX_FILE_SIZE_MB = 10;
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
 const formSchema = z.object({
   fullName: z.string().min(1, "Full name is required").max(100),
   phone: z.string().min(9, "Phone must be at least 9 digits").max(15),
   departmentId: z.string().min(1, "Department is required"),
   positionId: z.string().min(1, "Position is required"),
   startDate: z.string().min(1, "Start date is required"),
-  duration: z.number({ message: "Must be a positive number" }).int().positive("Must be a positive number"),
+  duration: z
+    .number({ message: "Must be a positive number" })
+    .int()
+    .positive("Must be a positive number"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -38,6 +48,11 @@ const inputClass =
   "w-full rounded-2xl border border-zinc-800 bg-zinc-950/50 py-3 pl-11 pr-4 text-sm text-white outline-none transition-all duration-300 hover:border-zinc-700 focus:border-sky-500/50 focus:shadow-[0_0_25px_rgba(21,174,245,0.15)] placeholder:text-zinc-600";
 
 const selectClass = `${inputClass} appearance-none`;
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 export default function FormPage() {
   const params = useParams<{ token: string }>();
@@ -76,8 +91,9 @@ export default function FormPage() {
   });
 
   const selectedDepartmentId = watch("departmentId");
-  const { data: posData, isLoading: posLoading } =
-    usePositions(selectedDepartmentId || undefined);
+  const { data: posData, isLoading: posLoading } = usePositions(
+    selectedDepartmentId || undefined,
+  );
   const positions = posData?.data ?? [];
 
   // Reset position when department changes
@@ -85,6 +101,41 @@ export default function FormPage() {
     setValue("positionId", "");
   }, [selectedDepartmentId, setValue]);
 
+  // ─── File upload state ────────────────────────────────────────────────────
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const [fileError, setFileError] = useState<string | null>(null);
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const selected = Array.from(e.target.files ?? []);
+    if (selected.length === 0) return;
+
+    const merged = [...attachedFiles, ...selected];
+
+    if (merged.length > MAX_FILES) {
+      setFileError(`Tối đa ${MAX_FILES} tệp đính kèm.`);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    const oversized = merged.find((f) => f.size > MAX_FILE_SIZE_BYTES);
+    if (oversized) {
+      setFileError(`"${oversized.name}" vượt quá ${MAX_FILE_SIZE_MB}MB.`);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    setFileError(null);
+    setAttachedFiles(merged);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  function removeFile(index: number) {
+    setAttachedFiles((prev) => prev.filter((_, i) => i !== index));
+    setFileError(null);
+  }
+
+  // ─── Submit ───────────────────────────────────────────────────────────────
   async function onSubmit(data: FormValues) {
     const reg = await getActiveRegulationService().catch(() => null);
     if (!reg) return;
@@ -101,6 +152,7 @@ export default function FormPage() {
         token,
         regulationId: reg.data.id,
         acceptedRegulations: true,
+        files: attachedFiles.length > 0 ? attachedFiles : undefined,
       },
       {
         onSuccess: () => router.push(`/onboarding/${token}/success`),
@@ -164,7 +216,11 @@ export default function FormPage() {
           />
         </Field>
 
-        <Field label="Department" icon={Building2} error={errors.departmentId?.message}>
+        <Field
+          label="Department"
+          icon={Building2}
+          error={errors.departmentId?.message}
+        >
           <div className="relative">
             <select
               {...register("departmentId")}
@@ -184,7 +240,11 @@ export default function FormPage() {
           </div>
         </Field>
 
-        <Field label="Position" icon={Briefcase} error={errors.positionId?.message}>
+        <Field
+          label="Position"
+          icon={Briefcase}
+          error={errors.positionId?.message}
+        >
           <div className="relative">
             <select
               {...register("positionId")}
@@ -208,11 +268,23 @@ export default function FormPage() {
           </div>
         </Field>
 
-        <Field label="Start Date" icon={Calendar} error={errors.startDate?.message}>
-          <input type="date" {...register("startDate")} className={inputClass} />
+        <Field
+          label="Start Date"
+          icon={Calendar}
+          error={errors.startDate?.message}
+        >
+          <input
+            type="date"
+            {...register("startDate")}
+            className={inputClass}
+          />
         </Field>
 
-        <Field label="Duration (months)" icon={Clock} error={errors.duration?.message}>
+        <Field
+          label="Duration (months)"
+          icon={Clock}
+          error={errors.duration?.message}
+        >
           <input
             type="number"
             {...register("duration", { valueAsNumber: true })}
@@ -221,6 +293,75 @@ export default function FormPage() {
             className={inputClass}
           />
         </Field>
+
+        {/* ─── File Attachments ──────────────────────────────────────────── */}
+        <div>
+          <label className="mb-2 block text-sm font-medium text-zinc-300">
+            Attachments{" "}
+            <span className="text-zinc-500">
+              (CV, transcript, reference letter... - optional, max {MAX_FILES}{" "}
+              files, {MAX_FILE_SIZE_MB}MB each)
+            </span>
+          </label>
+
+          {/* Hidden native file input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.zip"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+
+          {/* Attached file list */}
+          {attachedFiles.length > 0 && (
+            <ul className="mb-3 space-y-2">
+              {attachedFiles.map((file, idx) => (
+                <li
+                  key={idx}
+                  className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-2.5"
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <FileText className="h-4 w-4 shrink-0 text-sky-400" />
+                    <span className="truncate text-sm text-zinc-200">
+                      {file.name}
+                    </span>
+                    <span className="shrink-0 text-xs text-zinc-500">
+                      {formatFileSize(file.size)}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeFile(idx)}
+                    className="ml-3 shrink-0 rounded-lg p-1 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-red-400"
+                    aria-label={`Remove ${file.name}`}
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {/* Add file button — hidden when limit reached */}
+          {attachedFiles.length < MAX_FILES && (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-zinc-700 py-3 text-sm text-zinc-400 transition-all hover:border-sky-500/50 hover:text-sky-400"
+            >
+              <Paperclip className="h-4 w-4" />
+              {attachedFiles.length === 0
+                ? "Attach documents"
+                : `Add more (${attachedFiles.length}/${MAX_FILES})`}
+            </button>
+          )}
+
+          {fileError && (
+            <p className="mt-1.5 text-xs text-red-400">{fileError}</p>
+          )}
+        </div>
 
         <button
           type="submit"

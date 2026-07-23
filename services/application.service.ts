@@ -55,9 +55,28 @@ export const revokeInviteService = async (
 export const createApplicationService = async (
   payload: CreateApplicationPayload,
 ): Promise<ApplicationSuccessResponse> => {
+  const formData = new FormData();
+  formData.append("fullName", payload.fullName);
+  formData.append("email", payload.email);
+  formData.append("phone", payload.phone);
+  formData.append("departmentId", payload.departmentId);
+  formData.append("positionId", payload.positionId);
+  formData.append("startDate", payload.startDate);
+  formData.append("duration", String(payload.duration));
+  formData.append("token", payload.token);
+  formData.append("regulationId", payload.regulationId);
+  formData.append("acceptedRegulations", String(payload.acceptedRegulations));
+
+  if (payload.files && payload.files.length > 0) {
+    payload.files.forEach((file) => {
+      formData.append("files", file);
+    });
+  }
+
   const response = await api.post<ApplicationSuccessResponse>(
     "/applications",
-    payload,
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } },
   );
   return response.data;
 };
