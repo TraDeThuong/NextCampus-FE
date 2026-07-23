@@ -26,6 +26,9 @@ export default function LeaderRow({ leader }: LeaderRowProps) {
     const { data: deptData } = useDepartments();
     const departments = deptData?.data ?? [];
 
+    const selectedDept = departments.find((d) => d.id === leader.departmentId);
+    const availablePositions = selectedDept ? selectedDept.positions : [];
+
     const [updatingField, setUpdatingField] = useState<
         "department" | "position" | null
     >(null);
@@ -146,59 +149,51 @@ export default function LeaderRow({ leader }: LeaderRowProps) {
                 {/* Position */}
                 <div className="text-sm text-slate-400">
                     {editingPos ? (
-                        <div className="flex items-center gap-1">
-                            <input
-                                type="text"
-                                value={posValue}
-                                onChange={(e) => setPosValue(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                        setUpdatingField("position");
-                                        updateLeader(
-                                            {
-                                                id: leader.id,
-                                                payload: {
-                                                    position: posValue || null,
-                                                },
-                                            },
-                                            {
-                                                onSettled: () =>
-                                                    setUpdatingField(null),
-                                            },
-                                        );
-                                        setEditingPos(false);
+                        <select
+                            value={posValue}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setPosValue(val);
+                                setUpdatingField("position");
+                                updateLeader(
+                                    {
+                                        id: leader.id,
+                                        payload: {
+                                            position: val || null,
+                                        },
+                                    },
+                                    {
+                                        onSettled: () => setUpdatingField(null),
                                     }
-                                    if (e.key === "Escape") {
-                                        setPosValue(leader.position ?? "");
-                                        setEditingPos(false);
-                                    }
-                                }}
-                                onBlur={() => {
-                                    if (posValue !== (leader.position ?? "")) {
-                                        setUpdatingField("position");
-                                        updateLeader(
-                                            {
-                                                id: leader.id,
-                                                payload: {
-                                                    position: posValue || null,
-                                                },
-                                            },
-                                            {
-                                                onSettled: () =>
-                                                    setUpdatingField(null),
-                                            },
-                                        );
-                                    }
-                                    setEditingPos(false);
-                                }}
-                                autoFocus
-                                className="w-full rounded-lg border border-cyan-400/30 bg-[#0f172a] px-2 py-1 text-xs text-white outline-none"
-                            />
-                        </div>
+                                );
+                                setEditingPos(false);
+                            }}
+                            onBlur={() => setEditingPos(false)}
+                            autoFocus
+                            disabled={updatingField === "position"}
+                            className="w-full rounded-lg border border-cyan-400/30 bg-[#0f172a] px-2 py-1 text-xs text-white outline-none cursor-pointer"
+                        >
+                            <option value="" className="bg-[#0b1020] text-slate-300">
+                                Not set
+                            </option>
+                            {availablePositions.map((pos) => (
+                                <option
+                                    key={pos.id}
+                                    value={pos.name}
+                                    className="bg-[#0b1020] text-slate-200"
+                                >
+                                    {pos.name}
+                                </option>
+                            ))}
+                        </select>
                     ) : (
                         <button
                             type="button"
                             onClick={() => {
+                                if (!leader.departmentId) {
+                                    toast.error("Please select a department first.");
+                                    return;
+                                }
                                 setPosValue(leader.position ?? "");
                                 setEditingPos(true);
                             }}

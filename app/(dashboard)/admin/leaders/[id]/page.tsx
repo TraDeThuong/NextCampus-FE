@@ -138,8 +138,10 @@ function LeaderHeader({ leader }: { leader: Leader }) {
 
 function LeaderInfo({ leader }: { leader: Leader }) {
     const { mutate: updateLeader } = useUpdateLeader();
-    const [editingPos, setEditingPos] = useState(false);
-    const [posValue, setPosValue] = useState(leader.position ?? "");
+    const { data: deptData } = useDepartments();
+    const departments = deptData?.data ?? [];
+    const selectedDept = departments.find((d) => d.id === leader.departmentId);
+    const availablePositions = selectedDept ? selectedDept.positions : [];
 
     return (
         <MetalCard>
@@ -160,46 +162,26 @@ function LeaderInfo({ leader }: { leader: Leader }) {
                         </span>
                     </div>
 
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3 text-sm text-slate-400">
-                            <User className="h-4 w-4" />
-                            <span>Position</span>
-                        </div>
-                        {editingPos ? (
-                            <input
-                                type="text"
-                                value={posValue}
-                                onChange={(e) => setPosValue(e.target.value)}
-                                onBlur={() => {
-                                    if (posValue !== (leader.position ?? "")) {
-                                        updateLeader({
-                                            id: leader.id,
-                                            payload: {
-                                                position: posValue || null,
-                                            },
-                                        });
-                                    }
-                                    setEditingPos(false);
-                                }}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter")
-                                        (e.target as HTMLInputElement).blur();
-                                }}
-                                autoFocus
-                                className="rounded-lg border border-cyan-400/30 bg-[#0f172a] px-2 py-1 text-sm text-white outline-none"
-                            />
-                        ) : (
-                            <button
-                                onClick={() => {
-                                    setPosValue(leader.position ?? "");
-                                    setEditingPos(true);
-                                }}
-                                className="text-sm text-white transition hover:text-cyan-400"
-                            >
-                                {leader.position ?? "—"}
-                            </button>
-                        )}
-                    </div>
+                    <InlineSelectRow
+                        icon={User}
+                        label="Position"
+                        value={leader.position ?? "Not set"}
+                        options={availablePositions.map((pos) => ({
+                            value: pos.name,
+                            label: pos.name,
+                        }))}
+                        currentId={leader.position ?? ""}
+                        onChange={(posName) => {
+                            if (!leader.departmentId) {
+                                toast.error("Please select a department first.");
+                                return;
+                            }
+                            updateLeader({
+                                id: leader.id,
+                                payload: { position: posName || null },
+                            });
+                        }}
+                    />
                 </div>
             </div>
         </MetalCard>
