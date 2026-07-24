@@ -59,8 +59,8 @@ jobs:
 
             cd /var/www/nexcampus/NexCampus-FE
 
-            echo "Cài đặt production dependencies..."
-            pnpm install --prod --no-frozen-lockfile
+            echo "Cài đặt dependencies (bao gồm devDeps cho build)..."
+            pnpm install --no-frozen-lockfile
 
             echo "Reload Frontend trên PM2..."
             pm2 describe nexcampus-fe > /dev/null 2>&1 && pm2 reload nexcampus-fe || pm2 start node_modules/next/dist/bin/next --name "nexcampus-fe" -- start --port 3000
