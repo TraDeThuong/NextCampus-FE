@@ -33,6 +33,13 @@ function decodeJwtPayload(token: string): JwtPayload | null {
 
 export function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
+
+    // Skip middleware for Next.js internal data/routing requests to prevent race conditions
+    // where the cookie is not yet fully written during client-side SPA navigation.
+    if (pathname.startsWith("/_next") || request.headers.has("x-nextjs-data")) {
+        return NextResponse.next();
+    }
+
     const refreshToken = request.cookies.get("refreshToken")?.value;
 
     let payload: JwtPayload | null = null;
