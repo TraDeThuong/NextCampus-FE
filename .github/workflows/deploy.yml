@@ -63,7 +63,7 @@ jobs:
             pnpm install --prod --frozen-lockfile
 
             echo "Reload Frontend trên PM2..."
-            pm2 describe nexcampus-fe > /dev/null 2>&1 && pm2 reload nexcampus-fe || pm2 start pnpm --name "nexcampus-fe" -- start
+            pm2 describe nexcampus-fe > /dev/null 2>&1 && pm2 reload nexcampus-fe || pm2 start node_modules/next/dist/bin/next --name "nexcampus-fe" -- start --port 3000
             pm2 save
 
             echo "Frontend deploy thành công!"
