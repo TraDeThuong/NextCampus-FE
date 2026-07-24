@@ -1,0 +1,9 @@
+.git
+node_modules
+src
+*.ts
+*.tsx
+!next.config.ts
+.env.local
+*.log
+.DS_Store

@@ -23,12 +23,13 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Build Next.js
+      - name: Build Next.js (standalone output)
         run: npm run build
 
       - name: Sync build artifacts to VPS via rsync
         uses: burnett01/rsync-deployments@7.0.1
         with:
+          # Sync code + .next (standalone) + public, bỏ node_modules
           switches: -avzr --delete --exclude='node_modules' --exclude='.git' --exclude='.env.local'
           path: ./
           remote_path: /var/www/nexcampus/NexCampus-FE
@@ -37,7 +38,7 @@ jobs:
           remote_user: ${{ secrets.VPS_USER }}
           remote_key: ${{ secrets.VPS_SSH_KEY }}
 
-      - name: Reload Frontend PM2 Process
+      - name: Rebuild & Restart Frontend container
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -46,17 +47,10 @@ jobs:
           port: ${{ secrets.VPS_PORT }}
           script: |
             set -e
-            # Load NVM (SSH action dùng non-interactive shell, không tự load ~/.bashrc)
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            cd /var/www/nexcampus/NexCampus-BE
 
-            cd /var/www/nexcampus/NexCampus-FE
-
-            echo "Cài đặt dependencies bằng npm..."
-            npm install
-
-            echo "Reload Frontend trên PM2..."
-            pm2 describe nexcampus-fe > /dev/null 2>&1 && pm2 reload nexcampus-fe || pm2 start node_modules/next/dist/bin/next --name "nexcampus-fe" -- start --port 3000
-            pm2 save
+            echo "Build và restart Frontend container..."
+            docker compose up -d --build frontend --no-deps
 
             echo "Frontend deploy thành công!"
+            docker compose ps frontend
