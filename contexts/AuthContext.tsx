@@ -63,24 +63,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [state, dispatch] = useReducer(authReducer, initialState);
 
     useEffect(() => {
-        axios
-            .post(
-                `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
-                {},
-                { withCredentials: true }
-            )
+        authService
+            .me()
             .then((res) => {
-                const data = res.data?.data;
-                if (data?.accessToken && data?.user) {
-                    setAccessToken(data.accessToken);
-                    dispatch({ type: "SET_USER", user: data.user });
+                if (res.success && res.data) {
+                    dispatch({ type: "SET_USER", user: res.data });
                 } else {
                     clearAccessToken();
                     dispatch({ type: "SET_LOADING", isLoading: false });
                 }
             })
             .catch(() => {
-                // No valid cookie → not authenticated
                 clearAccessToken();
                 dispatch({ type: "SET_LOADING", isLoading: false });
             });

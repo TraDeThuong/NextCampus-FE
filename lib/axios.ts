@@ -20,22 +20,31 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// Refresh queue to avoid race conditions when multiple requests fail simultaneously
-let isRefreshing = false;
-let failedQueue: Array<{
-    resolve: (token: string) => void;
-    reject: (error: unknown) => void;
-}> = [];
+// Shared refresh promise to handle concurrent requests without double calls
+let refreshPromise: Promise<string> | null = null;
 
-function processQueue(error: unknown, token: string | null) {
-    failedQueue.forEach(({ resolve, reject }) => {
-        if (error || !token) {
-            reject(error);
-        } else {
-            resolve(token);
+export async function executeTokenRefresh(): Promise<string> {
+    if (refreshPromise) {
+        return refreshPromise;
+    }
+
+    refreshPromise = (async () => {
+        try {
+            // POST /auth/refresh — no body; refreshToken cookie sent automatically
+            const response = await axios.post(
+                `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+                {},
+                { withCredentials: true }
+            );
+            const { accessToken } = response.data.data;
+            setAccessToken(accessToken);
+            return accessToken;
+        } finally {
+            refreshPromise = null;
         }
-    });
-    failedQueue = [];
+    })();
+
+    return refreshPromise;
 }
 
 // Response interceptor — silent token refresh on 401
@@ -54,43 +63,27 @@ api.interceptors.response.use(
             !originalRequest.url?.includes("/auth/forgot-password") &&
             !originalRequest.url?.includes("/auth/reset-password")
         ) {
-            if (isRefreshing) {
-                // Queue concurrent requests until refresh completes
-                return new Promise((resolve, reject) => {
-                    failedQueue.push({
-                        resolve: (token: string) => {
-                            originalRequest.headers.Authorization = `Bearer ${token}`;
-                            resolve(api(originalRequest));
-                        },
-                        reject,
-                    });
-                });
-            }
-
             originalRequest._retry = true;
-            isRefreshing = true;
 
             try {
-                // POST /auth/refresh — no body; refreshToken cookie sent automatically
-                const response = await axios.post(
-                    `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
-                    {},
-                    { withCredentials: true }
-                );
-                const { accessToken } = response.data.data;
-                setAccessToken(accessToken);
-                processQueue(null, accessToken);
+                const accessToken = await executeTokenRefresh();
                 originalRequest.headers.Authorization = `Bearer ${accessToken}`;
                 return api(originalRequest);
             } catch (refreshError) {
-                processQueue(refreshError, null);
                 clearAccessToken();
                 if (typeof window !== "undefined") {
-                    window.location.href = "/login";
+                    const pathname = window.location.pathname;
+                    const isPublicRoute =
+                        pathname === "/login" ||
+                        pathname === "/forgot-password" ||
+                        pathname === "/reset-password" ||
+                        pathname.startsWith("/onboarding");
+
+                    if (!isPublicRoute) {
+                        window.location.href = "/login";
+                    }
                 }
                 return Promise.reject(refreshError);
-            } finally {
-                isRefreshing = false;
             }
         }
 
