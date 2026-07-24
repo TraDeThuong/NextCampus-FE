@@ -50,7 +50,7 @@ jobs:
             cd /var/www/nexcampus/NexCampus-BE
 
             echo "Build và restart Frontend container..."
-            docker compose up -d --build frontend --no-deps
+            docker-compose up -d --build frontend --no-deps
 
             echo "Frontend deploy thành công!"
-            docker compose ps frontend
+            docker-compose ps frontend
