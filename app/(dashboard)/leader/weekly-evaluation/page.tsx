@@ -1,4 +1,8 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import WeeklyEvaluationHeader from "./WeeklyEvaluationHeader";
+import WeeklyEvaluationList from "./WeeklyEvaluationList";
+import Spinner from "@/components/ui/Spinner";
 
 export const metadata: Metadata = {
   title: "Đánh giá tuần",
@@ -6,10 +10,11 @@ export const metadata: Metadata = {
 
 export default function page() {
   return (
-    <div>
-      <h1> Weekly Evaluation </h1>
-      <p> Form Cham diem Intern </p>
-      <p> Xem diem ma Intern tu cham </p>
+    <div className="space-y-6">
+      <WeeklyEvaluationHeader />
+      <Suspense fallback={<Spinner />}>
+        <WeeklyEvaluationList />
+      </Suspense>
     </div>
   );
 }
