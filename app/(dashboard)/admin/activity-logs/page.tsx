@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import ActivityLogFilter from "./ActivityLogFilter";
 import ActivityLogTable from "./ActivityLogTable";
 import MetalCard from "@/components/ui/MetalCard";
+import Spinner from "@/components/ui/Spinner";
 
 export const metadata: Metadata = {
   title: "Nhật ký hoạt động",
@@ -22,11 +24,19 @@ export default function ActivityLogsPage() {
         </div>
       </MetalCard>
 
-      {/* Filter */}
-      <ActivityLogFilter />
+      <Suspense
+        fallback={
+          <MetalCard className="flex items-center justify-center py-20">
+            <Spinner size="lg" />
+          </MetalCard>
+        }
+      >
+        {/* Filter */}
+        <ActivityLogFilter />
 
-      {/* Table */}
-      <ActivityLogTable />
+        {/* Table */}
+        <ActivityLogTable />
+      </Suspense>
     </div>
   );
 }
