@@ -78,7 +78,6 @@ export function useLogin() {
         },
 
         onError: (error: AxiosError<ApiErrorResponse>) => {
-            setValue("password", "");
             const code = error.response?.data?.code;
             const message = error.response?.data?.message;
 

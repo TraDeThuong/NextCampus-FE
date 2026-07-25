@@ -2,15 +2,18 @@
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useMemo } from "react";
-import { Trash2, Sparkles, AlertTriangle, Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { Trash2, Sparkles, Plus, Eye, ChevronLeft, ChevronRight, Bot } from "lucide-react";
 import Table from "@/components/ui/Table";
 import Button from "@/components/ui/Button";
 import Spinner from "@/components/ui/Spinner";
+import Modal from "@/components/ui/Modal";
+import WeeklyEvaluationCreateModal from "./WeeklyEvaluationCreateModal";
 import { useWeeklyEvaluations } from "@/hooks/weekly-evaluation/useWeeklyEvaluations";
 import { useDeleteWeeklyEvaluation } from "@/hooks/weekly-evaluation/useDeleteWeeklyEvaluation";
 import WeeklyEvaluationExportButton from "./WeeklyEvaluationExportButton";
-import type { WeeklyEvaluationQueryParams, WeeklyEvaluation } from "@/types/weekly-evaluation";
+import { RATING_COLORS, RATING_LABELS, type RatingLevel, type WeeklyEvaluationQueryParams, type WeeklyEvaluation } from "@/types/weekly-evaluation";
 import Link from "next/link";
+import MetalCard from "@/components/ui/MetalCard";
 
 export default function WeeklyEvaluationList() {
   const searchParams = useSearchParams();
@@ -58,80 +61,126 @@ export default function WeeklyEvaluationList() {
     );
   }
 
+  const getRatingLevel = (score: number): RatingLevel => {
+    if (score >= 8.0) return "TOT";
+    if (score >= 6.5) return "KHA";
+    if (score >= 5.0) return "TB";
+    if (score >= 3.5) return "TBY";
+    return "YEU";
+  };
+
   return (
-    <div className="space-y-4">
-      <Table columns="2.2fr 1fr 3fr 1.2fr 2fr">
+    <MetalCard className="p-6">
+      {/* Header Banner */}
+      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between border-b border-white/10 pb-5 mb-6">
+        <div>
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <Sparkles className="h-6 w-6 text-primary-light shrink-0" />
+            <span className="metal-text">Đánh Giá Tuần (Weekly Evaluation)</span>
+          </h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Đánh giá thực tập sinh hàng tuần, nhận gợi ý thông minh từ AI và xuất báo cáo PDF.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Modal>
+            <Modal.Open opens="create-evaluation">
+              <Button variant="primary" size="md">
+                <Plus className="h-4 w-4 mr-1 inline" />
+                Tạo Đánh Giá
+              </Button>
+            </Modal.Open>
+            <Modal.Window name="create-evaluation" size="md">
+              <WeeklyEvaluationCreateModal />
+            </Modal.Window>
+          </Modal>
+        </div>
+      </div>
+
+      <Table columns="2.5fr 1fr 1.5fr 1fr 2fr">
         <Table.Header>
-          <div>Thực Tập Sinh</div>
-          <div>Tuần</div>
-          <div>Chi Tiết Điểm (G / T / H / C)</div>
-          <div>Tổng Điểm</div>
-          <div className="text-center">Thao tác</div>
+          <span>Thực Tập Sinh</span>
+          <span>Tuần</span>
+          <span>Điểm &amp; Xếp Loại</span>
+          <span className="text-center">AI</span>
+          <span className="text-center">Thao Tác</span>
         </Table.Header>
 
         <Table.Body
           data={evaluations}
-          render={(item: WeeklyEvaluation) => (
-            <Table.Row key={item.id}>
-              {/* Intern Info */}
-              <div className="flex flex-col">
-                <span className="font-semibold text-foreground">
-                  {item.intern?.fullName || "Chưa xác định"}
-                </span>
-                <span className="text-xs text-muted">
-                  {item.intern?.user?.email || ""}
-                </span>
-              </div>
+          render={(item: WeeklyEvaluation) => {
+            const level = getRatingLevel(item.totalScore);
+            const createdDate = new Date(item.createdAt).toLocaleDateString("vi-VN", {
+              day: "2-digit", month: "2-digit", year: "numeric",
+            });
 
-              {/* Week */}
-              <div className="font-medium text-foreground">Tuần {item.week}</div>
+            return (
+              <Table.Row key={item.id}>
+                {/* Intern Info */}
+                <div className="flex flex-col">
+                  <p className="font-bold text-foreground text-sm">
+                    {item.intern?.fullName || "Chưa xác định"}
+                  </p>
+                  <p className="text-xs text-muted">
+                    {item.intern?.user?.email || ""}
+                  </p>
+                </div>
 
-              {/* Breakdown Scores */}
-              <div className="text-sm">
-                <div className="flex flex-wrap gap-2">
-                  <span className="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300">
-                    Giao tiếp: <strong className="text-primary-light">{item.communication}</strong>
+                {/* Week + Date */}
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-semibold text-foreground text-sm">Tuần {item.week}</span>
+                  <span className="text-[11px] text-muted">{createdDate}</span>
+                </div>
+
+                {/* Score + Rating Badge */}
+                <div className="flex flex-col gap-1.5 items-start">
+                  <span className="text-sm font-extrabold text-foreground">
+                    {item.totalScore.toFixed(1)} / 10
                   </span>
-                  <span className="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300">
-                    Thái độ: <strong className="text-primary-light">{item.attitude}</strong>
-                  </span>
-                  <span className="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300">
-                    Tự học: <strong className="text-primary-light">{item.learning}</strong>
-                  </span>
-                  <span className="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300">
-                    Coding: <strong className="text-primary-light">{item.coding}</strong>
+                  <span className={`inline-flex items-center justify-center text-[10px] font-semibold px-2.5 py-0.5 rounded-lg border leading-none ${RATING_COLORS[level]}`}>
+                    {RATING_LABELS[level]}
                   </span>
                 </div>
-              </div>
 
-              {/* Total Score */}
-              <div className="font-bold text-base text-emerald-400">
-                {item.totalScore.toFixed(1)} / 10
-              </div>
+                {/* AI Status */}
+                <div className="flex justify-center">
+                  {item.aiComment ? (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg border text-emerald-400 border-emerald-500/30 bg-emerald-500/10">
+                      <Bot className="h-3 w-3" />
+                      AI
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg border text-slate-500 border-white/10 bg-white/5">
+                      <Bot className="h-3 w-3" />
+                      Chưa
+                    </span>
+                  )}
+                </div>
 
-              {/* Actions */}
-              <div className="flex items-center justify-center gap-2">
-                <Link href={`/leader/weekly-evaluation/${item.id}`}>
-                  <Button variant="glass" size="sm" className="flex items-center gap-1">
-                    <Eye className="h-3.5 w-3.5" />
-                    <span>Xem</span>
+                {/* Actions */}
+                <div className="flex items-center justify-center gap-2">
+                  <Link href={`/leader/weekly-evaluation/${item.id}`}>
+                    <Button variant="glass" size="sm" className="flex items-center gap-1">
+                      <Eye className="h-3.5 w-3.5" />
+                      <span>Xem</span>
+                    </Button>
+                  </Link>
+
+                  <WeeklyEvaluationExportButton id={item.id} />
+
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => handleDelete(item.id)}
+                    disabled={deleteEvaluation.isPending}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
                   </Button>
-                </Link>
-
-                <WeeklyEvaluationExportButton id={item.id} />
-
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => handleDelete(item.id)}
-                  disabled={deleteEvaluation.isPending}
-                  className="flex items-center gap-1"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            </Table.Row>
-          )}
+                </div>
+              </Table.Row>
+            );
+          }}
         />
 
         {/* Pagination Footer */}
@@ -161,6 +210,6 @@ export default function WeeklyEvaluationList() {
           </Table.Footer>
         )}
       </Table>
-    </div>
+    </MetalCard>
   );
 }
