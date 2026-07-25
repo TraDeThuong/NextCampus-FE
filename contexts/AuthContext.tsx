@@ -4,6 +4,7 @@ import axios from "axios";
 import { createContext, useReducer, useEffect, useCallback, type ReactNode } from "react";
 import { setAccessToken, clearAccessToken } from "@/lib/token";
 import { authService } from "@/services/auth.service";
+import { queryClient } from "@/lib/query-client";
 import type { LoginUser, AuthTokens } from "@/types/auth";
 
 interface AuthState {
@@ -81,6 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Store accessToken in memory and update auth state after a successful login.
     const login = useCallback((token: AuthTokens, user: LoginUser) => {
+        queryClient.clear();
         dispatch({ type: "LOGIN", token, user });
     }, []);
 
@@ -89,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
             await authService.logout();
         } finally {
+            queryClient.clear();
             dispatch({ type: "LOGOUT" });
         }
     }, []);
