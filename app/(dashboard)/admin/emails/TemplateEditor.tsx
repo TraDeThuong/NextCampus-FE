@@ -65,17 +65,17 @@ function interpolatePreview(template: string): string {
   let processed = template;
 
   // 1. Replace variables inside href="..." or href='...' raw, to avoid breaking HTML syntax
-  processed = processed.replace(/(href=["'])(.*?)(["'])/gi, (match, prefix, content, suffix) => {
-    const cleanContent = content.replace(/\{\{(\w+)\}\}/g, (_, key) => {
-      return SAMPLE_VALUES[key] !== undefined ? SAMPLE_VALUES[key] : "#";
+  processed = processed.replace(/(href=["'])(.*?)(["'])/gi, (match: string, prefix: string, content: string, suffix: string) => {
+    const cleanContent = content.replace(/\{\{(\w+)\}\}/g, (_: string, key: string) => {
+      return (SAMPLE_VALUES as Record<string, string>)[key] !== undefined ? (SAMPLE_VALUES as Record<string, string>)[key] : "#";
     });
     return prefix + cleanContent + suffix;
   });
 
   // 2. Wrap remaining variables outside href attributes with styled <mark> tags
-  processed = processed.replace(/\{\{(\w+)\}\}/g, (_, key) => {
-    return SAMPLE_VALUES[key] !== undefined
-      ? `<mark class="bg-cyan-500/20 text-cyan-300 rounded px-0.5 font-mono">${SAMPLE_VALUES[key]}</mark>`
+  processed = processed.replace(/\{\{(\w+)\}\}/g, (_: string, key: string) => {
+    return (SAMPLE_VALUES as Record<string, string>)[key] !== undefined
+      ? `<mark class="bg-cyan-500/20 text-cyan-300 rounded px-0.5 font-mono">${(SAMPLE_VALUES as Record<string, string>)[key]}</mark>`
       : `<span class="text-red-400 font-mono">{{${key}}}</span>`;
   });
 

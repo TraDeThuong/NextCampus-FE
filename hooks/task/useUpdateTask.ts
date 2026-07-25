@@ -14,7 +14,7 @@ export function useUpdateTask() {
 
     onSuccess: (_data, variables) => {
       toast.success("Task updated successfully.");
-      queryClient.invalidateQueries({ queryKey: ["tasks"] }, { exact: false });
+      queryClient.invalidateQueries({ queryKey: ["tasks"], exact: false });
       queryClient.invalidateQueries({ queryKey: ["task", variables.id] });
     },
 

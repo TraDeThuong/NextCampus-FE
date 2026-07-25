@@ -95,7 +95,7 @@ function SecurityAlertContent() {
                   </Button>
                 </Link>
                 <Link href="/login" className="w-full">
-                  <Button variant="outline" className="w-full justify-center">
+                  <Button variant="glass" className="w-full justify-center">
                     Quay lại trang Đăng nhập
                   </Button>
                 </Link>
@@ -121,7 +121,7 @@ function SecurityAlertContent() {
                   </Button>
                 </Link>
                 <Link href="/login" className="w-full">
-                  <Button variant="outline" className="w-full justify-center">
+                  <Button variant="glass" className="w-full justify-center">
                     Trở về Đăng nhập
                   </Button>
                 </Link>

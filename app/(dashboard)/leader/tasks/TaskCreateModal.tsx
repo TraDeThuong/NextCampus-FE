@@ -288,7 +288,7 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
       }
 
       // refetch tasks so attachments appear without page reload
-      queryClient.invalidateQueries({ queryKey: ["tasks"] }, { exact: false });
+      queryClient.invalidateQueries({ queryKey: ["tasks"], exact: false });
 
       // assign task to intern if selected
       console.log("[TaskCreateModal] Assign:", { assignMode, selectedInternId });
