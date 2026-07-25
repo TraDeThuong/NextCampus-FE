@@ -12,7 +12,7 @@ export function useDeleteTask() {
 
     onSuccess: () => {
       toast.success("Task deleted successfully.");
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks"] }, { exact: false });
     },
 
     onError: () => {

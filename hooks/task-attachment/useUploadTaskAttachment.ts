@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import axios from "axios";
 import { taskAttachmentService } from "@/services/task-attachment.service";
 
 export function useUploadTaskAttachment() {
@@ -18,8 +19,12 @@ export function useUploadTaskAttachment() {
       });
     },
 
-    onError: () => {
-      toast.error("Failed to upload attachment.");
+    onError: (error) => {
+      const message =
+        axios.isAxiosError(error) && error.response?.data?.message
+          ? error.response.data.message
+          : "Failed to upload attachment.";
+      toast.error(message);
     },
   });
 }

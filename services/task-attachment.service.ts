@@ -35,6 +35,21 @@ export const taskAttachmentService = {
     return response.data;
   },
 
+  // POST /tasks/:taskId/attachments (batch — uploads up to 5 files)
+  uploadMultiple: async (
+    taskId: string,
+    files: File[],
+  ): Promise<TaskAttachmentListResponse & { failedCount: number }> => {
+    const formData = new FormData();
+    files.forEach((f) => formData.append("file", f));
+    const response = await api.post<
+      TaskAttachmentListResponse & { failedCount: number }
+    >(`/tasks/${taskId}/attachments`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data;
+  },
+
   // DELETE /tasks/:taskId/attachments/:attachmentId
   deleteTaskAttachment: async (
     taskId: string,

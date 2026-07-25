@@ -18,9 +18,8 @@ export function useDeleteTaskAttachment() {
 
     onSuccess: (_data, variables) => {
       toast.success("Attachment deleted successfully.");
-      queryClient.invalidateQueries({
-        queryKey: ["task-attachments", variables.taskId],
-      });
+      queryClient.invalidateQueries({ queryKey: ["task-attachments", variables.taskId] });
+      queryClient.invalidateQueries({ queryKey: ["tasks"] }, { exact: false });
     },
 
     onError: () => {

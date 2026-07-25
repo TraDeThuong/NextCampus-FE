@@ -20,7 +20,7 @@ export function useExecuteImport() {
 
     onSuccess: () => {
       toast.success("Tasks imported successfully.");
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks"] }, { exact: false });
     },
 
     onError: () => {
