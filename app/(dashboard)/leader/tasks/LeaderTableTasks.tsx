@@ -173,16 +173,17 @@ export default function LeaderTableTasks() {
               <div className="flex justify-center py-12"><Spinner /></div>
             ) : tasks.length > 0 ? (
               <div className="overflow-x-auto">
-                <Table columns="100px 240px 140px 90px 110px 120px 130px 100px 80px 120px 200px 60px 50px" className="min-w-[2000px]">
+                <Table columns="100px 240px 140px 140px 90px 110px 120px 130px 100px 80px 120px 200px 180px 200px 60px 50px" className="min-w-[2400px]">
                   <Table.Header>
-                    <div>Code</div><div>Title</div><div>Owner</div><div>Priority</div><div>Status</div>
-                    <div>Deadline</div><div>Phase</div><div>Module</div><div>Est Days</div><div>Start Date</div><div>Description</div><div>Att</div><div></div>
+                    <div>Code</div><div>Title</div><div>Owner</div><div>Support</div><div>Priority</div><div>Status</div>
+                    <div>Deadline</div><div>Phase</div><div>Module</div><div>Est Days</div><div>Start Date</div><div>Description</div><div>Dependency</div><div>Acceptance Criteria</div><div>Att</div><div></div>
                   </Table.Header>
                   <Table.Body data={tasks} render={(task) => (
                     <Table.Row key={task.id}>
                       <div className="font-mono text-xs text-muted">{task.code ?? "—"}</div>
                       <div className="truncate text-sm">{task.title}</div>
                       <div className="text-sm text-muted">{task.assignment?.intern?.fullName ?? "—"}</div>
+                      <div className="text-sm text-muted">{task.assignment?.support?.fullName ?? "—"}</div>
                       <div><PriorityBadge priority={task.priority} /></div>
                       <div><StatusBadge status={task.assignment?.status ?? "—"} /></div>
                       <div className="text-sm text-muted">{new Date(task.deadline).toLocaleDateString("vi-VN")}</div>
@@ -191,6 +192,12 @@ export default function LeaderTableTasks() {
                       <div className="text-sm text-muted">{task.estDays ?? "—"}</div>
                       <div className="text-sm text-muted">{task.startDate ? new Date(task.startDate).toLocaleDateString("vi-VN") : "—"}</div>
                       <div className="truncate text-xs text-muted">{task.description ?? "—"}</div>
+                      <div className="truncate text-xs text-muted">
+                        {task.dependsOn && task.dependsOn.length > 0
+                          ? task.dependsOn.map((d) => d.code ?? d.title).join(", ")
+                          : "—"}
+                      </div>
+                      <div className="truncate text-xs text-muted">{task.acceptanceCriteria ?? "—"}</div>
                       <div className="text-center text-sm text-muted">
                         {task.attachments?.length > 0 ? (
                           <button onClick={() => setAttachPopover({ taskId: task.id, taskTitle: task.title })} className="flex items-center gap-1 rounded-lg px-1.5 py-0.5 text-primary-light hover:bg-primary-main/10">

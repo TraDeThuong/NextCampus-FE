@@ -24,6 +24,7 @@ export interface TaskAssignmentSummary {
   assignedAt: string;
   updatedAt: string;
   intern?: { id: string; fullName: string };
+  support?: { id: string; fullName: string } | null;
 }
 
 export interface TaskAttachmentSummary {
