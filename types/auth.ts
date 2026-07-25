@@ -51,6 +51,13 @@ export interface MeNotificationSetting {
     discordEnabled: boolean;
 }
 
+export interface MeLeader {
+    id: string;
+    phone: string | null;
+    position: string | null;
+    department: { id: string; name: string } | null;
+}
+
 export interface MeUser {
     id: string;
     email: string;
@@ -61,6 +68,7 @@ export interface MeUser {
     createdAt: string;
     updatedAt: string;
     intern: MeIntern | null;
+    leader: MeLeader | null;
     notificationSetting: MeNotificationSetting | null;
 }
 

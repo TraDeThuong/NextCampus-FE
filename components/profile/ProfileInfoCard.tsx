@@ -8,6 +8,9 @@ import {
     Calendar,
     User,
     Fingerprint,
+    Building,
+    Briefcase,
+    Phone,
 } from "lucide-react";
 
 import { useUpdateProfile } from "@/hooks/profile/useUpdateProfile";
@@ -132,6 +135,26 @@ export default function ProfileInfoCard({
                             label="Created at"
                             value={createdAt}
                         />
+
+                        {profile.role === "LEADER" && profile.leader && (
+                            <>
+                                <ReadonlyField
+                                    icon={<Building className="h-4 w-4" />}
+                                    label="Department"
+                                    value={profile.leader.department?.name ?? "Not set"}
+                                />
+                                <ReadonlyField
+                                    icon={<Briefcase className="h-4 w-4" />}
+                                    label="Position"
+                                    value={profile.leader.position ?? "Not set"}
+                                />
+                                <ReadonlyField
+                                    icon={<Phone className="h-4 w-4" />}
+                                    label="Phone Number"
+                                    value={profile.leader.phone ?? "Not set"}
+                                />
+                            </>
+                        )}
                     </div>
 
                     {
