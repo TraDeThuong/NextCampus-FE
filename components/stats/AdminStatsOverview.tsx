@@ -73,7 +73,8 @@ export default function AdminStatsOverview() {
   const systemCompletionRate = stats.systemCompletionRate ?? 0;
 
   const allAssignments = stats.recentAssignments ?? [];
-  const overdueAssignments = stats.overdueAssignments ?? [];
+  const rawOverdue = stats.overdueAssignments ?? [];
+  const overdueAssignments = rawOverdue.filter((a) => a.isOverdue);
   const leaderTeams = stats.leaderTeams ?? [];
   const recentActivities = stats.recentActivities ?? [];
 
@@ -93,7 +94,7 @@ export default function AdminStatsOverview() {
   const handleOpenOverdueModal = () => {
     setModalConfig({
       isOpen: true,
-      title: "Danh Sách Tất Cả Task Quá Hạn Toàn Hệ Thống",
+      title: `Danh Sách Tất Cả Task Quá Hạn Toàn Hệ Thống (${overdueAssignments.length})`,
       assignments: overdueAssignments,
     });
   };

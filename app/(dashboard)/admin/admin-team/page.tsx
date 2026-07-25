@@ -1,23 +1,15 @@
-// Header:
-// Title: Admin Team
-// Description: Manage administrators in your organization.
-// Button: Invite Admin (tuong tu giong leader)
+import AdminTeamHeader from "./AdminTeamHeader";
+import AdminTeamStats from "./AdminTeamStats";
+import AdminTeamFilter from "./AdminTeamFilter";
+import AdminTeamTable from "./AdminTeamTable";
 
-// Table 
-// Filter 
-// Admin 
-
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Quản trị hệ thống",
-};
-
-export default function page() {
-  return (
-    <div>
-      Admin Team 
-    </div>
-  );
+export default function AdminTeamPage() {
+    return (
+        <div className="space-y-6">
+            <AdminTeamHeader />
+            <AdminTeamStats />
+            <AdminTeamFilter />
+            <AdminTeamTable />
+        </div>
+    );
 }
-

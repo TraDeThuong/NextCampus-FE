@@ -1,6 +1,7 @@
 import AdminSidebar from "@/components/layout/AdminSidebar";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import PrefetchProvider from "@/providers/PrefetchProvider";
 
 export default function Layout({
     children,
@@ -10,6 +11,7 @@ export default function Layout({
     return (
         <ProtectedRoute allowedRoles={["ADMIN"]}>
             <DashboardLayout sidebar={<AdminSidebar/>}>
+                <PrefetchProvider role="ADMIN" />
                 {children}
             </DashboardLayout>
         </ProtectedRoute>

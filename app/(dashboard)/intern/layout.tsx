@@ -1,6 +1,7 @@
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import InternSidebar from "@/components/layout/InternSidebar";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import PrefetchProvider from "@/providers/PrefetchProvider";
 
 export default function Layout({
     children,
@@ -10,6 +11,7 @@ export default function Layout({
     return (
         <ProtectedRoute allowedRoles={["INTERN"]}>
             <DashboardLayout sidebar={<InternSidebar />}>
+                <PrefetchProvider role="INTERN" />
                 {children}
             </DashboardLayout>
         </ProtectedRoute>

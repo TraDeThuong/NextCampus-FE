@@ -12,6 +12,7 @@ import {
   Search,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
+import Spinner from "@/components/ui/Spinner";
 import { TEMPLATE_CATALOG } from "./TemplateSidebar";
 import { notificationService } from "@/services/notification.service";
 import { getUsersService } from "@/services/user.service";
@@ -193,7 +194,7 @@ export default function SendNotificationTab() {
             />
             <div className="absolute right-3 top-3.5 text-slate-500">
               {searching ? (
-                <div className="h-4 w-4 animate-spin rounded-full border border-t-transparent border-slate-500" />
+                <Spinner size="sm" />
               ) : (
                 <Search className="h-4 w-4" />
               )}
@@ -386,7 +387,7 @@ export default function SendNotificationTab() {
             className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-medium shadow-[0_4px_20px_rgba(6,182,212,0.25)] rounded-xl px-5 py-2.5 disabled:opacity-50"
           >
             {sending ? (
-              <div className="h-4 w-4 animate-spin rounded-full border border-t-transparent border-white" />
+              <Spinner size="sm" />
             ) : (
               <Send className="h-4 w-4 mr-2" />
             )}

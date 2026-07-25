@@ -57,7 +57,8 @@ export default function LeaderStatsOverview() {
 
   const stats = response.data;
   const allAssignments = stats.recentAssignments ?? [];
-  const overdueAssignments = stats.overdueAssignments ?? [];
+  const rawOverdue = stats.overdueAssignments ?? [];
+  const overdueAssignments = rawOverdue.filter((a) => a.isOverdue);
   const internProgress = stats.internProgress ?? [];
 
   const handleOpenStatusModal = (statusKey: string, statusTitle: string) => {
@@ -72,7 +73,7 @@ export default function LeaderStatsOverview() {
   const handleOpenOverdueModal = () => {
     setModalConfig({
       isOpen: true,
-      title: "Danh Sách Task Quá Hạn Của Nhóm",
+      title: `Danh Sách Task Quá Hạn Của Nhóm (${overdueAssignments.length})`,
       assignments: overdueAssignments,
     });
   };
@@ -130,7 +131,7 @@ export default function LeaderStatsOverview() {
           value={overdueAssignments.length}
           subtitle="Các task trễ deadline"
           icon={<ShieldAlert className="h-6 w-6 text-rose-400" />}
-          href="/leader/tasks"
+          onCardClick={handleOpenOverdueModal}
           trend={{
             text: overdueAssignments.length > 0 ? "Cần nhắc nhở TTS" : "Đúng tiến độ",
             positive: overdueAssignments.length === 0,

@@ -1,17 +1,21 @@
 
 import type { Metadata } from "next";
+import LeaderTaskHeader from "./LeaderTaskHeader";
+import LeaderTaskStats from "./LeaderTaskStats";
+import LeaderTaskFilters from "./LeaderTaskFilters";
+import LeaderTableTasks from "./LeaderTableTasks";
 
 export const metadata: Metadata = {
-  title: "Quản lý công việc",
+  title: "Task Management",
 };
 
 export default function page() {
   return (
-    <div>
-      <h1> Task management </h1>
-      <p> Create task </p>
-      <p> Table: Tat ca task trong tuan </p>
-      <p> Gui mail thong bao task tu dong </p>
+    <div className="space-y-6">
+      <LeaderTaskHeader />
+      <LeaderTaskStats />
+      <LeaderTaskFilters />
+      <LeaderTableTasks/>
     </div>
   );
 }
