@@ -173,7 +173,7 @@ export default function LeaderTableTasks() {
               <div className="flex justify-center py-12"><Spinner /></div>
             ) : tasks.length > 0 ? (
               <div className="overflow-x-auto">
-                <Table columns="100px 240px 140px 140px 90px 110px 120px 130px 100px 80px 120px 200px 180px 200px 60px 50px" className="min-w-[2400px]">
+                <Table columns="100px 240px 140px 140px 90px 110px 120px 130px 100px 80px 120px 200px 180px 200px 60px 50px" className="min-w-[2700px]">
                   <Table.Header>
                     <div>Code</div><div>Title</div><div>Owner</div><div>Support</div><div>Priority</div><div>Status</div>
                     <div>Deadline</div><div>Phase</div><div>Module</div><div>Est Days</div><div>Start Date</div><div>Description</div><div>Dependency</div><div>Acceptance Criteria</div><div>Att</div><div></div>
@@ -185,7 +185,7 @@ export default function LeaderTableTasks() {
                       <div className="text-sm text-muted">{task.assignment?.intern?.fullName ?? "—"}</div>
                       <div className="text-sm text-muted">{task.assignment?.support?.fullName ?? "—"}</div>
                       <div><PriorityBadge priority={task.priority} /></div>
-                      <div><StatusBadge status={task.assignment?.status ?? "—"} /></div>
+                      <div><StatusBadge status={task.assignment?.status ?? "UNASSIGNED"} /></div>
                       <div className="text-sm text-muted">{new Date(task.deadline).toLocaleDateString("vi-VN")}</div>
                       <div className="text-sm text-muted">{task.phase ?? "—"}</div>
                       <div className="text-sm text-muted">{task.module ?? "—"}</div>
@@ -417,7 +417,7 @@ function ViewGroup({ groupId }: { groupId: string }) {
                 <span className="font-mono text-xs text-muted">{t.code ?? "—"}</span>
                 <span className="flex-1 truncate text-foreground">{t.title}</span>
                 <PriorityBadge priority={t.priority} />
-                <StatusBadge status={t.assignment?.status ?? "—"} />
+                <StatusBadge status={t.assignment?.status ?? "UNASSIGNED"} />
               </div>
             ))}
           </div>
@@ -593,7 +593,7 @@ function PriorityBadge({ priority }: { priority: string }) {
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const colors: Record<string, string> = { DONE: "bg-emerald-500/10 text-emerald-400", IN_PROGRESS: "bg-blue-500/10 text-blue-400", REVIEW: "bg-purple-500/10 text-purple-400", TODO: "bg-white/5 text-muted", BLOCKED: "bg-red-500/10 text-red-400", PENDING_APPROVAL: "bg-amber-500/10 text-amber-400" };
+  const colors: Record<string, string> = { DONE: "bg-emerald-500/10 text-emerald-400", IN_PROGRESS: "bg-blue-500/10 text-blue-400", REVIEW: "bg-purple-500/10 text-purple-400", TODO: "bg-white/5 text-muted", BLOCKED: "bg-red-500/10 text-red-400", PENDING_APPROVAL: "bg-amber-500/10 text-amber-400", UNASSIGNED: "bg-orange-500/10 text-orange-400" };
   return <span className={`inline-flex rounded-lg px-2 py-0.5 text-xs ${colors[status] ?? "bg-white/5 text-muted"}`}>{status.replace("_", " ")}</span>;
 }
 
