@@ -8,7 +8,8 @@ import {
   Rocket,
   MessageCircle,
   FileText,
-  UserRoundPen
+  UserRoundPen,
+  History
 } from "lucide-react";
 import { PiBuildingOfficeLight } from "react-icons/pi";
 import { MdManageAccounts } from "react-icons/md";
@@ -25,6 +26,7 @@ const menus = [
   { name: "Policies", href: "/admin/policies", icon: FileText },
   { name: "Mails", href: "/admin/emails", icon: MdOutlineMailOutline},
   { name: "Department", href: "/admin/department", icon: PiBuildingOfficeLight},
+  { name: "Activity Logs", href: "/admin/activity-logs", icon: History },
   { name: "Profile", href: "/admin/profile", icon: UserRoundPen},
 ];
 
