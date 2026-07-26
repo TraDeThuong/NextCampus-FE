@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useContext } from "react";
 import { createPortal } from "react-dom";
-import { Layers, MoreHorizontal, Eye, Pencil, Trash2, Loader2, Paperclip, FileText, Film, FileArchive, ImageIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { Layers, MoreHorizontal, Eye, Pencil, Trash2, Loader2, Paperclip, FileText, Film, FileArchive, ImageIcon, ChevronLeft, ChevronRight, Check, ChevronDown, UserPlus, UserX } from "lucide-react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
@@ -17,8 +17,14 @@ import { useTasks } from "@/hooks/task/useTasks";
 import { useDeleteTask } from "@/hooks/task/useDeleteTask";
 import { useTaskAttachments } from "@/hooks/task-attachment/useTaskAttachments";
 import { useDeleteTaskAttachment } from "@/hooks/task-attachment/useDeleteTaskAttachment";
+import { useInterns } from "@/hooks/intern/useInterns";
+import { useCreateTaskAssignment } from "@/hooks/task-assignment/useCreateTaskAssignment";
+import { useUpdateTaskAssignment } from "@/hooks/task-assignment/useUpdateTaskAssignment";
+import { useDeleteTaskAssignment } from "@/hooks/task-assignment/useDeleteTaskAssignment";
+import { AuthContext } from "@/contexts/AuthContext";
 import TaskEditModal from "./TaskEditModal";
 import { useForm } from "react-hook-form";
+import { useQueryClient } from "@tanstack/react-query";
 import type { UpdateTaskGroupPayload } from "@/types/task-group";
 import type { TaskQueryParams } from "@/types/task";
 
@@ -71,6 +77,8 @@ export default function LeaderTableTasks() {
     const deadlineTo = searchParams.get("deadlineTo");
     const page = searchParams.get("page");
     const limit = searchParams.get("limit");
+    const sortBy = searchParams.get("sortBy");
+    const order = searchParams.get("order");
 
     if (title) p.title = title;
     if (priority) p.priority = priority as TaskQueryParams["priority"];
@@ -82,6 +90,8 @@ export default function LeaderTableTasks() {
     if (taskGroupId) p.taskGroupId = taskGroupId;
     if (page) p.page = Number(page);
     p.limit = limit ? Number(limit) : 20;
+    if (sortBy) p.sortBy = sortBy as TaskQueryParams["sortBy"];
+    if (order) p.order = order as TaskQueryParams["order"];
 
     return p;
   }, [searchParams, taskGroupId]);
@@ -182,7 +192,7 @@ export default function LeaderTableTasks() {
                     <Table.Row key={task.id}>
                       <div className="font-mono text-xs text-muted">{task.code ?? "—"}</div>
                       <div className="truncate text-sm">{task.title}</div>
-                      <div className="text-sm text-muted">{task.assignment?.intern?.fullName ?? "—"}</div>
+                      <InlineAssignCell taskId={task.id} assignment={task.assignment} />
                       <div><PriorityBadge priority={task.priority} /></div>
                       <div><StatusBadge status={task.assignment?.status ?? "—"} /></div>
                       <div className="text-sm text-muted">{new Date(task.deadline).toLocaleDateString("vi-VN")}</div>
@@ -574,6 +584,164 @@ function DeleteTaskConfirm({
         <Button variant="glass" onClick={onClose} disabled={deleteTask.isPending}>Cancel</Button>
         <Button variant="danger" isLoading={deleteTask.isPending} onClick={handleDelete}>Delete Task</Button>
       </div>
+    </div>
+  );
+}
+
+/* ─── Inline Assign Cell ──────────────────────────────────── */
+
+function InlineAssignCell({
+  taskId,
+  assignment,
+}: {
+  taskId: string;
+  assignment: { id: string; internId: string; intern?: { id: string; fullName: string } } | null;
+}) {
+  const queryClient = useQueryClient();
+  const auth = useContext(AuthContext);
+  const currentUserId = auth?.state.user?.id;
+  const [open, setOpen] = useState(false);
+  const cellRef = useRef<HTMLDivElement>(null);
+
+  const { data: myInternsData } = useInterns({ leaderId: currentUserId });
+  const { data: allInternsData } = useInterns();
+  const myInterns = myInternsData?.data ?? [];
+  const otherInterns = (allInternsData?.data ?? []).filter((i) => i.leaderId !== currentUserId);
+
+  const createAssignment = useCreateTaskAssignment();
+  const updateAssignment = useUpdateTaskAssignment();
+  const deleteAssignment = useDeleteTaskAssignment();
+
+  const isPending = createAssignment.isPending || updateAssignment.isPending || deleteAssignment.isPending;
+  const currentInternId = assignment?.internId ?? null;
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (cellRef.current && !cellRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    if (open) document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  async function handleAssign(internId: string) {
+    console.log("[InlineAssignCell] handleAssign", { taskId, internId, hasAssignment: !!assignment, assignmentId: assignment?.id });
+    try {
+      if (assignment?.id) {
+        await updateAssignment.mutateAsync({ id: assignment.id, payload: { internId } });
+      } else {
+        await createAssignment.mutateAsync({ taskId, internId });
+      }
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    } catch {
+      // error toast handled by mutation hooks
+    }
+    setOpen(false);
+  }
+
+  async function handleUnassign() {
+    if (!assignment) return;
+    try {
+      await deleteAssignment.mutateAsync(assignment.id);
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    } catch {
+      // error toast handled by mutation hooks
+    }
+    setOpen(false);
+  }
+
+  const assigneeName = assignment?.intern?.fullName;
+
+  return (
+    <div ref={cellRef} className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        disabled={isPending}
+        className={`flex w-full items-center gap-1 rounded-lg px-2 py-1 text-sm transition hover:bg-white/5 disabled:opacity-50 ${
+          assigneeName ? "text-foreground" : "text-muted"
+        }`}
+      >
+        {isPending ? (
+          <Loader2 className="h-3 w-3 animate-spin shrink-0" />
+        ) : assigneeName ? (
+          <span className="truncate">{assigneeName}</span>
+        ) : (
+          <span className="flex items-center gap-1">
+            <UserPlus className="h-3 w-3" />
+            Assign
+          </span>
+        )}
+        <ChevronDown className="h-3 w-3 shrink-0 text-muted" />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-full z-50 mt-1 w-56 rounded-xl border border-border bg-[#1a1d2e] p-1 shadow-lg">
+          {/* My Team */}
+          {myInterns.length > 0 && (
+            <>
+              <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted">
+                My Team
+              </div>
+              {myInterns.map((intern) => (
+                <button
+                  key={intern.id}
+                  onClick={() => handleAssign(intern.id)}
+                  disabled={isPending}
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-foreground hover:bg-white/5 transition disabled:opacity-50"
+                >
+                  <span className="truncate flex-1 text-left">{intern.fullName}</span>
+                  {currentInternId === intern.id && (
+                    <Check className="h-3.5 w-3.5 shrink-0 text-primary-light" />
+                  )}
+                </button>
+              ))}
+            </>
+          )}
+
+          {/* Other Teams */}
+          {otherInterns.length > 0 && (
+            <>
+              <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted mt-0.5">
+                Other Teams
+              </div>
+              {otherInterns.map((intern) => (
+                <button
+                  key={intern.id}
+                  onClick={() => handleAssign(intern.id)}
+                  disabled={isPending}
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-foreground hover:bg-white/5 transition disabled:opacity-50"
+                >
+                  <span className="truncate flex-1 text-left">
+                    {intern.fullName}
+                    {intern.leader?.fullName && (
+                      <span className="ml-1 text-xs text-muted">({intern.leader.fullName})</span>
+                    )}
+                  </span>
+                  {currentInternId === intern.id && (
+                    <Check className="h-3.5 w-3.5 shrink-0 text-primary-light" />
+                  )}
+                </button>
+              ))}
+            </>
+          )}
+
+          {/* Unassign */}
+          {assignment && (
+            <>
+              <div className="my-0.5 border-t border-border" />
+              <button
+                onClick={handleUnassign}
+                disabled={isPending}
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-red-400 hover:bg-red-500/10 transition disabled:opacity-50"
+              >
+                <UserX className="h-3.5 w-3.5" />
+                Unassign
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }
