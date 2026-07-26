@@ -17,8 +17,10 @@ export function useCreateTaskSubmission() {
       queryClient.invalidateQueries({ queryKey: ["task-submissions"] });
     },
 
-    onError: () => {
-      toast.error("Failed to create submission.");
+    onError: (error) => {
+      const message =
+        (error as any)?.response?.data?.message ?? "Failed to create submission.";
+      toast.error(message);
     },
   });
 }
