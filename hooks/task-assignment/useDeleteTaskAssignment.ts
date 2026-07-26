@@ -12,7 +12,8 @@ export function useDeleteTaskAssignment() {
 
     onSuccess: () => {
       toast.success("Assignment deleted successfully.");
-      queryClient.invalidateQueries({ queryKey: ["task-assignments"] });
+      queryClient.invalidateQueries({ queryKey: ["task-assignments"] }, { exact: false });
+      queryClient.invalidateQueries({ queryKey: ["stats"] }, { exact: false });
     },
 
     onError: () => {

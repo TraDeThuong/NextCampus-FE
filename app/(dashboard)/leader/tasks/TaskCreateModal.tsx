@@ -235,12 +235,15 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
         if (selectedInternId) {
           try {
             await createAssignment.mutateAsync({ taskId, internId: selectedInternId });
-          } catch {
+          } catch (err) {
+            console.error("[TaskCreateModal] Failed to create assignment:", err);
             // error toast handled by useCreateTaskAssignment
           }
         }
+        queryClient.invalidateQueries({ queryKey: ["tasks"] });
         reset();
         setStep(1);
+        submittingRef.current = false;
         onCloseModal?.();
         return;
       }
@@ -314,6 +317,9 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
         }
       }
 
+      // ensure tasks refetch with assignment data
+      queryClient.invalidateQueries({ queryKey: ["tasks"] }, { exact: false });
+
       // brief delay so user sees final status before reset
       setTimeout(() => {
         reset();
@@ -323,6 +329,7 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
         setFileStatuses({});
         setLinkStatuses({});
         setIsUploading(false);
+        submittingRef.current = false;
         onCloseModal?.();
       }, 800);
     } catch {

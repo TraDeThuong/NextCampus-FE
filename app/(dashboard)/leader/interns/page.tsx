@@ -1,16 +1,20 @@
 import type { Metadata } from "next";
+import LeaderInternHeader from "./LeaderInternHeader";
+import LeaderInternStats from "./LeaderInternStats";
+import LeaderInternFilters from "./LeaderInternFilters";
+import LeaderInternTable from "./LeaderInternTable";
 
 export const metadata: Metadata = {
-  title: "Thực tập sinh nhóm",
+  title: "My Interns",
 };
 
-export default function page() {
+export default function LeaderInternsPage() {
   return (
-    <div>
-      <h1> INTERN </h1>
-      <p> Bang de xem danh sach Intern: name, email, task,..... </p>
-      <p> Xem chi tiet Intern, theo ID, tao route  </p>
+    <div className="space-y-6">
+      <LeaderInternHeader />
+      <LeaderInternStats />
+      <LeaderInternFilters />
+      <LeaderInternTable />
     </div>
   );
 }
-

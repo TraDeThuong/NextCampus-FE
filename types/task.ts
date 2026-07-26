@@ -70,6 +70,8 @@ export interface Task {
   attachments: TaskAttachmentSummary[];
   dependsOn: TaskDependency[];
   dependencies: TaskDependency[];
+  recreatedTaskId: string | null;
+  recreatedTask: { id: string; title: string; code: string | null; assignment: { intern: { fullName: string } } | null } | null;
 }
 
 // ─── Response wrappers ────────────────────────────────────────────────────
@@ -144,6 +146,7 @@ export interface UpdateTaskPayload {
   acceptanceCriteria?: string | null;
   taskNotes?: string | null;
   taskGroupId?: string | null;
+  recreatedTaskId?: string | null;
 }
 
 // ─── Bulk Import ──────────────────────────────────────────────────────────

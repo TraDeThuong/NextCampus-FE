@@ -633,7 +633,8 @@ function InlineAssignCell({
       } else {
         await createAssignment.mutateAsync({ taskId, internId });
       }
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks"] }, { exact: false });
+      queryClient.invalidateQueries({ queryKey: ["stats"] }, { exact: false });
     } catch {
       // error toast handled by mutation hooks
     }
@@ -644,7 +645,8 @@ function InlineAssignCell({
     if (!assignment) return;
     try {
       await deleteAssignment.mutateAsync(assignment.id);
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks"] }, { exact: false });
+      queryClient.invalidateQueries({ queryKey: ["stats"] }, { exact: false });
     } catch {
       // error toast handled by mutation hooks
     }
