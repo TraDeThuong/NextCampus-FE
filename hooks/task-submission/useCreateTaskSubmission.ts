@@ -15,6 +15,7 @@ export function useCreateTaskSubmission() {
     onSuccess: () => {
       toast.success("Submission created successfully.");
       queryClient.invalidateQueries({ queryKey: ["task-submissions"] });
+      queryClient.invalidateQueries({ queryKey: ["task-assignments"] });
     },
 
     onError: (error) => {

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { FileText, Calendar, User, Layers, Link, ChevronRight, Clock, Send, Pencil, Video } from "lucide-react";
+import { FileText, Calendar, User, Layers, Link, ChevronRight, Clock, Send, Pencil, Video, Play, Loader2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useTaskAssignments } from "@/hooks/task-assignment/useTaskAssignments";
+import { useUpdateTaskAssignment } from "@/hooks/task-assignment/useUpdateTaskAssignment";
 import { useTask } from "@/hooks/task/useTask";
 import { useTaskSubmissions } from "@/hooks/task-submission/useTaskSubmissions";
 import type { TaskAssignment } from "@/types/task-assignment";
@@ -243,6 +244,7 @@ function TaskDetailPanel({
   onEditSubmission: (sub: TaskSubmission) => void;
 }) {
   const basicTask = task ?? assignment?.task;
+  const updateAssignment = useUpdateTaskAssignment();
   const { data: submissionsData } = useTaskSubmissions(
     assignment ? { assignmentId: assignment.id, limit: 20, sortBy: "attempt", order: "desc" } : undefined,
   );
@@ -285,6 +287,32 @@ function TaskDetailPanel({
         </div>
         <h3 className="text-xl font-bold tracking-tight text-white">{basicTask.title}</h3>
       </div>
+
+      {/* Status Actions */}
+      {assignment && (assignment.status === "TODO" || assignment.status === "BLOCKED") && (
+        <div className="flex items-center gap-3 rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-3">
+          <Play className="h-4 w-4 text-cyan-400" />
+          <span className="text-xs text-cyan-300 flex-1">
+            {assignment.status === "TODO"
+              ? "Ready to start? Mark this task as In Progress."
+              : "Task is blocked. Unblock to continue working."}
+          </span>
+          <button
+            onClick={() =>
+              updateAssignment.mutate({ id: assignment.id, payload: { status: "IN_PROGRESS" } })
+            }
+            disabled={updateAssignment.isPending}
+            className="flex items-center gap-1.5 rounded-lg bg-cyan-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-cyan-500 disabled:opacity-50"
+          >
+            {updateAssignment.isPending ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Play className="h-3.5 w-3.5" />
+            )}
+            {assignment.status === "TODO" ? "Start Working" : "Unblock"}
+          </button>
+        </div>
+      )}
 
       {/* Grid specs */}
       <div className="grid grid-cols-2 gap-3 bg-slate-950/40 border border-slate-850 p-4 rounded-xl">

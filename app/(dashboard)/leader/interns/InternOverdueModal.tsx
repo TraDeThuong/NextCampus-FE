@@ -34,6 +34,8 @@ function daysAgo(dateStr: string): number {
   return Math.floor(diff / (1000 * 60 * 60 * 24));
 }
 
+const TODAY = new Date().toISOString().split("T")[0];
+
 export default function InternOverdueModal({ intern, onClose }: Props) {
   const auth = useContext(AuthContext);
   const currentUserId = auth?.state.user?.id;
@@ -119,18 +121,20 @@ function OverdueTaskCard({
   const queryClient = useQueryClient();
   const [phase, setPhase] = useState<RecreatePhase>("idle");
   const [recreateInternId, setRecreateInternId] = useState(currentIntern.id);
-  const [recreatedMsg, setRecreatedMsg] = useState("");
+  const [recreateDeadline, setRecreateDeadline] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return d.toISOString().split("T")[0];
+  });
 
   const recreateMutation = useMutation({
     mutationFn: async (internId: string) => {
       const task = assignment.task;
-      const newDeadline = new Date();
-      newDeadline.setDate(newDeadline.getDate() + 7);
 
       const payload: CreateTaskPayload = {
         title: task.title,
         description: task.description ?? undefined,
-        deadline: newDeadline.toISOString().split("T")[0],
+        deadline: recreateDeadline,
         priority: task.priority as CreateTaskPayload["priority"],
       };
 
@@ -155,7 +159,6 @@ function OverdueTaskCard({
           ? currentIntern.fullName
           : myInterns.find((i) => i.id === internId)?.fullName ?? "another intern";
 
-      setRecreatedMsg(`Task recreated for ${targetName}`);
       setPhase("done");
       toast.success(`Task "${assignment.task.title}" recreated for ${targetName}`);
     },
@@ -176,6 +179,10 @@ function OverdueTaskCard({
 
   function handleConfirm() {
     if (recreateMutation.isPending) return;
+    if (!recreateDeadline || recreateDeadline < TODAY) {
+      toast.error("Deadline cannot be in the past");
+      return;
+    }
     setPhase("creating");
     recreateMutation.mutate(recreateInternId);
   }
@@ -220,6 +227,11 @@ function OverdueTaskCard({
                 <button
                   onClick={() => {
                     setRecreateInternId(currentIntern.id);
+                    setRecreateDeadline(() => {
+                      const d = new Date();
+                      d.setDate(d.getDate() + 7);
+                      return d.toISOString().split("T")[0];
+                    });
                     setPhase("choosing");
                   }}
                   className="flex items-center gap-1.5 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-3 py-1.5 text-xs font-medium text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20"
@@ -242,38 +254,51 @@ function OverdueTaskCard({
         </div>
       </div>
 
-      {/* Choose intern — only shown in "choosing" phase */}
+      {/* Choose intern and deadline — only shown in "choosing" phase */}
       {phase === "choosing" && (
-        <div className="mt-4 flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3">
-          <span className="text-xs text-muted shrink-0">Assign to:</span>
-          <select
-            value={recreateInternId}
-            onChange={(e) => setRecreateInternId(e.target.value)}
-            className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white outline-none"
-          >
-            <option value={currentIntern.id}>
-              {currentIntern.fullName} (current)
-            </option>
-            {myInterns
-              .filter((i) => i.id !== currentIntern.id)
-              .map((i) => (
-                <option key={i.id} value={i.id}>
-                  {i.fullName}
-                </option>
-              ))}
-          </select>
-          <button
-            onClick={handleConfirm}
-            className="rounded-lg bg-cyan-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-cyan-500"
-          >
-            Confirm
-          </button>
-          <button
-            onClick={() => setPhase("idle")}
-            className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-400 transition hover:text-white"
-          >
-            Cancel
-          </button>
+        <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] p-3 space-y-3">
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted shrink-0">Assign to:</span>
+            <select
+              value={recreateInternId}
+              onChange={(e) => setRecreateInternId(e.target.value)}
+              className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white outline-none"
+            >
+              <option value={currentIntern.id}>
+                {currentIntern.fullName} (current)
+              </option>
+              {myInterns
+                .filter((i) => i.id !== currentIntern.id)
+                .map((i) => (
+                  <option key={i.id} value={i.id}>
+                    {i.fullName}
+                  </option>
+                ))}
+            </select>
+            <button
+              onClick={handleConfirm}
+              className="rounded-lg bg-cyan-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-cyan-500"
+            >
+              Confirm
+            </button>
+            <button
+              onClick={() => setPhase("idle")}
+              className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-400 transition hover:text-white"
+            >
+              Cancel
+            </button>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted shrink-0">Deadline:</span>
+            <input
+              type="date"
+              value={recreateDeadline}
+              min={TODAY}
+              onChange={(e) => setRecreateDeadline(e.target.value)}
+              className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white outline-none"
+            />
+          </div>
         </div>
       )}
 
@@ -282,13 +307,6 @@ function OverdueTaskCard({
           <CheckCircle className="h-3.5 w-3.5" />
           Recreated → {rt.code || rt.title}
           {rt.assignment?.intern?.fullName && ` for ${rt.assignment.intern.fullName}`}
-        </div>
-      )}
-
-      {phase === "done" && recreatedMsg && (
-        <div className="mt-3 flex items-center gap-1.5 text-xs text-emerald-400">
-          <CheckCircle className="h-3.5 w-3.5" />
-          {recreatedMsg}
         </div>
       )}
     </div>
