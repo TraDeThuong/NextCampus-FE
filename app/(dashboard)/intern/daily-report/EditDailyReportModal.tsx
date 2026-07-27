@@ -1,0 +1,335 @@
+"use client";
+
+import { useState } from "react";
+import { createPortal } from "react-dom";
+import { X, FileText, Link, Video, Loader2, Trash2, AlertTriangle, Paperclip, Download } from "lucide-react";
+import { useUpdateDailyReport } from "@/hooks/daily-report/useUpdateDailyReport";
+import { useDeleteDailyReport } from "@/hooks/daily-report/useDeleteDailyReport";
+import { useUploadReportAttachment } from "@/hooks/report-attachment/useUploadReportAttachment";
+import { useDeleteReportAttachment } from "@/hooks/report-attachment/useDeleteReportAttachment";
+import { useReportAttachments } from "@/hooks/report-attachment/useReportAttachments";
+import type { DailyReport } from "@/types/daily-report";
+
+type Props = {
+  report: DailyReport;
+  onClose: () => void;
+};
+
+export default function EditDailyReportModal({ report, onClose }: Props) {
+  const updateDailyReport = useUpdateDailyReport();
+  const deleteDailyReport = useDeleteDailyReport();
+  const uploadAttachment = useUploadReportAttachment();
+  const deleteAttachment = useDeleteReportAttachment();
+  const { data: attachmentsData } = useReportAttachments(report.id);
+  const existingAttachments = attachmentsData?.data ?? [];
+
+  const [content, setContent] = useState(report.content);
+  const [prLink, setPrLink] = useState(report.prLink ?? "");
+  const [videoLink, setVideoLink] = useState(report.videoDemo ?? "");
+  const [newAttachments, setNewAttachments] = useState<File[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    try {
+      await updateDailyReport.mutateAsync({
+        id: report.id,
+        payload: {
+          content,
+          prLink: prLink.trim() || null,
+          videoDemo: videoLink.trim() || null,
+        },
+      });
+
+      for (const file of newAttachments) {
+        await uploadAttachment.mutateAsync({
+          reportId: report.id,
+          file,
+        });
+      }
+
+      onClose();
+    } catch (err: unknown) {
+      const axiosErr = err as {
+        response?: { data?: { message?: string } };
+      };
+      console.error(
+        "[EditDailyReportModal] Submit failed:",
+        axiosErr?.response?.data?.message ?? err,
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    try {
+      await deleteDailyReport.mutateAsync(report.id);
+      onClose();
+    } catch (err: unknown) {
+      const axiosErr = err as {
+        response?: { data?: { message?: string } };
+      };
+      console.error(
+        "[EditDailyReportModal] Delete failed:",
+        axiosErr?.response?.data?.message ?? err,
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  const isPending = isSubmitting || updateDailyReport.isPending || deleteDailyReport.isPending || uploadAttachment.isPending || deleteAttachment.isPending;
+
+  return createPortal(
+    <div
+      onClick={() => {
+        if (showDeleteConfirm) {
+          setShowDeleteConfirm(false);
+        } else {
+          onClose();
+        }
+      }}
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0a0e1a] p-4"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-lg overflow-hidden rounded-[32px] border border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] shadow-[0_25px_80px_rgba(0,0,0,0.55)]"
+      >
+        <div className="absolute -left-24 -top-24 h-64 w-64 rounded-full bg-cyan-400/10 blur-3xl" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent" />
+
+        <div className="relative p-6">
+          <div className="mb-6 flex items-start justify-between">
+            <div>
+              <h2 className="text-xl font-bold metal-text flex items-center gap-2">
+                <FileText className="h-5 w-5 text-cyan-400" />
+                Edit Daily Report
+              </h2>
+              <p className="mt-1 text-sm text-muted">
+                Update your work report for today.
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 transition-all hover:rotate-90 hover:border-white/20 hover:bg-white/10"
+            >
+              <X className="h-5 w-5 text-white" />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-200">
+                <FileText className="h-4 w-4 text-cyan-400" />
+                Report Content
+              </label>
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="Describe what you worked on today..."
+                rows={5}
+                required
+                disabled={isPending}
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-cyan-400/50 disabled:opacity-50 resize-none"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-200">
+                <Link className="h-4 w-4 text-cyan-400" />
+                PR Link
+              </label>
+              <input
+                type="url"
+                value={prLink}
+                onChange={(e) => setPrLink(e.target.value)}
+                placeholder="https://github.com/user/repo/pull/1"
+                disabled={isPending}
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-cyan-400/50 disabled:opacity-50"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-200">
+                <Video className="h-4 w-4 text-cyan-400" />
+                Video Demo
+              </label>
+              <input
+                type="url"
+                value={videoLink}
+                onChange={(e) => setVideoLink(e.target.value)}
+                placeholder="Paste video URL..."
+                disabled={isPending}
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-cyan-400/50 disabled:opacity-50"
+              />
+            </div>
+
+            {/* Attachments */}
+            <div>
+              <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-200">
+                <Paperclip className="h-4 w-4 text-cyan-400" />
+                Attachments
+              </label>
+              <div className="space-y-2">
+                {existingAttachments.map((att) => (
+                  <div
+                    key={att.id}
+                    className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-2"
+                  >
+                    <a
+                      href={att.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-slate-300 hover:text-cyan-400 truncate flex items-center gap-2"
+                    >
+                      <Download className="h-3.5 w-3.5 shrink-0" />
+                      {att.fileName}
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        deleteAttachment.mutate({
+                          reportId: report.id,
+                          attachmentId: att.id,
+                        })
+                      }
+                      disabled={isPending}
+                      className="text-xs text-slate-400 hover:text-red-400 ml-2 shrink-0"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+                {newAttachments.map((file, i) => (
+                  <div
+                    key={`new-${file.name}-${i}`}
+                    className="flex items-center justify-between rounded-xl border border-emerald-400/20 bg-emerald-500/5 px-4 py-2"
+                  >
+                    <span className="text-sm text-emerald-300 truncate">
+                      {file.name} (new)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setNewAttachments((prev) => prev.filter((_, idx) => idx !== i))
+                      }
+                      disabled={isPending}
+                      className="text-xs text-slate-400 hover:text-red-400 ml-2 shrink-0"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+                <input
+                  type="file"
+                  multiple
+                  disabled={isPending}
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files ?? []);
+                    setNewAttachments((prev) => [...prev, ...files]);
+                  }}
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-400 file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 file:cursor-pointer outline-none disabled:opacity-50"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-between gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={isPending}
+                className="flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-5 py-2.5 text-sm text-red-400 transition hover:bg-red-500/20 hover:text-red-300 disabled:opacity-50"
+              >
+                {deleteDailyReport.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4" />
+                )}
+                Delete
+              </button>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  disabled={isPending}
+                  className="rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm text-slate-300 transition hover:text-white disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="flex items-center gap-2 rounded-xl bg-cyan-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-cyan-500 disabled:opacity-50"
+                >
+                  {isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <FileText className="h-4 w-4" />
+                  )}
+                  Update
+                </button>
+              </div>
+            </div>
+          </form>
+
+          {/* Delete confirmation overlay */}
+          {showDeleteConfirm && (
+            <div
+              onClick={() => setShowDeleteConfirm(false)}
+              className="absolute inset-0 z-10 flex items-center justify-center rounded-[32px] bg-[#0a0e1a]/90 backdrop-blur-sm"
+            >
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="mx-6 w-full max-w-sm rounded-2xl border border-red-500/20 bg-[#0f1520] p-6 shadow-[0_25px_50px_rgba(0,0,0,0.6)]"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-500/10">
+                    <AlertTriangle className="h-5 w-5 text-red-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-semibold text-white">Delete Report</h3>
+                    <p className="text-sm text-slate-400">
+                      This action cannot be undone.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteConfirm(false)}
+                    disabled={isPending}
+                    className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 transition hover:text-white disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={isPending}
+                    className="flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-500 disabled:opacity-50"
+                  >
+                    {deleteDailyReport.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}

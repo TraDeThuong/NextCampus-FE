@@ -32,12 +32,12 @@ export default function InternStatsOverview() {
   if (isError || !response?.success) {
     return (
       <div className="rounded-2xl border border-danger/30 bg-danger/10 p-6 text-center text-danger space-y-3">
-        <p className="font-semibold">Lỗi khi tải dữ liệu thống kê cá nhân. Vui lòng kiểm tra lại kết nối mạng.</p>
+        <p className="font-semibold">Error loading personal statistics. Please check your network connection.</p>
         <button
           onClick={() => refetch()}
           className="px-4 py-2 rounded-xl bg-danger text-white text-xs font-bold hover:opacity-90 transition-all cursor-pointer"
         >
-          Thử lại
+          Retry
         </button>
       </div>
     );
@@ -52,10 +52,10 @@ export default function InternStatsOverview() {
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-extrabold text-foreground metal-text">
-            Xin chào, {stats.internName}! 👋
+            Hello, {stats.internName}! 👋
           </h1>
           <p className="text-sm text-muted">
-            Chào mừng bạn quay trở lại • Theo dõi tiến độ nhiệm vụ và nộp báo cáo hàng ngày
+            Welcome back • Track task progress and submit daily reports
           </p>
         </div>
 
@@ -64,56 +64,56 @@ export default function InternStatsOverview() {
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-primary-main to-primary-light text-white font-semibold shadow-soft hover:opacity-90 transition-all text-sm"
         >
           <Calendar className="h-4 w-4" />
-          Nộp Báo Cáo Daily Hôm Nay
+          Submit Today's Daily Report
         </Link>
       </div>
 
       {/* Action-Oriented Personal KPI Cards */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <StatsCard
-          title="Task Đang Làm"
+          title="Tasks In Progress"
           value={stats.tasksInProgress}
-          subtitle={`Tổng số task: ${stats.totalTasks}`}
+          subtitle={`Total tasks: ${stats.totalTasks}`}
           icon={<ClipboardList className="h-6 w-6 text-cyan-400" />}
           href="/intern/task"
           trend={{
-            text: `${stats.completionRate}% Hoàn thành`,
+            text: `${stats.completionRate}% Completed`,
             positive: true,
           }}
         />
 
         <StatsCard
-          title="Task Đã Hoàn Thành"
+          title="Tasks Completed"
           value={stats.tasksCompleted}
-          subtitle={`Đã hoàn thành ${stats.tasksCompleted}/${stats.totalTasks}`}
+          subtitle={`Completed ${stats.tasksCompleted}/${stats.totalTasks}`}
           icon={<CheckCircle2 className="h-6 w-6 text-emerald-400" />}
           href="/intern/task?status=DONE"
           trend={{
-            text: "Cập nhật công việc",
+            text: "Update work progress",
             positive: true,
           }}
         />
 
         <StatsCard
-          title="Báo Cáo Hôm Nay"
-          value={stats.dailyReportTodaySubmitted ? "Đã Nộp" : "Chưa Nộp"}
-          subtitle={stats.dailyReportTodaySubmitted ? "✓ Đúng hạn" : "🔴 Cần nộp trước 18:00"}
+          title="Today's Report"
+          value={stats.dailyReportTodaySubmitted ? "Submitted" : "Not Submitted"}
+          subtitle={stats.dailyReportTodaySubmitted ? "✓ On time" : "🔴 Submit by 18:00"}
           icon={<FileCheck className="h-6 w-6 text-amber-400" />}
           href="/intern/daily-report"
           trend={{
-            text: stats.dailyReportTodaySubmitted ? "🟢 Hoàn thành" : "🔴 Nộp ngay",
+            text: stats.dailyReportTodaySubmitted ? "🟢 Complete" : "🔴 Submit now",
             positive: stats.dailyReportTodaySubmitted,
           }}
         />
 
         <StatsCard
-          title="Điểm Đánh Giá Tuần"
+          title="Weekly Score"
           value={stats.lastWeekScore ? `${stats.lastWeekScore}/10` : `${stats.avgScore}/10`}
-          subtitle={`Trung bình: ${stats.avgScore}/10`}
+          subtitle={`Average: ${stats.avgScore}/10`}
           icon={<Award className="h-6 w-6 text-indigo-400" />}
           href="/intern/weekly-evaluation"
           trend={{
-            text: "Kết quả chấm điểm",
+            text: "Score results",
             positive: stats.avgScore >= 7,
           }}
         />
@@ -129,13 +129,13 @@ export default function InternStatsOverview() {
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
             <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
               <Clock className="h-5 w-5 text-amber-400" />
-              Nhiệm Vụ & Việc Cần Làm
+              Tasks & To-Dos
             </h3>
             <Link
               href="/intern/task"
               className="text-xs font-medium text-primary-light hover:underline flex items-center gap-1"
             >
-              Xem tất cả Task <ExternalLink className="h-3.5 w-3.5" />
+              View All Tasks <ExternalLink className="h-3.5 w-3.5" />
             </Link>
           </div>
 
@@ -160,12 +160,12 @@ export default function InternStatsOverview() {
                 </div>
                 <div>
                   <p className="text-sm font-bold text-foreground">
-                    Báo Cáo Hàng Ngày (Daily Report)
+                    Daily Report
                   </p>
                   <p className="text-xs text-muted">
                     {stats.dailyReportTodaySubmitted
-                      ? "Bạn đã hoàn thành nộp báo cáo daily cho ngày hôm nay."
-                      : "Vui lòng cập nhật các công việc đã làm trong ngày hôm nay."}
+                      ? "You have submitted your daily report for today."
+                      : "Please update the tasks you have worked on today."}
                   </p>
                 </div>
               </div>
@@ -175,7 +175,7 @@ export default function InternStatsOverview() {
                   href="/intern/daily-report"
                   className="px-4 py-2 rounded-xl bg-amber-500 text-black font-bold text-xs hover:bg-amber-400 transition-all shrink-0"
                 >
-                  Nộp ngay
+                  Submit now
                 </Link>
               )}
             </div>
@@ -183,13 +183,13 @@ export default function InternStatsOverview() {
             {/* Task List Table */}
             <div className="pt-2">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted mb-3">
-                Danh sách Task phân công gần đây
+                Recently Assigned Tasks
               </p>
               <Table columns="2.5fr 1fr 1.5fr">
                 <Table.Header>
-                  <span>Tên Nhiệm Vụ</span>
-                  <span>Ưu Tiên</span>
-                  <span>Trạng Thái / Hạn Chót</span>
+                  <span>Task Name</span>
+                  <span>Priority</span>
+                  <span>Status / Deadline</span>
                 </Table.Header>
 
                 <Table.Body
@@ -244,7 +244,7 @@ export default function InternStatsOverview() {
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-emerald-400" />
-                Tiến Độ Thực Tập
+                Internship Progress
               </h3>
             </div>
 
@@ -255,13 +255,13 @@ export default function InternStatsOverview() {
                     {stats.completionRate}%
                   </span>
                   <span className="block text-[10px] text-muted uppercase font-semibold">
-                    Hoàn thành
+                    Completed
                   </span>
                 </div>
               </div>
 
               <p className="text-xs text-muted">
-                Bạn đã hoàn thành <strong className="text-foreground">{stats.tasksCompleted}</strong> trên tổng số <strong className="text-foreground">{stats.totalTasks}</strong> nhiệm vụ được giao.
+                You have completed <strong className="text-foreground">{stats.tasksCompleted}</strong> out of <strong className="text-foreground">{stats.totalTasks}</strong> assigned tasks.
               </p>
             </div>
           </div>
@@ -271,7 +271,7 @@ export default function InternStatsOverview() {
               href="/intern/task"
               className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-white/10 bg-white/5 text-foreground font-semibold text-sm hover:bg-white/10 transition-all"
             >
-              Xem Chi Tiết Task <ExternalLink className="h-4 w-4" />
+              View Task Details <ExternalLink className="h-4 w-4" />
             </Link>
           </div>
         </MetalCard>

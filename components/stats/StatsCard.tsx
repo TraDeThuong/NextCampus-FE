@@ -70,7 +70,7 @@ export default function StatsCard({
           </span>
           {href && (
             <span className="text-[11px] text-muted opacity-0 group-hover/card:opacity-100 transition-opacity font-normal">
-              Xem chi tiết
+              View details
             </span>
           )}
         </div>

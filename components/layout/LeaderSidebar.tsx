@@ -15,7 +15,7 @@ const menus = [
   { name: "Dashboard", href: "/leader/dashboard", icon: LayoutDashboard },
   { name: "Interns", href: "/leader/interns", icon: Users },
   { name: "Tasks", href: "/leader/tasks", icon: CheckSquare },
-  { name: "Review Tasks", href: "/leader/review", icon: ClipboardCheck },
+  { name: "Daily Reports", href: "/leader/daily-reports", icon: ClipboardCheck },
   {
     name: "Weekly Evaluation",
     href: "/leader/weekly-evaluation",
