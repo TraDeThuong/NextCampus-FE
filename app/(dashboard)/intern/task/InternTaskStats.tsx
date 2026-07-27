@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { CheckSquare, Clock, CheckCircle2, Percent, AlertTriangle, type LucideIcon } from "lucide-react";
+import { CheckSquare, Clock, CheckCircle2, Percent, AlertTriangle, ListTodo, type LucideIcon } from "lucide-react";
 import { useTaskAssignments } from "@/hooks/task-assignment/useTaskAssignments";
 import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
@@ -39,6 +39,7 @@ export default function InternTaskStats() {
     }
 
     const total = all.length;
+    const todo = all.filter((a) => a.status === "TODO").length;
     const inProgress = all.filter((a) => a.status === "IN_PROGRESS").length;
     const completed = all.filter((a) => a.status === "DONE").length;
     const rate = total > 0 ? Math.round((completed / total) * 100) : 0;

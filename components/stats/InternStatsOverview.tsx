@@ -5,6 +5,7 @@ import { useInternStats } from "@/hooks/stats/useInternStats";
 import StatsCard from "./StatsCard";
 import Spinner from "../ui/Spinner";
 import MetalCard from "../ui/MetalCard";
+import RejectedSubmissionsCard from "./RejectedSubmissionsCard";
 import Table from "../ui/Table";
 import {
   ClipboardList,
@@ -119,9 +120,12 @@ export default function InternStatsOverview() {
       </div>
 
       {/* Action Items List & Overall Task Completion Progress */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+        {/* Rejected Submissions Card */}
+        <RejectedSubmissionsCard />
+
         {/* Today's Required Actions */}
-        <MetalCard className="p-6 lg:col-span-2">
+        <MetalCard className="p-6 lg:col-span-3">
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
             <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
               <Clock className="h-5 w-5 text-amber-400" />

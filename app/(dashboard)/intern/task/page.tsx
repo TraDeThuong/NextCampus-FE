@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import InternTaskHeader from "./InternTaskHeader";
 import InternTaskTimeFilter from "./InternTaskTimeFilter";
@@ -14,7 +15,9 @@ export default function InternTaskPage() {
       <InternTaskHeader />
       <InternTaskTimeFilter />
       <InternTaskStats />
-      <InternTaskTable />
+      <Suspense fallback={null}>
+        <InternTaskTable />
+      </Suspense>
     </div>
   );
 }

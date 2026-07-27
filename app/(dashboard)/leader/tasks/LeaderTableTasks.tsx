@@ -23,6 +23,7 @@ import { useUpdateTaskAssignment } from "@/hooks/task-assignment/useUpdateTaskAs
 import { useDeleteTaskAssignment } from "@/hooks/task-assignment/useDeleteTaskAssignment";
 import { AuthContext } from "@/contexts/AuthContext";
 import TaskEditModal from "./TaskEditModal";
+import TaskReviewModal from "./TaskReviewModal";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 import type { UpdateTaskGroupPayload } from "@/types/task-group";
@@ -35,6 +36,7 @@ export default function LeaderTableTasks() {
   const [action, setAction] = useState<GroupAction>(null);
   const [attachPopover, setAttachPopover] = useState<{ taskId: string; taskTitle: string } | null>(null);
   const [taskAction, setTaskAction] = useState<{ type: "edit" | "delete"; taskId: string; taskTitle: string } | null>(null);
+  const [reviewModal, setReviewModal] = useState<{ assignmentId: string; taskId: string } | null>(null);
   const [taskMenuOpen, setTaskMenuOpen] = useState<string | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const taskTriggerRef = useRef<HTMLButtonElement>(null);
@@ -60,6 +62,10 @@ export default function LeaderTableTasks() {
     setTaskAction(a);
     setTaskMenuOpen(null);
     taskTriggerRef.current?.click();
+  };
+
+  const handleOpenReview = (aId: string, tId: string) => {
+    setReviewModal({ assignmentId: aId, taskId: tId });
   };
 
   const { data: groupsData, isLoading: groupsLoading } = useTaskGroups();
@@ -194,7 +200,7 @@ export default function LeaderTableTasks() {
                       <div className="truncate text-sm">{task.title}</div>
                       <InlineAssignCell taskId={task.id} assignment={task.assignment} />
                       <div><PriorityBadge priority={task.priority} /></div>
-                      <div><StatusBadge status={task.assignment?.status ?? "—"} /></div>
+                      <div><StatusBadge status={task.assignment?.status ?? "—"} assignmentId={task.assignment?.id} taskId={task.id} onReviewClick={handleOpenReview} /></div>
                       <div className="text-sm text-muted">{new Date(task.deadline).toLocaleDateString("vi-VN")}</div>
                       <div className="text-sm text-muted">{task.phase ?? "—"}</div>
                       <div className="text-sm text-muted">{task.module ?? "—"}</div>
@@ -293,6 +299,11 @@ export default function LeaderTableTasks() {
 
     {attachPopover && createPortal(
       <TaskAttachmentsPopover taskId={attachPopover.taskId} taskTitle={attachPopover.taskTitle} onClose={() => setAttachPopover(null)} />,
+      document.body,
+    )}
+
+    {reviewModal && createPortal(
+      <TaskReviewModal assignmentId={reviewModal.assignmentId} taskId={reviewModal.taskId} onClose={() => setReviewModal(null)} />,
       document.body,
     )}
     </>
@@ -420,7 +431,7 @@ function ViewGroup({ groupId }: { groupId: string }) {
                 <span className="font-mono text-xs text-muted">{t.code ?? "—"}</span>
                 <span className="flex-1 truncate text-foreground">{t.title}</span>
                 <PriorityBadge priority={t.priority} />
-                <StatusBadge status={t.assignment?.status ?? "—"} />
+                <StatusBadge status={t.assignment?.status ?? "—"} assignmentId={t.assignment?.id} taskId={t.id} onReviewClick={handleOpenReview} />
               </div>
             ))}
           </div>
@@ -755,8 +766,20 @@ function PriorityBadge({ priority }: { priority: string }) {
   return <span className={`inline-flex rounded-lg px-2 py-0.5 text-xs ${colors[priority] ?? "bg-white/5 text-muted"}`}>{priority}</span>;
 }
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ status, assignmentId, taskId, onReviewClick }: { status: string; assignmentId?: string; taskId?: string; onReviewClick?: (assignmentId: string, taskId: string) => void }) {
   const colors: Record<string, string> = { DONE: "bg-emerald-500/10 text-emerald-400", IN_PROGRESS: "bg-blue-500/10 text-blue-400", REVIEW: "bg-purple-500/10 text-purple-400", TODO: "bg-white/5 text-muted", BLOCKED: "bg-red-500/10 text-red-400", PENDING_APPROVAL: "bg-amber-500/10 text-amber-400" };
+
+  if (status === "REVIEW" && assignmentId && taskId && onReviewClick) {
+    return (
+      <button
+        onClick={() => onReviewClick(assignmentId, taskId)}
+        className={`inline-flex rounded-lg px-2 py-0.5 text-xs cursor-pointer transition hover:opacity-80 hover:scale-105 ${colors[status] ?? "bg-white/5 text-muted"}`}
+      >
+        {status.replace("_", " ")}
+      </button>
+    );
+  }
+
   return <span className={`inline-flex rounded-lg px-2 py-0.5 text-xs ${colors[status] ?? "bg-white/5 text-muted"}`}>{status.replace("_", " ")}</span>;
 }
 

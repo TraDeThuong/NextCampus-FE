@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { FileText, Calendar, User, Layers, Link, ChevronRight, Clock, Send, Pencil, Video, Play, Loader2 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useTaskAssignments } from "@/hooks/task-assignment/useTaskAssignments";
 import { useUpdateTaskAssignment } from "@/hooks/task-assignment/useUpdateTaskAssignment";
 import { useTask } from "@/hooks/task/useTask";
@@ -29,15 +29,28 @@ const statusBadge: Record<string, string> = {
 
 export default function InternTaskTable() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const deadlineFrom = searchParams.get("deadlineFrom");
   const deadlineTo = searchParams.get("deadlineTo");
+  const assignmentId = searchParams.get("assignmentId");
 
-  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [showSubmissionModal, setShowSubmissionModal] = useState(false);
   const [editingSubmission, setEditingSubmission] = useState<TaskSubmission | undefined>(undefined);
 
+  const updateParams = useCallback(
+    (key: string, value: string | null) => {
+      const p = new URLSearchParams(searchParams.toString());
+      if (value) {
+        p.set(key, value);
+      } else {
+        p.delete(key);
+      }
+      return p.toString();
+    },
+    [searchParams],
+  );
+
   const { data: assignmentsData, isLoading: listLoading } = useTaskAssignments({ limit: 100 });
-  const { data: taskData, isLoading: taskLoading } = useTask(selectedTaskId ?? undefined);
 
   const assignments = assignmentsData?.data ?? [];
   const sortedAssignments = useMemo(() => {
@@ -58,8 +71,20 @@ export default function InternTaskTable() {
       (a, b) => new Date(a.task.deadline).getTime() - new Date(b.task.deadline).getTime(),
     );
   }, [assignments, deadlineFrom, deadlineTo]);
+
+  const selectedAssignment = assignmentId
+    ? sortedAssignments.find((a) => a.id === assignmentId)
+    : undefined;
+  const { data: taskData, isLoading: taskLoading } = useTask(
+    selectedAssignment?.taskId,
+  );
+
   const task = taskData?.data ?? null;
-  const selectedAssignment = sortedAssignments.find((a) => a.taskId === selectedTaskId);
+
+  const handleSelectAssignment = (aId: string) => {
+    const query = updateParams("assignmentId", aId === assignmentId ? null : aId);
+    router.replace(`?${query}`, { scroll: false });
+  };
 
   return (
     <>
@@ -104,17 +129,15 @@ export default function InternTaskTable() {
                 <TaskRowButton
                   key={a.id}
                   assignment={a}
-                  isSelected={selectedTaskId === a.taskId}
-                  onClick={() =>
-                    setSelectedTaskId(selectedTaskId === a.taskId ? null : a.taskId)
-                  }
+                  isSelected={assignmentId === a.id}
+                  onClick={() => handleSelectAssignment(a.id)}
                 />
               ))}
             </div>
 
             {/* Right: Task detail */}
             <div className="w-3/4 overflow-y-auto p-6 bg-slate-900/20 relative custom-scrollbar">
-              {selectedTaskId ? (
+              {assignmentId ? (
                 taskLoading ? (
                   <div className="flex h-full items-center justify-center">
                     <Spinner size="md" />
@@ -259,7 +282,7 @@ function TaskDetailPanel({
         <div className="flex items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-mono text-xs bg-slate-800 border border-slate-700 text-slate-300 px-2 py-0.5 rounded-md">
-              {(basicTask as any).code ?? "N/A"}
+              {basicTask.code ?? "N/A"}
             </span>
             {assignment && (
               <span
