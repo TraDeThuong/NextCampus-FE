@@ -145,7 +145,7 @@ export default function LeaderTableTasks() {
                     p.set("page", "1");
                     router.push(`${pathname}?${p.toString()}`);
                   }} className={`w-full rounded-xl px-3 py-2 text-left text-sm transition ${taskGroupId === null ? "bg-primary-main/10 text-primary-light font-medium" : "text-muted hover:bg-white/5 hover:text-foreground"}`}>
-                    All Tasks<span className="ml-2 text-xs text-muted">({totalTasks})</span>
+                    All Tasks
                   </button>
                 </li>
                 {groups.map((g) => (
@@ -157,7 +157,6 @@ export default function LeaderTableTasks() {
                       router.push(`${pathname}?${p.toString()}`);
                     }} className={`flex-1 rounded-xl px-3 py-2 text-left text-sm transition ${taskGroupId === g.id ? "bg-primary-main/10 text-primary-light font-medium" : "text-muted hover:bg-white/5 hover:text-foreground"}`}>
                       <span className="truncate">{g.name}</span>
-                      <span className="ml-2 text-xs text-muted">({g._count?.tasks ?? 0})</span>
                     </button>
                     <button onClick={(e) => { e.stopPropagation(); setMenuOpen(menuOpen === g.id ? null : g.id); }} className="mr-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted opacity-0 transition hover:bg-white/10 hover:text-foreground group-hover:opacity-100">
                       <MoreHorizontal className="h-3.5 w-3.5" />

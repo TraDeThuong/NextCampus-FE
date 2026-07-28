@@ -1,16 +1,15 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
+import LeaderDailyReportContent from "./LeaderDailyReportContent";
 
 export const metadata: Metadata = {
-  title: "Duyệt báo cáo",
+  title: "Daily Reports",
 };
 
-export default function page() {
+export default function LeaderDailyReportsPage() {
   return (
-    <div>
-      <h1> Review Task </h1>
-      <p> Xem pr cua intern, nhan xet, gui mail tu dong, va notification den Intern de intern chinh sua task </p>
-      <p> table </p>
-    </div>
+    <Suspense fallback={null}>
+      <LeaderDailyReportContent />
+    </Suspense>
   );
 }
-
