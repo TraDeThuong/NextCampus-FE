@@ -15,7 +15,7 @@ export function useCreateTaskAssignment() {
     onSuccess: () => {
       toast.success("Assignment created successfully.");
       queryClient.invalidateQueries({ queryKey: ["task-assignments"] });
-      queryClient.invalidateQueries({ queryKey: ["tasks"] }, { exact: false });
+      queryClient.invalidateQueries({ queryKey: ["tasks"], exact: false });
     },
 
     onError: () => {
