@@ -7,6 +7,8 @@ import StatsCard from "./StatsCard";
 import Spinner from "../ui/Spinner";
 import MetalCard from "../ui/MetalCard";
 import TaskAssignmentModal from "./TaskAssignmentModal";
+import PendingApprovalCard from "./PendingApprovalCard";
+import PendingApprovalModal from "./PendingApprovalModal";
 import Table from "../ui/Table";
 import { AssignmentDetail } from "@/types/stats";
 import {
@@ -32,6 +34,8 @@ export default function LeaderStatsOverview() {
     title: "",
     assignments: [],
   });
+
+  const [pendingModalOpen, setPendingModalOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -86,6 +90,12 @@ export default function LeaderStatsOverview() {
         onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
         title={modalConfig.title}
         assignments={modalConfig.assignments}
+      />
+
+      {/* Modal Pending Approval */}
+      <PendingApprovalModal
+        isOpen={pendingModalOpen}
+        onClose={() => setPendingModalOpen(false)}
       />
 
       {/* Header Banner */}
@@ -152,7 +162,10 @@ export default function LeaderStatsOverview() {
       </div>
 
       {/* Action Items Required List */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+        {/* Action Item 0: Pending Approval Requests */}
+        <PendingApprovalCard onOpenModal={() => setPendingModalOpen(true)} />
+
         {/* Action Item 1: Pending Submissions */}
         <Link
           href="/leader/review?status=PENDING"

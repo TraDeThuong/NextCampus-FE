@@ -48,7 +48,7 @@ export default function AdminSidebar() {
                     flex items-center justify-center
                     w-14 h-14 rounded-2xl
                     border transition-all duration-300
-                    shadow-shadow-soft
+                    shadow-shadow-soft cursor-pointer
 
                     ${
                       isActive

@@ -8,7 +8,7 @@ const api = axios.create({
     },
     // Required for the HTTP-only refreshToken cookie to be sent on cross-origin requests.
     withCredentials: true,
-    timeout: 10000,
+    timeout: 30000,
 });
 
 // Request interceptor — attach in-memory access token

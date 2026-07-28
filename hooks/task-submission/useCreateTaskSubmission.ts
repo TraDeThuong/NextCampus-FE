@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import axios from "axios";
 import { taskSubmissionService } from "@/services/task-submission.service";
 import type { CreateTaskSubmissionPayload } from "@/types/task-submission";
 
@@ -15,10 +16,14 @@ export function useCreateTaskSubmission() {
     onSuccess: () => {
       toast.success("Submission created successfully.");
       queryClient.invalidateQueries({ queryKey: ["task-submissions"] });
+      queryClient.invalidateQueries({ queryKey: ["task-assignments"] });
     },
 
-    onError: () => {
-      toast.error("Failed to create submission.");
+    onError: (error) => {
+      const message = axios.isAxiosError<{ message?: string }>(error)
+        ? error.response?.data?.message ?? "Failed to create submission."
+        : "Failed to create submission.";
+      toast.error(message);
     },
   });
 }

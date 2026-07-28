@@ -30,6 +30,7 @@ export interface AssignmentIntern {
 
 export interface AssignmentTask {
   id: string;
+  code: string | null;
   title: string;
   description: string | null;
   deadline: string;
@@ -37,6 +38,8 @@ export interface AssignmentTask {
   createdBy: string;
   createdAt: string;
   updatedAt: string;
+  recreatedTaskId: string | null;
+  recreatedTask: { id: string; title: string; code: string | null; assignment: { intern: { fullName: string } } | null } | null;
 }
 
 export interface AssignmentAssigner {
@@ -97,6 +100,7 @@ export interface TaskAssignmentQueryParams {
   taskId?: string;
   internId?: string;
   assignedBy?: string;
+  leaderId?: string;
   status?: AssignmentStatus;
   sortBy?: "assignedAt" | "status";
   order?: "asc" | "desc";

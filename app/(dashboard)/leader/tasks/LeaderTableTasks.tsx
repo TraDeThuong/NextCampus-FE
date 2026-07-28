@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useContext } from "react";
 import { createPortal } from "react-dom";
-import { Layers, MoreHorizontal, Eye, Pencil, Trash2, Loader2, Paperclip, FileText, Film, FileArchive, ImageIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { Layers, MoreHorizontal, Eye, Pencil, Trash2, Loader2, Paperclip, FileText, Film, FileArchive, ImageIcon, ChevronLeft, ChevronRight, Check, ChevronDown, UserPlus, UserX } from "lucide-react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
@@ -17,8 +17,15 @@ import { useTasks } from "@/hooks/task/useTasks";
 import { useDeleteTask } from "@/hooks/task/useDeleteTask";
 import { useTaskAttachments } from "@/hooks/task-attachment/useTaskAttachments";
 import { useDeleteTaskAttachment } from "@/hooks/task-attachment/useDeleteTaskAttachment";
+import { useInterns } from "@/hooks/intern/useInterns";
+import { useCreateTaskAssignment } from "@/hooks/task-assignment/useCreateTaskAssignment";
+import { useUpdateTaskAssignment } from "@/hooks/task-assignment/useUpdateTaskAssignment";
+import { useDeleteTaskAssignment } from "@/hooks/task-assignment/useDeleteTaskAssignment";
+import { AuthContext } from "@/contexts/AuthContext";
 import TaskEditModal from "./TaskEditModal";
+import TaskReviewModal from "./TaskReviewModal";
 import { useForm } from "react-hook-form";
+import { useQueryClient } from "@tanstack/react-query";
 import type { UpdateTaskGroupPayload } from "@/types/task-group";
 import type { TaskQueryParams } from "@/types/task";
 
@@ -29,6 +36,7 @@ export default function LeaderTableTasks() {
   const [action, setAction] = useState<GroupAction>(null);
   const [attachPopover, setAttachPopover] = useState<{ taskId: string; taskTitle: string } | null>(null);
   const [taskAction, setTaskAction] = useState<{ type: "edit" | "delete"; taskId: string; taskTitle: string } | null>(null);
+  const [reviewModal, setReviewModal] = useState<{ assignmentId: string; taskId: string } | null>(null);
   const [taskMenuOpen, setTaskMenuOpen] = useState<string | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const taskTriggerRef = useRef<HTMLButtonElement>(null);
@@ -56,6 +64,10 @@ export default function LeaderTableTasks() {
     taskTriggerRef.current?.click();
   };
 
+  const handleOpenReview = (aId: string, tId: string) => {
+    setReviewModal({ assignmentId: aId, taskId: tId });
+  };
+
   const { data: groupsData, isLoading: groupsLoading } = useTaskGroups();
   const groups = groupsData?.data ?? [];
 
@@ -71,6 +83,8 @@ export default function LeaderTableTasks() {
     const deadlineTo = searchParams.get("deadlineTo");
     const page = searchParams.get("page");
     const limit = searchParams.get("limit");
+    const sortBy = searchParams.get("sortBy");
+    const order = searchParams.get("order");
 
     if (title) p.title = title;
     if (priority) p.priority = priority as TaskQueryParams["priority"];
@@ -82,6 +96,8 @@ export default function LeaderTableTasks() {
     if (taskGroupId) p.taskGroupId = taskGroupId;
     if (page) p.page = Number(page);
     p.limit = limit ? Number(limit) : 20;
+    if (sortBy) p.sortBy = sortBy as TaskQueryParams["sortBy"];
+    if (order) p.order = order as TaskQueryParams["order"];
 
     return p;
   }, [searchParams, taskGroupId]);
@@ -129,7 +145,7 @@ export default function LeaderTableTasks() {
                     p.set("page", "1");
                     router.push(`${pathname}?${p.toString()}`);
                   }} className={`w-full rounded-xl px-3 py-2 text-left text-sm transition ${taskGroupId === null ? "bg-primary-main/10 text-primary-light font-medium" : "text-muted hover:bg-white/5 hover:text-foreground"}`}>
-                    All Tasks<span className="ml-2 text-xs text-muted">({totalTasks})</span>
+                    All Tasks
                   </button>
                 </li>
                 {groups.map((g) => (
@@ -141,7 +157,6 @@ export default function LeaderTableTasks() {
                       router.push(`${pathname}?${p.toString()}`);
                     }} className={`flex-1 rounded-xl px-3 py-2 text-left text-sm transition ${taskGroupId === g.id ? "bg-primary-main/10 text-primary-light font-medium" : "text-muted hover:bg-white/5 hover:text-foreground"}`}>
                       <span className="truncate">{g.name}</span>
-                      <span className="ml-2 text-xs text-muted">({g._count?.tasks ?? 0})</span>
                     </button>
                     <button onClick={(e) => { e.stopPropagation(); setMenuOpen(menuOpen === g.id ? null : g.id); }} className="mr-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted opacity-0 transition hover:bg-white/10 hover:text-foreground group-hover:opacity-100">
                       <MoreHorizontal className="h-3.5 w-3.5" />
@@ -182,10 +197,10 @@ export default function LeaderTableTasks() {
                     <Table.Row key={task.id}>
                       <div className="font-mono text-xs text-muted">{task.code ?? "—"}</div>
                       <div className="truncate text-sm">{task.title}</div>
-                      <div className="text-sm text-muted">{task.assignment?.intern?.fullName ?? "—"}</div>
+                      <InlineAssignCell taskId={task.id} assignment={task.assignment} />
                       <div className="text-sm text-muted">{task.assignment?.support?.fullName ?? "—"}</div>
                       <div><PriorityBadge priority={task.priority} /></div>
-                      <div><StatusBadge status={task.assignment?.status ?? "UNASSIGNED"} /></div>
+                      <div><StatusBadge status={task.assignment?.status ?? "UNASSIGNED"} assignmentId={task.assignment?.id} taskId={task.id} onReviewClick={handleOpenReview} /></div>
                       <div className="text-sm text-muted">{new Date(task.deadline).toLocaleDateString("vi-VN")}</div>
                       <div className="text-sm text-muted">{task.phase ?? "—"}</div>
                       <div className="text-sm text-muted">{task.module ?? "—"}</div>
@@ -271,7 +286,7 @@ export default function LeaderTableTasks() {
       </div>
 
       <Modal.Window name="group-action" size="sm">
-        {action?.type === "view" ? <ViewGroup groupId={action.groupId} /> :
+        {action?.type === "view" ? <ViewGroup groupId={action.groupId} onReviewClick={handleOpenReview} /> :
          action?.type === "edit" ? <EditGroup groupId={action.groupId} onClose={() => setAction(null)} /> :
          action?.type === "delete" ? <DeleteGroup groupId={action.groupId} groupName={action.groupName} onClose={() => { setAction(null); if (taskGroupId === action.groupId) router.push(pathname); }} /> :
          <div />}
@@ -290,6 +305,11 @@ export default function LeaderTableTasks() {
 
     {attachPopover && createPortal(
       <TaskAttachmentsPopover taskId={attachPopover.taskId} taskTitle={attachPopover.taskTitle} onClose={() => setAttachPopover(null)} />,
+      document.body,
+    )}
+
+    {reviewModal && createPortal(
+      <TaskReviewModal assignmentId={reviewModal.assignmentId} taskId={reviewModal.taskId} onClose={() => setReviewModal(null)} />,
       document.body,
     )}
     </>
@@ -365,7 +385,13 @@ function TaskAttachmentsPopover({ taskId, taskTitle, onClose }: { taskId: string
 
 /* ─── View Group ────────────────────────────────────────────── */
 
-function ViewGroup({ groupId }: { groupId: string }) {
+function ViewGroup({
+  groupId,
+  onReviewClick,
+}: {
+  groupId: string;
+  onReviewClick: (assignmentId: string, taskId: string) => void;
+}) {
   const { data, isLoading } = useTaskGroup(groupId);
   const { data: tasksData } = useTasks({ taskGroupId: groupId, limit: 5, sortBy: "createdAt", order: "desc" });
   const group = data?.data;
@@ -417,7 +443,7 @@ function ViewGroup({ groupId }: { groupId: string }) {
                 <span className="font-mono text-xs text-muted">{t.code ?? "—"}</span>
                 <span className="flex-1 truncate text-foreground">{t.title}</span>
                 <PriorityBadge priority={t.priority} />
-                <StatusBadge status={t.assignment?.status ?? "UNASSIGNED"} />
+                <StatusBadge status={t.assignment?.status ?? "UNASSIGNED"} assignmentId={t.assignment?.id} taskId={t.id} onReviewClick={onReviewClick} />
               </div>
             ))}
           </div>
@@ -585,6 +611,165 @@ function DeleteTaskConfirm({
   );
 }
 
+/* ─── Inline Assign Cell ──────────────────────────────────── */
+
+function InlineAssignCell({
+  taskId,
+  assignment,
+}: {
+  taskId: string;
+  assignment: { id: string; internId: string; intern?: { id: string; fullName: string } } | null;
+}) {
+  const queryClient = useQueryClient();
+  const auth = useContext(AuthContext);
+  const currentUserId = auth?.state.user?.id;
+  const [open, setOpen] = useState(false);
+  const cellRef = useRef<HTMLDivElement>(null);
+
+  const { data: myInternsData } = useInterns({ leaderId: currentUserId });
+  const { data: allInternsData } = useInterns();
+  const myInterns = myInternsData?.data ?? [];
+  const otherInterns = (allInternsData?.data ?? []).filter((i) => i.leaderId !== currentUserId);
+
+  const createAssignment = useCreateTaskAssignment();
+  const updateAssignment = useUpdateTaskAssignment();
+  const deleteAssignment = useDeleteTaskAssignment();
+
+  const isPending = createAssignment.isPending || updateAssignment.isPending || deleteAssignment.isPending;
+  const currentInternId = assignment?.internId ?? null;
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (cellRef.current && !cellRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    if (open) document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  async function handleAssign(internId: string) {
+    try {
+      if (assignment?.id) {
+        await updateAssignment.mutateAsync({ id: assignment.id, payload: { internId } });
+      } else {
+        await createAssignment.mutateAsync({ taskId, internId });
+      }
+      queryClient.invalidateQueries({ queryKey: ["tasks"], exact: false });
+      queryClient.invalidateQueries({ queryKey: ["stats"], exact: false });
+    } catch {
+      // error toast handled by mutation hooks
+    }
+    setOpen(false);
+  }
+
+  async function handleUnassign() {
+    if (!assignment) return;
+    try {
+      await deleteAssignment.mutateAsync(assignment.id);
+      queryClient.invalidateQueries({ queryKey: ["tasks"], exact: false });
+      queryClient.invalidateQueries({ queryKey: ["stats"], exact: false });
+    } catch {
+      // error toast handled by mutation hooks
+    }
+    setOpen(false);
+  }
+
+  const assigneeName = assignment?.intern?.fullName;
+
+  return (
+    <div ref={cellRef} className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        disabled={isPending}
+        className={`flex w-full items-center gap-1 rounded-lg px-2 py-1 text-sm transition hover:bg-white/5 disabled:opacity-50 ${
+          assigneeName ? "text-foreground" : "text-muted"
+        }`}
+      >
+        {isPending ? (
+          <Loader2 className="h-3 w-3 animate-spin shrink-0" />
+        ) : assigneeName ? (
+          <span className="truncate">{assigneeName}</span>
+        ) : (
+          <span className="flex items-center gap-1">
+            <UserPlus className="h-3 w-3" />
+            Assign
+          </span>
+        )}
+        <ChevronDown className="h-3 w-3 shrink-0 text-muted" />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-full z-50 mt-1 w-56 rounded-xl border border-border bg-[#1a1d2e] p-1 shadow-lg">
+          {/* My Team */}
+          {myInterns.length > 0 && (
+            <>
+              <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted">
+                My Team
+              </div>
+              {myInterns.map((intern) => (
+                <button
+                  key={intern.id}
+                  onClick={() => handleAssign(intern.id)}
+                  disabled={isPending}
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-foreground hover:bg-white/5 transition disabled:opacity-50"
+                >
+                  <span className="truncate flex-1 text-left">{intern.fullName}</span>
+                  {currentInternId === intern.id && (
+                    <Check className="h-3.5 w-3.5 shrink-0 text-primary-light" />
+                  )}
+                </button>
+              ))}
+            </>
+          )}
+
+          {/* Other Teams */}
+          {otherInterns.length > 0 && (
+            <>
+              <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted mt-0.5">
+                Other Teams
+              </div>
+              {otherInterns.map((intern) => (
+                <button
+                  key={intern.id}
+                  onClick={() => handleAssign(intern.id)}
+                  disabled={isPending}
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-foreground hover:bg-white/5 transition disabled:opacity-50"
+                >
+                  <span className="truncate flex-1 text-left">
+                    {intern.fullName}
+                    {intern.leader?.fullName && (
+                      <span className="ml-1 text-xs text-muted">({intern.leader.fullName})</span>
+                    )}
+                  </span>
+                  {currentInternId === intern.id && (
+                    <Check className="h-3.5 w-3.5 shrink-0 text-primary-light" />
+                  )}
+                </button>
+              ))}
+            </>
+          )}
+
+          {/* Unassign */}
+          {assignment && (
+            <>
+              <div className="my-0.5 border-t border-border" />
+              <button
+                onClick={handleUnassign}
+                disabled={isPending}
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-red-400 hover:bg-red-500/10 transition disabled:opacity-50"
+              >
+                <UserX className="h-3.5 w-3.5" />
+                Unassign
+              </button>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ─── Badges ────────────────────────────────────────────────── */
 
 function PriorityBadge({ priority }: { priority: string }) {
@@ -592,8 +777,19 @@ function PriorityBadge({ priority }: { priority: string }) {
   return <span className={`inline-flex rounded-lg px-2 py-0.5 text-xs ${colors[priority] ?? "bg-white/5 text-muted"}`}>{priority}</span>;
 }
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ status, assignmentId, taskId, onReviewClick }: { status: string; assignmentId?: string; taskId?: string; onReviewClick?: (assignmentId: string, taskId: string) => void }) {
   const colors: Record<string, string> = { DONE: "bg-emerald-500/10 text-emerald-400", IN_PROGRESS: "bg-blue-500/10 text-blue-400", REVIEW: "bg-purple-500/10 text-purple-400", TODO: "bg-white/5 text-muted", BLOCKED: "bg-red-500/10 text-red-400", PENDING_APPROVAL: "bg-amber-500/10 text-amber-400", UNASSIGNED: "bg-orange-500/10 text-orange-400" };
+
+  if (status === "REVIEW" && assignmentId && taskId && onReviewClick) {
+    return (
+      <button
+        onClick={() => onReviewClick(assignmentId, taskId)}
+        className={`inline-flex rounded-lg px-2 py-0.5 text-xs cursor-pointer transition hover:opacity-80 hover:scale-105 ${colors[status] ?? "bg-white/5 text-muted"}`}
+      >
+        {status.replace("_", " ")}
+      </button>
+    );
+  }
   return <span className={`inline-flex rounded-lg px-2 py-0.5 text-xs ${colors[status] ?? "bg-white/5 text-muted"}`}>{status.replace("_", " ")}</span>;
 }
 

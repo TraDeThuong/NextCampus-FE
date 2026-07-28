@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
@@ -18,12 +18,6 @@ export default function Header({ role }: HeaderProps) {
     const [language, setLanguage] = useState<"vn" | "en">("vn");
     const { state } = useAuth();
     const { logoutMutate, isLoading } = useLogout();
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-
     const toggleLanguage = () => {
         setLanguage((prev) => (prev === "vn" ? "en" : "vn"));
     };
@@ -34,8 +28,8 @@ export default function Header({ role }: HeaderProps) {
 
   return (
     <>
-      {/* FULL PAGE SPINNER: Xuất hiện khi đang xử lý logout */}
-      {mounted && isLoading && createPortal(
+      {/* FULL PAGE SPINNER: Shown while logging out */}
+      {typeof document !== "undefined" && isLoading && createPortal(
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md">
           <Spinner size="lg" />
           <p className="mt-4 text-white/80 text-sm font-medium tracking-wide animate-pulse">
@@ -58,7 +52,7 @@ export default function Header({ role }: HeaderProps) {
           {/* Language Switch */}
           <button
             onClick={toggleLanguage}
-            className="flex items-center gap-2 text-sm text-white/70 hover:text-white transition"
+            className="flex items-center gap-2 text-sm text-white/70 hover:text-white transition cursor-pointer"
           >
             <span className="text-2xl">
               {language === "vn" ? "🇻🇳" : "🇺🇸"}
@@ -74,7 +68,7 @@ export default function Header({ role }: HeaderProps) {
           {/* Profile */}
           <Link
             href={`/${role.toLowerCase()}/profile`}
-            className="flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-lg transition hover:bg-white/10"
+            className="flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-lg transition hover:bg-white/10 cursor-pointer"
           >
             {state.user?.avatarUrl ? (
               <Image

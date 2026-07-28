@@ -12,7 +12,8 @@ export function useRejectTaskAssignment() {
 
     onSuccess: (_data, id) => {
       toast.success("Assignment rejected successfully.");
-      queryClient.invalidateQueries({ queryKey: ["task-assignments"] });
+      queryClient.invalidateQueries({ queryKey: ["task-assignments"], exact: false });
+      queryClient.invalidateQueries({ queryKey: ["stats"], exact: false });
       queryClient.invalidateQueries({ queryKey: ["task-assignment", id] });
     },
 

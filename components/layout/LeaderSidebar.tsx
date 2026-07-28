@@ -15,7 +15,7 @@ const menus = [
   { name: "Dashboard", href: "/leader/dashboard", icon: LayoutDashboard },
   { name: "Interns", href: "/leader/interns", icon: Users },
   { name: "Tasks", href: "/leader/tasks", icon: CheckSquare },
-  { name: "Review Tasks", href: "/leader/review", icon: ClipboardCheck },
+  { name: "Daily Reports", href: "/leader/daily-reports", icon: ClipboardCheck },
   {
     name: "Weekly Evaluation",
     href: "/leader/weekly-evaluation",
@@ -25,7 +25,7 @@ const menus = [
 ];
 
 const baseClass =
-  "flex items-center justify-center w-14 h-14 rounded-2xl border transition-all duration-300 shadow-shadow-soft";
+  "flex items-center justify-center w-14 h-14 rounded-2xl border transition-all duration-300 shadow-shadow-soft cursor-pointer";
 
 const activeClass =
   "bg-primary-main/20 border-primary-light text-gray-300 scale-110 shadow-[0_0_24px_primary-white]";

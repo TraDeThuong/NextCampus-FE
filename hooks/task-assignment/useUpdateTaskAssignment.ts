@@ -19,7 +19,8 @@ export function useUpdateTaskAssignment() {
 
     onSuccess: (_data, variables) => {
       toast.success("Assignment updated successfully.");
-      queryClient.invalidateQueries({ queryKey: ["task-assignments"] });
+      queryClient.invalidateQueries({ queryKey: ["task-assignments"], exact: false });
+      queryClient.invalidateQueries({ queryKey: ["stats"], exact: false });
       queryClient.invalidateQueries({
         queryKey: ["task-assignment", variables.id],
       });

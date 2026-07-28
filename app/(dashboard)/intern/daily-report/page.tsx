@@ -1,16 +1,10 @@
-import type { Metadata } from "next";
+import { Suspense } from "react";
+import DailyReportContent from "./DailyReportContent";
 
-export const metadata: Metadata = {
-  title: "Báo cáo hằng ngày",
-};
-
-export default function page() {
+export default function DailyReportPage() {
   return (
-    <div>
-      <h1> DAILY REPORT </h1>
-      <p> Bang hien thi danh sach report hang tuan, hang ngay </p>
-      <p> Chinh sua report </p>
-    </div>
+    <Suspense fallback={null}>
+      <DailyReportContent />
+    </Suspense>
   );
 }
-

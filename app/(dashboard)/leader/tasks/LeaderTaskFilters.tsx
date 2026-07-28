@@ -3,6 +3,7 @@
 import { Search } from "lucide-react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import FilterSelect from "@/components/ui/FilterSelect";
+import SortSelect from "@/components/ui/SortSelect";
 import MetalCard from "@/components/ui/MetalCard";
 
 const PRIORITY_OPTIONS = [
@@ -18,6 +19,17 @@ const STATUS_OPTIONS = [
   { value: "DONE", label: "Done" },
   { value: "BLOCKED", label: "Blocked" },
   { value: "PENDING_APPROVAL", label: "Pending Approval" },
+];
+
+const SORT_OPTIONS = [
+  { sortBy: "createdAt", order: "desc", label: "Newest First" },
+  { sortBy: "createdAt", order: "asc", label: "Oldest First" },
+  { sortBy: "title", order: "asc", label: "Title (A-Z)" },
+  { sortBy: "title", order: "desc", label: "Title (Z-A)" },
+  { sortBy: "deadline", order: "asc", label: "Deadline (Earliest)" },
+  { sortBy: "deadline", order: "desc", label: "Deadline (Latest)" },
+  { sortBy: "priority", order: "desc", label: "Priority (High-Low)" },
+  { sortBy: "priority", order: "asc", label: "Priority (Low-High)" },
 ];
 
 export default function LeaderTaskFilters() {
@@ -100,8 +112,14 @@ export default function LeaderTaskFilters() {
           />
         </div>
 
-        {/* Deadline range */}
-        <div className="flex flex-col gap-3">
+        {/* Sort */}
+        <SortSelect
+          label="Sort"
+          options={SORT_OPTIONS}
+        />
+
+        {/* Deadline range — full width on second row */}
+        <div className="flex flex-col gap-3 xl:col-span-6">
           <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">
             Deadline
           </label>
