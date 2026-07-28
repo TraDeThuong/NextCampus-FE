@@ -298,15 +298,20 @@ function TaskDetailPanel({
               {basicTask.priority}
             </span>
           </div>
-          {assignment && !latestSubmission && (
-            <button
-              onClick={onOpenSubmission}
-              className="flex shrink-0 items-center gap-1.5 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-3 py-1.5 text-xs font-medium text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20"
-            >
-              <Send className="h-3.5 w-3.5" />
-              Submit Work
-            </button>
-          )}
+          {assignment &&
+            (assignment.status === "TODO" ||
+              assignment.status === "IN_PROGRESS" ||
+              latestSubmission?.reviewStatus === "REJECTED") &&
+            latestSubmission?.reviewStatus !== "PENDING" &&
+            assignment.status !== "DONE" && (
+              <button
+                onClick={onOpenSubmission}
+                className="flex shrink-0 items-center gap-1.5 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-3 py-1.5 text-xs font-medium text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20"
+              >
+                <Send className="h-3.5 w-3.5" />
+                Submit Work
+              </button>
+            )}
         </div>
         <h3 className="text-xl font-bold tracking-tight text-white">{basicTask.title}</h3>
       </div>

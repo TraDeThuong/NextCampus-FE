@@ -26,7 +26,7 @@ export default function LeaderInternList({ interns, selectedId, onSelect }: Prop
             <button
               key={intern.id}
               onClick={() => onSelect(intern.id)}
-              className={`w-full text-left px-3 py-2.5 rounded-xl text-sm transition border ${
+              className={`w-full text-left px-3 py-2.5 rounded-xl text-sm transition border hover:cursor-pointer ${
                 isSelected
                   ? "border-cyan-400/40 bg-cyan-500/10 text-cyan-200"
                   : "border-transparent text-slate-400 hover:text-slate-200 hover:bg-white/5"

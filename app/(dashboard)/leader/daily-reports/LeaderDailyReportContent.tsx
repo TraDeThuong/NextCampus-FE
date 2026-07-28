@@ -7,7 +7,6 @@ import MetalCard from "@/components/ui/MetalCard";
 import StatsCard from "@/components/stats/StatsCard";
 import InternCalendar from "@/app/(dashboard)/intern/daily-report/InternCalendar";
 import ReportDetail from "@/app/(dashboard)/intern/daily-report/ReportDetail";
-import EditDailyReportModal from "@/app/(dashboard)/intern/daily-report/EditDailyReportModal";
 import LeaderInternList from "./LeaderInternList";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { useInterns } from "@/hooks/intern/useInterns";
@@ -107,7 +106,6 @@ export default function LeaderDailyReportContent() {
     (id: string) => {
       setSelectedInternId(id);
       router.replace(`${pathname}?internId=${id}`);
-      setEditReport(null);
     },
     [router, pathname],
   );
@@ -180,7 +178,6 @@ export default function LeaderDailyReportContent() {
     [router, pathname, selectedInternId],
   );
 
-  const [editReport, setEditReport] = useState<DailyReport | null>(null);
   const [missingDate, setMissingDate] = useState<string | null>(null);
 
   if (internsLoading) {
@@ -282,19 +279,11 @@ export default function LeaderDailyReportContent() {
                 report={selectedReport}
                 isLoading={!!selectedReportId && !selectedReport}
                 missingDate={missingDate}
-                onEdit={(report) => setEditReport(report)}
               />
             </div>
           </div>
         </div>
       </MetalCard>
-
-      {editReport && (
-        <EditDailyReportModal
-          report={editReport}
-          onClose={() => setEditReport(null)}
-        />
-      )}
     </div>
   );
 }

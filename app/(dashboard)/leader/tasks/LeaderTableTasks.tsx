@@ -23,7 +23,6 @@ import { useUpdateTaskAssignment } from "@/hooks/task-assignment/useUpdateTaskAs
 import { useDeleteTaskAssignment } from "@/hooks/task-assignment/useDeleteTaskAssignment";
 import { AuthContext } from "@/contexts/AuthContext";
 import TaskEditModal from "./TaskEditModal";
-import TaskReviewModal from "./TaskReviewModal";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 import type { UpdateTaskGroupPayload } from "@/types/task-group";
@@ -36,7 +35,6 @@ export default function LeaderTableTasks() {
   const [action, setAction] = useState<GroupAction>(null);
   const [attachPopover, setAttachPopover] = useState<{ taskId: string; taskTitle: string } | null>(null);
   const [taskAction, setTaskAction] = useState<{ type: "edit" | "delete"; taskId: string; taskTitle: string } | null>(null);
-  const [reviewModal, setReviewModal] = useState<{ assignmentId: string; taskId: string } | null>(null);
   const [taskMenuOpen, setTaskMenuOpen] = useState<string | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const taskTriggerRef = useRef<HTMLButtonElement>(null);
@@ -64,8 +62,10 @@ export default function LeaderTableTasks() {
     taskTriggerRef.current?.click();
   };
 
-  const handleOpenReview = (aId: string, tId: string) => {
-    setReviewModal({ assignmentId: aId, taskId: tId });
+  const handleOpenReview = (aId: string, _tId: string) => {
+    const p = new URLSearchParams(searchParams.toString());
+    p.set("reviewAssignmentId", aId);
+    router.push(`${pathname}?${p.toString()}`, { scroll: false });
   };
 
   const { data: groupsData, isLoading: groupsLoading } = useTaskGroups();
@@ -95,7 +95,7 @@ export default function LeaderTableTasks() {
     if (deadlineTo) p.deadlineTo = deadlineTo;
     if (taskGroupId) p.taskGroupId = taskGroupId;
     if (page) p.page = Number(page);
-    p.limit = limit ? Number(limit) : 20;
+    p.limit = limit ? Number(limit) : 10;
     if (sortBy) p.sortBy = sortBy as TaskQueryParams["sortBy"];
     if (order) p.order = order as TaskQueryParams["order"];
 
@@ -188,32 +188,24 @@ export default function LeaderTableTasks() {
               <div className="flex justify-center py-12"><Spinner /></div>
             ) : tasks.length > 0 ? (
               <div className="overflow-x-auto">
-                <Table columns="100px 240px 140px 90px 110px 120px 130px 100px 80px 120px 200px 60px 50px" className="min-w-[2000px]">
+                <Table columns="100px 1fr 140px 90px 110px 120px 50px" className="min-w-[800px]">
                   <Table.Header>
                     <div>Code</div><div>Title</div><div>Owner</div><div>Priority</div><div>Status</div>
-                    <div>Deadline</div><div>Phase</div><div>Module</div><div>Est Days</div><div>Start Date</div><div>Description</div><div>Att</div><div></div>
+                    <div>Deadline</div><div></div>
                   </Table.Header>
                   <Table.Body data={tasks} render={(task) => (
                     <Table.Row key={task.id}>
                       <div className="font-mono text-xs text-muted">{task.code ?? "—"}</div>
-                      <div className="truncate text-sm">{task.title}</div>
+                      <button
+                        onClick={() => router.push(`${pathname}/${task.id}`)}
+                        className="truncate text-sm text-left hover:text-primary-light transition cursor-pointer"
+                      >
+                        {task.title}
+                      </button>
                       <InlineAssignCell taskId={task.id} assignment={task.assignment} />
                       <div><PriorityBadge priority={task.priority} /></div>
                       <div><StatusBadge status={task.assignment?.status ?? "—"} assignmentId={task.assignment?.id} taskId={task.id} onReviewClick={handleOpenReview} /></div>
                       <div className="text-sm text-muted">{new Date(task.deadline).toLocaleDateString("vi-VN")}</div>
-                      <div className="text-sm text-muted">{task.phase ?? "—"}</div>
-                      <div className="text-sm text-muted">{task.module ?? "—"}</div>
-                      <div className="text-sm text-muted">{task.estDays ?? "—"}</div>
-                      <div className="text-sm text-muted">{task.startDate ? new Date(task.startDate).toLocaleDateString("vi-VN") : "—"}</div>
-                      <div className="truncate text-xs text-muted">{task.description ?? "—"}</div>
-                      <div className="text-center text-sm text-muted">
-                        {task.attachments?.length > 0 ? (
-                          <button onClick={() => setAttachPopover({ taskId: task.id, taskTitle: task.title })} className="flex items-center gap-1 rounded-lg px-1.5 py-0.5 text-primary-light hover:bg-primary-main/10">
-                            <Paperclip className="h-3 w-3" />
-                            {task.attachments.length}
-                          </button>
-                        ) : "0"}
-                      </div>
                       <div className="relative text-center">
                         <button
                           onClick={(e) => { e.stopPropagation(); setTaskMenuOpen(taskMenuOpen === task.id ? null : task.id); }}
@@ -223,6 +215,12 @@ export default function LeaderTableTasks() {
                         </button>
                         {taskMenuOpen === task.id && (
                           <div ref={taskMenuRef} className="absolute right-0 top-full z-50 mt-1 w-28 rounded-xl border border-border bg-card p-1 shadow-lg">
+                            <button
+                              onClick={() => { setTaskMenuOpen(null); router.push(`${pathname}/${task.id}`); }}
+                              className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground"
+                            >
+                              <Eye className="h-3 w-3" />View
+                            </button>
                             <button
                               onClick={() => openTaskAction({ type: "edit", taskId: task.id, taskTitle: task.title })}
                               className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground"
@@ -243,7 +241,7 @@ export default function LeaderTableTasks() {
 
                 {meta && meta.totalPages > 1 && (
                   <Table.Footer>
-                    <div className="flex w-full items-center justify-between gap-4 text-sm">
+                    <div className="flex w-full items-center justify-between gap-4 text-md">
                       <p className="text-muted">
                         Page {meta.page} of {meta.totalPages} &middot;{" "}
                         {meta.total} total
@@ -298,11 +296,6 @@ export default function LeaderTableTasks() {
 
     {attachPopover && createPortal(
       <TaskAttachmentsPopover taskId={attachPopover.taskId} taskTitle={attachPopover.taskTitle} onClose={() => setAttachPopover(null)} />,
-      document.body,
-    )}
-
-    {reviewModal && createPortal(
-      <TaskReviewModal assignmentId={reviewModal.assignmentId} taskId={reviewModal.taskId} onClose={() => setReviewModal(null)} />,
       document.body,
     )}
     </>
