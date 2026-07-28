@@ -60,7 +60,7 @@ export default function LeaderInternFilters() {
               onChange={(e) =>
                 updateParam("fullName", e.target.value)
               }
-              className="w-full rounded-2xl border border-border bg-card py-3 pl-11 pr-4 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted"
+              className="w-full rounded-2xl border border-border bg-card py-3 pl-11 pr-4 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted cursor-text"
             />
           </div>
         </div>
@@ -75,7 +75,7 @@ export default function LeaderInternFilters() {
             onChange={(e) =>
               updateParam("departmentId", e.target.value)
             }
-            className="appearance-none w-full rounded-2xl border border-border bg-card px-5 py-3 pr-12 text-sm font-medium text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong"
+            className="appearance-none w-full rounded-2xl border border-border bg-card px-5 py-3 pr-12 text-sm font-medium text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong cursor-pointer"
           >
             <option value="">All Departments</option>
             {departments.map((d) => (
@@ -101,7 +101,7 @@ export default function LeaderInternFilters() {
               updateParam("positionId", e.target.value)
             }
             disabled={!selectedDeptId}
-            className="appearance-none w-full rounded-2xl border border-border bg-card px-5 py-3 pr-12 text-sm font-medium text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong disabled:opacity-50"
+            className="appearance-none w-full rounded-2xl border border-border bg-card px-5 py-3 pr-12 text-sm font-medium text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong disabled:opacity-50 disabled:cursor-default cursor-pointer"
           >
             <option value="">
               {selectedDeptId

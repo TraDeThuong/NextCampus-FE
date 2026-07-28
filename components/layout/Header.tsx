@@ -51,7 +51,7 @@ export default function Header({ role }: HeaderProps) {
           {/* Language Switch */}
           <button
             onClick={toggleLanguage}
-            className="flex items-center gap-2 text-sm text-white/70 hover:text-white transition"
+            className="flex items-center gap-2 text-sm text-white/70 hover:text-white transition cursor-pointer"
           >
             <span className="text-2xl">
               {language === "vn" ? "🇻🇳" : "🇺🇸"}
@@ -67,7 +67,7 @@ export default function Header({ role }: HeaderProps) {
           {/* Profile */}
           <Link
             href={`/${role.toLowerCase()}/profile`}
-            className="flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-lg transition hover:bg-white/10"
+            className="flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-lg transition hover:bg-white/10 cursor-pointer"
           >
             {state.user?.avatarUrl ? (
               <Image
