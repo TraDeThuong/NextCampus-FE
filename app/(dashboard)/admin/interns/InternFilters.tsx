@@ -67,63 +67,31 @@ export default function InternFilters() {
                 </div>
 
                 {/* Department */}
-                <div className="flex flex-col gap-3">
-                    <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">
-                        Department
-                    </label>
-                    <div className="relative">
-                        <select
-                            value={selectedDeptId}
-                            onChange={(e) =>
-                                updateParam("departmentId", e.target.value)
-                            }
-                            className="appearance-none w-full rounded-2xl border border-border bg-card px-5 py-3 pr-12 text-sm font-medium text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong"
-                        >
-                            <option value="">All Departments</option>
-                            {departments.map((d) => (
-                                <option
-                                    key={d.id}
-                                    value={d.id}
-                                    className="bg-primary-dark text-foreground"
-                                >
-                                    {d.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
+                <FilterSelect
+                    label="Department"
+                    filterField="departmentId"
+                    options={departments.map((d) => ({
+                        value: d.id,
+                        label: d.name,
+                    }))}
+                    placeholder="All Departments"
+                />
 
                 {/* Position (cascading) */}
-                <div className="flex flex-col gap-3">
-                    <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">
-                        Position
-                    </label>
-                    <div className="relative">
-                        <select
-                            value={searchParams.get("positionId") ?? ""}
-                            onChange={(e) =>
-                                updateParam("positionId", e.target.value)
-                            }
-                            disabled={!selectedDeptId}
-                            className="appearance-none w-full rounded-2xl border border-border bg-card px-5 py-3 pr-12 text-sm font-medium text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong disabled:opacity-50"
-                        >
-                            <option value="">
-                                {selectedDeptId
-                                    ? "All Positions"
-                                    : "Select department first"}
-                            </option>
-                            {positions.map((p) => (
-                                <option
-                                    key={p.id}
-                                    value={p.id}
-                                    className="bg-primary-dark text-foreground"
-                                >
-                                    {p.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
+                <FilterSelect
+                    label="Position"
+                    filterField="positionId"
+                    options={positions.map((p) => ({
+                        value: p.id,
+                        label: p.name,
+                    }))}
+                    placeholder={
+                        selectedDeptId
+                            ? "All Positions"
+                            : "Select department first"
+                    }
+                    disabled={!selectedDeptId}
+                />
 
                 {/* Status */}
                 <FilterSelect
