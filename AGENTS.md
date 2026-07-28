@@ -1,3 +1,20 @@
+# NexCampus frontend
+
+Phạm vi: toàn bộ `NexCampus-FE/`.
+
+Khi workspace cha có `.agents/`, phải đọc:
+
+- `../.agents/rules/project.md`
+- `../.agents/rules/workflow.md`
+- `../.agents/rules/frontend.md`
+- `../.agents/rules/quality.md`
+- `../.agents/rules/api-contract.md` nếu thay đổi API
+
+Giữ data flow `page/component → domain hook → service → lib/axios.ts`, cơ chế
+access token in-memory + refresh cookie hiện có, query key/invalidation nhất quán
+và design token trong `app/globals.css`. Không sửa `.next/`, `node_modules/`,
+`.env*` hoặc generated file. Chạy lint/build tương xứng với thay đổi.
+
 <!-- BEGIN:nextjs-agent-rules -->
 # This is NOT the Next.js you know
 
