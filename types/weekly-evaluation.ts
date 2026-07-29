@@ -125,6 +125,7 @@ export interface WeeklyEvaluation {
   aiComment: string | null;
   aiGeneratedAt: string | null;
   leaderEdited: boolean;
+  reviewedAt: string | null;
   createdAt: string;
   updatedAt: string;
   intern: WeeklyEvaluationIntern;

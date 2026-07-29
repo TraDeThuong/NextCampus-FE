@@ -1,19 +1,18 @@
-
-
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import InternWeeklyEvaluationList from "./InternWeeklyEvaluationList";
+import Spinner from "@/components/ui/Spinner";
 
 export const metadata: Metadata = {
-  title: "Đánh giá tuần",
+  title: "Đánh giá tuần | NexCampus",
+  description:
+    "Theo dõi kết quả đánh giá hàng tuần từ Leader, xem chi tiết từng tiêu chí và xác nhận đã đọc.",
 };
 
 export default function page() {
   return (
-    <div>
-       <h1> WEEKLY EVALUATION </h1>
-       <p> Summary card: diem tuan truoc, diem trung binh, nhan xet cau leader,... </p>
-       <p> Form de Intern tu cham diem hang tuan cua minh </p>
-       <p> Xem nhung tuan truoc, diem minh tu cham va leader cham </p>
-    </div>
+    <Suspense fallback={<Spinner />}>
+      <InternWeeklyEvaluationList />
+    </Suspense>
   );
 }
-
