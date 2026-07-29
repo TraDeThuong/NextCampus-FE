@@ -11,6 +11,8 @@ import {
   UserRoundPen,
   History
 } from "lucide-react";
+
+import { LuAlarmClock } from "react-icons/lu";
 import { PiBuildingOfficeLight } from "react-icons/pi";
 import { MdManageAccounts } from "react-icons/md";
 import { usePathname } from "next/navigation";
@@ -24,6 +26,7 @@ const menus = [
   { name: "Department", href: "/admin/department", icon: PiBuildingOfficeLight },
   { name: "Onboarding", href: "/admin/onboarding", icon: Rocket },
   { name: "Mails", href: "/admin/emails", icon: MdOutlineMailOutline },
+  { name: "Mettings", href:"/admin/mettings", icon:LuAlarmClock},
   { name: "Discord", href: "/admin/discord", icon: MessageCircle },
   { name: "Policies", href: "/admin/policies", icon: FileText },
   { name: "Activity Logs", href: "/admin/activity-logs", icon: History },
@@ -34,9 +37,9 @@ export default function AdminSidebar() {
   const pathname = usePathname()
   return (
     <aside
-      className="flex flex-col items-center min-h-screen py-10 px-4 ">
+      className="flex flex-col items-center min-h-screen py-2 px-4 ">
 
-      <ul className="flex flex-col items-center gap-7">
+      <ul className="flex flex-col items-center gap-6">
         {menus.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;

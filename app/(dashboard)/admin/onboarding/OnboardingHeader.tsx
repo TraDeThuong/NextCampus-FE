@@ -53,8 +53,8 @@ export default function OnboardingHeader() {
                                     group-hover:left-[130%]
                                 "
                             />
-                            <span className="relative flex items-center gap-2">
-                                <Plus className="h-5 w-5 transition-transform duration-300 group-hover:rotate-90" />
+                            <span className="relative flex items-center gap-2 hover:cursor-pointer">
+                                <Plus className=" h-5 w-5 transition-transform duration-300 group-hover:rotate-90" />
                                 Invite Intern
                             </span>
                         </button>

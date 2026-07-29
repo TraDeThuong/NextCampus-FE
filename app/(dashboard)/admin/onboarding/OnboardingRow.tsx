@@ -101,7 +101,10 @@ export default function OnboardingRow({ invite }: Props) {
 
     function handleView() {
         setMenuOpen(false);
-        router.push(`/admin/onboarding/${invite.id}`);
+        const params = new URLSearchParams(window.location.search);
+        params.set("Id", invite.id);
+        params.set("view", "modal");
+        router.push(`/admin/onboarding?${params.toString()}`);
     }
 
     return (
