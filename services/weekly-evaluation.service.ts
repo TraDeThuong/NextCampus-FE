@@ -51,4 +51,9 @@ export const weeklyEvaluationService = {
     const response = await api.post("/weekly-evaluations/ai-suggestion", payload);
     return response.data;
   },
+
+  markReviewed: async (id: string): Promise<{ success: boolean; data: WeeklyEvaluation }> => {
+    const response = await api.patch(`/weekly-evaluations/${id}/mark-reviewed`);
+    return response.data;
+  },
 };

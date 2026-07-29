@@ -314,7 +314,7 @@ export default function WeeklyEvaluationDetailPage() {
         </div>
 
         {/* Sidebar Summary */}
-        <div className="space-y-6">
+        <div className="space-y-6 lg:sticky lg:top-6 self-start">
           <MetalCard>
             <div className="rounded-3xl p-6 text-center space-y-6">
               <h2 className="text-lg font-semibold border-b border-border/40 pb-4 flex items-center justify-center gap-2">
