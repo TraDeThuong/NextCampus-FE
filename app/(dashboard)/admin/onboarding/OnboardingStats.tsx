@@ -1,6 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { useApplicationInvites } from "@/hooks/application/useApplicationInvites";
+import type { GetApplicationInvitesParams } from "@/types/application";
 import {
   Mail,
   Clock,
@@ -20,7 +23,18 @@ interface StatCard {
 }
 
 export default function OnboardingStats() {
-  const { data, isPending, isError } = useApplicationInvites();
+  const searchParams = useSearchParams();
+
+  const params: GetApplicationInvitesParams = useMemo(() => {
+    const p: GetApplicationInvitesParams = {};
+    const createdFrom = searchParams.get("createdFrom");
+    const createdTo = searchParams.get("createdTo");
+    if (createdFrom) p.createdFrom = createdFrom;
+    if (createdTo) p.createdTo = createdTo;
+    return p;
+  }, [searchParams]);
+
+  const { data, isPending, isError } = useApplicationInvites(params);
 
   const invites = data?.data ?? [];
 

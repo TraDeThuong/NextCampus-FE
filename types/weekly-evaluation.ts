@@ -101,6 +101,10 @@ export const DEFAULT_RATINGS: EvaluationRatings = {
 
 // ─── WeeklyEvaluation ─────────────────────────────────────────────────────────
 
+type WeeklyEvaluationIntern = Omit<Intern, "user" | "leader"> & {
+  user: Pick<Intern["user"], "id" | "email" | "fullName">;
+};
+
 export interface WeeklyEvaluation {
   id: string;
   internId: string;
@@ -123,13 +127,33 @@ export interface WeeklyEvaluation {
   leaderEdited: boolean;
   createdAt: string;
   updatedAt: string;
-  intern?: Intern;
-  leader?: {
+  intern: WeeklyEvaluationIntern;
+  leader: {
     id: string;
     email: string;
     fullName: string | null;
   };
 }
+
+// ─── Response wrappers ──────────────────────────────────────────────────────
+
+export interface WeeklyEvaluationSuccessResponse {
+  success: boolean;
+  data: WeeklyEvaluation;
+}
+
+export interface WeeklyEvaluationListResponse {
+  success: boolean;
+  data: WeeklyEvaluation[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+// ─── Query params ───────────────────────────────────────────────────────────
 
 export interface WeeklyEvaluationQueryParams {
   internId?: string;
@@ -140,7 +164,6 @@ export interface WeeklyEvaluationQueryParams {
   page?: number;
   limit?: number;
 }
-
 export interface CreateWeeklyEvaluationPayload {
   internId: string;
   week: number;

@@ -7,7 +7,6 @@ import MetalCard from "@/components/ui/MetalCard";
 import StatsCard from "@/components/stats/StatsCard";
 import InternCalendar from "@/app/(dashboard)/intern/daily-report/InternCalendar";
 import ReportDetail from "@/app/(dashboard)/intern/daily-report/ReportDetail";
-import EditDailyReportModal from "@/app/(dashboard)/intern/daily-report/EditDailyReportModal";
 import LeaderInternList from "./LeaderInternList";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { useInterns } from "@/hooks/intern/useInterns";
@@ -42,7 +41,10 @@ export default function LeaderDailyReportContent() {
   const { data: internsData, isLoading: internsLoading } = useInterns(
     leaderId ? { leaderId, limit: 100 } : undefined,
   );
-  const interns = internsData?.data ?? [];
+  const interns = useMemo(
+    () => internsData?.data ?? [],
+    [internsData?.data],
+  );
 
   // Leader-wide stats: fetch today's and this week's reports
   const todayStr = useMemo(() => new Date().toISOString().split("T")[0], []);
@@ -102,14 +104,12 @@ export default function LeaderDailyReportContent() {
   const [selectedInternId, setSelectedInternId] = useState<string | null>(
     urlInternId ?? null,
   );
-  const [editReport, setEditReport] = useState<DailyReport | null>(null);
   const [missingDate, setMissingDate] = useState<string | null>(null);
 
   const handleSelectIntern = useCallback(
     (id: string) => {
       setSelectedInternId(id);
       router.replace(`${pathname}?internId=${id}`);
-      setEditReport(null);
     },
     [router, pathname],
   );
@@ -281,19 +281,11 @@ export default function LeaderDailyReportContent() {
                 report={selectedReport}
                 isLoading={!!selectedReportId && !selectedReport}
                 missingDate={missingDate}
-                onEdit={(report) => setEditReport(report)}
               />
             </div>
           </div>
         </div>
       </MetalCard>
-
-      {editReport && (
-        <EditDailyReportModal
-          report={editReport}
-          onClose={() => setEditReport(null)}
-        />
-      )}
     </div>
   );
 }

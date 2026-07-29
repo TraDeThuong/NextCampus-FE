@@ -1,6 +1,7 @@
 import api from "@/lib/axios";
 import type {
   WeeklyEvaluation,
+  WeeklyEvaluationListResponse,
   WeeklyEvaluationQueryParams,
   CreateWeeklyEvaluationPayload,
   UpdateWeeklyEvaluationPayload,
@@ -10,9 +11,12 @@ import type {
 
 export const weeklyEvaluationService = {
   getWeeklyEvaluations: async (
-    params?: WeeklyEvaluationQueryParams
-  ): Promise<{ success: boolean; data: WeeklyEvaluation[]; meta?: any }> => {
-    const response = await api.get("/weekly-evaluations", { params });
+    params?: WeeklyEvaluationQueryParams,
+  ): Promise<WeeklyEvaluationListResponse> => {
+    const response = await api.get<WeeklyEvaluationListResponse>(
+      "/weekly-evaluations",
+      { params },
+    );
     return response.data;
   },
 

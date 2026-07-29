@@ -1,94 +1,263 @@
 "use client";
 
+import {
+    useState,
+    useRef,
+    useEffect,
+    useCallback,
+    useId,
+} from "react";
+import { createPortal } from "react-dom";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import { HiChevronDown } from "react-icons/hi2";
+import { ChevronDown, Check } from "lucide-react";
 
 interface Option {
-  value: string;
-  label: string;
+    value: string;
+    label: string;
 }
 
 interface FilterSelectProps {
-  label: string;
-  filterField: string;
-  options: Option[];
-  className?: string;
+    label: string;
+    filterField: string;
+    options: Option[];
+    placeholder?: string;
+    disabled?: boolean;
+    className?: string;
 }
 
 export default function FilterSelect({
-  label,
-  filterField,
-  options,
-  className = "",
+    label,
+    filterField,
+    options,
+    placeholder = "All",
+    disabled = false,
+    className = "",
 }: FilterSelectProps) {
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const router = useRouter();
+    const searchParams = useSearchParams();
+    const pathname = usePathname();
+    const router = useRouter();
 
-  const currentValue = searchParams.get(filterField) ?? "";
+    const currentValue = searchParams.get(filterField) ?? "";
+    const selected = options.find((o) => o.value === currentValue);
 
-  function handleChange(value: string) {
-    const params = new URLSearchParams(searchParams.toString());
+    const [open, setOpen] = useState(false);
+    const [activeIndex, setActiveIndex] = useState(0);
+    const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
+    const triggerRef = useRef<HTMLButtonElement>(null);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+    const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
+    const triggerId = useId();
+    const listboxId = useId();
+    const allOptions = [{ value: "", label: placeholder }, ...options];
+    const selectedIndex = Math.max(
+        0,
+        allOptions.findIndex((option) => option.value === currentValue),
+    );
 
-    if (value) {
-      params.set(filterField, value);
-    } else {
-      params.delete(filterField);
+    const updatePosition = useCallback(() => {
+        if (triggerRef.current) {
+            const rect = triggerRef.current.getBoundingClientRect();
+            setDropdownStyle({
+                position: "fixed",
+                top: rect.bottom + 8,
+                left: rect.left,
+                width: Math.max(rect.width, 200),
+                zIndex: 9999,
+            });
+        }
+    }, []);
+
+    useEffect(() => {
+        if (open) {
+            updatePosition();
+            window.addEventListener("scroll", updatePosition, true);
+            window.addEventListener("resize", updatePosition);
+        }
+        return () => {
+            window.removeEventListener("scroll", updatePosition, true);
+            window.removeEventListener("resize", updatePosition);
+        };
+    }, [open, updatePosition]);
+
+    useEffect(() => {
+        function handleClick(e: MouseEvent) {
+            const target = e.target as Node;
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(target) &&
+                triggerRef.current &&
+                !triggerRef.current.contains(target)
+            ) {
+                setOpen(false);
+            }
+        }
+        if (open) document.addEventListener("mousedown", handleClick);
+        return () => document.removeEventListener("mousedown", handleClick);
+    }, [open]);
+
+    function handleChange(value: string) {
+        const params = new URLSearchParams(searchParams.toString());
+
+        if (value) {
+            params.set(filterField, value);
+        } else {
+            params.delete(filterField);
+        }
+
+        if (params.get("page")) {
+            params.set("page", "1");
+        }
+
+        router.push(`${pathname}?${params.toString()}`);
+        setOpen(false);
     }
 
-    if (params.get("page")) {
-      params.set("page", "1");
+    function focusOption(index: number) {
+        const nextIndex = (index + allOptions.length) % allOptions.length;
+        setActiveIndex(nextIndex);
+        optionRefs.current[nextIndex]?.focus();
     }
 
-    router.push(`${pathname}?${params.toString()}`);
-  }
+    function openDropdown() {
+        setActiveIndex(selectedIndex);
+        setOpen(true);
+        requestAnimationFrame(() => {
+            optionRefs.current[selectedIndex]?.focus();
+        });
+    }
 
-  return (
-    <div className={`flex w-full flex-col gap-3 ${className}`}>
-      <label
-        className="
-          metal-text metal-glow
-          text-sm font-semibold
-          uppercase tracking-[0.18em]
-        "
-      >
-        {label}
-      </label>
+    function closeDropdown() {
+        setOpen(false);
+        triggerRef.current?.focus();
+    }
 
-      <div className="relative">
-        <select
-          value={currentValue}
-          onChange={(e) => handleChange(e.target.value)}
-          className="appearance-none w-full rounded-2xl border border-border bg-card px-5 py-3 pr-12 text-base font-medium text-foreground shadow-glass backdrop-blur-xl transition-all duration-300 hover:border-border-strong hover:bg-card-hover focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] outline-none cursor-pointer"
-        >
-          <option value="" className="bg-primary-dark text-foreground">
-            All
-          </option>
-          {options.map((option) => (
-            <option
-              key={option.value}
-              value={option.value}
-              className="bg-primary-dark text-foreground"
+    return (
+        <div className={`flex w-full flex-col gap-3 ${className}`}>
+            <label
+                htmlFor={triggerId}
+                className="
+                    metal-text metal-glow
+                    text-sm font-semibold
+                    uppercase tracking-[0.18em]
+                "
             >
-              {option.label}
-            </option>
-          ))}
-        </select>
+                {label}
+            </label>
 
-        <HiChevronDown className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted transition-colors duration-300" />
+            <div className="relative">
+                <button
+                    id={triggerId}
+                    ref={triggerRef}
+                    type="button"
+                    aria-haspopup="listbox"
+                    aria-expanded={open}
+                    aria-controls={listboxId}
+                    onClick={() => {
+                        if (disabled) return;
+                        if (open) {
+                            setOpen(false);
+                        } else {
+                            openDropdown();
+                        }
+                    }}
+                    onKeyDown={(event) => {
+                        if (
+                            !disabled &&
+                            (event.key === "ArrowDown" ||
+                                event.key === "ArrowUp")
+                        ) {
+                            event.preventDefault();
+                            openDropdown();
+                        }
+                    }}
+                    disabled={disabled}
+                    className={`flex w-full items-center justify-between rounded-2xl border border-border bg-card px-5 py-3 text-sm font-medium shadow-glass backdrop-blur-xl transition-all duration-300 outline-none ${
+                        disabled
+                            ? "opacity-50 cursor-not-allowed"
+                            : "hover:border-border-strong hover:bg-card-hover cursor-pointer"
+                    } ${
+                        open
+                            ? "border-primary-light shadow-[0_0_28px_rgba(21,174,245,0.18)]"
+                            : ""
+                    }`}
+                >
+                    <span
+                        className={
+                            selected ? "text-foreground" : "text-muted"
+                        }
+                    >
+                        {selected?.label ?? placeholder}
+                    </span>
+                    <ChevronDown
+                        className={`h-4 w-4 shrink-0 text-muted transition-transform duration-300 ${
+                            open ? "rotate-180" : ""
+                        }`}
+                    />
+                </button>
 
-        <div
-          className="
-            pointer-events-none
-            absolute inset-x-6 top-0
-            h-px
-            bg-gradient-to-r
-            from-transparent
-            via-primary-light/50
-            to-transparent
-          "
-        />
-      </div>
-    </div>
-  );
+                {open &&
+                    createPortal(
+                        <div
+                            id={listboxId}
+                            ref={dropdownRef}
+                            role="listbox"
+                            aria-label={label}
+                            style={dropdownStyle}
+                            onKeyDown={(event) => {
+                                if (event.key === "Escape") {
+                                    event.preventDefault();
+                                    closeDropdown();
+                                } else if (event.key === "ArrowDown") {
+                                    event.preventDefault();
+                                    focusOption(activeIndex + 1);
+                                } else if (event.key === "ArrowUp") {
+                                    event.preventDefault();
+                                    focusOption(activeIndex - 1);
+                                }
+                            }}
+                            className="rounded-xl border border-white/10 bg-[#0f172a] p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl"
+                        >
+                            <div className="max-h-[240px] overflow-y-auto scrollbar-dropdown">
+                                {allOptions.map((opt, index) => {
+                                    const isSelected =
+                                        opt.value === currentValue;
+                                    return (
+                                        <button
+                                            ref={(element) => {
+                                                optionRefs.current[index] =
+                                                    element;
+                                            }}
+                                            key={opt.value}
+                                            type="button"
+                                            role="option"
+                                            aria-selected={isSelected}
+                                            tabIndex={
+                                                index === activeIndex ? 0 : -1
+                                            }
+                                            onClick={() => {
+                                                handleChange(opt.value);
+                                                triggerRef.current?.focus();
+                                            }}
+                                            className={`flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm transition-colors ${
+                                                isSelected
+                                                    ? "text-cyan-400 bg-cyan-400/10"
+                                                    : "text-slate-300 hover:bg-white/5 hover:text-white"
+                                            }`}
+                                        >
+                                            <span className="flex-1 truncate text-left">
+                                                {opt.label}
+                                            </span>
+                                            {isSelected && (
+                                                <Check className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>,
+                        document.body,
+                    )}
+            </div>
+        </div>
+    );
 }

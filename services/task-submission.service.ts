@@ -3,6 +3,7 @@ import type {
   TaskSubmissionListResponse,
   TaskSubmissionSuccessResponse,
   TaskSubmissionDeleteResponse,
+  TaskSubmissionThreadResponse,
   TaskSubmissionQueryParams,
   CreateTaskSubmissionPayload,
   UpdateTaskSubmissionPayload,
@@ -16,6 +17,16 @@ export const taskSubmissionService = {
     const response = await api.get<TaskSubmissionListResponse>(
       "/task-submissions",
       { params },
+    );
+    return response.data;
+  },
+
+  // GET /task-submissions/thread/:assignmentId
+  getSubmissionThread: async (
+    assignmentId: string,
+  ): Promise<TaskSubmissionThreadResponse> => {
+    const response = await api.get<TaskSubmissionThreadResponse>(
+      `/task-submissions/thread/${assignmentId}`,
     );
     return response.data;
   },

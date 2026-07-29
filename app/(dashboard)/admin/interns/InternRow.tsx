@@ -1,14 +1,20 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { MoreVertical, Eye, Trash2, Circle, Loader2 } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { MoreVertical, Eye, Trash2, Circle, Loader2, ChevronDown, Check } from "lucide-react";
+import {
+    useState,
+    useRef,
+    useEffect,
+    useCallback,
+    useMemo,
+    useId,
+} from "react";
 
 import type { Intern } from "@/types/intern";
 import { useDeleteIntern } from "@/hooks/intern/useDeleteIntern";
-import { useLeaders } from "@/hooks/user/useLeaders";
+import { useLeaders } from "@/hooks/leader/useLeaders";
 import { useUpdateIntern } from "@/hooks/intern/useUpdateIntern";
-import { useDepartments } from "@/hooks/department/useDepartments";
 import { usePositions } from "@/hooks/department/usePositions";
 import Table from "@/components/ui/Table";
 import Modal from "@/components/ui/Modal";
@@ -19,23 +25,17 @@ type InternRowProps = {
 
 export default function InternRow({ intern }: InternRowProps) {
     const router = useRouter();
-    const { mutate: deleteIntern, isPending: deleting } = useDeleteIntern();
+    const { mutate: deleteIntern } = useDeleteIntern();
     const { data: leadersData } = useLeaders();
     const { mutate: updateIntern } = useUpdateIntern();
     const [updatingField, setUpdatingField] = useState<
-        "department" | "position" | "leader" | "status" | null
+        "position" | "leader" | "status" | null
     >(null);
-    const [editingLeader, setEditingLeader] = useState(false);
-    const [editingDept, setEditingDept] = useState(false);
-    const [editingPos, setEditingPos] = useState(false);
-    const [editingStatus, setEditingStatus] = useState(false);
-    const leaders = leadersData?.data ?? [];
-    const { data: deptData } = useDepartments();
-    const departments = deptData?.data ?? [];
-    const { data: posData } = usePositions(
-        editingPos ? (intern.department?.id ?? undefined) : undefined,
-    );
+    const leaders = useMemo(() => leadersData?.data ?? [], [leadersData?.data]);
+
+    const { data: posData } = usePositions(intern.department?.id ?? undefined);
     const positions = posData?.data ?? [];
+
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -60,6 +60,56 @@ export default function InternRow({ intern }: InternRowProps) {
         COMPLETED: "border-blue-400/20 bg-blue-500/10 text-blue-300",
         DROPPED: "border-red-400/20 bg-red-500/10 text-red-300",
     };
+
+    const handleLeaderChange = useCallback(
+        (newLeaderId: string | null) => {
+            setUpdatingField("leader");
+            const selectedLeader = newLeaderId
+                ? leaders.find((l) => l.userId === newLeaderId)
+                : null;
+            updateIntern(
+                {
+                    id: intern.id,
+                    payload: {
+                        leaderId: newLeaderId,
+                        ...(selectedLeader && {
+                            departmentId: selectedLeader.departmentId ?? undefined,
+                        }),
+                    },
+                },
+                { onSettled: () => setUpdatingField(null) },
+            );
+        },
+        [intern.id, leaders, updateIntern],
+    );
+
+    const handlePositionChange = useCallback(
+        (newPositionId: string | null) => {
+            setUpdatingField("position");
+            updateIntern(
+                {
+                    id: intern.id,
+                    payload: { positionId: newPositionId || undefined },
+                },
+                { onSettled: () => setUpdatingField(null) },
+            );
+        },
+        [intern.id, updateIntern],
+    );
+
+    const handleStatusChange = useCallback(
+        (newStatus: Intern["status"]) => {
+            setUpdatingField("status");
+            updateIntern(
+                {
+                    id: intern.id,
+                    payload: { status: newStatus },
+                },
+                { onSettled: () => setUpdatingField(null) },
+            );
+        },
+        [intern.id, updateIntern],
+    );
 
     return (
         <Modal>
@@ -86,141 +136,45 @@ export default function InternRow({ intern }: InternRowProps) {
 
                 {/* Department */}
                 <div className="text-sm text-slate-400">
-                    {editingDept ? (
-                        <select
-                            value={intern.department?.id ?? ""}
-                            onChange={(e) => {
-                                setUpdatingField("department");
-                                updateIntern(
-                                    {
-                                        id: intern.id,
-                                        payload: { departmentId: e.target.value || undefined },
-                                    },
-                                    { onSettled: () => setUpdatingField(null) },
-                                );
-                                setEditingDept(false);
-                            }}
-                            onBlur={() => setEditingDept(false)}
-                            autoFocus
-                            disabled={updatingField === "department"}
-                            className="w-full rounded-lg border border-cyan-400/30 bg-[#0f172a] px-2 py-1 text-xs text-white outline-none"
-                        >
-                            <option value="">Not set</option>
-                            {departments.map((d) => (
-                                <option key={d.id} value={d.id}>
-                                    {d.name}
-                                </option>
-                            ))}
-                        </select>
-                    ) : (
-                        <button
-                            type="button"
-                            onClick={() => setEditingDept(true)}
-                            disabled={updatingField === "department"}
-                            className="text-left transition hover:text-cyan-400 disabled:opacity-50"
-                        >
-                            {updatingField === "department" ? (
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : intern.department?.name ? (
-                                intern.department.name
-                            ) : (
-                                <span className="italic text-slate-600">Not set</span>
-                            )}
-                        </button>
+                    {intern.department?.name ?? (
+                        <span className="italic text-slate-600">Not set</span>
                     )}
                 </div>
 
                 {/* Position */}
                 <div className="text-sm text-slate-400">
-                    {editingPos ? (
-                        <select
-                            value={intern.position?.id ?? ""}
-                            onChange={(e) => {
-                                setUpdatingField("position");
-                                updateIntern(
-                                    {
-                                        id: intern.id,
-                                        payload: { positionId: e.target.value || undefined },
-                                    },
-                                    { onSettled: () => setUpdatingField(null) },
-                                );
-                                setEditingPos(false);
-                            }}
-                            onBlur={() => setEditingPos(false)}
-                            autoFocus
-                            disabled={updatingField === "position"}
-                            className="w-full rounded-lg border border-cyan-400/30 bg-[#0f172a] px-2 py-1 text-xs text-white outline-none"
-                        >
-                            <option value="">Not set</option>
-                            {positions.map((p) => (
-                                <option key={p.id} value={p.id}>
-                                    {p.name}
-                                </option>
-                            ))}
-                        </select>
-                    ) : (
-                        <button
-                            type="button"
-                            onClick={() => setEditingPos(true)}
-                            disabled={updatingField === "position"}
-                            className="text-left transition hover:text-cyan-400 disabled:opacity-50"
-                        >
-                            {updatingField === "position" ? (
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : intern.position?.name ? (
-                                intern.position.name
-                            ) : (
-                                <span className="italic text-slate-600">Not set</span>
-                            )}
-                        </button>
-                    )}
+                    <InlineSelect
+                        ariaLabel="Position"
+                        value={intern.position?.id ?? null}
+                        placeholder="Not set"
+                        loading={updatingField === "position"}
+                        onChange={handlePositionChange}
+                        options={[
+                            { value: null, label: "Not set" },
+                            ...positions.map((p) => ({
+                                value: p.id,
+                                label: p.name,
+                            })),
+                        ]}
+                    />
                 </div>
 
                 {/* Leader */}
                 <div className="text-sm text-slate-400">
-                    {editingLeader ? (
-                        <select
-                            value={intern.leaderId ?? ""}
-                            onChange={(e) => {
-                                setUpdatingField("leader");
-                                const newLeaderId = e.target.value || null;
-                                updateIntern(
-                                    {
-                                        id: intern.id,
-                                        payload: { leaderId: newLeaderId },
-                                    },
-                                    { onSettled: () => setUpdatingField(null) },
-                                );
-                                setEditingLeader(false);
-                            }}
-                            onBlur={() => setEditingLeader(false)}
-                            autoFocus
-                            disabled={updatingField === "leader"}
-                            className="w-full rounded-lg border border-cyan-400/30 bg-[#0f172a] px-2 py-1 text-xs text-white outline-none"
-                        >
-                            <option value="">Not set</option>
-                            {leaders.map((l) => (
-                                <option key={l.id} value={l.id}>
-                                    {l.fullName ?? l.email}
-                                </option>
-                            ))}
-                        </select>
-                    ) : (
-                        <button
-                            type="button"
-                            onClick={() => setEditingLeader(true)}
-                            disabled={updatingField === "leader"}
-                            className="text-left transition hover:text-cyan-400 disabled:opacity-50"
-                        >
-                            {updatingField === "leader" ? (
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : intern.leader?.fullName ? (
-                                intern.leader.fullName
-                            ) : (
-                                <span className="italic text-slate-600">Not set</span>
-                            )}
-                        </button>
-                    )}
+                    <InlineSelect
+                        ariaLabel="Leader"
+                        value={intern.leaderId}
+                        placeholder="Not set"
+                        loading={updatingField === "leader"}
+                        onChange={handleLeaderChange}
+                        options={[
+                            { value: null, label: "Not set" },
+                            ...leaders.map((l) => ({
+                                value: l.userId,
+                                label: l.user.fullName ?? l.user.email,
+                            })),
+                        ]}
+                    />
                 </div>
 
                 {/* Duration */}
@@ -231,56 +185,28 @@ export default function InternRow({ intern }: InternRowProps) {
 
                 {/* Status */}
                 <div>
-                    {editingStatus ? (
-                        <select
-                            value={intern.status}
-                            onChange={(e) => {
-                                setUpdatingField("status");
-                                updateIntern(
-                                    {
-                                        id: intern.id,
-                                        payload: { status: e.target.value as Intern["status"] },
-                                    },
-                                    { onSettled: () => setUpdatingField(null) },
-                                );
-                                setEditingStatus(false);
-                            }}
-                            onBlur={() => setEditingStatus(false)}
-                            autoFocus
-                            disabled={updatingField === "status"}
-                            className="rounded-lg border border-cyan-400/30 bg-[#0f172a] px-2 py-1 text-xs text-white outline-none cursor-pointer"
-                        >
-                            <option value="ACTIVE" className="bg-[#0b1020] text-emerald-400 font-medium">
-                                Active
-                            </option>
-                            <option value="COMPLETED" className="bg-[#0b1020] text-blue-400 font-medium">
-                                Completed
-                            </option>
-                            <option value="DROPPED" className="bg-[#0b1020] text-red-400 font-medium">
-                                Dropped
-                            </option>
-                        </select>
-                    ) : (
-                        <button
-                            type="button"
-                            onClick={() => setEditingStatus(true)}
-                            disabled={updatingField === "status"}
-                            className="disabled:opacity-50"
-                        >
-                            {updatingField === "status" ? (
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                                <span
-                                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${
-                                        statusBadge[intern.status] ?? ""
-                                    }`}
-                                >
-                                    <Circle className="h-2 w-2 fill-current" />
-                                    {intern.status}
-                                </span>
-                            )}
-                        </button>
-                    )}
+                    <InlineSelect
+                        ariaLabel="Status"
+                        value={intern.status}
+                        placeholder="Status"
+                        loading={updatingField === "status"}
+                        onChange={(val) => handleStatusChange(val as Intern["status"])}
+                        options={[
+                            { value: "ACTIVE", label: "Active" },
+                            { value: "COMPLETED", label: "Completed" },
+                            { value: "DROPPED", label: "Dropped" },
+                        ]}
+                        renderTrigger={(label) => (
+                            <span
+                                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${
+                                    statusBadge[intern.status] ?? ""
+                                }`}
+                            >
+                                <Circle className="h-2 w-2 fill-current" />
+                                {label}
+                            </span>
+                        )}
+                    />
                 </div>
 
                 {/* Actions */}
@@ -335,6 +261,183 @@ export default function InternRow({ intern }: InternRowProps) {
         </Modal>
     );
 }
+
+/* ─── InlineSelect ──────────────────────────────────────────── */
+
+type Option = {
+    value: string | null;
+    label: string;
+};
+
+type InlineSelectProps = {
+    ariaLabel: string;
+    value: string | null;
+    placeholder: string;
+    loading?: boolean;
+    onChange: (value: string | null) => void;
+    options: Option[];
+    renderTrigger?: (label: string) => React.ReactNode;
+};
+
+function InlineSelect({
+    ariaLabel,
+    value,
+    placeholder,
+    loading,
+    onChange,
+    options,
+    renderTrigger,
+}: InlineSelectProps) {
+    const [open, setOpen] = useState(false);
+    const [activeIndex, setActiveIndex] = useState(0);
+    const ref = useRef<HTMLDivElement>(null);
+    const triggerRef = useRef<HTMLButtonElement>(null);
+    const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
+    const listboxId = useId();
+
+    useEffect(() => {
+        function handleClick(e: MouseEvent) {
+            if (ref.current && !ref.current.contains(e.target as Node)) {
+                setOpen(false);
+            }
+        }
+        if (open) document.addEventListener("mousedown", handleClick);
+        return () => document.removeEventListener("mousedown", handleClick);
+    }, [open]);
+
+    const selected = options.find((o) => o.value === value);
+    const label = selected?.label ?? placeholder;
+    const isPlaceholder = !selected;
+    const selectedIndex = Math.max(
+        0,
+        options.findIndex((option) => option.value === value),
+    );
+
+    const focusOption = (index: number) => {
+        const nextIndex = (index + options.length) % options.length;
+        setActiveIndex(nextIndex);
+        optionRefs.current[nextIndex]?.focus();
+    };
+
+    const openDropdown = () => {
+        setActiveIndex(selectedIndex);
+        setOpen(true);
+        requestAnimationFrame(() => optionRefs.current[selectedIndex]?.focus());
+    };
+
+    const closeDropdown = () => {
+        setOpen(false);
+        triggerRef.current?.focus();
+    };
+
+    const trigger = renderTrigger ? (
+        renderTrigger(label)
+    ) : (
+        <span className={isPlaceholder ? "italic text-slate-600" : ""}>
+            {label}
+        </span>
+    );
+
+    return (
+        <div ref={ref} className="relative">
+            <button
+                ref={triggerRef}
+                type="button"
+                aria-label={ariaLabel}
+                aria-haspopup="listbox"
+                aria-expanded={open}
+                aria-controls={listboxId}
+                onClick={() => {
+                    if (open) {
+                        setOpen(false);
+                    } else {
+                        openDropdown();
+                    }
+                }}
+                onKeyDown={(event) => {
+                    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+                        event.preventDefault();
+                        openDropdown();
+                    }
+                }}
+                disabled={loading}
+                className="flex w-full items-center gap-1 text-left transition hover:text-cyan-400 disabled:opacity-50"
+            >
+                {loading ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
+                ) : (
+                    <>
+                        <span className="min-w-0 truncate">{trigger}</span>
+                        <ChevronDown
+                            className={`h-3 w-3 shrink-0 text-slate-500 transition-transform ${
+                                open ? "rotate-180" : ""
+                            }`}
+                        />
+                    </>
+                )}
+            </button>
+
+            {open && (
+                <div
+                    id={listboxId}
+                    role="listbox"
+                    aria-label={ariaLabel}
+                    onKeyDown={(event) => {
+                        if (event.key === "Escape") {
+                            event.preventDefault();
+                            closeDropdown();
+                        } else if (event.key === "ArrowDown") {
+                            event.preventDefault();
+                            focusOption(activeIndex + 1);
+                        } else if (event.key === "ArrowUp") {
+                            event.preventDefault();
+                            focusOption(activeIndex - 1);
+                        }
+                    }}
+                    className="absolute left-0 top-full z-50 mt-1 min-w-[180px] max-w-[280px] rounded-xl border border-white/10 bg-[#0f172a] p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl"
+                >
+                    <div className="max-h-[220px] overflow-y-auto">
+                        {options.map((opt, index) => {
+                            const isSelected =
+                                opt.value === value ||
+                                (opt.value === null && value === null);
+                            return (
+                                <button
+                                    ref={(element) => {
+                                        optionRefs.current[index] = element;
+                                    }}
+                                    key={String(opt.value)}
+                                    type="button"
+                                    role="option"
+                                    aria-selected={isSelected}
+                                    tabIndex={index === activeIndex ? 0 : -1}
+                                    onClick={() => {
+                                        onChange(opt.value);
+                                        closeDropdown();
+                                    }}
+                                    className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
+                                        isSelected
+                                            ? "text-cyan-400 bg-cyan-400/10"
+                                            : "text-slate-300 hover:bg-white/5 hover:text-white"
+                                    }`}
+                                >
+                                    <span className="flex-1 truncate text-left">
+                                        {opt.label}
+                                    </span>
+                                    {isSelected && (
+                                        <Check className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+/* ─── DeleteConfirm ──────────────────────────────────────────── */
 
 function DeleteConfirm({
     name,

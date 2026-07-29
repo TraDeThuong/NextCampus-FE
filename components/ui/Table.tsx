@@ -28,6 +28,8 @@ type HeaderProps = {
 
 type RowProps = {
   children: ReactNode;
+  className?: string;
+  onClick?: () => void;
 };
 
 type BodyProps<T> = {
@@ -94,14 +96,15 @@ function Header({ children }: HeaderProps) {
   );
 }
 
-function Row({ children }: RowProps) {
+function Row({ children, className = "", onClick }: RowProps) {
   const { columns } = useTableContext();
 
   return (
     <div
       role="row"
       style={{ gridTemplateColumns: columns }}
-      className="
+      onClick={onClick}
+      className={`
         grid items-center gap-x-8
         border-b border-white/5
         px-8 py-4
@@ -109,7 +112,9 @@ function Row({ children }: RowProps) {
         transition-all duration-200
         hover:bg-white/[0.03]
         last:border-b-0
-      "
+        ${onClick ? "cursor-pointer" : ""}
+        ${className}
+      `}
     >
       {children}
     </div>

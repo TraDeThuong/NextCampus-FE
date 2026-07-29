@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { UserPlus, Clock } from "lucide-react";
+import { UserPlus, Clock, UserCheck } from "lucide-react";
 
 import { useApplications } from "@/hooks/application/useApplications";
 import InviteInternModal from "../onboarding/InviteInternModal";
+import CreateInternModal from "./CreateInternModal";
 import PendingInternsTable from "./PendingInternsTable";
 import MetalCard from "@/components/ui/MetalCard";
 
 export default function InternHeader() {
     const [showInviteModal, setShowInviteModal] = useState(false);
+    const [showDirectModal, setShowDirectModal] = useState(false);
     const [showPending, setShowPending] = useState(false);
 
     const { data: pendingData } = useApplications({ status: "PENDING" });
@@ -30,6 +32,15 @@ export default function InternHeader() {
                         </div>
 
                         <div className="flex items-center gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setShowDirectModal(true)}
+                                className="flex items-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/50 hover:bg-emerald-500/20"
+                            >
+                                <UserCheck className="h-4 w-4" />
+                                Direct Add
+                            </button>
+
                             <button
                                 type="button"
                                 onClick={() => setShowInviteModal(true)}
@@ -62,6 +73,11 @@ export default function InternHeader() {
                     <PendingInternsTable />
                 </div>
             )}
+
+            <CreateInternModal
+                open={showDirectModal}
+                onClose={() => setShowDirectModal(false)}
+            />
 
             <InviteInternModal
                 open={showInviteModal}

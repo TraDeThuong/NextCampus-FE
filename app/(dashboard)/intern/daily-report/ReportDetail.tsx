@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Link, Video, ExternalLink, AlertCircle, Paperclip, Download } from "lucide-react";
+import { FileText, Link, Video, ExternalLink, AlertCircle, Download } from "lucide-react";
 import MetalCard from "@/components/ui/MetalCard";
 import Button from "@/components/ui/Button";
 import { useReportAttachments } from "@/hooks/report-attachment/useReportAttachments";
@@ -10,7 +10,7 @@ type Props = {
   report: DailyReport | null;
   isLoading: boolean;
   missingDate?: string | null;
-  onEdit: (report: DailyReport) => void;
+  onEdit?: (report: DailyReport) => void;
 };
 
 export default function ReportDetail({ report, isLoading, missingDate, onEdit }: Props) {
@@ -102,9 +102,11 @@ export default function ReportDetail({ report, isLoading, missingDate, onEdit }:
               {createdDate} at {createdTime}
             </p>
           </div>
-          <Button variant="metal-blue" size="sm" onClick={() => onEdit(report)}>
-            Edit
-          </Button>
+          {onEdit && (
+            <Button variant="metal-blue" size="sm" onClick={() => onEdit(report)}>
+              Edit
+            </Button>
+          )}
         </div>
 
         <div className="space-y-4">

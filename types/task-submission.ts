@@ -97,6 +97,44 @@ export interface TaskSubmissionListResponse {
   };
 }
 
+export interface TaskSubmissionThreadItem {
+  id: string;
+  attempt: number;
+  prLink: string | null;
+  videoDemo: string | null;
+  note: string | null;
+  reviewStatus: ReviewStatus;
+  reviewComment: string | null;
+  reviewedAt: string | null;
+  submittedAt: string;
+  updatedAt: string;
+  reviewer: SubmissionReviewer | null;
+  attachments: Array<Omit<SubmissionAttachmentSummary, "submissionId">>;
+}
+
+export interface TaskSubmissionThreadResponse {
+  success: boolean;
+  data: {
+    assignment: {
+      id: string;
+      status: string;
+      task: SubmissionAssignment["task"];
+      intern: SubmissionAssignment["intern"] | null;
+      assigner: {
+        id: string;
+        email: string;
+        fullName: string | null;
+      };
+      support: {
+        id: string;
+        userId: string;
+        fullName: string;
+      } | null;
+    };
+    thread: TaskSubmissionThreadItem[];
+  };
+}
+
 export interface TaskSubmissionDeleteResponse {
   success: boolean;
   message: string;

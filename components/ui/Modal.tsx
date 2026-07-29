@@ -143,6 +143,7 @@ function Window({ children, name, size = "lg" }: WindowProps) {
 
             transition-all duration-200
 
+            hover:cursor-pointer
             hover:border-primary-light/40
             hover:bg-card-hover
             hover:text-foreground
@@ -151,7 +152,7 @@ function Window({ children, name, size = "lg" }: WindowProps) {
             focus:outline-none
           "
         >
-          <HiXMark className="h-7 w-7" />
+          <HiXMark className="h-7 w-7 hover:cursor-pointer" />
         </button>
 
         <div>

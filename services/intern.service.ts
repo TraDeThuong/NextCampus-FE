@@ -4,6 +4,7 @@ import type {
     InternListResponse,
     InternQueryParams,
     CreateInternPayload,
+    DirectCreateInternPayload,
     UpdateInternPayload,
     UpdateMeInternPayload,
 } from "@/types/intern";
@@ -51,6 +52,16 @@ export const internService = {
     ): Promise<InternSuccessResponse> => {
         const response = await api.post<InternSuccessResponse>(
             "/interns",
+            payload,
+        );
+        return response.data;
+    },
+        // POST /interns/direct
+    directCreateIntern: async (
+        payload: DirectCreateInternPayload,
+    ): Promise<InternSuccessResponse> => {
+        const response = await api.post<InternSuccessResponse>(
+            "/interns/direct",
             payload,
         );
         return response.data;

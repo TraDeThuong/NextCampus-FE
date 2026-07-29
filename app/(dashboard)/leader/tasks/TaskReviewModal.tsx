@@ -4,7 +4,6 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { X, ExternalLink, Loader2, CheckCircle, RotateCcw, Calendar, User } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { toast } from "react-hot-toast";
 import { useTaskAssignment } from "@/hooks/task-assignment/useTaskAssignment";
 import { useTaskSubmissions } from "@/hooks/task-submission/useTaskSubmissions";
 import { useUpdateTaskSubmission } from "@/hooks/task-submission/useUpdateTaskSubmission";
@@ -13,7 +12,6 @@ import type { ReviewStatus } from "@/types/task-submission";
 
 type Props = {
   assignmentId: string;
-  taskId: string;
   onClose: () => void;
 };
 
@@ -29,7 +27,7 @@ const reviewStatusBadge: Record<string, string> = {
   REJECTED: "border-red-400/20 bg-red-500/10 text-red-300",
 };
 
-export default function TaskReviewModal({ assignmentId, taskId, onClose }: Props) {
+export default function TaskReviewModal({ assignmentId, onClose }: Props) {
   const queryClient = useQueryClient();
   const [reviewComment, setReviewComment] = useState("");
 

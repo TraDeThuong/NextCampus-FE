@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter, notFound } from "next/navigation";
+import { useState } from "react";
+import { isAxiosError } from "axios";
+import { useParams, useRouter } from "next/navigation";
 import {
     ArrowLeft,
     Mail,
@@ -16,6 +17,7 @@ import {
     CheckCircle2,
     XCircle,
     Trash2,
+    ChevronDown,
 } from "lucide-react";
 
 import { useInternDetail } from "@/hooks/intern/useInternDetail";
@@ -31,39 +33,75 @@ import Spinner from "@/components/ui/Spinner";
 export default function InternDetailPage() {
     const params = useParams<{ id: string }>();
     const router = useRouter();
-    const { data, isLoading, isError } = useInternDetail(params.id);
+    const { data, error, isLoading, isError, refetch } = useInternDetail(params.id);
     const intern = data?.data;
+    const isNotFound =
+        !intern &&
+        (!isError || (isAxiosError(error) && error.response?.status === 404));
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center py-32">
+            <div className="flex h-[60vh] items-center justify-center">
                 <Spinner size="lg" />
             </div>
         );
     }
 
     if (isError || !intern) {
-        notFound();
+        return (
+            <div className="flex h-[60vh] flex-col items-center justify-center gap-4">
+                <div className="rounded-full bg-slate-800/50 p-4 border border-slate-700/50">
+                    <XCircle className="h-8 w-8 text-rose-400" />
+                </div>
+                <p className="text-slate-400 font-medium">
+                    {isNotFound
+                        ? "Intern profile not found."
+                        : "Unable to load the intern profile."}
+                </p>
+                <div className="flex items-center gap-3">
+                    {!isNotFound && (
+                        <button
+                            type="button"
+                            onClick={() => void refetch()}
+                            className="rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-300 transition hover:bg-cyan-500/20"
+                        >
+                            Try again
+                        </button>
+                    )}
+                    <button
+                        type="button"
+                        onClick={() => router.back()}
+                        className="group flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800/40 px-4 py-2 text-sm font-medium text-slate-300 transition-all duration-300 hover:bg-slate-800 hover:text-cyan-400 hover:border-cyan-500/50 shadow-lg shadow-cyan-950/20"
+                    >
+                        <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+                        Go back
+                    </button>
+                </div>
+            </div>
+        );
     }
 
     return (
-        <div className="space-y-6">
-            {/* Back + header */}
+        <div className="mx-auto w-auto space-y-8 px-4 py-6">
+            {/* Back action */}
             <button
                 onClick={() => router.push("/admin/interns")}
-                className="flex items-center gap-2 text-sm text-slate-400 transition hover:text-white"
+                className="group inline-flex items-center gap-2 text-sm font-medium text-slate-400 transition-colors duration-200 hover:text-cyan-400"
             >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Interns
+                <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+                Back to Dashboard
             </button>
 
+            {/* Header section */}
             <InternHeader intern={intern} />
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {/* Main content grid */}
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
                 <PersonalInfo intern={intern} />
                 <InternshipInfo intern={intern} />
             </div>
 
+            {/* Integrations section */}
             <DiscordCard intern={intern} />
         </div>
     );
@@ -73,95 +111,97 @@ function InternHeader({ intern }: { intern: Intern }) {
     const { mutate: updateIntern } = useUpdateIntern();
     const [status, setStatus] = useState(intern.status);
 
-    useEffect(() => {
-        setStatus(intern.status);
-    }, [intern.status]);
-
     const statusBadge: Record<string, string> = {
-        ACTIVE: "border-emerald-400/20 bg-emerald-500/10 text-emerald-300",
-        COMPLETED: "border-blue-400/20 bg-blue-500/10 text-blue-300",
-        DROPPED: "border-red-400/20 bg-red-500/10 text-red-300",
+        ACTIVE: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 ring-emerald-500/20",
+        COMPLETED: "border-cyan-500/30 bg-cyan-500/10 text-cyan-400 ring-cyan-500/20",
+        DROPPED: "border-rose-500/30 bg-rose-500/10 text-rose-400 ring-rose-500/20",
     };
 
-    const joined = new Date(intern.createdAt).toLocaleDateString("en-GB", {
-        month: "short",
+    const joined = new Date(intern.createdAt).toLocaleDateString("en-US", {
+        month: "long",
         year: "numeric",
     });
 
     return (
         <Modal>
-        <MetalCard>
-            <div className="rounded-3xl p-6">
-                <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-600 to-slate-800 text-2xl font-bold text-slate-200">
-                            {intern.fullName.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                            <h1 className="text-2xl font-bold text-white">
-                                {intern.fullName}
-                            </h1>
-                            <div className="mt-1 flex items-center gap-2 text-sm text-slate-400">
-                                <Mail className="h-4 w-4" />
-                                {intern.user.email}
+            <MetalCard>
+                <div className="relative overflow-hidden rounded-3xl bg-slate-900/40 p-6 backdrop-blur-md border border-slate-800/60 shadow-2xl">
+                    {/* Metal sheen overlay decorative element */}
+                    <div className="absolute -left-16 -top-16 h-32 w-32 rounded-full bg-cyan-500/5 blur-3xl pointer-events-none" />
+                    <div className="absolute -right-16 -bottom-16 h-32 w-32 rounded-full bg-indigo-500/5 blur-3xl pointer-events-none" />
+
+                    <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex items-center gap-5">
+                            <div className="relative flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-700 via-slate-800 to-slate-950 font-bold text-3xl text-white shadow-xl border border-slate-700/60 ring-1 ring-white/10">
+                                {intern.fullName.charAt(0).toUpperCase()}
+                                <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-slate-900 bg-emerald-500 shadow-md" />
                             </div>
-                            <p className="mt-1 text-xs text-slate-500">
-                                Joined: {joined}
-                            </p>
+                            <div className="space-y-1">
+                                <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+                                    {intern.fullName}
+                                </h1>
+                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-400">
+                                    <span className="flex items-center gap-1.5 hover:text-slate-300 transition-colors">
+                                        <Mail className="h-4 w-4 text-slate-500" />
+                                        {intern.user.email}
+                                    </span>
+                                    <span className="text-slate-600">•</span>
+                                    <span className="text-slate-500 font-medium">Joined {joined}</span>
+                                </div>
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="flex items-center gap-3">
-                        <select
-                            value={status}
-                            onChange={(e) => {
-                                const v = e.target
-                                    .value as Intern["status"];
-                                setStatus(v);
-                                updateIntern({
-                                    id: intern.id,
-                                    payload: { status: v },
-                                });
-                            }}
-                            className={`rounded-lg border px-2.5 py-1 text-xs font-medium outline-none cursor-pointer ${statusBadge[status]}`}
-                        >
-                            <option value="ACTIVE" className="bg-[#0b1020] text-emerald-400 font-medium">
-                                Active
-                            </option>
-                            <option value="COMPLETED" className="bg-[#0b1020] text-blue-400 font-medium">
-                                Completed
-                            </option>
-                            <option value="DROPPED" className="bg-[#0b1020] text-red-400 font-medium">
-                                Dropped
-                            </option>
-                        </select>
+                        <div className="flex flex-wrap items-center gap-3">
+                            <div className="relative group">
+                                <select
+                                    value={status}
+                                    onChange={(e) => {
+                                        const v = e.target.value as Intern["status"];
+                                        setStatus(v);
+                                        updateIntern({
+                                            id: intern.id,
+                                            payload: { status: v },
+                                        }, {
+                                            onError: () => setStatus(intern.status),
+                                        });
+                                    }}
+                                    className={`appearance-none rounded-xl border px-4 py-2 pr-9 text-xs font-semibold tracking-wide uppercase outline-none transition-all duration-300 cursor-pointer ring-1 ${statusBadge[status]}`}
+                                >
+                                    <option value="ACTIVE" className="bg-slate-950 text-emerald-400">Active</option>
+                                    <option value="COMPLETED" className="bg-slate-950 text-cyan-400">Completed</option>
+                                    <option value="DROPPED" className="bg-slate-950 text-rose-400">Dropped</option>
+                                </select>
+                                <ChevronDown className="absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 opacity-60 pointer-events-none" />
+                            </div>
 
-                        {status === "ACTIVE" && (
-                            <Modal.Open opens="drop-intern">
-                                <button className="flex items-center gap-1.5 rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-300 transition hover:bg-red-500/20">
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                    Drop
-                                </button>
-                            </Modal.Open>
-                        )}
+                            {status === "ACTIVE" && (
+                                <Modal.Open opens="drop-intern">
+                                    <button className="flex items-center gap-2 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-2 text-xs font-semibold tracking-wide uppercase text-rose-400 transition-all duration-300 hover:bg-rose-500/20 hover:border-rose-500/40 active:scale-95">
+                                        <Trash2 className="h-3.5 w-3.5" />
+                                        Drop Intern
+                                    </button>
+                                </Modal.Open>
+                            )}
+                        </div>
                     </div>
                 </div>
-            </div>
-        </MetalCard>
+            </MetalCard>
 
-        <Modal.Window name="drop-intern" size="sm">
-            <DropConfirm
-                name={intern.fullName}
-                onConfirm={(close) => {
-                    setStatus("DROPPED");
-                    updateIntern({
-                        id: intern.id,
-                        payload: { status: "DROPPED" },
-                    });
-                    close?.();
-                }}
-            />
-        </Modal.Window>
+            <Modal.Window name="drop-intern" size="sm">
+                <DropConfirm
+                    name={intern.fullName}
+                    onConfirm={(close) => {
+                        setStatus("DROPPED");
+                        updateIntern({
+                            id: intern.id,
+                            payload: { status: "DROPPED" },
+                        }, {
+                            onError: () => setStatus(intern.status),
+                        });
+                        close?.();
+                    }}
+                />
+            </Modal.Window>
         </Modal>
     );
 }
@@ -179,18 +219,18 @@ function PersonalInfo({ intern }: { intern: Intern }) {
 
     return (
         <MetalCard>
-            <div className="rounded-3xl p-6">
-                <h2 className="text-lg font-semibold metal-text">
-                    Personal Information
+            <div className="rounded-3xl bg-slate-900/40 p-6 border border-slate-800/60 shadow-xl backdrop-blur-md h-full">
+                <h2 className="text-lg font-bold tracking-wide bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent border-b border-slate-800/80 pb-3">
+                    Personal Details
                 </h2>
                 <div className="mt-5 space-y-4">
-                    <InfoRow icon={Mail} label="Email" value={intern.user.email} />
-                    <InfoRow icon={Hash} label="User ID" value={intern.userId} />
+                    <InfoRow icon={Mail} label="Email Address" value={intern.user.email} />
+                    <InfoRow icon={Hash} label="User System ID" value={intern.userId} className="font-mono text-xs bg-slate-950/40 px-2 py-0.5 rounded border border-slate-800/30" />
 
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3 text-sm text-slate-400">
-                            <Phone className="h-4 w-4" />
-                            <span>Phone</span>
+                    <div className="flex items-center justify-between group py-1">
+                        <div className="flex items-center gap-3 text-sm font-medium text-slate-400">
+                            <Phone className="h-4 w-4 text-slate-500 group-hover:text-cyan-400 transition-colors" />
+                            <span>Phone Contact</span>
                         </div>
                         {editingPhone ? (
                             <input
@@ -211,24 +251,25 @@ function PersonalInfo({ intern }: { intern: Intern }) {
                                         (e.target as HTMLInputElement).blur();
                                 }}
                                 autoFocus
-                                className="rounded-lg border border-cyan-400/30 bg-[#0f172a] px-2 py-1 text-sm text-white outline-none"
+                                className="rounded-lg border border-cyan-500/50 bg-slate-950 px-3 py-1 text-sm text-white outline-none ring-2 ring-cyan-500/20 shadow-inner w-44 transition-all"
                             />
                         ) : (
                             <button
                                 onClick={() => setEditingPhone(true)}
-                                className="text-sm text-white transition hover:text-cyan-400"
+                                className="rounded-md px-2 py-0.5 text-sm font-medium text-slate-200 transition-all duration-200 hover:bg-slate-800 hover:text-cyan-400 border border-transparent hover:border-slate-700"
                             >
-                                {phone}
+                                {phone || "Add phone number"}
                             </button>
                         )}
                     </div>
 
                     <InfoRow
                         icon={intern.user.isActive ? CheckCircle2 : XCircle}
-                        label="Account"
-                        value={intern.user.isActive ? "Active" : "Inactive"}
+                        label="Account Status"
+                        value={intern.user.isActive ? "Authorized" : "Deactivated"}
+                        valueClass={intern.user.isActive ? "text-emerald-400" : "text-rose-400"}
                     />
-                    <InfoRow icon={Calendar} label="Created" value={created} />
+                    <InfoRow icon={Calendar} label="Profile Created" value={created} />
                 </div>
             </div>
         </MetalCard>
@@ -259,15 +300,15 @@ function InternshipInfo({ intern }: { intern: Intern }) {
 
     return (
         <MetalCard>
-            <div className="rounded-3xl p-6">
-                <h2 className="text-lg font-semibold metal-text">
-                    Internship Information
+            <div className="rounded-3xl bg-slate-900/40 p-6 border border-slate-800/60 shadow-xl backdrop-blur-md h-full">
+                <h2 className="text-lg font-bold tracking-wide bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent border-b border-slate-800/80 pb-3">
+                    Program Placement
                 </h2>
                 <div className="mt-5 space-y-4">
                     <InlineSelectRow
                         icon={Building2}
                         label="Department"
-                        value={intern.department?.name ?? "Not set"}
+                        value={intern.department?.name ?? "Not assigned"}
                         options={departments.map((d) => ({
                             value: d.id,
                             label: d.name,
@@ -283,8 +324,8 @@ function InternshipInfo({ intern }: { intern: Intern }) {
 
                     <InlineSelectRow
                         icon={Briefcase}
-                        label="Position"
-                        value={intern.position?.name ?? "Not set"}
+                        label="Job Role"
+                        value={intern.position?.name ?? "Not assigned"}
                         options={positions.map((p) => ({
                             value: p.id,
                             label: p.name,
@@ -300,8 +341,8 @@ function InternshipInfo({ intern }: { intern: Intern }) {
 
                     <InlineSelectRow
                         icon={User}
-                        label="Leader"
-                        value={intern.leader?.fullName ?? "Not set"}
+                        label="Mentor / Leader"
+                        value={intern.leader?.fullName ?? "Not assigned"}
                         options={leaders.map((l) => ({
                             value: l.id,
                             label: l.fullName ?? l.email,
@@ -317,13 +358,15 @@ function InternshipInfo({ intern }: { intern: Intern }) {
 
                     <InfoRow
                         icon={Calendar}
-                        label="Period"
-                        value={`${startDate} → ${endDateStr}`}
+                        label="Active Timeline"
+                        value={`${startDate} — ${endDateStr}`}
+                        valueClass="text-slate-300 font-medium"
                     />
                     <InfoRow
                         icon={Clock}
-                        label="Duration"
-                        value={`${intern.duration} month${intern.duration > 1 ? "s" : ""}`}
+                        label="Total Duration"
+                        value={`${intern.duration} Month${intern.duration > 1 ? "s" : ""}`}
+                        valueClass="bg-indigo-500/10 text-indigo-400 px-2.5 py-0.5 rounded-full border border-indigo-500/20 text-xs font-semibold"
                     />
                 </div>
             </div>
@@ -334,19 +377,30 @@ function InternshipInfo({ intern }: { intern: Intern }) {
 function DiscordCard({ intern }: { intern: Intern }) {
     return (
         <MetalCard>
-            <div className="rounded-3xl p-6">
-                <h2 className="text-lg font-semibold metal-text">Discord</h2>
-                <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                    <InfoRow
-                        icon={User}
-                        label="Username"
-                        value={intern.discordUsername ?? "Not connected"}
-                    />
-                    <InfoRow
-                        icon={Circle}
-                        label="Role Granted"
-                        value={intern.discordRoleGranted ? "Yes" : "No"}
-                    />
+            <div className="relative overflow-hidden rounded-3xl bg-slate-900/40 p-6 border border-slate-800/60 shadow-xl backdrop-blur-md">
+                {/* Visual Glow Brand Effect */}
+                <div className="absolute -right-10 top-1/2 h-20 w-20 -translate-y-1/2 rounded-full bg-indigo-600/10 blur-2xl pointer-events-none" />
+
+                <h2 className="text-lg font-bold tracking-wide bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent border-b border-slate-800/80 pb-3">
+                    Community Integrations
+                </h2>
+                <div className="mt-5 grid gap-6 sm:grid-cols-2">
+                    <div className="rounded-2xl bg-slate-950/40 border border-slate-800/60 p-4 transition-all duration-300 hover:border-indigo-500/30">
+                        <InfoRow
+                            icon={User}
+                            label="Discord Handle"
+                            value={intern.discordUsername ?? "Not linked"}
+                            valueClass={intern.discordUsername ? "text-indigo-400 font-semibold" : "text-slate-500 italic"}
+                        />
+                    </div>
+                    <div className="rounded-2xl bg-slate-950/40 border border-slate-800/60 p-4 transition-all duration-300 hover:border-indigo-500/30">
+                        <InfoRow
+                            icon={Circle}
+                            label="Server Role Sync"
+                            value={intern.discordRoleGranted ? "Synchronized" : "Pending Sync"}
+                            valueClass={intern.discordRoleGranted ? "text-emerald-400 font-semibold" : "text-amber-400/80 font-medium"}
+                        />
+                    </div>
                 </div>
             </div>
         </MetalCard>
@@ -357,18 +411,22 @@ function InfoRow({
     icon: Icon,
     label,
     value,
+    className = "",
+    valueClass = "text-slate-200 font-medium",
 }: {
     icon: React.ComponentType<{ className?: string }>;
     label: string;
     value: string;
+    className?: string;
+    valueClass?: string;
 }) {
     return (
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between py-1.5">
             <div className="flex items-center gap-3 text-sm text-slate-400">
-                <Icon className="h-4 w-4" />
+                <Icon className="h-4 w-4 text-slate-500" />
                 <span>{label}</span>
             </div>
-            <span className="text-sm text-white">{value}</span>
+            <span className={`text-sm tracking-wide ${valueClass} ${className}`}>{value}</span>
         </div>
     );
 }
@@ -391,33 +449,36 @@ function InlineSelectRow({
     const [editing, setEditing] = useState(false);
 
     return (
-        <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 text-sm text-slate-400">
-                <Icon className="h-4 w-4" />
+        <div className="flex items-center justify-between group py-1.5">
+            <div className="flex items-center gap-3 text-sm font-medium text-slate-400">
+                <Icon className="h-4 w-4 text-slate-500 group-hover:text-cyan-400 transition-colors" />
                 <span>{label}</span>
             </div>
             {editing ? (
-                <select
-                    value={currentId}
-                    onChange={(e) => {
-                        onChange(e.target.value);
-                        setEditing(false);
-                    }}
-                    onBlur={() => setEditing(false)}
-                    autoFocus
-                    className="rounded-lg border border-cyan-400/30 bg-[#0f172a] px-2 py-1 text-sm text-white outline-none"
-                >
-                    <option value="">Not set</option>
-                    {options.map((o) => (
-                        <option key={o.value} value={o.value}>
-                            {o.label}
-                        </option>
-                    ))}
-                </select>
+                <div className="relative">
+                    <select
+                        value={currentId}
+                        onChange={(e) => {
+                            onChange(e.target.value);
+                            setEditing(false);
+                        }}
+                        onBlur={() => setEditing(false)}
+                        autoFocus
+                        className="appearance-none rounded-lg border border-cyan-500/50 bg-slate-950 pl-3 pr-8 py-1 text-sm text-white outline-none ring-2 ring-cyan-500/20 shadow-inner max-w-48 transition-all cursor-pointer"
+                    >
+                        <option value="">Not assigned</option>
+                        {options.map((o) => (
+                            <option key={o.value} value={o.value} className="bg-slate-950">
+                                {o.label}
+                            </option>
+                        ))}
+                    </select>
+                    <ChevronDown className="absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 opacity-60 pointer-events-none" />
+                </div>
             ) : (
                 <button
                     onClick={() => setEditing(true)}
-                    className="text-sm text-white transition hover:text-cyan-400"
+                    className="rounded-md px-2 py-0.5 text-sm font-medium text-slate-200 transition-all duration-200 hover:bg-slate-800 hover:text-cyan-400 border border-transparent hover:border-slate-700"
                 >
                     {value}
                 </button>
@@ -436,30 +497,28 @@ function DropConfirm({
     onCloseModal?: () => void;
 }) {
     return (
-        <div className="px-2 py-8 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 text-red-400">
+        <div className="relative overflow-hidden rounded-2xl p-6 shadow-2xl text-center">
+            <div className="relative mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-b from-rose-500/20 to-rose-500/5 border border-rose-500/30 text-rose-400 shadow-inner">
                 <Trash2 className="h-6 w-6" />
             </div>
-            <h3 className="mt-4 text-base font-semibold text-white">
-                Drop Intern
+            <h3 className="mt-5 text-xl font-bold tracking-tight text-white">
+                Terminate Internship
             </h3>
-            <p className="mt-2 text-sm text-slate-400">
-                This will deactivate{" "}
-                <span className="font-medium text-white">{name}</span>
-                &apos;s account and mark them as dropped.
+            <p className="mt-3 text-sm leading-relaxed text-slate-400 max-w-xs mx-auto">
+                Are you sure you want to drop <span className="font-semibold text-white">{name}</span>? This action revokes network permissions instantly.
             </p>
-            <div className="mt-6 flex justify-center gap-3">
+            <div className="mt-8 flex justify-center gap-3">
                 <button
                     onClick={onCloseModal}
-                    className="rounded-xl border border-white/10 bg-white/5 px-5 py-2 text-sm text-slate-300 hover:text-white"
+                    className="flex-1 rounded-xl border border-slate-800 bg-slate-900/50 px-5 py-2.5 text-sm font-semibold text-slate-300 transition-all hover:bg-slate-800 hover:text-white"
                 >
                     Cancel
                 </button>
                 <button
                     onClick={() => onConfirm(onCloseModal)}
-                    className="rounded-xl bg-red-600 px-5 py-2 text-sm font-medium text-white hover:bg-red-500"
+                    className="flex-1 rounded-xl bg-gradient-to-r from-rose-600 to-rose-700 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:from-rose-500 hover:to-rose-600 shadow-lg shadow-rose-950/40 active:scale-[0.98] "
                 >
-                    Drop
+                    Drop Now
                 </button>
             </div>
         </div>

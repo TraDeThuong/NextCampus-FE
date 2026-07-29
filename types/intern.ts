@@ -67,6 +67,18 @@ export interface CreateInternPayload {
     discordUsername?: string;
 }
 
+export interface DirectCreateInternPayload {
+    email: string;
+    leaderId?: string;
+    fullName: string;
+    phone: string;
+    departmentId: string;
+    positionId: string;
+    startDate: string;
+    duration: number;
+    discordUsername?: string;
+}
+
 export interface UpdateInternPayload {
     leaderId?: string | null;
     fullName?: string;
