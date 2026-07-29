@@ -136,11 +136,11 @@ export default function AdminStatsOverview() {
           </Link>
 
           <Link
-            href="/admin/onboarding?status=PENDING"
+            href="/admin/onboarding?inviteStatus=USED&applicationStatus=PENDING"
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-semibold hover:bg-amber-500/30 transition-all shadow-sm"
           >
             <FileText className="h-4 w-4" />
-            + Duyệt Đơn Ứng Tuyển
+            + Duyệt Đơn Ứng Tuyển 
           </Link>
 
           <Link
@@ -196,7 +196,7 @@ export default function AdminStatsOverview() {
           value={stats.applications.pending}
           subtitle={`Trên tổng ${stats.applications.total} đơn ứng tuyển`}
           icon={<FileText className="h-6 w-6 text-amber-400" />}
-          href="/admin/onboarding?status=PENDING"
+          href="/admin/onboarding?inviteStatus=USED&applicationStatus=PENDING"
           trend={{
             text: stats.applications.pending > 0 ? "Cần duyệt ngay" : "Đã xử lý xong",
             positive: stats.applications.pending === 0,
@@ -410,7 +410,7 @@ export default function AdminStatsOverview() {
           <div className="mt-5 space-y-3.5">
             {/* Action Item 1: Applications Pending */}
             <Link
-              href="/admin/onboarding?status=PENDING"
+              href="/admin/onboarding?inviteStatus=USED&applicationStatus=PENDING"
               className="flex items-center justify-between p-3.5 rounded-2xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 transition-all group"
             >
               <div className="flex items-center gap-3">

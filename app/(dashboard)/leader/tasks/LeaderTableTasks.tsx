@@ -182,7 +182,7 @@ export default function LeaderTableTasks() {
               <div className="flex justify-center py-12"><Spinner /></div>
             ) : tasks.length > 0 ? (
               <div className="overflow-x-auto">
-                <Table columns="100px minmax(220px,1fr) 140px 140px 90px 110px 120px 50px" className="min-w-[1050px]">
+                <Table columns="100px minmax(220px,1fr) 180px 140px 90px 110px 120px 50px" className="min-w-[1050px]">
                   <Table.Header>
                     <div>Code</div><div>Title</div><div>Owner</div><div>Support</div><div>Priority</div><div>Status</div>
                     <div>Deadline</div><div></div>
@@ -586,6 +586,7 @@ function InlineAssignCell({
   }
 
   const assigneeName = assignment?.intern?.fullName;
+  const assigneeEmail = [...myInterns, ...otherInterns].find((i) => i.id === assignment?.internId)?.user?.email;
 
   return (
     <div ref={cellRef} className="relative">
@@ -599,7 +600,12 @@ function InlineAssignCell({
         {isPending ? (
           <Loader2 className="h-3 w-3 animate-spin shrink-0" />
         ) : assigneeName ? (
-          <span className="truncate">{assigneeName}</span>
+          <div className="truncate text-left">
+            <span className="block truncate text-sm">{assigneeName}</span>
+            {assigneeEmail && (
+              <span className="block truncate text-[11px] text-muted">{assigneeEmail}</span>
+            )}
+          </div>
         ) : (
           <span className="flex items-center gap-1">
             <UserPlus className="h-3 w-3" />
