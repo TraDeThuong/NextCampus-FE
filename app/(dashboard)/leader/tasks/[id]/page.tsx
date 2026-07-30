@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
+import { useState } from "react";
 import {
   ArrowLeft,
   Layers,
@@ -18,11 +19,13 @@ import {
   CheckCircle2,
   XCircle,
   Video,
+  Sparkles,
 } from "lucide-react";
 import { useTask } from "@/hooks/task/useTask";
 import { useTaskSubmissions } from "@/hooks/task-submission/useTaskSubmissions";
 import Spinner from "@/components/ui/Spinner";
 import MetalCard from "@/components/ui/MetalCard";
+import TaskAiRecommendationModal from "../TaskAiRecommendationModal";
 
 const priorityBadge: Record<string, string> = {
   HIGH: "bg-rose-500/10 text-rose-400 border border-rose-500/20",
@@ -62,6 +65,7 @@ export default function TaskDetailPage() {
   const router = useRouter();
   const { data, isLoading } = useTask(id);
   const task = data?.data;
+  const [showAi, setShowAi] = useState(false);
 
   const { data: submissionsData } = useTaskSubmissions(
     task?.assignment?.id ? { assignmentId: task.assignment.id, sortBy: "attempt", order: "asc", limit: 50 } : undefined,
@@ -116,11 +120,33 @@ export default function TaskDetailPage() {
               {task.assignment.status.replace("_", " ")}
             </span>
           )}
+
+          {/* AI assignment button — only when not yet assigned */}
+          {(!task.assignment || !task.assignment.internId) && (
+            <button
+              id={`ai-recommend-btn-${task.id}`}
+              onClick={() => setShowAi(true)}
+              className="ml-auto flex items-center gap-1.5 rounded-xl border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 text-xs font-semibold text-sky-400 hover:bg-sky-500/20 hover:border-sky-500/50 transition-all"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              AI Phân công
+            </button>
+          )}
         </div>
         <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white bg-clip-text">
           {task.title}
         </h1>
       </div>
+
+      {/* AI Recommendation Modal */}
+      {showAi && (
+        <TaskAiRecommendationModal
+          taskId={task.id}
+          taskTitle={task.title}
+          isAssigned={!!task.assignment?.internId}
+          onClose={() => setShowAi(false)}
+        />
+      )}
 
       {/* BỐ CỤC 2 CỘT HOÀN HẢO */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">

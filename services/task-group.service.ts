@@ -5,6 +5,11 @@ import type {
   CreateTaskGroupPayload,
   UpdateTaskGroupPayload,
 } from "@/types/task-group";
+import type {
+  GroupAiRecommendationResponse,
+  ConfirmGroupAllocationPayload,
+  ConfirmGroupAllocationResponse,
+} from "@/types/task-allocation";
 import type { MessageSuccessResponse } from "@/types/auth";
 
 export const taskGroupService = {
@@ -49,6 +54,26 @@ export const taskGroupService = {
   delete: async (id: string): Promise<MessageSuccessResponse> => {
     const response = await api.delete<MessageSuccessResponse>(
       `/task-groups/${id}`,
+    );
+    return response.data;
+  },
+
+  // POST /task-groups/:id/ai-recommendation
+  getGroupAiRecommendation: async (id: string): Promise<GroupAiRecommendationResponse> => {
+    const response = await api.post<GroupAiRecommendationResponse>(
+      `/task-groups/${id}/ai-recommendation`,
+    );
+    return response.data;
+  },
+
+  // POST /task-groups/:id/ai-allocation/confirm
+  confirmGroupAiAllocation: async (
+    id: string,
+    payload: ConfirmGroupAllocationPayload,
+  ): Promise<ConfirmGroupAllocationResponse> => {
+    const response = await api.post<ConfirmGroupAllocationResponse>(
+      `/task-groups/${id}/ai-allocation/confirm`,
+      payload,
     );
     return response.data;
   },
