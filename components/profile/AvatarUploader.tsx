@@ -74,6 +74,7 @@ export default function AvatarUploader({
                                     src={preview}
                                     alt={profile.fullName}
                                     fill
+                                    sizes="160px"
                                     className="object-cover"
                                 />
                             ) : (

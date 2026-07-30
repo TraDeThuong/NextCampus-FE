@@ -101,6 +101,7 @@ export default function ProfileHeader({
                                         src={preview ?? profile.avatarUrl!}
                                         alt={profile.fullName}
                                         fill
+                                        sizes="128px"
                                         className="object-cover transition group-hover/avatar:scale-110"
                                     />
                                 ) : (
