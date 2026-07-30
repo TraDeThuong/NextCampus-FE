@@ -1,16 +1,17 @@
 "use client";
 
-import { useState } from "react";
 import { Plus } from "lucide-react";
 import MetalCard from "@/components/ui/MetalCard";
 import DateRangeFilter from "./DateRangeFilter";
-import InviteInternModal from "./InviteInternModal";
+import InviteInternForm from "./InviteInternForm";
+import Modal from "@/components/ui/Modal";
+import { useCreateInvite } from "@/hooks/application/useCreateInvite";
 
 export default function OnboardingHeader() {
-    const [openInviteModal, setOpenInviteModal] = useState(false);
+    const { mutate: createInvite, isPending } = useCreateInvite();
 
     return (
-        <>
+        <Modal>
             <MetalCard className="px-8 py-7">
                 {/* Decorative glow blobs */}
                 <div className="animate-[floatGlow_7s_ease-in-out_infinite] absolute -left-24 top-0 h-56 w-56 rounded-full bg-(--primary-main)/15 blur-3xl" />
@@ -31,41 +32,44 @@ export default function OnboardingHeader() {
                     <div className="flex flex-col items-end gap-4 sm:flex-row sm:items-center">
                         <DateRangeFilter />
 
-                        <button
-                            type="button"
-                            onClick={() => setOpenInviteModal(true)}
-                            className="
-                                group relative shrink-0 overflow-hidden
-                                rounded-2xl
-                                bg-gradient-to-r from-(--primary-main) to-(--primary-light)
-                                px-6 py-3.5
-                                text-sm font-semibold text-white
-                                shadow-[0_0_35px_rgba(21,174,245,0.25)]
-                                transition-all duration-500
-                                hover:-translate-y-1 hover:scale-[1.03]
-                            "
-                        >
-                            <span
+                        <Modal.Open opens="invite-intern">
+                            <button
+                                type="button"
                                 className="
-                                    absolute inset-y-0 -left-24 w-16 rotate-12
-                                    bg-white/30 blur-lg
-                                    transition-all duration-700
-                                    group-hover:left-[130%]
+                                    group relative shrink-0 overflow-hidden
+                                    rounded-2xl
+                                    bg-gradient-to-r from-(--primary-main) to-(--primary-light)
+                                    px-6 py-3.5
+                                    text-sm font-semibold text-white
+                                    shadow-[0_0_35px_rgba(21,174,245,0.25)]
+                                    transition-all duration-500
+                                    hover:-translate-y-1 hover:scale-[1.03]
                                 "
-                            />
-                            <span className="relative flex items-center gap-2 hover:cursor-pointer">
-                                <Plus className=" h-5 w-5 transition-transform duration-300 group-hover:rotate-90" />
-                                Invite Intern
-                            </span>
-                        </button>
+                            >
+                                <span
+                                    className="
+                                        absolute inset-y-0 -left-24 w-16 rotate-12
+                                        bg-white/30 blur-lg
+                                        transition-all duration-700
+                                        group-hover:left-[130%]
+                                    "
+                                />
+                                <span className="relative flex items-center gap-2 hover:cursor-pointer">
+                                    <Plus className=" h-5 w-5 transition-transform duration-300 group-hover:rotate-90" />
+                                    Invite Intern
+                                </span>
+                            </button>
+                        </Modal.Open>
                     </div>
                 </div>
             </MetalCard>
 
-            <InviteInternModal
-                open={openInviteModal}
-                onClose={() => setOpenInviteModal(false)}
-            />
-        </>
+            <Modal.Window name="invite-intern" size="sm">
+                <InviteInternForm
+                    isPending={isPending}
+                    onSubmit={(email, onSuccess) => createInvite({ email }, { onSuccess })}
+                />
+            </Modal.Window>
+        </Modal>
     );
 }

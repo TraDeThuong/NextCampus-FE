@@ -4,21 +4,24 @@ import { useState } from "react";
 import { UserPlus, Clock, UserCheck } from "lucide-react";
 
 import { useApplications } from "@/hooks/application/useApplications";
-import InviteInternModal from "../onboarding/InviteInternModal";
+import InviteInternForm from "../onboarding/InviteInternForm";
 import CreateInternModal from "./CreateInternModal";
 import PendingInternsTable from "./PendingInternsTable";
 import MetalCard from "@/components/ui/MetalCard";
+import Modal from "@/components/ui/Modal";
+import { useCreateInvite } from "@/hooks/application/useCreateInvite";
 
 export default function InternHeader() {
-    const [showInviteModal, setShowInviteModal] = useState(false);
     const [showDirectModal, setShowDirectModal] = useState(false);
     const [showPending, setShowPending] = useState(false);
 
     const { data: pendingData } = useApplications({ status: "PENDING" });
     const pendingCount = pendingData?.meta?.total ?? 0;
 
+    const { mutate: createInvite, isPending } = useCreateInvite();
+
     return (
-        <>
+        <Modal>
             <MetalCard>
                 <div className="rounded-3xl p-6">
                     <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
@@ -41,14 +44,15 @@ export default function InternHeader() {
                                 Direct Add
                             </button>
 
-                            <button
-                                type="button"
-                                onClick={() => setShowInviteModal(true)}
-                                className="flex items-center gap-2 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2.5 text-sm font-medium text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20"
-                            >
-                                <UserPlus className="h-4 w-4" />
-                                Add Intern
-                            </button>
+                            <Modal.Open opens="invite-intern">
+                                <button
+                                    type="button"
+                                    className="flex items-center gap-2 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2.5 text-sm font-medium text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20"
+                                >
+                                    <UserPlus className="h-4 w-4" />
+                                    Add Intern
+                                </button>
+                            </Modal.Open>
 
                             <button
                                 type="button"
@@ -79,10 +83,12 @@ export default function InternHeader() {
                 onClose={() => setShowDirectModal(false)}
             />
 
-            <InviteInternModal
-                open={showInviteModal}
-                onClose={() => setShowInviteModal(false)}
-            />
-        </>
+            <Modal.Window name="invite-intern" size="sm">
+                <InviteInternForm
+                    isPending={isPending}
+                    onSubmit={(email, onSuccess) => createInvite({ email }, { onSuccess })}
+                />
+            </Modal.Window>
+        </Modal>
     );
 }

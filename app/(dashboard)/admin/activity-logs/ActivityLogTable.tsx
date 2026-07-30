@@ -12,9 +12,6 @@ import {
   User,
   PlusCircle,
   Shield,
-  Key,
-  Edit,
-  Trash2,
 } from "lucide-react";
 
 import { useActivityLogs } from "@/hooks/activity-log/useActivityLogs";
@@ -75,11 +72,15 @@ export default function ActivityLogTable() {
 
     const action = searchParams.get("action");
     const targetType = searchParams.get("targetType");
+    const createdFrom = searchParams.get("createdFrom");
+    const createdTo = searchParams.get("createdTo");
     const order = searchParams.get("order");
     const page = searchParams.get("page");
 
     if (action) p.action = action;
     if (targetType) p.targetType = targetType;
+    if (createdFrom) p.createdFrom = createdFrom;
+    if (createdTo) p.createdTo = createdTo;
     if (order) p.order = order as "asc" | "desc";
     p.page = page ? Number(page) : 1;
     p.limit = 20;

@@ -44,7 +44,9 @@ export default function SendNotificationTab() {
 
   // Debounced search recipient on email input change
   useEffect(() => {
-    if (!email || !email.includes("@")) {
+    const trimmed = email.trim();
+    const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+    if (!isValid) {
       setRecipient(null);
       setSearchError("");
       return;
@@ -54,9 +56,9 @@ export default function SendNotificationTab() {
       setSearching(true);
       setSearchError("");
       try {
-        const res = await getUsersService({ email, limit: 1 });
+        const res = await getUsersService({ email: trimmed, limit: 1 });
         const user = res.data?.[0];
-        if (user) {
+        if (user && user.email.toLowerCase() === trimmed.toLowerCase()) {
           setRecipient(user);
         } else {
           setRecipient(null);
@@ -104,7 +106,7 @@ export default function SendNotificationTab() {
   async function handleSend() {
     if (isSubmittingRef.current) return;
 
-    const isEmailValid = email.includes("@") && email.trim().length > 3;
+    const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
     if (!isEmailValid) {
       toast.error("Please enter a valid email address");
       return;
@@ -210,7 +212,7 @@ export default function SendNotificationTab() {
             </div>
           )}
 
-          {!recipient && email.includes("@") && email.trim().length > 3 && !searching && (
+          {!recipient && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) && !searching && (
             <div className={`flex items-center gap-3 rounded-xl p-3 text-xs border ${
               sendWeb 
                 ? "border-red-500/20 bg-red-500/5 text-red-400" 
@@ -219,7 +221,7 @@ export default function SendNotificationTab() {
               <AlertCircle className="h-4 w-4 shrink-0" />
               <span>
                 {sendWeb 
-                  ? "User not registered in database. Cannot send Web notification. Please uncheck Web channel to send Email only."
+                  ? "User not registered. Cannot send Web notification. Please uncheck Web channel to send Email only."
                   : "Onboarding Candidate / Guest: Message will be sent directly to this email address via SMTP."}
               </span>
             </div>

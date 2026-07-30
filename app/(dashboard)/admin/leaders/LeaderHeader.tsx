@@ -65,22 +65,24 @@ export default function LeaderHeader() {
             <Modal.Window name="add-leader" size="sm">
                 <AddLeaderForm
                     isPending={isPending}
-                    onSubmit={(email) => createLeader(email)}
+                    onSubmit={(email, onSuccess) => createLeader(email, { onSuccess })}
                 />
             </Modal.Window>
         </Modal>
     );
 }
 
+interface AddLeaderFormProps {
+    isPending: boolean;
+    onSubmit: (email: string, onSuccess: () => void) => void;
+    onCloseModal?: () => void;
+}
+
 function AddLeaderForm({
     isPending,
     onSubmit,
     onCloseModal,
-}: {
-    isPending: boolean;
-    onSubmit: (email: string) => void;
-    onCloseModal?: () => void;
-}) {
+}: AddLeaderFormProps) {
     const {
         register,
         handleSubmit,
@@ -100,7 +102,7 @@ function AddLeaderForm({
             </p>
 
             <form
-                onSubmit={handleSubmit((data) => onSubmit(data.email))}
+                onSubmit={handleSubmit((data) => onSubmit(data.email, () => onCloseModal?.()))}
                 className="mt-6 space-y-4"
             >
                 <div className="relative">
