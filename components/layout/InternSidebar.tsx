@@ -7,7 +7,7 @@ import {
   CheckSquare,
   FileClock,
   ClipboardCheck,
-  User,
+  UserRoundPen,
 } from "lucide-react";
 
 const menus = [
@@ -19,7 +19,7 @@ const menus = [
     href: "/intern/weekly-evaluation",
     icon: ClipboardCheck,
   },
-  { name: "Profile", href: "/intern/profile", icon: User },
+  { name: "Profile", href: "/intern/profile", icon: UserRoundPen },
 ];
 
 const baseClass =

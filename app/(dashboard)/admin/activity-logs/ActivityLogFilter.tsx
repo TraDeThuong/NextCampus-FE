@@ -5,7 +5,6 @@ import MetalCard from "@/components/ui/MetalCard";
 
 const ACTION_OPTIONS = [
   { value: "LOGIN", label: "Đăng nhập (Login)" },
-  { value: "LOGOUT", label: "Đăng xuất (Logout)" },
   { value: "CREATE_USER", label: "Tạo người dùng" },
   { value: "UPDATE_USER", label: "Cập nhật người dùng" },
   { value: "DELETE_USER", label: "Xóa người dùng" },

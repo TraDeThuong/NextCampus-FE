@@ -14,7 +14,6 @@ import {
   Award,
   ExternalLink,
   Clock,
-  AlertCircle,
   FileCheck,
 } from "lucide-react";
 
@@ -108,8 +107,12 @@ export default function InternStatsOverview() {
 
         <StatsCard
           title="Weekly Score"
-          value={stats.lastWeekScore ? `${stats.lastWeekScore}/10` : `${stats.avgScore}/10`}
-          subtitle={`Average: ${stats.avgScore}/10`}
+          value={
+            typeof stats.lastWeekScore === "number"
+              ? `${stats.lastWeekScore.toFixed(1)}/10`
+              : `${stats.avgScore.toFixed(1)}/10`
+          }
+          subtitle={`Average: ${stats.avgScore.toFixed(1)}/10`}
           icon={<Award className="h-6 w-6 text-indigo-400" />}
           href="/intern/weekly-evaluation"
           trend={{
