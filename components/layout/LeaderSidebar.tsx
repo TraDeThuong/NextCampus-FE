@@ -7,21 +7,21 @@ import {
   Users,
   CheckSquare,
   ClipboardCheck,
-  FileBarChart,
-  User,
+  FileClock,
+  UserRoundPen,
 } from "lucide-react";
 
 const menus = [
   { name: "Dashboard", href: "/leader/dashboard", icon: LayoutDashboard },
   { name: "Interns", href: "/leader/interns", icon: Users },
   { name: "Tasks", href: "/leader/tasks", icon: CheckSquare },
-  { name: "Daily Reports", href: "/leader/daily-reports", icon: ClipboardCheck },
+  { name: "Daily Reports", href: "/leader/daily-reports", icon: FileClock },
   {
     name: "Weekly Evaluation",
     href: "/leader/weekly-evaluation",
-    icon: FileBarChart,
+    icon: ClipboardCheck,
   },
-  { name: "Profile", href: "/leader/profile", icon: User },
+  { name: "Profile", href: "/leader/profile", icon: UserRoundPen },
 ];
 
 const baseClass =

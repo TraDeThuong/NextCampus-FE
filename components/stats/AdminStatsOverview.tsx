@@ -15,20 +15,15 @@ import {
   CheckCircle2,
   AlertOctagon,
   ExternalLink,
-  Ban,
   UserCheck,
   ShieldAlert,
   Eye,
   Clock,
   AlertTriangle,
-  PlusCircle,
   Activity,
   ChevronDown,
   ChevronUp,
-  Award,
   Calendar,
-  Building2,
-  TrendingUp,
 } from "lucide-react";
 
 export default function AdminStatsOverview() {
@@ -69,10 +64,7 @@ export default function AdminStatsOverview() {
   }
 
   const stats = response.data;
-  const assignmentTotal = stats.assignments.total || 1;
-  const systemCompletionRate = stats.systemCompletionRate ?? 0;
 
-  const allAssignments = stats.recentAssignments ?? [];
   const rawOverdue = stats.overdueAssignments ?? [];
   const overdueAssignments = rawOverdue.filter((a) => a.isOverdue);
   const leaderTeams = stats.leaderTeams ?? [];
@@ -81,15 +73,6 @@ export default function AdminStatsOverview() {
   const displayedLeaderTeams = showAllLeaders
     ? leaderTeams
     : leaderTeams.slice(0, 5);
-
-  const handleOpenStatusModal = (statusKey: string, statusTitle: string) => {
-    const filtered = allAssignments.filter((a) => a.status === statusKey);
-    setModalConfig({
-      isOpen: true,
-      title: `Chi Tiết Nhiệm Vụ Toàn Hệ Thống - Trạng Thái: ${statusTitle}`,
-      assignments: filtered,
-    });
-  };
 
   const handleOpenOverdueModal = () => {
     setModalConfig({
@@ -109,8 +92,8 @@ export default function AdminStatsOverview() {
         assignments={modalConfig.assignments}
       />
 
-      {/* Header Banner + SaaS Quick Action Bar */}
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between border-b border-white/10 pb-6">
+      {/* Header Banner */}
+      <div className="border-b border-white/10 pb-6">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-3xl font-extrabold text-foreground metal-text">
@@ -124,37 +107,10 @@ export default function AdminStatsOverview() {
             Quản trị cấp cao toàn hệ thống • Giám sát sức khỏe tổng thể, nhóm Leader & xử lý tác vụ nhanh
           </p>
         </div>
-
-        {/* Quick Actions Bar */}
-        <div className="flex flex-wrap items-center gap-2">
-          <Link
-            href="/admin/leaders"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary-main/20 border border-primary-main/40 text-primary-light text-xs font-semibold hover:bg-primary-main/30 transition-all shadow-sm"
-          >
-            <PlusCircle className="h-4 w-4" />
-            + Tạo Leader
-          </Link>
-
-          <Link
-            href="/admin/onboarding?inviteStatus=USED&applicationStatus=PENDING"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-semibold hover:bg-amber-500/30 transition-all shadow-sm"
-          >
-            <FileText className="h-4 w-4" />
-            + Duyệt Đơn Ứng Tuyển 
-          </Link>
-
-          <Link
-            href="/admin/department"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold hover:bg-indigo-500/30 transition-all shadow-sm"
-          >
-            <Building2 className="h-4 w-4" />
-            + Phòng Ban
-          </Link>
-        </div>
       </div>
 
       {/* Level 1: Health & Performance KPI Cards (KPIs "Sống") */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <StatsCard
           title="TTS Đang Thực Tập"
           value={stats.interns.active}
@@ -164,18 +120,6 @@ export default function AdminStatsOverview() {
           trend={{
             text: `${stats.interns.completed} đã hoàn thành`,
             positive: true,
-          }}
-        />
-
-        <StatsCard
-          title="Tỷ Lệ Hoàn Thành Task"
-          value={`${systemCompletionRate}%`}
-          subtitle={`${stats.assignments.byStatus.done}/${stats.assignments.total} task đã hoàn tất`}
-          icon={<TrendingUp className="h-6 w-6 text-emerald-400" />}
-          href="/admin/leaders"
-          trend={{
-            text: "Hiệu suất toàn hệ thống",
-            positive: systemCompletionRate >= 70,
           }}
         />
 
@@ -235,13 +179,6 @@ export default function AdminStatsOverview() {
                 )}
               </button>
             )}
-
-            <Link
-              href="/admin/leaders"
-              className="text-xs font-semibold text-primary-light hover:underline flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-primary-light/30 bg-primary-light/10"
-            >
-              Quản Lý Leader <ExternalLink className="h-3.5 w-3.5" />
-            </Link>
           </div>
         </div>
 
@@ -353,12 +290,20 @@ export default function AdminStatsOverview() {
               <Activity className="h-5 w-5 text-indigo-400" />
               Nhật Ký Hoạt Động Gần Đây (Recent Activity)
             </h3>
-            <span className="text-xs text-muted">Tự động cập nhật</span>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/admin/activity-logs"
+                className="text-xs text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1 transition-colors"
+              >
+                Xem tất cả
+                <ExternalLink className="h-3 w-3" />
+              </Link>
+            </div>
           </div>
 
           <div className="mt-5 space-y-3">
             {recentActivities.length > 0 ? (
-              recentActivities.map((act) => (
+              recentActivities.slice(0, 3).map((act) => (
                 <div
                   key={act.id}
                   className="flex items-start gap-3 p-3.5 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-colors"
