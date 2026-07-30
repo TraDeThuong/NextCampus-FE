@@ -4,6 +4,8 @@ export interface TaskGroup {
   id: string;
   name: string;
   description: string | null;
+  departmentId: string | null;
+  department?: { id: string; name: string } | null;
   _count?: { tasks: number };
   createdAt: string;
   updatedAt: string;
@@ -26,9 +28,11 @@ export interface TaskGroupListResponse {
 export interface CreateTaskGroupPayload {
   name: string;
   description?: string;
+  departmentId?: string | null;
 }
 
 export interface UpdateTaskGroupPayload {
   name?: string;
   description?: string | null;
+  departmentId?: string | null;
 }

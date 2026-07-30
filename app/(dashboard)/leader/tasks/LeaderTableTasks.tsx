@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo, useContext } from "react";
-import { Layers, MoreHorizontal, Eye, Pencil, Trash2, Loader2, ChevronLeft, ChevronRight, Check, ChevronDown, UserPlus, UserX } from "lucide-react";
+import { Layers, MoreHorizontal, Eye, Pencil, Trash2, Loader2, ChevronLeft, ChevronRight, Check, ChevronDown, UserPlus, UserX, Sparkles, Building } from "lucide-react";
+import TaskAiRecommendationModal from "./TaskAiRecommendationModal";
+import TaskGroupAiAllocationModal from "./TaskGroupAiAllocationModal";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
@@ -12,6 +14,7 @@ import { useTaskGroups } from "@/hooks/task-group/useTaskGroups";
 import { useTaskGroup } from "@/hooks/task-group/useTaskGroup";
 import { useUpdateTaskGroup } from "@/hooks/task-group/useUpdateTaskGroup";
 import { useDeleteTaskGroup } from "@/hooks/task-group/useDeleteTaskGroup";
+import { useDepartments } from "@/hooks/department/useDepartments";
 import { useTasks } from "@/hooks/task/useTasks";
 import { useDeleteTask } from "@/hooks/task/useDeleteTask";
 import { useInterns } from "@/hooks/intern/useInterns";
@@ -32,6 +35,8 @@ export default function LeaderTableTasks() {
   const [action, setAction] = useState<GroupAction>(null);
   const [taskAction, setTaskAction] = useState<{ type: "edit" | "delete"; taskId: string; taskTitle: string } | null>(null);
   const [taskMenuOpen, setTaskMenuOpen] = useState<string | null>(null);
+  const [aiTask, setAiTask] = useState<{ taskId: string; taskTitle: string; isAssigned: boolean } | null>(null);
+  const [groupAiModal, setGroupAiModal] = useState<{ groupId: string; groupName: string } | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const taskTriggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -149,8 +154,14 @@ export default function LeaderTableTasks() {
                       p.set("taskGroupId", g.id);
                       p.set("page", "1");
                       router.push(`${pathname}?${p.toString()}`);
-                    }} className={`flex-1 rounded-xl px-3 py-2 text-left text-sm transition ${taskGroupId === g.id ? "bg-primary-main/10 text-primary-light font-medium" : "text-muted hover:bg-white/5 hover:text-foreground"}`}>
-                      <span className="truncate">{g.name}</span>
+                    }} className={`flex-1 min-w-0 rounded-xl px-3 py-2 text-left text-sm transition ${taskGroupId === g.id ? "bg-primary-main/10 text-primary-light font-medium" : "text-muted hover:bg-white/5 hover:text-foreground"}`}>
+                      <span className="truncate block font-medium">{g.name}</span>
+                      {g.department?.name && (
+                        <span className="truncate flex items-center gap-1 text-[10px] text-sky-400 font-normal mt-0.5">
+                          <Building className="h-2.5 w-2.5 shrink-0" />
+                          {g.department.name}
+                        </span>
+                      )}
                     </button>
                     <button onClick={(e) => { e.stopPropagation(); setMenuOpen(menuOpen === g.id ? null : g.id); }} className="mr-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted opacity-0 transition hover:bg-white/10 hover:text-foreground group-hover:opacity-100">
                       <MoreHorizontal className="h-3.5 w-3.5" />
@@ -172,12 +183,30 @@ export default function LeaderTableTasks() {
         {/* Right: Task Table */}
         <MetalCard>
           <div className="p-4">
-            <h3 className="mb-3 text-sm font-semibold metal-text">
-              Tasks
-              {taskGroupId && groups.find((g) => g.id === taskGroupId) && (
-                <span className="ml-2 font-normal text-muted">— {groups.find((g) => g.id === taskGroupId)!.name}</span>
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-semibold metal-text flex items-center">
+                Tasks
+                {taskGroupId && groups.find((g) => g.id === taskGroupId) && (
+                  <span className="ml-2 font-normal text-muted">— {groups.find((g) => g.id === taskGroupId)!.name}</span>
+                )}
+              </h3>
+              {taskGroupId && (
+                <Button
+                  variant="glass"
+                  size="sm"
+                  onClick={() => {
+                    const currentGroup = groups.find((g) => g.id === taskGroupId);
+                    if (currentGroup) {
+                      setGroupAiModal({ groupId: currentGroup.id, groupName: currentGroup.name });
+                    }
+                  }}
+                  className="flex items-center gap-1.5 text-xs text-sky-400 border border-sky-500/20 hover:bg-sky-500/10 transition-all font-semibold"
+                >
+                  <Sparkles className="h-3.5 w-3.5 animate-pulse" />
+                  AI Phân công
+                </Button>
               )}
-            </h3>
+            </div>
             {tasksLoading ? (
               <div className="flex justify-center py-12"><Spinner /></div>
             ) : tasks.length > 0 ? (
@@ -210,6 +239,14 @@ export default function LeaderTableTasks() {
                         </button>
                         {taskMenuOpen === task.id && (
                           <div ref={taskMenuRef} className="absolute right-0 top-full z-50 mt-1 w-28 rounded-xl border border-border bg-card p-1 shadow-lg">
+                            {(!task.assignment || !task.assignment.internId) && (
+                              <button
+                                onClick={() => { setTaskMenuOpen(null); setAiTask({ taskId: task.id, taskTitle: task.title, isAssigned: false }); }}
+                                className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-sky-400 hover:bg-sky-500/10 transition font-medium"
+                              >
+                                <Sparkles className="h-3 w-3" />AI Phân công
+                              </button>
+                            )}
                             <button
                               onClick={() => { setTaskMenuOpen(null); router.push(`${pathname}/${task.id}`); }}
                               className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground"
@@ -289,6 +326,24 @@ export default function LeaderTableTasks() {
       </Modal.Window>
     </Modal>
 
+    {/* AI Recommendation Modal */}
+    {aiTask && (
+      <TaskAiRecommendationModal
+        taskId={aiTask.taskId}
+        taskTitle={aiTask.taskTitle}
+        isAssigned={aiTask.isAssigned}
+        onClose={() => setAiTask(null)}
+      />
+    )}
+
+    {/* Group AI Allocation Modal */}
+    {groupAiModal && (
+      <TaskGroupAiAllocationModal
+        groupId={groupAiModal.groupId}
+        groupName={groupAiModal.groupName}
+        onClose={() => setGroupAiModal(null)}
+      />
+    )}
     </>
   );
 }
@@ -339,6 +394,7 @@ function ViewGroup({
 
       <div className="space-y-2 rounded-xl border border-border bg-white/5 p-4">
         <DetailRow label="ID" value={group.id} mono />
+        <DetailRow label="Department" value={group.department?.name ?? "Chung (Tất cả)"} />
         <DetailRow label="Description" value={group.description ?? "—"} />
         <DetailRow label="Created" value={new Date(group.createdAt).toLocaleString("vi-VN")} />
         <DetailRow label="Updated" value={new Date(group.updatedAt).toLocaleString("vi-VN")} />
@@ -367,22 +423,46 @@ function ViewGroup({
 
 function EditGroup({ groupId, onClose }: { groupId: string; onClose: () => void }) {
   const { data, isLoading } = useTaskGroup(groupId);
+  const { data: deptData } = useDepartments();
+  const departments = deptData?.data ?? [];
   const updateMutation = useUpdateTaskGroup();
   const group = data?.data;
-  const { register, handleSubmit, formState: { errors } } = useForm<UpdateTaskGroupPayload>({ values: group ? { name: group.name, description: group.description ?? "" } : undefined });
+  const { register, handleSubmit, formState: { errors } } = useForm<UpdateTaskGroupPayload>({
+    values: group
+      ? {
+          name: group.name,
+          description: group.description ?? "",
+          departmentId: group.departmentId ?? "",
+        }
+      : undefined,
+  });
 
   if (isLoading) return <div className="flex justify-center py-8"><Spinner size="sm" /></div>;
   if (!group) return <p className="py-4 text-center text-sm text-muted">Group not found.</p>;
 
   return (
-    <form onSubmit={handleSubmit((payload) => updateMutation.mutate({ id: groupId, payload }, { onSuccess: onClose }))} className="space-y-5">
+    <form
+      onSubmit={handleSubmit((payload) =>
+        updateMutation.mutate(
+          {
+            id: groupId,
+            payload: {
+              ...payload,
+              departmentId: payload.departmentId || null,
+            },
+          },
+          { onSuccess: onClose },
+        ),
+      )}
+      className="space-y-5"
+    >
       <div className="flex items-center gap-3">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500/10">
           <Pencil className="h-6 w-6 text-amber-400" />
         </div>
         <div>
           <h3 className="text-lg font-semibold text-foreground">Edit Group</h3>
-          <p className="mt-0.5 text-sm text-muted">Update name and description.</p>
+          <p className="mt-0.5 text-sm text-muted">Update name, department and description.</p>
         </div>
       </div>
       <div className="space-y-4">
@@ -390,6 +470,20 @@ function EditGroup({ groupId, onClose }: { groupId: string; onClose: () => void 
           <label className="mb-1.5 block text-sm font-medium text-foreground">Name</label>
           <input type="text" {...register("name", { required: "Name is required" })} placeholder="Group name" className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-primary-light/40 focus:outline-none" />
           {errors.name && <p className="mt-1 text-xs text-red-400">{errors.name.message}</p>}
+        </div>
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-foreground">Department (Phòng ban)</label>
+          <select
+            {...register("departmentId")}
+            className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground focus:border-primary-light/40 focus:outline-none"
+          >
+            <option value="">-- Tất cả phòng ban (Chung) --</option>
+            {departments.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.name}
+              </option>
+            ))}
+          </select>
         </div>
         <div>
           <label className="mb-1.5 block text-sm font-medium text-foreground">Description</label>

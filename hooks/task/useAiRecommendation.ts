@@ -1,19 +1,25 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { taskService } from "@/services/task.service";
+import type { AiRecommendation } from "@/types/task-allocation";
 
-export function useAiRecommendation() {
-  return useMutation({
-    mutationFn: (taskId: string) => taskService.getAiRecommendation(taskId),
-
-    onSuccess: () => {
-      toast.success("AI recommendation generated successfully.");
+export function useAiRecommendation(taskId: string, enabled = true) {
+  return useQuery<AiRecommendation, Error>({
+    queryKey: ["ai-recommendation", taskId],
+    queryFn: async () => {
+      const res = await taskService.getAiRecommendation(taskId);
+      const data = res.data;
+      if (data.meta.aiFailed) {
+        toast("AI không phản hồi - hiển thị kết quả từ thuật toán nội bộ.", { icon: "⚠️", id: "ai-fallback" });
+      } else {
+        toast.success("AI đã phân tích và đề xuất phân công thành công.", { id: "ai-success" });
+      }
+      return data;
     },
-
-    onError: () => {
-      toast.error("Failed to get AI recommendation.");
-    },
+    enabled: !!taskId && enabled,
+    gcTime: 0,
+    retry: false,
   });
 }

@@ -10,6 +10,7 @@ import type {
   ImportResultResponse,
   TaskAnalyticsResponse,
 } from "@/types/task";
+import type { AiRecommendationResponse } from "@/types/task-allocation";
 
 export const taskService = {
   // ─── CRUD ────────────────────────────────────────────────────────────
@@ -114,8 +115,8 @@ export const taskService = {
   // ─── AI Recommendation ──────────────────────────────────────────────
 
   // POST /tasks/:taskId/ai-recommendation
-  getAiRecommendation: async (taskId: string) => {
-    const response = await api.post(`/tasks/${taskId}/ai-recommendation`);
+  getAiRecommendation: async (taskId: string): Promise<AiRecommendationResponse> => {
+    const response = await api.post<AiRecommendationResponse>(`/tasks/${taskId}/ai-recommendation`);
     return response.data;
   },
 };
