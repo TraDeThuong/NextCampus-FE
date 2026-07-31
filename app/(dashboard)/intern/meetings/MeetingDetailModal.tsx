@@ -1,14 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { MapPin, Video, Users, Clock, CheckCircle2, XCircle, Calendar, AlertTriangle, Loader2, Trash2 } from "lucide-react";
+import { MapPin, Video, Users, Clock, CheckCircle2, XCircle, Calendar, AlertTriangle, Loader2 } from "lucide-react";
 import Spinner from "@/components/ui/Spinner";
 import Button from "@/components/ui/Button";
 import { useMeeting } from "@/hooks/meeting/useMeeting";
 import { useMeetingAbsences } from "@/hooks/meeting/useMeetingAbsences";
 import { useUpdateMeeting } from "@/hooks/meeting/useUpdateMeeting";
-import { useDeleteMeeting } from "@/hooks/meeting/useDeleteMeeting";
 import { useReviewAbsence } from "@/hooks/meeting/useReviewAbsence";
+import { useAuth } from "@/hooks/auth/useAuth";
+import { useRsvpMeeting } from "@/hooks/meeting/useRsvpMeeting";
+import { useSubmitAbsence } from "@/hooks/meeting/useSubmitAbsence";
 
 interface Props {
   meetingId: string;
@@ -49,9 +51,13 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
   const { data: meetingData, isPending, isError } = useMeeting(meetingId);
   const { data: absencesData } = useMeetingAbsences(meetingId);
   const updateMeeting = useUpdateMeeting();
-  const deleteMeeting = useDeleteMeeting();
   const reviewAbsence = useReviewAbsence();
-  const [confirmAction, setConfirmAction] = useState<"cancel" | "delete" | null>(null);
+  const { state } = useAuth();
+  const rsvpMeeting = useRsvpMeeting();
+  const submitAbsence = useSubmitAbsence();
+  const [confirmAction, setConfirmAction] = useState<"cancel" | null>(null);
+  const [showLeaveForm, setShowLeaveForm] = useState(false);
+  const [leaveReason, setLeaveReason] = useState("");
 
   if (isPending) {
     return (
@@ -72,6 +78,12 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
 
   const meeting = meetingData.data;
   const absences = absencesData?.data ?? [];
+  const currentUser = state.user;
+
+  const myParticipant = meeting.participants.find((p) => p.userId === currentUser?.id);
+  const myStatus = myParticipant?.invitationStatus;
+  const isHostOrOrganizer =
+    myParticipant?.participantRole === "HOST" || myParticipant?.participantRole === "ORGANIZER";
 
   const leaderCount = meeting.participants.filter(
     (p) => p.participantRole === "PARTICIPANT",
@@ -85,14 +97,23 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
     );
   }
 
-  function handleDelete() {
-    deleteMeeting.mutate(meeting.id, {
-      onSuccess: () => onCloseModal?.(),
-    });
-  }
-
   function handleReview(absenceId: string, status: "APPROVED" | "REJECTED") {
     reviewAbsence.mutate({ absenceId, payload: { status } });
+  }
+
+  function handleAccept() {
+    rsvpMeeting.mutate({ id: meeting.id, payload: { status: "ACCEPTED" } });
+  }
+
+  function handleDecline() {
+    if (!leaveReason.trim()) return;
+    rsvpMeeting.mutate({ id: meeting.id, payload: { status: "DECLINED" } });
+    submitAbsence.mutate({
+      meetingId: meeting.id,
+      payload: { reason: leaveReason },
+    });
+    setShowLeaveForm(false);
+    setLeaveReason("");
   }
 
   return (
@@ -154,6 +175,70 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
           </span>
         </div>
       </div>
+
+      {/* RSVP — for invited leaders */}
+      {!isHostOrOrganizer && myParticipant && meeting.status !== "COMPLETED" && meeting.status !== "CANCELLED" && (
+        <div className="rounded-2xl border border-white/5 bg-white/[0.03] p-4">
+          {showLeaveForm ? (
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-slate-200">
+                {myStatus === "ACCEPTED" ? "Leave meeting" : "Decline invitation"}
+              </p>
+              <textarea
+                rows={2}
+                placeholder="Reason (required)..."
+                value={leaveReason}
+                onChange={(e) => setLeaveReason(e.target.value)}
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white outline-none transition focus:border-primary-main/50 placeholder:text-slate-600 resize-none"
+              />
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => { setShowLeaveForm(false); setLeaveReason(""); }}
+                  className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDecline}
+                  disabled={!leaveReason.trim() || rsvpMeeting.isPending || submitAbsence.isPending}
+                  className="rounded-lg bg-red-500/20 px-3 py-1.5 text-xs font-medium text-red-300 transition hover:bg-red-500/30 disabled:opacity-50"
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-slate-400">
+                {myStatus === "ACCEPTED" ? "You've accepted this meeting." : "You're invited to this meeting."}
+              </p>
+              <div className="flex items-center gap-2">
+                {myStatus === "PENDING" && (
+                  <button
+                    type="button"
+                    onClick={handleAccept}
+                    disabled={rsvpMeeting.isPending}
+                    className="flex items-center gap-1.5 rounded-lg bg-emerald-500/20 px-3 py-1.5 text-xs font-medium text-emerald-300 transition hover:bg-emerald-500/30 disabled:opacity-50"
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    Accept
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowLeaveForm(true)}
+                  className="flex items-center gap-1.5 rounded-lg bg-red-500/20 px-3 py-1.5 text-xs font-medium text-red-300 transition hover:bg-red-500/30"
+                >
+                  <XCircle className="h-3.5 w-3.5" />
+                  {myStatus === "ACCEPTED" ? "Leave" : "Decline"}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Host + Creator */}
       <div className="flex flex-wrap gap-x-8 gap-y-1 text-xs text-slate-500">
@@ -264,14 +349,10 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
                 <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-400" />
                 <div className="flex-1">
                   <p className="text-sm font-medium text-red-300">
-                    {confirmAction === "cancel"
-                      ? "Cancel this meeting?"
-                      : "Delete this meeting?"}
+                    Cancel this meeting?
                   </p>
                   <p className="mt-1 text-xs text-slate-400">
-                    {confirmAction === "cancel"
-                      ? "The meeting will be marked as cancelled and all participants will be notified."
-                      : "This action cannot be undone. The meeting will be permanently removed."}
+                    The meeting will be marked as cancelled and all participants will be notified.
                   </p>
                   <div className="mt-3 flex items-center gap-2">
                     <button
@@ -283,13 +364,10 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
                     </button>
                     <button
                       type="button"
-                      onClick={() => {
-                        if (confirmAction === "cancel") handleCancel();
-                        else handleDelete();
-                      }}
+                      onClick={handleCancel}
                       className="hover:cursor-pointer rounded-lg bg-red-500/20 px-3 py-1.5 text-xs font-medium text-red-300 transition hover:bg-red-500/30"
                     >
-                      Yes, {confirmAction === "cancel" ? "cancel" : "delete"} it
+                      Yes, cancel it
                     </button>
                   </div>
                 </div>
@@ -297,19 +375,6 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
             </div>
           ) : (
             <div className="flex items-center justify-end gap-2">
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={() => setConfirmAction("delete")}
-                disabled={deleteMeeting.isPending}
-              >
-                {deleteMeeting.isPending ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Trash2 className="h-3.5 w-3.5" />
-                )}
-                <span className="ml-1">Delete</span>
-              </Button>
               <Button
                 variant="glass"
                 size="sm"

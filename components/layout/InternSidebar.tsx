@@ -9,11 +9,13 @@ import {
   ClipboardCheck,
   UserRoundPen,
 } from "lucide-react";
+import { LuAlarmClock } from "react-icons/lu";
 
 const menus = [
   { name: "Dashboard", href: "/intern/dashboard", icon: LayoutDashboard },
   { name: "Task", href: "/intern/task", icon: CheckSquare },
   { name: "Daily Report", href: "/intern/daily-report", icon: FileClock },
+  { name: "Meetings", href: "/intern/meetings", icon: LuAlarmClock },
   {
     name: "Weekly Evaluation",
     href: "/intern/weekly-evaluation",

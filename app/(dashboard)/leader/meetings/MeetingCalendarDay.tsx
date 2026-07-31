@@ -26,11 +26,12 @@ interface Props {
   isCurrentMonth: boolean;
   isPast: boolean;
   currentUserId?: string;
+  excusedMeetingIds?: Set<string>;
   onClickMeeting: (meetingId: string) => void;
   onScheduleClick?: () => void;
 }
 
-export default function MeetingCalendarDay({ date, meetings, isToday, isCurrentMonth, isPast, currentUserId, onClickMeeting, onScheduleClick }: Props) {
+export default function MeetingCalendarDay({ date, meetings, isToday, isCurrentMonth, isPast, currentUserId, excusedMeetingIds, onClickMeeting, onScheduleClick }: Props) {
   if (!date) {
     return <div className="min-h-[100px] rounded-xl bg-white/[0.02]" />;
   }
@@ -68,6 +69,7 @@ export default function MeetingCalendarDay({ date, meetings, isToday, isCurrentM
       <div className="space-y-0.5">
         {visibleMeetings.map((meeting) => {
           const isHosted = !currentUserId || meeting.createdBy === currentUserId;
+          const isExcused = excusedMeetingIds?.has(meeting.id);
           const colors = isHosted ? HOSTED_COLORS : INVITED_COLORS;
           const baseColor = colors[meeting.status] || colors.DRAFT;
           return (
@@ -77,7 +79,7 @@ export default function MeetingCalendarDay({ date, meetings, isToday, isCurrentM
               onClick={() => onClickMeeting(meeting.id)}
               className={`w-full truncate rounded border-l-2 px-1.5 py-0.5 text-left text-[10px] leading-tight transition hover:brightness-125 ${
                 baseColor
-              } ${!isHosted ? "border-dashed opacity-75" : ""}`}
+              } ${!isHosted ? "border-dashed opacity-75" : ""} ${isExcused ? "opacity-40 saturate-50" : ""}`}
             >
               {meeting.title}
             </button>
