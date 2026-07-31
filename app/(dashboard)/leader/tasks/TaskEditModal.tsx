@@ -287,7 +287,6 @@ export default function TaskEditModal({ taskId, onClose, onCloseModal }: Props) 
       queryClient.invalidateQueries({ queryKey: ["tasks"], exact: false });
       queryClient.invalidateQueries({ queryKey: ["task-attachments", taskId] });
 
-      toast.success("Task updated successfully.");
       onClose?.();
       onCloseModal?.();
     } catch {

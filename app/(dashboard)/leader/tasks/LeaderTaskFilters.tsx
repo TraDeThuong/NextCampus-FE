@@ -1,16 +1,12 @@
 "use client";
 
-import { Search } from "lucide-react";
+
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import FilterSelect from "@/components/ui/FilterSelect";
 import SortSelect from "@/components/ui/SortSelect";
 import MetalCard from "@/components/ui/MetalCard";
 
-const PRIORITY_OPTIONS = [
-  { value: "LOW", label: "Low" },
-  { value: "MEDIUM", label: "Medium" },
-  { value: "HIGH", label: "High" },
-];
+
 
 const STATUS_OPTIONS = [
   { value: "TODO", label: "To Do" },
@@ -53,29 +49,47 @@ export default function LeaderTaskFilters() {
   return (
     <MetalCard className="px-6 py-5">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        {/* Code */}
+        <div className="flex flex-col gap-3">
+          <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">
+            Code
+          </label>
+          <input
+            type="text"
+            placeholder="Search code..."
+            defaultValue={searchParams.get("code") ?? ""}
+            onChange={(e) => updateParam("code", e.target.value)}
+            className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted"
+          />
+        </div>
+
         {/* Title */}
         <div className="flex flex-col gap-3">
           <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">
-            Search
+            Title
           </label>
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-            <input
-              type="text"
-              placeholder="Search title..."
-              defaultValue={searchParams.get("title") ?? ""}
-              onChange={(e) => updateParam("title", e.target.value)}
-              className="w-full rounded-2xl border border-border bg-card py-3 pl-11 pr-4 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted"
-            />
-          </div>
+          <input
+            type="text"
+            placeholder="Search title..."
+            defaultValue={searchParams.get("title") ?? ""}
+            onChange={(e) => updateParam("title", e.target.value)}
+            className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted"
+          />
         </div>
 
-        {/* Priority */}
-        <FilterSelect
-          label="Priority"
-          filterField="priority"
-          options={PRIORITY_OPTIONS}
-        />
+        {/* Owner */}
+        <div className="flex flex-col gap-3">
+          <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">
+            Owner
+          </label>
+          <input
+            type="text"
+            placeholder="Filter by owner..."
+            defaultValue={searchParams.get("owner") ?? ""}
+            onChange={(e) => updateParam("owner", e.target.value)}
+            className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted"
+          />
+        </div>
 
         {/* Status */}
         <FilterSelect
@@ -94,20 +108,6 @@ export default function LeaderTaskFilters() {
             placeholder="Filter by phase..."
             defaultValue={searchParams.get("phase") ?? ""}
             onChange={(e) => updateParam("phase", e.target.value)}
-            className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted"
-          />
-        </div>
-
-        {/* Module */}
-        <div className="flex flex-col gap-3">
-          <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">
-            Module
-          </label>
-          <input
-            type="text"
-            placeholder="Filter by module..."
-            defaultValue={searchParams.get("module") ?? ""}
-            onChange={(e) => updateParam("module", e.target.value)}
             className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted"
           />
         </div>

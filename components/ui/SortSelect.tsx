@@ -70,7 +70,7 @@ export default function SortSelect({
         <select
           value={currentValue}
           onChange={(e) => handleChange(e.target.value)}
-          className="appearance-none w-full rounded-2xl border border-border bg-card px-5 py-3 pr-12 text-base font-medium text-foreground shadow-glass backdrop-blur-xl transition-all duration-300 hover:border-border-strong hover:bg-card-hover focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] outline-none"
+          className="appearance-none w-full rounded-2xl border border-border bg-card px-5 py-3 pr-12 text-sm font-medium text-foreground shadow-glass backdrop-blur-xl transition-all duration-300 hover:border-border-strong hover:bg-card-hover focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] outline-none"
         >
           {options.map((option) => (
             <option

@@ -7,6 +7,7 @@ export type TaskPriority = "LOW" | "MEDIUM" | "HIGH";
 export interface TaskGroup {
   id: string;
   name: string;
+  departmentId?: string | null;
 }
 
 export interface TaskCreator {
@@ -102,6 +103,8 @@ export interface TaskDeleteResponse {
 
 export interface TaskQueryParams {
   title?: string;
+  code?: string;
+  owner?: string;
   priority?: TaskPriority;
   createdBy?: string;
   phase?: string;
