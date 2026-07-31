@@ -16,7 +16,6 @@ import {
   CheckCircle2,
   FileCheck,
   Award,
-  ShieldAlert,
   ExternalLink,
   AlertTriangle,
 } from "lucide-react";
@@ -120,42 +119,6 @@ export default function LeaderStatsOverview() {
           trend={{
             text: `${stats.interns.completed} completed`,
             positive: true,
-          }}
-        />
-
-        <StatsCard
-          title="Pending Submissions"
-          value={stats.submissions.pending}
-          subtitle={`${stats.submissions.approved} approved`}
-          icon={<FileCheck className="h-6 w-6 text-amber-400" />}
-          href="/leader/review?status=PENDING"
-          trend={{
-            text: stats.submissions.pending > 0 ? "Needs review" : "Review completed",
-            positive: stats.submissions.pending === 0,
-          }}
-        />
-
-        <StatsCard
-          title="Overdue Tasks in Team"
-          value={overdueAssignments.length}
-          subtitle="Tasks past deadline"
-          icon={<ShieldAlert className="h-6 w-6 text-rose-400" />}
-          onCardClick={handleOpenOverdueModal}
-          trend={{
-            text: overdueAssignments.length > 0 ? "Remind interns" : "On schedule",
-            positive: overdueAssignments.length === 0,
-          }}
-        />
-
-        <StatsCard
-          title="Team Average Score"
-          value={`${stats.weeklyEvaluations.avgScore}/10`}
-          subtitle={`${stats.weeklyEvaluations.total} evaluations`}
-          icon={<Award className="h-6 w-6 text-emerald-400" />}
-          href="/leader/weekly-evaluation"
-          trend={{
-            text: "Team average score",
-            positive: stats.weeklyEvaluations.avgScore >= 7,
           }}
         />
 
