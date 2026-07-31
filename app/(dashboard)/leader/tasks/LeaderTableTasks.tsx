@@ -30,6 +30,12 @@ import type { TaskQueryParams } from "@/types/task";
 
 type GroupAction = { type: "view" | "edit" | "delete"; groupId: string; groupName: string } | null;
 
+const checkIsOverdue = (deadline: string) => {
+  const d = new Date(deadline);
+  d.setHours(23, 59, 59, 999);
+  return d < new Date();
+};
+
 export default function LeaderTableTasks() {
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [action, setAction] = useState<GroupAction>(null);
@@ -76,6 +82,8 @@ export default function LeaderTableTasks() {
     const p: TaskQueryParams = {};
 
     const title = searchParams.get("title");
+    const code = searchParams.get("code");
+    const owner = searchParams.get("owner");
     const priority = searchParams.get("priority");
     const status = searchParams.get("status");
     const phase = searchParams.get("phase");
@@ -88,6 +96,8 @@ export default function LeaderTableTasks() {
     const order = searchParams.get("order");
 
     if (title) p.title = title;
+    if (code) p.code = code;
+    if (owner) p.owner = owner;
     if (priority) p.priority = priority as TaskQueryParams["priority"];
     if (status) p.status = status;
     if (phase) p.phase = phase;
@@ -225,7 +235,7 @@ export default function LeaderTableTasks() {
                       >
                         {task.title}
                       </button>
-                      <InlineAssignCell taskId={task.id} assignment={task.assignment} />
+                      <InlineAssignCell taskId={task.id} assignment={task.assignment} deadline={task.deadline} taskGroupDepartmentId={task.taskGroup?.departmentId} />
                       <div className="text-sm text-muted">{task.assignment?.support?.fullName ?? "—"}</div>
                       <div><PriorityBadge priority={task.priority} /></div>
                       <div><StatusBadge status={task.assignment?.status ?? "UNASSIGNED"} assignmentId={task.assignment?.id} taskId={task.id} onReviewClick={handleOpenReview} /></div>
@@ -239,7 +249,7 @@ export default function LeaderTableTasks() {
                         </button>
                         {taskMenuOpen === task.id && (
                           <div ref={taskMenuRef} className="absolute right-0 top-full z-50 mt-1 w-28 rounded-xl border border-border bg-card p-1 shadow-lg">
-                            {(!task.assignment || !task.assignment.internId) && (
+                            {(!task.assignment || !task.assignment.internId) && !checkIsOverdue(task.deadline) && (
                               <button
                                 onClick={() => { setTaskMenuOpen(null); setAiTask({ taskId: task.id, taskTitle: task.title, isAssigned: false }); }}
                                 className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-sky-400 hover:bg-sky-500/10 transition font-medium"
@@ -620,9 +630,13 @@ function DeleteTaskConfirm({
 function InlineAssignCell({
   taskId,
   assignment,
+  deadline,
+  taskGroupDepartmentId,
 }: {
   taskId: string;
   assignment: { id: string; internId: string; intern?: { id: string; fullName: string } } | null;
+  deadline: string;
+  taskGroupDepartmentId?: string | null;
 }) {
   const queryClient = useQueryClient();
   const auth = useContext(AuthContext);
@@ -641,6 +655,19 @@ function InlineAssignCell({
 
   const isPending = createAssignment.isPending || updateAssignment.isPending || deleteAssignment.isPending;
   const currentInternId = assignment?.internId ?? null;
+
+  const isOverdue = checkIsOverdue(deadline);
+  const canClick = !isOverdue || !!assignment;
+
+  console.log("InlineAssignCell Debug:", { taskId, taskGroupDepartmentId, isOverdue });
+
+  // Filter interns by taskGroup department if it belongs to a department
+  const filteredMyInterns = taskGroupDepartmentId
+    ? myInterns.filter((i) => i.department?.id === taskGroupDepartmentId)
+    : myInterns;
+  const filteredOtherInterns = taskGroupDepartmentId
+    ? otherInterns.filter((i) => i.department?.id === taskGroupDepartmentId)
+    : otherInterns;
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -686,10 +713,10 @@ function InlineAssignCell({
     <div ref={cellRef} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        disabled={isPending}
+        disabled={isPending || !canClick}
         className={`flex w-full items-center gap-1 rounded-lg px-2 py-1 text-sm transition hover:bg-white/5 disabled:opacity-50 ${
           assigneeName ? "text-foreground" : "text-muted"
-        }`}
+        } ${!canClick ? "cursor-not-allowed" : ""}`}
       >
         {isPending ? (
           <Loader2 className="h-3 w-3 animate-spin shrink-0" />
@@ -703,67 +730,70 @@ function InlineAssignCell({
         ) : (
           <span className="flex items-center gap-1">
             <UserPlus className="h-3 w-3" />
-            Assign
+            {isOverdue ? "Expired" : "Assign"}
           </span>
         )}
-        <ChevronDown className="h-3 w-3 shrink-0 text-muted" />
+        {!isPending && canClick && <ChevronDown className="h-3 w-3 shrink-0 text-muted" />}
       </button>
 
       {open && (
         <div className="absolute left-0 top-full z-50 mt-1 w-56 rounded-xl border border-border bg-[#1a1d2e] p-1 shadow-lg">
-          {/* My Team */}
-          {myInterns.length > 0 && (
+          {/* My Team & Other Teams (Only show if not overdue) */}
+          {!isOverdue && (
             <>
-              <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted">
-                My Team
-              </div>
-              {myInterns.map((intern) => (
-                <button
-                  key={intern.id}
-                  onClick={() => handleAssign(intern.id)}
-                  disabled={isPending}
-                  className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-foreground hover:bg-white/5 transition disabled:opacity-50"
-                >
-                  <span className="truncate flex-1 text-left">{intern.fullName}</span>
-                  {currentInternId === intern.id && (
-                    <Check className="h-3.5 w-3.5 shrink-0 text-primary-light" />
-                  )}
-                </button>
-              ))}
-            </>
-          )}
+              {filteredMyInterns.length > 0 && (
+                <>
+                  <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted">
+                    My Team
+                  </div>
+                  {filteredMyInterns.map((intern) => (
+                    <button
+                      key={intern.id}
+                      onClick={() => handleAssign(intern.id)}
+                      disabled={isPending}
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-foreground hover:bg-white/5 transition disabled:opacity-50"
+                    >
+                      <span className="truncate flex-1 text-left">{intern.fullName}</span>
+                      {currentInternId === intern.id && (
+                        <Check className="h-3.5 w-3.5 shrink-0 text-primary-light" />
+                      )}
+                    </button>
+                  ))}
+                </>
+              )}
 
-          {/* Other Teams */}
-          {otherInterns.length > 0 && (
-            <>
-              <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted mt-0.5">
-                Other Teams
-              </div>
-              {otherInterns.map((intern) => (
-                <button
-                  key={intern.id}
-                  onClick={() => handleAssign(intern.id)}
-                  disabled={isPending}
-                  className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-foreground hover:bg-white/5 transition disabled:opacity-50"
-                >
-                  <span className="truncate flex-1 text-left">
-                    {intern.fullName}
-                    {intern.leader?.fullName && (
-                      <span className="ml-1 text-xs text-muted">({intern.leader.fullName})</span>
-                    )}
-                  </span>
-                  {currentInternId === intern.id && (
-                    <Check className="h-3.5 w-3.5 shrink-0 text-primary-light" />
-                  )}
-                </button>
-              ))}
+              {filteredOtherInterns.length > 0 && (
+                <>
+                  <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted mt-0.5">
+                    Other Teams
+                  </div>
+                  {filteredOtherInterns.map((intern) => (
+                    <button
+                      key={intern.id}
+                      onClick={() => handleAssign(intern.id)}
+                      disabled={isPending}
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-foreground hover:bg-white/5 transition disabled:opacity-50"
+                    >
+                      <span className="truncate flex-1 text-left">
+                        {intern.fullName}
+                        {intern.leader?.fullName && (
+                          <span className="ml-1 text-xs text-muted">({intern.leader.fullName})</span>
+                        )}
+                      </span>
+                      {currentInternId === intern.id && (
+                        <Check className="h-3.5 w-3.5 shrink-0 text-primary-light" />
+                      )}
+                    </button>
+                  ))}
+                </>
+              )}
             </>
           )}
 
           {/* Unassign */}
           {assignment && (
             <>
-              <div className="my-0.5 border-t border-border" />
+              {!isOverdue && <div className="my-0.5 border-t border-border" />}
               <button
                 onClick={handleUnassign}
                 disabled={isPending}
