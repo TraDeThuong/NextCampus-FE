@@ -17,6 +17,7 @@ export function useCreateLeader() {
                 `Leader created for ${data.data.user.fullName ?? data.data.user.email}.`,
             );
             queryClient.invalidateQueries({ queryKey: ["leaders"] });
+            queryClient.invalidateQueries({ queryKey: ["departments"] });
         },
 
         onError: () => {

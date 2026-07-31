@@ -8,11 +8,12 @@ import type {
     UpdatePositionPayload,
     DepartmentSuccessResponse,
     PositionSuccessResponse,
+    GetDepartmentsParams,
 } from "@/types/department";
 
 export const departmentService = {
-    getDepartments: async (): Promise<DepartmentListResponse> => {
-        const response = await api.get<DepartmentListResponse>("/departments");
+    getDepartments: async (params?: GetDepartmentsParams): Promise<DepartmentListResponse> => {
+        const response = await api.get<DepartmentListResponse>("/departments", { params });
         return response.data;
     },
 

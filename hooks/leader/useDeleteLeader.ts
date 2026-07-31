@@ -13,6 +13,7 @@ export function useDeleteLeader() {
         onSuccess: () => {
             toast.success("Leader deleted.");
             queryClient.invalidateQueries({ queryKey: ["leaders"] });
+            queryClient.invalidateQueries({ queryKey: ["departments"] });
         },
 
         onError: () => {
