@@ -177,7 +177,7 @@ export default function LeaderTableTasks() {
                       <MoreHorizontal className="h-3.5 w-3.5" />
                     </button>
                     {menuOpen === g.id && (
-                      <div ref={menuRef} className="absolute right-0 top-full z-50 mt-1 w-32 rounded-xl border border-border bg-card p-1 shadow-lg">
+                      <div ref={menuRef} className="absolute right-0 top-full z-50 mt-1 w-32 rounded-xl border border-border bg-[#0f172a] p-1 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl">
                         <button onClick={() => { setMenuOpen(null); openAction({ type: "view", groupId: g.id, groupName: g.name }); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground"><Eye className="h-3 w-3" />View</button>
                         <button onClick={() => { setMenuOpen(null); openAction({ type: "edit", groupId: g.id, groupName: g.name }); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground"><Pencil className="h-3 w-3" />Edit</button>
                         <button onClick={() => { setMenuOpen(null); openAction({ type: "delete", groupId: g.id, groupName: g.name }); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-red-400 hover:bg-red-500/10"><Trash2 className="h-3 w-3" />Delete</button>
@@ -194,8 +194,8 @@ export default function LeaderTableTasks() {
         <MetalCard>
           <div className="p-4">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-sm font-semibold metal-text flex items-center">
-                Tasks
+              <h3 className="text-sm font-semibold flex items-center">
+                <span className="metal-text">Tasks</span>
                 {taskGroupId && groups.find((g) => g.id === taskGroupId) && (
                   <span className="ml-2 font-normal text-muted">— {groups.find((g) => g.id === taskGroupId)!.name}</span>
                 )}
@@ -248,7 +248,7 @@ export default function LeaderTableTasks() {
                           <MoreHorizontal className="h-3.5 w-3.5" />
                         </button>
                         {taskMenuOpen === task.id && (
-                          <div ref={taskMenuRef} className="absolute right-0 top-full z-50 mt-1 w-28 rounded-xl border border-border bg-card p-1 shadow-lg">
+                          <div ref={taskMenuRef} className="absolute right-0 top-full z-50 mt-1 w-28 rounded-xl border border-border bg-[#0f172a] p-1 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl">
                             {(!task.assignment || !task.assignment.internId) && !checkIsOverdue(task.deadline) && (
                               <button
                                 onClick={() => { setTaskMenuOpen(null); setAiTask({ taskId: task.id, taskTitle: task.title, isAssigned: false }); }}

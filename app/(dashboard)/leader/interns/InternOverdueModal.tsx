@@ -65,9 +65,9 @@ export default function InternOverdueModal({ intern, onClose }: Props) {
         <div className="relative p-6 overflow-y-auto max-h-[85vh]">
           <div className="mb-6 flex items-start justify-between">
             <div>
-              <h2 className="text-xl font-bold metal-text flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-red-400" />
-                Overdue Tasks
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-red-400 shrink-0" />
+                <span className="metal-text">Overdue Tasks</span>
               </h2>
               <p className="mt-1 text-sm text-muted">
                 {intern.fullName} — {overdueAssignments.length} overdue task

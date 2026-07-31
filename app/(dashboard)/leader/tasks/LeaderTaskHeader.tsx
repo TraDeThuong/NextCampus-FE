@@ -27,7 +27,7 @@ export default function LeaderTaskHeader() {
             <Modal>
               <Modal.Open opens="import">
                 <Button variant="glass" size="md">
-                  <FileSpreadsheet className="h-4 w-4" />
+                  <FileSpreadsheet className="h-4 w-4 mr-2" />
                   Import Tasks
                 </Button>
               </Modal.Open>
@@ -40,7 +40,7 @@ export default function LeaderTaskHeader() {
             <Modal>
               <Modal.Open opens="create-task">
                 <Button variant="primary" size="md">
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-4 w-4 mr-2" />
                   Create Task
                 </Button>
               </Modal.Open>
@@ -52,7 +52,7 @@ export default function LeaderTaskHeader() {
             <Modal>
               <Modal.Open opens="create-group">
                 <Button variant="glass" size="md">
-                  <Layers className="h-4 w-4" />
+                  <Layers className="h-4 w-4 mr-2" />
                   Create Group
                 </Button>
               </Modal.Open>

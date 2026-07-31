@@ -82,13 +82,13 @@ export default function TaskSubmissionModal({ assignmentId, submission, readOnly
         <div className="relative p-6">
           <div className="mb-6 flex items-start justify-between">
             <div>
-              <h2 className="text-xl font-bold metal-text flex items-center gap-2">
+              <h2 className="text-xl font-bold flex items-center gap-2">
                 {isEdit ? (
-                  <Pencil className="h-5 w-5 text-amber-400" />
+                  <Pencil className="h-5 w-5 text-amber-400 shrink-0" />
                 ) : (
-                  <Send className="h-5 w-5 text-cyan-400" />
+                  <Send className="h-5 w-5 text-cyan-400 shrink-0" />
                 )}
-                {isEdit ? "Edit Submission" : "Submit Work"}
+                <span className="metal-text">{isEdit ? "Edit Submission" : "Submit Work"}</span>
               </h2>
               <p className="mt-1 text-sm text-muted">
                 {isEdit
