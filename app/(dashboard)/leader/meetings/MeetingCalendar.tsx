@@ -6,6 +6,7 @@ import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
 import Modal from "@/components/ui/Modal";
 import { useMeetings } from "@/hooks/meeting/useMeetings";
+import { useMyApprovedAbsences } from "@/hooks/meeting/useMyApprovedAbsences";
 import MeetingCalendarDay from "./MeetingCalendarDay";
 import CreateMeetingModal from "./CreateMeetingModal";
 import type { Meeting } from "@/types/meeting";
@@ -49,6 +50,7 @@ export default function MeetingCalendar({
     setScheduleDate(date);
     setTimeout(() => scheduleRef.current?.click(), 0);
   }
+  const { data: excusedIds } = useMyApprovedAbsences();
 
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
@@ -129,8 +131,8 @@ export default function MeetingCalendar({
           {currentUserId && (
             <div className="mb-4 flex flex-wrap items-center gap-3">
               {[
-                { color: "bg-blue-500", label: "By You" },
-                { color: "bg-amber-500", label: "By Leader" },
+                { color: "bg-blue-500", label: "Hosted" },
+                { color: "bg-amber-500", label: "Invited" },
                 { color: "bg-emerald-500", label: "Ongoing" },
                 { color: "bg-violet-500", label: "Completed" },
                 { color: "bg-red-500", label: "Cancelled" },
@@ -180,6 +182,7 @@ export default function MeetingCalendar({
                       isCurrentMonth={date ? date.getMonth() === month : false}
                       isPast={date ? isPast(date) : false}
                       currentUserId={currentUserId}
+                      excusedMeetingIds={excusedIds}
                       onClickMeeting={(meetingId) => onMeetingClick(meetingId)}
                       onScheduleClick={() => date && handleScheduleClick(date)}
                     />

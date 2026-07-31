@@ -14,13 +14,12 @@ export default function MeetingHeader() {
             <div>
               <h2 className="text-2xl font-bold metal-text">Meetings</h2>
               <p className="mt-1 text-sm text-slate-500">
-                Manage all meetings across the organization.
+                Manage your meetings and invitations.
               </p>
             </div>
-
             <div className="flex items-center gap-3">
               <Modal.Open opens="create-meeting">
-                <button className="hover:cursor-pointer flex items-center gap-2 rounded-xl border border-primary-main/30 bg-primary-main/10 px-4 py-2.5 text-sm font-medium text-primary-light transition hover:border-primary-main/50 hover:bg-primary-main/20">
+                <button className="flex items-center gap-2 rounded-xl border border-primary-main/30 bg-primary-main/10 px-4 py-2.5 text-sm font-medium text-primary-light transition hover:border-primary-main/50 hover:bg-primary-main/20">
                   <Calendar className="h-4 w-4" />
                   <Plus className="h-3.5 w-3.5" />
                   Schedule Meeting
@@ -30,7 +29,6 @@ export default function MeetingHeader() {
           </div>
         </div>
       </MetalCard>
-
       <Modal.Window name="create-meeting" size="sm">
         <CreateMeetingModal />
       </Modal.Window>
