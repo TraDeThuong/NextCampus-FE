@@ -84,9 +84,9 @@ export default function CreateDailyReportModal({ onClose }: Props) {
         <div className="relative p-6">
           <div className="mb-6 flex items-start justify-between">
             <div>
-              <h2 className="text-xl font-bold metal-text flex items-center gap-2">
-                <FileText className="h-5 w-5 text-cyan-400" />
-                Create Daily Report
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <FileText className="h-5 w-5 text-cyan-400 shrink-0" />
+                <span className="metal-text">Create Daily Report</span>
               </h2>
               <p className="mt-1 text-sm text-muted">
                 Submit your work report for today with a PR link and a video

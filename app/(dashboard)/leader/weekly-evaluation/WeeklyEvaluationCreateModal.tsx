@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useContext } from "react";
 import { Loader2, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Button from "@/components/ui/Button";
 import { useCreateWeeklyEvaluation } from "@/hooks/weekly-evaluation/useCreateWeeklyEvaluation";
 import { useAiSuggestion } from "@/hooks/weekly-evaluation/useAiSuggestion";
 import { useInterns } from "@/hooks/intern/useInterns";
+import { useWeeklyEvaluations } from "@/hooks/weekly-evaluation/useWeeklyEvaluations";
+import { AuthContext } from "@/contexts/AuthContext";
 import type {
   CreateWeeklyEvaluationPayload,
   EvaluationRatings,
@@ -83,14 +85,71 @@ function RatingSelector({
 }
 
 export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
+  const auth = useContext(AuthContext);
+  const currentUserId = auth?.state.user?.id;
+
   const createEvaluation = useCreateWeeklyEvaluation();
   const aiSuggestion = useAiSuggestion();
-  const { data: internsData, isLoading: internsLoading } = useInterns({ status: "ACTIVE" });
-  const interns = internsData?.data ?? [];
+  const { data: internsData, isLoading: internsLoading } = useInterns({
+    status: "ACTIVE",
+    leaderId: currentUserId || undefined,
+  });
+  const interns = useMemo(() => internsData?.data ?? [], [internsData]);
 
   const [internId, setInternId] = useState("");
   const [week, setWeek] = useState(1);
   const [ratings, setRatings] = useState<EvaluationRatings>({ ...DEFAULT_RATINGS });
+
+  const { data: existingEvaluations } = useWeeklyEvaluations(
+    internId ? { internId, limit: 100 } : undefined
+  );
+
+  const evaluatedWeeks = useMemo(() => {
+    return existingEvaluations?.data?.map((e) => e.week) ?? [];
+  }, [existingEvaluations]);
+
+  const selectedIntern = useMemo(() => {
+    return interns.find((i) => i.id === internId);
+  }, [interns, internId]);
+
+  const maxWeek = useMemo(() => {
+    if (!selectedIntern) return 99;
+    const start = new Date(selectedIntern.startDate);
+    start.setHours(0, 0, 0, 0);
+
+    const today = new Date();
+    const todayMidnight = new Date(today);
+    todayMidnight.setHours(0, 0, 0, 0);
+
+    const elapsedWeeks = Math.ceil((todayMidnight.getTime() - start.getTime()) / (7 * 24 * 3600 * 1000));
+    return Math.max(1, elapsedWeeks);
+  }, [selectedIntern]);
+
+  const isWeekendAllowedForCurrentWeek = useMemo(() => {
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, ..., 5 = Friday, 6 = Saturday
+    const hours = today.getHours();
+    const isSaturdayAllowed = dayOfWeek === 6 && hours >= 11;
+    const isSundayAllowed = dayOfWeek === 0;
+    return isSaturdayAllowed || isSundayAllowed;
+  }, []);
+
+  const handleInternChange = (id: string) => {
+    setInternId(id);
+    const intern = interns.find(i => i.id === id);
+    if (intern) {
+      const start = new Date(intern.startDate);
+      start.setHours(0, 0, 0, 0);
+
+      const today = new Date();
+      const todayMidnight = new Date(today);
+      todayMidnight.setHours(0, 0, 0, 0);
+
+      const elapsedWeeks = Math.ceil((todayMidnight.getTime() - start.getTime()) / (7 * 24 * 3600 * 1000));
+      const calculatedWeek = Math.max(1, elapsedWeeks);
+      setWeek(calculatedWeek);
+    }
+  };
   const [aiRatings, setAiRatings] = useState<EvaluationRatings | null>(null);
   const [aiComment, setAiComment] = useState<string | null>(null);
   const [comment, setComment] = useState("");
@@ -117,6 +176,18 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
       toast.error("Vui lòng nhập tuần đánh giá hợp lệ.");
       return;
     }
+    if (selectedIntern && (Number(week) < 1 || Number(week) > maxWeek)) {
+      toast.error(`Tuần đánh giá phải nằm trong khoảng từ 1 đến ${maxWeek}.`);
+      return;
+    }
+    if (selectedIntern && Number(week) === maxWeek && !isWeekendAllowedForCurrentWeek) {
+      toast.error("Chỉ có thể đánh giá tuần hiện tại từ Thứ Bảy (sau 11:00 sáng) đến hết Chủ Nhật.");
+      return;
+    }
+    if (evaluatedWeeks.includes(Number(week))) {
+      toast.error(`Tuần ${week} đã được đánh giá cho thực tập sinh này.`);
+      return;
+    }
 
     try {
       const response = await aiSuggestion.mutateAsync({ internId, week: Number(week) });
@@ -137,6 +208,18 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
     e.preventDefault();
     if (!internId) {
       toast.error("Vui lòng chọn thực tập sinh.");
+      return;
+    }
+    if (selectedIntern && (Number(week) < 1 || Number(week) > maxWeek)) {
+      toast.error(`Tuần đánh giá phải nằm trong khoảng từ 1 đến ${maxWeek} (tuần thực tập hiện tại).`);
+      return;
+    }
+    if (selectedIntern && Number(week) === maxWeek && !isWeekendAllowedForCurrentWeek) {
+      toast.error("Chỉ có thể đánh giá tuần hiện tại từ Thứ Bảy (sau 11:00 sáng) đến hết Chủ Nhật.");
+      return;
+    }
+    if (evaluatedWeeks.includes(Number(week))) {
+      toast.error(`Tuần ${week} đã được đánh giá cho thực tập sinh này.`);
       return;
     }
 
@@ -198,7 +281,7 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
             ) : (
               <select
                 value={internId}
-                onChange={e => setInternId(e.target.value)}
+                onChange={e => handleInternChange(e.target.value)}
                 className={inputClass}
                 required
               >
@@ -219,11 +302,29 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
             <input
               type="number"
               min={1}
+              max={maxWeek}
               value={week}
               onChange={e => setWeek(Number(e.target.value))}
               className={inputClass}
               required
             />
+            {selectedIntern && (
+              <div className="mt-1 space-y-1">
+                <p className="text-[11px] text-slate-400">
+                  Tuần hiện tại: <span className="font-semibold text-primary-light">{maxWeek}</span> (Khoảng từ 1 đến {maxWeek})
+                </p>
+                {Number(week) === maxWeek && !isWeekendAllowedForCurrentWeek && (
+                  <p className="text-[11px] text-amber-400 font-semibold">
+                    Đánh giá tuần hiện tại sẽ bắt đầu mở từ Thứ Bảy (sau 11:00 sáng).
+                  </p>
+                )}
+                {evaluatedWeeks.includes(Number(week)) && (
+                  <p className="text-[11px] text-red-400 font-semibold">
+                    Tuần này đã được đánh giá cho học viên này trước đó.
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
 

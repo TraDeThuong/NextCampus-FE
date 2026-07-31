@@ -87,7 +87,7 @@ export default function TaskImportModal({ onCloseModal }: Props) {
 
   return (
     <div className="flex w-full flex-col overflow-hidden" style={{ maxHeight: 'calc(100vh - 12rem)' }}>
-      <div className="shrink-0 space-y-8">
+      <div className="shrink-0 space-y-8 mb-3">
         {/* Header */}
         <div>
           <h2 className="text-2xl font-bold metal-text">Import Tasks</h2>
@@ -147,7 +147,7 @@ export default function TaskImportModal({ onCloseModal }: Props) {
                 isLoading={downloadMutation.isPending}
                 onClick={() => downloadMutation.mutate()}
               >
-                <Download className="h-4 w-4" />
+                <Download className="h-4 w-4 mr-2" />
                 Download Template
               </Button>
               <Button
@@ -155,7 +155,7 @@ export default function TaskImportModal({ onCloseModal }: Props) {
                 size="md"
                 onClick={() => setShowInstructions((prev) => !prev)}
               >
-                <BookOpen className="h-4 w-4" />
+                <BookOpen className="h-4 w-4 mr-2" />
                 {showInstructions ? "Hide Instructions" : "View Instructions"}
               </Button>
             </div>
@@ -229,7 +229,7 @@ export default function TaskImportModal({ onCloseModal }: Props) {
                 isLoading={previewMutation.isPending}
                 onClick={() => fileInputRef.current?.click()}
               >
-                <Upload className="h-4 w-4" />
+                <Upload className="h-4 w-4 mr-2" />
                 Choose Excel File
               </Button>
               {file && (
@@ -417,7 +417,7 @@ export default function TaskImportModal({ onCloseModal }: Props) {
               onClick={handleExecute}
               disabled={previewData.validRows.length === 0}
             >
-              <FileSpreadsheet className="h-4 w-4" />
+              <FileSpreadsheet className="h-4 w-4 mr-2" />
               Import {previewData.validRows.length} Tasks
             </Button>
           </div>

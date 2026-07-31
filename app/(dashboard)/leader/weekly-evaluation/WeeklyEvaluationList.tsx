@@ -1,12 +1,13 @@
 "use client";
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useContext } from "react";
 import { Trash2, Sparkles, Plus, Eye, ChevronLeft, ChevronRight, Bot } from "lucide-react";
 import Table from "@/components/ui/Table";
 import Button from "@/components/ui/Button";
 import Spinner from "@/components/ui/Spinner";
 import Modal from "@/components/ui/Modal";
+import { AuthContext } from "@/contexts/AuthContext";
 import WeeklyEvaluationCreateModal from "./WeeklyEvaluationCreateModal";
 import { useWeeklyEvaluations } from "@/hooks/weekly-evaluation/useWeeklyEvaluations";
 import { useDeleteWeeklyEvaluation } from "@/hooks/weekly-evaluation/useDeleteWeeklyEvaluation";
@@ -21,6 +22,9 @@ export default function WeeklyEvaluationList() {
   const pathname = usePathname();
   const deleteEvaluation = useDeleteWeeklyEvaluation();
 
+  const auth = useContext(AuthContext);
+  const currentUserId = auth?.state.user?.id;
+
   const params: WeeklyEvaluationQueryParams = useMemo(() => {
     const page = searchParams.get("page");
     return {
@@ -28,8 +32,9 @@ export default function WeeklyEvaluationList() {
       limit: 10,
       sortBy: "createdAt",
       order: "desc",
+      leaderId: currentUserId || undefined,
     };
-  }, [searchParams]);
+  }, [searchParams, currentUserId]);
 
   const { data: response, isLoading } = useWeeklyEvaluations(params);
   const evaluations = response?.data ?? [];
@@ -162,7 +167,7 @@ export default function WeeklyEvaluationList() {
                 <div className="flex items-center justify-center gap-2">
                   <Link href={`/leader/weekly-evaluation/${item.id}`}>
                     <Button variant="glass" size="sm" className="flex items-center gap-1">
-                      <Eye className="h-3.5 w-3.5" />
+                      <Eye className="h-3.5 w-3.5 mr-1" />
                       <span>Xem</span>
                     </Button>
                   </Link>

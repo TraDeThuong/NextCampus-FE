@@ -16,9 +16,6 @@ import {
   CheckCircle2,
   FileCheck,
   Award,
-  ExternalLink,
-  Eye,
-  AlertTriangle,
   ShieldAlert,
 } from "lucide-react";
 
@@ -110,8 +107,8 @@ export default function LeaderStatsOverview() {
         </div>
       </div>
 
-      {/* Action-Oriented KPI Cards (Chỉ 4 chỉ số có giá trị hành động) */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Action-Oriented KPI Cards (Chỉ 5 chỉ số có giá trị hành động) */}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
         <StatsCard
           title="TTS Đang Quản Lý"
           value={stats.interns.active}
@@ -159,91 +156,8 @@ export default function LeaderStatsOverview() {
             positive: stats.weeklyEvaluations.avgScore >= 7,
           }}
         />
-      </div>
 
-      {/* Action Items Required List */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
-        {/* Action Item 0: Pending Approval Requests */}
         <PendingApprovalCard onOpenModal={() => setPendingModalOpen(true)} />
-
-        {/* Action Item 1: Pending Submissions */}
-        <Link
-          href="/leader/review?status=PENDING"
-          className="group relative overflow-hidden rounded-[24px] border border-amber-500/30 bg-amber-500/10 p-5 hover:border-amber-500/60 hover:bg-amber-500/15 transition-all shadow-glass"
-        >
-          <div className="flex items-start justify-between">
-            <div>
-              <span className="inline-flex items-center justify-center text-[11px] font-bold uppercase tracking-wider leading-none text-amber-400 bg-amber-500/20 px-2.5 py-1.5 rounded-full border border-amber-500/30">
-                Cần xử lý ngay
-              </span>
-              <h3 className="text-2xl font-black text-amber-300 mt-2">
-                {stats.submissions.pending} Bài Nộp Chờ Duyệt
-              </h3>
-              <p className="text-xs text-muted mt-1">
-                Bài nộp từ thực tập sinh đang chờ Leader chấm điểm & đưa nhận xét
-              </p>
-            </div>
-            <div className="p-3 rounded-2xl bg-amber-500/20 text-amber-300 group-hover:scale-110 transition-transform">
-              <FileCheck className="h-6 w-6" />
-            </div>
-          </div>
-          <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-amber-400 group-hover:underline">
-            Đến trang chấm bài <ExternalLink className="h-3.5 w-3.5" />
-          </div>
-        </Link>
-
-        {/* Action Item 2: Overdue Tasks Alert */}
-        <button
-          type="button"
-          onClick={handleOpenOverdueModal}
-          className="group text-left relative overflow-hidden rounded-[24px] border border-rose-500/30 bg-rose-500/10 p-5 hover:border-rose-500/60 hover:bg-rose-500/15 transition-all shadow-glass cursor-pointer"
-        >
-          <div className="flex items-start justify-between">
-            <div>
-              <span className="inline-flex items-center justify-center text-[11px] font-bold uppercase tracking-wider leading-none text-rose-400 bg-rose-500/20 px-2.5 py-1.5 rounded-full border border-rose-500/30">
-                Cảnh báo tiến độ
-              </span>
-              <h3 className="text-2xl font-black text-rose-300 mt-2">
-                {overdueAssignments.length} Task Quá Hạn
-              </h3>
-              <p className="text-xs text-muted mt-1">
-                Các nhiệm vụ giao cho TTS đã vượt hạn chót chưa hoàn thành
-              </p>
-            </div>
-            <div className="p-3 rounded-2xl bg-rose-500/20 text-rose-300 group-hover:scale-110 transition-transform">
-              <AlertTriangle className="h-6 w-6" />
-            </div>
-          </div>
-          <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-rose-400 group-hover:underline">
-            Xem danh sách task trễ ↗
-          </div>
-        </button>
-
-        {/* Action Item 3: Weekly Evaluation Action */}
-        <Link
-          href="/leader/weekly-evaluation"
-          className="group relative overflow-hidden rounded-[24px] border border-indigo-500/30 bg-indigo-500/10 p-5 hover:border-indigo-500/60 hover:bg-indigo-500/15 transition-all shadow-glass"
-        >
-          <div className="flex items-start justify-between">
-            <div>
-              <span className="inline-flex items-center justify-center text-[11px] font-bold uppercase tracking-wider leading-none text-indigo-400 bg-indigo-500/20 px-2.5 py-1.5 rounded-full border border-indigo-500/30">
-                Đánh giá định kỳ
-              </span>
-              <h3 className="text-2xl font-black text-indigo-300 mt-2">
-                Chấm Điểm Đánh Giá Tuần
-              </h3>
-              <p className="text-xs text-muted mt-1">
-                Điểm trung bình hiện tại của nhóm: <strong className="text-foreground">{stats.weeklyEvaluations.avgScore}/10</strong>
-              </p>
-            </div>
-            <div className="p-3 rounded-2xl bg-indigo-500/20 text-indigo-300 group-hover:scale-110 transition-transform">
-              <Award className="h-6 w-6" />
-            </div>
-          </div>
-          <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-indigo-400 group-hover:underline">
-            Đến trang đánh giá <ExternalLink className="h-3.5 w-3.5" />
-          </div>
-        </Link>
       </div>
 
       {/* Intern Progress Table in Team */}
@@ -258,12 +172,7 @@ export default function LeaderStatsOverview() {
               Giám sát tiến độ hoàn thành công việc và điểm số trung bình của từng cá nhân
             </p>
           </div>
-          <Link
-            href="/leader/interns"
-            className="text-xs font-semibold text-primary-light hover:underline flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-primary-light/30 bg-primary-light/10"
-          >
-            Quản Lý TTS <ExternalLink className="h-3.5 w-3.5" />
-          </Link>
+
         </div>
 
         <div className="mt-6">

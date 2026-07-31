@@ -114,7 +114,7 @@ export default function TaskGroupCreateModal({ onCloseModal }: Props) {
             {isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <Layers className="h-4 w-4" />
+              <Layers className="h-4 w-4 mr-2" />
             )}
             Create Group
           </Button>
