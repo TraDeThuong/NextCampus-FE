@@ -9,12 +9,12 @@ import type { Meeting } from "@/types/meeting";
 
 const DAY_NAMES = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
-const STATUS_DOT: Record<string, string> = {
-  SCHEDULED: "bg-blue-400",
-  ONGOING: "bg-emerald-400",
-  COMPLETED: "bg-violet-400",
-  CANCELLED: "bg-red-400",
-  DRAFT: "bg-slate-400",
+const STATUS: Record<string, { dot: string; badge: string }> = {
+  SCHEDULED: { dot: "bg-sky-400", badge: "bg-sky-500/10 text-sky-300" },
+  ONGOING: { dot: "bg-emerald-400", badge: "bg-emerald-500/10 text-emerald-300" },
+  COMPLETED: { dot: "bg-violet-400", badge: "bg-violet-500/10 text-violet-300" },
+  CANCELLED: { dot: "bg-red-400", badge: "bg-red-500/10 text-red-300" },
+  DRAFT: { dot: "bg-slate-400", badge: "bg-slate-500/10 text-slate-300" },
 };
 
 function getWeekRange() {
@@ -31,25 +31,20 @@ function getWeekRange() {
 }
 
 function formatTime(iso: string) {
-  return new Date(iso).toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  return new Date(iso).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+}
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
 }
 
 function getParticipantLabel(m: Meeting) {
-  if (m.visibility === "TEAM") return "All leaders";
-  const count =
-    m.participants?.filter((p) => p.participantRole === "PARTICIPANT").length ||
-    m._count.participants;
+  if (m.visibility === "TEAM") return "All members";
+  const count = m.participants?.filter((p) => p.participantRole === "PARTICIPANT").length || m._count.participants;
   return `${count} leader${count !== 1 ? "s" : ""}`;
 }
 
-export default function WeekMeetingsCard({
-  onMeetingClick,
-}: {
-  onMeetingClick?: (id: string) => void;
-}) {
+export default function WeekMeetingsCard({ onMeetingClick }: { onMeetingClick?: (id: string) => void }) {
   const { monday, sunday } = useMemo(() => getWeekRange(), []);
 
   const { data, isPending } = useMeetings({
@@ -64,33 +59,32 @@ export default function WeekMeetingsCard({
 
   const grouped = useMemo(() => {
     const map = new Map<number, Meeting[]>();
-    for (let i = 0; i < 7; i++) {
-      map.set(i, []);
-    }
+    for (let i = 0; i < 7; i++) map.set(i, []);
     for (const m of meetings) {
       const d = new Date(m.startTime);
       const dayIndex = d.getDay() === 0 ? 6 : d.getDay() - 1;
-      const list = map.get(dayIndex) || [];
-      list.push(m);
-      map.set(dayIndex, list);
+      map.get(dayIndex)!.push(m);
     }
     return map;
   }, [meetings]);
-
-  const hasMeetings = meetings.length > 0;
 
   return (
     <MetalCard>
       <div className="p-5">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-base font-semibold metal-text">This Week</h3>
+          {meetings.length > 0 && (
+            <span className="rounded-full bg-white/5 px-2 py-0.5 text-xs text-slate-400">
+              {meetings.length}
+            </span>
+          )}
         </div>
 
         {isPending ? (
           <div className="flex items-center justify-center py-12">
             <Spinner size="md" />
           </div>
-        ) : !hasMeetings ? (
+        ) : meetings.length === 0 ? (
           <div className="flex flex-col items-center py-12 text-center">
             <Calendar className="mb-3 h-8 w-8 text-slate-600" />
             <p className="text-sm text-slate-500">No meetings this week</p>
@@ -100,14 +94,12 @@ export default function WeekMeetingsCard({
             {Array.from(grouped.entries()).map(([dayIndex, dayMeetings]) => {
               const date = new Date(monday);
               date.setDate(monday.getDate() + dayIndex);
-              const dayName = DAY_NAMES[dayIndex];
-              const dayNum = date.getDate();
 
               return (
                 <div key={dayIndex}>
                   <div className="mb-2 flex items-center gap-2">
                     <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                      {dayName} {dayNum}
+                      {DAY_NAMES[dayIndex]} {date.getDate()}
                     </span>
                   </div>
 
@@ -115,46 +107,47 @@ export default function WeekMeetingsCard({
                     <p className="pl-1 text-xs text-slate-600">No meetings</p>
                   ) : (
                     <div className="space-y-1.5">
-                      {dayMeetings.map((m) => (
-                        <button
-                          key={m.id}
-                          type="button"
-                          onClick={() => onMeetingClick?.(m.id)}
-                          className="w-full rounded-xl border border-white/5 bg-white/[0.03] p-3 text-left transition hover:cursor-pointer hover:bg-white/[0.06]"
-                        >
-                          <div className="flex items-start gap-2">
-                            <span
-                              className={`mt-1 h-2 w-2 shrink-0 rounded-full ${STATUS_DOT[m.status] || "bg-slate-400"}`}
-                            />
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-medium text-slate-200">
-                                {m.title}
-                              </p>
-                              <p className="mt-0.5 text-xs text-slate-500">
-                                {formatTime(m.startTime)} — {formatTime(m.endTime)}
-                              </p>
-                              <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-slate-500">
-                                {m.location && (
-                                  <span className="flex items-center gap-1">
-                                    <MapPin className="h-3 w-3" />
-                                    {m.location}
+                      {dayMeetings.map((m) => {
+                        const st = STATUS[m.status] || STATUS.DRAFT;
+                        return (
+                          <button
+                            key={m.id}
+                            type="button"
+                            onClick={() => onMeetingClick?.(m.id)}
+                            className="group w-full rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2 text-left transition-all hover:border-primary/30 hover:bg-white/[0.06]"
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className={`h-2 w-2 shrink-0 rounded-full ${st.dot}`} />
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center justify-between gap-3">
+                                  <p className="truncate text-sm font-medium text-slate-200">
+                                    {m.title}
+                                  </p>
+                                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${st.badge}`}>
+                                    {m.status}
                                   </span>
+                                </div>
+                                <div className="mt-0.5 flex items-center gap-2 text-[11px] text-slate-500">
+                                  <span>{formatTime(m.startTime)} — {formatTime(m.endTime)}</span>
+                                  <span>•</span>
+                                  <span>{getParticipantLabel(m)}</span>
+                                </div>
+                                {(m.location || m.host) && (
+                                  <div className="mt-0.5 flex items-center gap-2 text-[11px] text-slate-600">
+                                    {m.location && (
+                                      <span className="flex items-center gap-1">
+                                        <MapPin className="h-3 w-3" />{m.location}
+                                      </span>
+                                    )}
+                                    {m.location && m.host && <span>•</span>}
+                                    {m.host && <span className="truncate">Host: {m.host.fullName || m.host.email}</span>}
+                                  </div>
                                 )}
-                                {m.meetingType === "ONLINE" && m.meetingLink && (
-                                  <span className="flex items-center gap-1">
-                                    <Video className="h-3 w-3" />
-                                    Online
-                                  </span>
-                                )}
-                                <span className="flex items-center gap-1">
-                                  <Users className="h-3 w-3" />
-                                  {getParticipantLabel(m)}
-                                </span>
                               </div>
                             </div>
-                          </div>
                           </button>
-                        ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>

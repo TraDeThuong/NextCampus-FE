@@ -24,6 +24,7 @@ export function useReviewAbsence() {
         { exact: false },
       );
       queryClient.invalidateQueries({ queryKey: ["meetings"] }, { exact: false });
+      queryClient.invalidateQueries({ queryKey: ["absences"] }, { exact: false });
     },
 
     onError: () => {

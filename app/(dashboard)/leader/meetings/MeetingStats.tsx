@@ -1,27 +1,37 @@
 "use client";
 
+import { useMemo } from "react";
 import { Calendar, Clock, Play, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
 import { useMeetings } from "@/hooks/meeting/useMeetings";
+import { useMyApprovedAbsences } from "@/hooks/meeting/useMyApprovedAbsences";
 
 export default function MeetingStats() {
-  const { data: totalData, isPending: totalLoading, isError: totalError } = useMeetings({ limit: 1 });
-  const { data: scheduledData, isPending: scheduledLoading } = useMeetings({ status: "SCHEDULED", limit: 1 });
-  const { data: ongoingData, isPending: ongoingLoading } = useMeetings({ status: "ONGOING", limit: 1 });
-  const { data: completedData, isPending: completedLoading } = useMeetings({ status: "COMPLETED", limit: 1 });
-  const { data: cancelledData, isPending: cancelledLoading } = useMeetings({ status: "CANCELLED", limit: 1 });
+  const { data, isPending, isError } = useMeetings({ limit: 100, sortBy: "startTime", order: "asc" });
+  const { data: excusedIds } = useMyApprovedAbsences();
 
-  const isPending = totalLoading || scheduledLoading || ongoingLoading || completedLoading || cancelledLoading;
+  const counts = useMemo(() => {
+    const meetings = data?.data ?? [];
+    const excused = excusedIds ?? new Set<string>();
+    const active = meetings.filter((m) => !excused.has(m.id));
+    return {
+      total: active.length,
+      scheduled: active.filter((m) => m.status === "SCHEDULED").length,
+      ongoing: active.filter((m) => m.status === "ONGOING").length,
+      completed: active.filter((m) => m.status === "COMPLETED").length,
+      cancelled: active.filter((m) => m.status === "CANCELLED").length,
+    };
+  }, [data, excusedIds]);
 
   const cards = [
-    { title: "Total Meetings", value: totalData?.meta?.total ?? 0, icon: Calendar, iconBg: "from-sky-500/20 to-cyan-400/10" },
-    { title: "Scheduled", value: scheduledData?.meta?.total ?? 0, icon: Clock, iconBg: "from-blue-500/20 to-indigo-400/10" },
-    { title: "Completed", value: completedData?.meta?.total ?? 0, icon: CheckCircle2, iconBg: "from-violet-500/20 to-purple-400/10" },
-    { title: "Cancelled", value: cancelledData?.meta?.total ?? 0, icon: XCircle, iconBg: "from-red-500/20 to-rose-400/10" },
+    { title: "Total Meetings", value: counts.total, icon: Calendar, iconBg: "from-sky-500/20 to-cyan-400/10" },
+    { title: "Scheduled", value: counts.scheduled, icon: Clock, iconBg: "from-blue-500/20 to-indigo-400/10" },
+    { title: "Completed", value: counts.completed, icon: CheckCircle2, iconBg: "from-violet-500/20 to-purple-400/10" },
+    { title: "Cancelled", value: counts.cancelled, icon: XCircle, iconBg: "from-red-500/20 to-rose-400/10" },
   ];
 
-  if (totalError) {
+  if (isError) {
     return (
       <div className="flex items-center gap-3 rounded-3xl border border-red-500/20 bg-red-500/5 p-6 backdrop-blur-xl">
         <AlertTriangle className="h-5 w-5 shrink-0 text-red-400" />
