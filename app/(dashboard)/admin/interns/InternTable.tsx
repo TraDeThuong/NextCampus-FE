@@ -14,7 +14,7 @@ import Spinner from "@/components/ui/Spinner";
 import InternRow from "./InternRow";
 
 const COLUMNS =
-    "minmax(200px,2fr) minmax(100px,1fr) minmax(110px,1fr) minmax(100px,1fr) 100px 100px 40px";
+    "minmax(200px,2fr) minmax(100px,1fr) minmax(110px,1fr) minmax(220px,2fr) 100px 100px 40px";
 
 export default function InternTable() {
     const searchParams = useSearchParams();
@@ -29,6 +29,7 @@ export default function InternTable() {
         const positionId = searchParams.get("positionId");
         const status = searchParams.get("status");
         const leaderId = searchParams.get("leaderId");
+        const leader = searchParams.get("leader");
         const page = searchParams.get("page");
         const limit = searchParams.get("limit");
 
@@ -37,6 +38,7 @@ export default function InternTable() {
         if (positionId) p.positionId = positionId;
         if (status) p.status = status as InternQueryParams["status"];
         if (leaderId) p.leaderId = leaderId;
+        if (leader) p.leader = leader;
         if (page) p.page = Number(page);
         if (limit) p.limit = Number(limit);
 

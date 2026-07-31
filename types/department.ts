@@ -2,6 +2,18 @@ export interface Department {
     id: string;
     name: string;
     positions: { id: string; name: string }[];
+    leaders?: {
+        id: string;
+        user: {
+            fullName: string | null;
+            email: string;
+        };
+    }[];
+}
+
+export interface GetDepartmentsParams {
+    name?: string;
+    leader?: string;
 }
 
 export interface Position {
@@ -23,6 +35,7 @@ export interface PositionListResponse {
 export interface CreateDepartmentPayload {
     name: string;
     positions?: string[];
+    leaderId?: string;
 }
 
 export interface UpdateDepartmentPayload {

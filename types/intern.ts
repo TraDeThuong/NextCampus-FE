@@ -46,6 +46,7 @@ export interface InternQueryParams {
     positionId?: string;
     status?: "ACTIVE" | "COMPLETED" | "DROPPED";
     leaderId?: string;
+    leader?: string;
     discordRoleGranted?: boolean;
     startDateFrom?: string;
     startDateTo?: string;

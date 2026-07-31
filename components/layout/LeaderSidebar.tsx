@@ -8,13 +8,15 @@ import {
   CheckSquare,
   ClipboardCheck,
   FileBarChart,
-  User,
+  UserRoundPen,
+  Building2,
 } from "lucide-react";
 import { LuAlarmClock } from "react-icons/lu";
 
 const menus = [
   { name: "Dashboard", href: "/leader/dashboard", icon: LayoutDashboard },
   { name: "Interns", href: "/leader/interns", icon: Users },
+  { name: "Department", href: "/leader/department", icon: Building2 },
   { name: "Tasks", href: "/leader/tasks", icon: CheckSquare },
   { name: "Daily Reports", href: "/leader/daily-reports", icon: ClipboardCheck },
   { name: "Meetings", href: "/leader/meetings", icon: LuAlarmClock },
@@ -23,7 +25,7 @@ const menus = [
     href: "/leader/weekly-evaluation",
     icon: FileBarChart,
   },
-  { name: "Profile", href: "/leader/profile", icon: User },
+  { name: "Profile", href: "/leader/profile", icon: UserRoundPen },
 ];
 
 const baseClass =

@@ -219,7 +219,7 @@ export default function CreateInternModal({ open, onClose }: Props) {
                 <option value="">No leader (assign later)</option>
                 {leaders.map((leader) => (
                   <option key={leader.id} value={leader.userId}>
-                    {leader.user.fullName ?? leader.user.email}
+                    {leader.user.fullName ? `${leader.user.fullName} (${leader.user.email})` : leader.user.email}
                   </option>
                 ))}
               </select>

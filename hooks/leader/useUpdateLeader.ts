@@ -21,6 +21,7 @@ export function useUpdateLeader() {
             toast.success("Leader updated.");
             queryClient.invalidateQueries({ queryKey: ["leaders"] });
             queryClient.invalidateQueries({ queryKey: ["leader"] });
+            queryClient.invalidateQueries({ queryKey: ["departments"] });
         },
 
         onError: () => {

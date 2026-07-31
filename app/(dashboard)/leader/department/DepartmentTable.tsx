@@ -1,6 +1,5 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
 import { useDepartments } from "@/hooks/department/useDepartments";
 import Table from "@/components/ui/Table";
@@ -9,14 +8,10 @@ import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
 import DepartmentRow from "./DepartmentRow";
 
-const COLUMNS = "minmax(180px, 1.2fr) minmax(280px, 2.8fr) minmax(220px, 1.8fr) 80px";
+const COLUMNS = "minmax(200px, 1.5fr) minmax(300px, 3fr) 80px";
 
 export default function DepartmentTable() {
-    const searchParams = useSearchParams();
-    const name = searchParams.get("name") ?? undefined;
-    const leader = searchParams.get("leader") ?? undefined;
-
-    const { data, isPending, isError } = useDepartments({ name, leader });
+    const { data, isPending, isError } = useDepartments();
 
     const departments = data?.data ?? [];
 
@@ -61,7 +56,6 @@ export default function DepartmentTable() {
                 <Table.Header>
                     <div>Department</div>
                     <div>Positions</div>
-                    <div>Leader</div>
                     <div className="text-right pr-4">Actions</div>
                 </Table.Header>
 

@@ -1,6 +1,5 @@
 "use client";
 
-import { Search } from "lucide-react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 
 import FilterSelect from "@/components/ui/FilterSelect";
@@ -39,7 +38,6 @@ export default function LeaderFilter() {
                         Search
                     </label>
                     <div className="relative">
-                        <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
                         <input
                             type="text"
                             placeholder="Search name or email..."
@@ -47,7 +45,7 @@ export default function LeaderFilter() {
                             onChange={(e) =>
                                 updateParam("fullName", e.target.value)
                             }
-                            className="w-full rounded-2xl border border-border bg-card py-3 pl-11 pr-4 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted"
+                            className="w-full rounded-2xl border border-border bg-card py-3 px-5 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted"
                         />
                     </div>
                 </div>

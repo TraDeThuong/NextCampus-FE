@@ -171,7 +171,7 @@ export default function InternRow({ intern }: InternRowProps) {
                             { value: null, label: "Not set" },
                             ...leaders.map((l) => ({
                                 value: l.userId,
-                                label: l.user.fullName ?? l.user.email,
+                                label: l.user.fullName ? `${l.user.fullName} (${l.user.email})` : l.user.email,
                             })),
                         ]}
                     />
