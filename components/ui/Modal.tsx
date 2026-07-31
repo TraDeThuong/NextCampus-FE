@@ -90,7 +90,7 @@ function Window({ children, name, size = "lg" }: WindowProps) {
         className={`
           relative w-full
           max-h-[calc(100vh-3rem)]
-          overflow-y-auto overflow-x-hidden
+          flex flex-col
 
           rounded-[2rem]
           border border-border
@@ -155,7 +155,7 @@ function Window({ children, name, size = "lg" }: WindowProps) {
           <HiXMark className="h-7 w-7 hover:cursor-pointer" />
         </button>
 
-        <div>
+        <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
           {cloneElement(children, {
             onCloseModal: close,
           })}

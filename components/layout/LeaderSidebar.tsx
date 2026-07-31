@@ -10,12 +10,15 @@ import {
   FileBarChart,
   User,
 } from "lucide-react";
+import { LuAlarmClock } from "react-icons/lu";
 
 const menus = [
   { name: "Dashboard", href: "/leader/dashboard", icon: LayoutDashboard },
   { name: "Interns", href: "/leader/interns", icon: Users },
   { name: "Tasks", href: "/leader/tasks", icon: CheckSquare },
   { name: "Daily Reports", href: "/leader/daily-reports", icon: ClipboardCheck },
+  { name: "Meetings", href:"/leader/meetings", icon:LuAlarmClock},
+  
   {
     name: "Weekly Evaluation",
     href: "/leader/weekly-evaluation",
