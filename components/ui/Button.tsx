@@ -1,12 +1,12 @@
 import React, { ButtonHTMLAttributes, forwardRef } from 'react';
 
-export type ButtonVariant = 
-  | 'primary'       // Màu Brand Main chuẩn chỉnh
-  | 'glass'         // Phong cách kính mờ xuyên thấu (Glassmorphism)
-  | 'metal-silver'  // Ánh kim bạc cao cấp (Phong cách chủ đạo)
-  | 'metal-blue'    // Ánh thép xanh Futuristic
-  | 'chrome-glow'   // Chrome bóng bẩy kết hợp hiệu ứng phát quang
-  | 'danger';       // Trạng thái báo lỗi/xóa
+export type ButtonVariant =
+  | 'primary'       // Main brand color
+  | 'glass'         // Frosted glass style (Glassmorphism)
+  | 'metal-silver'  // Premium silver metallic (Signature style)
+  | 'metal-blue'    // Futuristic blue steel
+  | 'chrome-glow'   // Glossy chrome with glow effect
+  | 'danger';       // Error/delete state
 
 export type ButtonSize = 'sm' | 'md' | 'lg';
 

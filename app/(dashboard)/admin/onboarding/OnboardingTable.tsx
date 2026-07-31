@@ -1,27 +1,27 @@
-// | Cột                | Ý nghĩa                                |
+// | Column             | Description                             |
 // | ------------------ | -------------------------------------- |
-// | Candidate          | Họ tên hoặc email                      |
-// | Department         | Phòng ban ứng tuyển                    |
-// | Position           | Vị trí ứng tuyển                       |
+// | Candidate          | Full name or email                      |
+// | Department         | Department applied to                   |
+// | Position           | Position applied for                    |
 // | Invite Status      | `ACTIVE`, `USED`, `EXPIRED`, `REVOKED` |
 // | Application Status | `PENDING`, `APPROVED`, `REJECTED`      |
-// | Start Date         | Ngày bắt đầu thực tập                  |
-// | Submitted At       | Ngày nộp đơn                           |
-// | Actions            | Menu ba chấm                           |
+// | Start Date         | Internship start date                   |
+// | Submitted At       | Application submission date             |
+// | Actions            | Actions menu                            |
 
 
-// | Trạng thái        | Action                  | Mô tả                                                       |
+// | Status            | Action                  | Description                                                 |
 // | ----------------- | ----------------------- | ----------------------------------------------------------- |
-// | `ACTIVE`          | **View details**        | Xem thông tin lời mời: email, ngày tạo, ngày hết hạn.       |
-// |                   | **Revoke invite**       | Thu hồi lời mời, chuyển trạng thái sang `REVOKED`.          |
-// | `USED + PENDING`  | **View application**    | Xem chi tiết đơn ứng tuyển của intern.                      |
-// |                   | **Approve application** | Duyệt đơn, tạo tài khoản `INTERN` và hồ sơ intern.          |
-// |                   | **Reject application**  | Từ chối đơn ứng tuyển.                                      |
-// | `USED + APPROVED` | **View application**    | Xem thông tin đơn đã được duyệt và tài khoản intern đã tạo. |
-// | `USED + REJECTED` | **View application**    | Xem lại đơn đã bị từ chối.                                  |
-// |                   | **Delete application**  | Xóa mềm đơn ứng tuyển đã bị từ chối.                        |
-// | `EXPIRED`         | **View details**        | Xem thông tin lời mời đã hết hạn.                           |
-// | `REVOKED`         | **View details**        | Xem thông tin lời mời đã bị admin thu hồi.                  |
+// | `ACTIVE`          | **View details**        | View invite info: email, creation date, expiration date.     |
+// |                   | **Revoke invite**       | Revoke invite, transition status to `REVOKED`.              |
+// | `USED + PENDING`  | **View application**    | View intern application details.                            |
+// |                   | **Approve application** | Approve, create `INTERN` account and intern profile.        |
+// |                   | **Reject application**  | Reject the application.                                     |
+// | `USED + APPROVED` | **View application**    | View approved application and created intern account.       |
+// | `USED + REJECTED` | **View application**    | Review rejected application.                                |
+// |                   | **Delete application**  | Soft delete rejected application.                           |
+// | `EXPIRED`         | **View details**        | View expired invite information.                            |
+// | `REVOKED`         | **View details**        | View invite information revoked by admin.                   |
 
 
 "use client";

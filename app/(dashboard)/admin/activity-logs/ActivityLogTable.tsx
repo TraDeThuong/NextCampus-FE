@@ -111,7 +111,7 @@ export default function ActivityLogTable() {
     return (
       <MetalCard className="flex items-center justify-center gap-2 py-20">
         <AlertTriangle className="h-5 w-5 text-red-400" />
-        <p className="text-sm text-slate-400">Không thể tải nhật ký hoạt động.</p>
+        <p className="text-sm text-slate-400">Unable to load activity logs.</p>
       </MetalCard>
     );
   }
@@ -119,7 +119,7 @@ export default function ActivityLogTable() {
   if (logs.length === 0) {
     return (
       <MetalCard className="flex flex-col items-center justify-center gap-3 py-20">
-        <p className="text-sm text-slate-500">Không tìm thấy hoạt động nào.</p>
+        <p className="text-sm text-slate-500">No activity found.</p>
       </MetalCard>
     );
   }
@@ -135,11 +135,11 @@ export default function ActivityLogTable() {
       "
     >
       <Table.Header>
-        <div>Thời gian</div>
-        <div>Người thực hiện</div>
-        <div>Hành động</div>
-        <div>Đối tượng</div>
-        <div>Mô tả</div>
+        <div>Time</div>
+        <div>Actor</div>
+        <div>Action</div>
+        <div>Target</div>
+        <div>Description</div>
       </Table.Header>
 
       <Table.Body
@@ -148,7 +148,7 @@ export default function ActivityLogTable() {
           <Table.Row key={log.id}>
             {/* Time */}
             <div className="text-xs text-slate-400 font-medium">
-              {new Date(log.createdAt).toLocaleString("vi-VN", {
+              {new Date(log.createdAt).toLocaleString("en-US", {
                 year: "numeric",
                 month: "2-digit",
                 day: "2-digit",
@@ -161,7 +161,7 @@ export default function ActivityLogTable() {
             {/* Actor */}
             <div className="flex flex-col gap-0.5 justify-center min-w-0 pr-2">
               <span className="text-xs font-bold text-foreground truncate">
-                {log.user?.fullName || "Hệ thống"}
+                {log.user?.fullName || "System"}
               </span>
               <span className="text-[10px] text-muted truncate">
                 {log.user?.email || ""}
@@ -195,7 +195,7 @@ export default function ActivityLogTable() {
         <Table.Footer>
           <div className="flex w-full items-center justify-between gap-4 text-sm">
             <p className="text-muted">
-              Trang {meta.page} / {meta.totalPages} &middot; Tổng số {meta.total} bản ghi
+              Page {meta.page} of {meta.totalPages} &middot; {meta.total} records total
             </p>
 
             <div className="flex items-center gap-2">

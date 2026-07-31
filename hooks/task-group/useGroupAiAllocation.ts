@@ -33,7 +33,7 @@ export function useConfirmGroupAiAllocation() {
       return await taskGroupService.confirmGroupAiAllocation(groupId, payload);
     },
     onSuccess: (data) => {
-      toast.success(data.message || "Đã phân công task thành công.");
+      toast.success(data.message || "Tasks assigned successfully.");
       queryClient.invalidateQueries({ queryKey: ["tasks"], exact: false });
       queryClient.invalidateQueries({ queryKey: ["task-groups"], exact: false });
       queryClient.invalidateQueries({ queryKey: ["stats"], exact: false });
@@ -42,7 +42,7 @@ export function useConfirmGroupAiAllocation() {
       const message =
         axios.isAxiosError(error) && error.response?.data?.message
           ? error.response.data.message
-          : "Phân công hàng loạt thất bại.";
+          : "Bulk assignment failed.";
       toast.error(message);
     },
   });

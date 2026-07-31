@@ -73,7 +73,7 @@ function RatingSelector({
                   : "border-white/10 text-slate-400 bg-white/[0.03] hover:border-white/20 hover:text-slate-300"
               }
             `}
-            title={isAi ? `AI gợi ý: ${RATING_LABELS[level]}` : RATING_LABELS[level]}
+            title={isAi ? `AI suggestion: ${RATING_LABELS[level]}` : RATING_LABELS[level]}
           >
             {RATING_LABELS[level]}
             {isAi && <span className="ml-1 opacity-60 text-[9px]">AI</span>}
@@ -169,11 +169,11 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
 
   const handleGetAiSuggestion = async () => {
     if (!internId) {
-      toast.error("Vui lòng chọn thực tập sinh trước.");
+      toast.error("Please select an intern first.");
       return;
     }
     if (!week || week <= 0) {
-      toast.error("Vui lòng nhập tuần đánh giá hợp lệ.");
+      toast.error("Please enter a valid evaluation week.");
       return;
     }
     if (selectedIntern && (Number(week) < 1 || Number(week) > maxWeek)) {
@@ -197,7 +197,7 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
         setAiRatings(suggestedRatings);
         setComment(suggestedComment || "");
         setAiComment(suggestedComment || "");
-        toast.success("Đã nhận gợi ý từ AI!");
+        toast.success("AI suggestion received!");
       }
     } catch (err: any) {
       console.error(err);
@@ -207,7 +207,7 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!internId) {
-      toast.error("Vui lòng chọn thực tập sinh.");
+      toast.error("Please select an intern.");
       return;
     }
     if (selectedIntern && (Number(week) < 1 || Number(week) > maxWeek)) {
@@ -260,9 +260,9 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
           <Sparkles className="h-5 w-5" />
         </div>
         <div>
-          <h3 className="text-lg font-semibold metal-text">Tạo Đánh Giá Tuần</h3>
+          <h3 className="text-lg font-semibold metal-text">Create Weekly Evaluation</h3>
           <p className="text-sm text-muted">
-            Đánh giá năng lực của thực tập sinh theo 12 tiêu chí và 5 mức xếp loại.
+            Evaluate intern competency based on 12 criteria and 5 rating levels.
           </p>
         </div>
       </div>
@@ -272,11 +272,11 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="mb-1 block text-sm font-medium text-foreground">
-              Thực Tập Sinh <span className="text-red-400">*</span>
+              Intern <span className="text-red-400">*</span>
             </label>
             {internsLoading ? (
               <div className="flex items-center gap-2 text-sm text-muted py-2.5">
-                <Loader2 className="h-4 w-4 animate-spin" /> Đang tải danh sách...
+                <Loader2 className="h-4 w-4 animate-spin" /> Loading list...
               </div>
             ) : (
               <select
@@ -285,7 +285,7 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
                 className={inputClass}
                 required
               >
-                <option value="">-- Chọn thực tập sinh --</option>
+                <option value="">-- Select intern --</option>
                 {interns.map((i) => (
                   <option key={i.id} value={i.id}>
                     {i.fullName} ({i.user.email})
@@ -297,7 +297,7 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
 
           <div>
             <label className="mb-1 block text-sm font-medium text-foreground">
-              Tuần Đánh Giá <span className="text-red-400">*</span>
+              Evaluation Week <span className="text-red-400">*</span>
             </label>
             <input
               type="number"
@@ -330,7 +330,7 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
 
         {/* AI Suggestion Button */}
         <div className="flex justify-between items-center">
-          <p className="text-xs text-muted">Chọn mức xếp loại cho 12 tiêu chí bên dưới:</p>
+          <p className="text-xs text-muted">Select rating level for 12 criteria below:</p>
           <Button
             type="button"
             variant="glass"
@@ -340,34 +340,34 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
             disabled={aiSuggestion.isPending || !internId}
           >
             <Sparkles className="h-3.5 w-3.5 mr-1" />
-            Nhận gợi ý từ AI
+            Get AI Suggestion
           </Button>
         </div>
 
         {/* Live Score Preview */}
         <div className="flex items-center gap-3 rounded-2xl border border-primary-light/20 bg-primary-main/5 p-3">
           <div className="text-center flex-1">
-            <div className="text-xs text-muted mb-0.5">Giao tiếp</div>
+            <div className="text-xs text-muted mb-0.5">Communication</div>
             <div className="text-base font-bold text-primary-light">{scores.communication.toFixed(1)}</div>
           </div>
           <div className="h-8 w-px bg-border/40" />
           <div className="text-center flex-1">
-            <div className="text-xs text-muted mb-0.5">Thái độ</div>
+            <div className="text-xs text-muted mb-0.5">Attitude</div>
             <div className="text-base font-bold text-primary-light">{scores.attitude.toFixed(1)}</div>
           </div>
           <div className="h-8 w-px bg-border/40" />
           <div className="text-center flex-1">
-            <div className="text-xs text-muted mb-0.5">Tự học</div>
+            <div className="text-xs text-muted mb-0.5">Self-learning</div>
             <div className="text-base font-bold text-primary-light">{scores.learning.toFixed(1)}</div>
           </div>
           <div className="h-8 w-px bg-border/40" />
           <div className="text-center flex-1">
-            <div className="text-xs text-muted mb-0.5">Lập trình</div>
+            <div className="text-xs text-muted mb-0.5">Coding</div>
             <div className="text-base font-bold text-primary-light">{scores.coding.toFixed(1)}</div>
           </div>
           <div className="h-8 w-px bg-border/40" />
           <div className="text-center flex-[1.5]">
-            <div className="text-xs text-muted mb-0.5">Tổng điểm TB</div>
+            <div className="text-xs text-muted mb-0.5">Total Avg Score</div>
             <div className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-primary-light">
               {scores.totalScore.toFixed(2)}
             </div>
@@ -392,7 +392,7 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
                     {section.id}
                   </span>
                   <span className="text-sm font-semibold text-foreground">{section.label}</span>
-                  <span className="text-xs text-muted">({section.criteria.length} tiêu chí)</span>
+                  <span className="text-xs text-muted">({section.criteria.length} criteria)</span>
                 </div>
                 {expandedSections[section.id] ? (
                   <ChevronUp className="h-4 w-4 text-muted" />
@@ -430,10 +430,10 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
 
         {/* Comment */}
         <div>
-          <label className="mb-1 block text-sm font-medium text-foreground">Nhận xét</label>
+          <label className="mb-1 block text-sm font-medium text-foreground">Comment</label>
           <textarea
             rows={4}
-            placeholder="Nhập nhận xét chi tiết về thực tập sinh trong tuần..."
+            placeholder="Enter detailed comments about the intern this week..."
             value={comment}
             onChange={e => setComment(e.target.value)}
             maxLength={2000}
@@ -446,7 +446,7 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
               onClick={() => setComment(aiComment)}
             >
               <Sparkles className="h-3 w-3" />
-              Dùng nhận xét của AI
+              Use AI comment
             </button>
           )}
         </div>
@@ -454,7 +454,7 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
         {/* Actions */}
         <div className="flex justify-end gap-3 pt-4 border-t border-border/40">
           <Button type="button" variant="glass" size="md" onClick={onCloseModal}>
-            Hủy
+            Cancel
           </Button>
           <Button
             type="submit"
@@ -462,7 +462,7 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
             size="md"
             isLoading={createEvaluation.isPending}
           >
-            Lưu Đánh Giá
+            Save Evaluation
           </Button>
         </div>
       </form>

@@ -5,24 +5,24 @@ import FilterSelect from "@/components/ui/FilterSelect";
 import MetalCard from "@/components/ui/MetalCard";
 
 const ACTION_OPTIONS = [
-  { value: "LOGIN", label: "Đăng nhập (Login)" },
-  { value: "CREATE_USER", label: "Tạo người dùng" },
-  { value: "UPDATE_USER", label: "Cập nhật người dùng" },
-  { value: "DELETE_USER", label: "Xóa người dùng" },
-  { value: "CREATE_TASK", label: "Tạo nhiệm vụ" },
-  { value: "UPDATE_TASK", label: "Cập nhật nhiệm vụ" },
-  { value: "DELETE_TASK", label: "Xóa nhiệm vụ" },
-  { value: "ASSIGN_TASK", label: "Giao nhiệm vụ" },
-  { value: "CREATE_SUBMISSION", label: "Nộp bài" },
-  { value: "REVIEW_SUBMISSION", label: "Đánh giá bài nộp" },
-  { value: "CREATE_DAILY_REPORT", label: "Tạo báo cáo ngày" },
-  { value: "CREATE_EVALUATION", label: "Tạo đánh giá tuần" },
-  { value: "SUBMIT_APPLICATION", label: "Nộp đơn ứng tuyển" },
+  { value: "LOGIN", label: "Login" },
+  { value: "CREATE_USER", label: "Create User" },
+  { value: "UPDATE_USER", label: "Update User" },
+  { value: "DELETE_USER", label: "Delete User" },
+  { value: "CREATE_TASK", label: "Create Task" },
+  { value: "UPDATE_TASK", label: "Update Task" },
+  { value: "DELETE_TASK", label: "Delete Task" },
+  { value: "ASSIGN_TASK", label: "Assign Task" },
+  { value: "CREATE_SUBMISSION", label: "Submit Work" },
+  { value: "REVIEW_SUBMISSION", label: "Review Submission" },
+  { value: "CREATE_DAILY_REPORT", label: "Create Daily Report" },
+  { value: "CREATE_EVALUATION", label: "Create Weekly Evaluation" },
+  { value: "SUBMIT_APPLICATION", label: "Submit Application" },
 ];
 
 const ORDER_OPTIONS = [
-  { value: "desc", label: "Mới nhất trước (Newest)" },
-  { value: "asc", label: "Cũ nhất trước (Oldest)" },
+  { value: "desc", label: "Newest First" },
+  { value: "asc", label: "Oldest First" },
 ];
 
 export default function ActivityLogFilter() {
@@ -44,10 +44,10 @@ export default function ActivityLogFilter() {
   return (
     <MetalCard className="px-6 py-5">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {/* Lọc theo ngày tháng */}
+        {/* Filter by date range */}
         <div className="flex flex-col gap-3">
           <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">
-            Thời gian
+            Time Period
           </label>
           <div className="flex items-center gap-2">
             <input
@@ -66,16 +66,16 @@ export default function ActivityLogFilter() {
           </div>
         </div>
 
-        {/* Lọc theo hành động */}
+        {/* Filter by action */}
         <FilterSelect
-          label="Hành động"
+          label="Action"
           filterField="action"
           options={ACTION_OPTIONS}
         />
 
-        {/* Lọc theo thứ tự sắp xếp */}
+        {/* Sort order */}
         <FilterSelect
-          label="Sắp xếp"
+          label="Sort By"
           filterField="order"
           options={ORDER_OPTIONS}
         />

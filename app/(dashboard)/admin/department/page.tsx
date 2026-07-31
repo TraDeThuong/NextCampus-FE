@@ -4,7 +4,7 @@ import DepartmentHeader from "./DepartmentHeader";
 import DepartmentTable from "./DepartmentTable";
 
 export const metadata: Metadata = {
-  title: "Quản lý Phòng ban",
+  title: "Manage Departments",
 };
 
 export default function page() {

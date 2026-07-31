@@ -21,7 +21,7 @@ export default function LoginForm() {
             {isInactive && (
                 <div className="mt-4 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-3.5 text-sm text-red-300">
                     <AlertTriangle className="h-5 w-5 shrink-0 text-red-400" />
-                    <span>Tài khoản của bạn đã bị khóa hoặc ngừng hoạt động.</span>
+                    <span>Your account has been locked or deactivated.</span>
                 </div>
             )}
 

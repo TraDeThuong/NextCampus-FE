@@ -13,12 +13,12 @@ export function useCreateWeeklyEvaluation() {
       weeklyEvaluationService.createWeeklyEvaluation(payload),
 
     onSuccess: () => {
-      toast.success("Tạo đánh giá tuần thành công!");
+      toast.success("Weekly evaluation created successfully!");
       queryClient.invalidateQueries({ queryKey: ["weeklyEvaluations"] });
     },
 
     onError: (error: any) => {
-      const msg = error?.response?.data?.message || "Lỗi khi tạo đánh giá tuần.";
+      const msg = error?.response?.data?.message || "Failed to create weekly evaluation.";
       toast.error(msg);
     },
   });

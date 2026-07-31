@@ -75,7 +75,7 @@ function PendingRow({ assignment }: { assignment: TaskAssignment }) {
             {assignment.intern.fullName}
           </span>
           <span>
-            Yêu cầu bởi:{" "}
+            Requested by:{" "}
             <span className="text-foreground">{assignment.assigner.fullName}</span>
           </span>
         </div>
@@ -137,11 +137,10 @@ export default function PendingApprovalModal({ isOpen, onClose }: Props) {
         <div className="p-6 sm:p-8 overflow-y-auto max-h-[85vh]">
           <div className="mb-6">
             <h2 className="text-xl font-bold metal-text">
-              Yêu Cầu Giao Việc Chờ Phê Duyệt
+              Pending Task Assignment Requests
             </h2>
             <p className="text-xs text-muted mt-1">
-              {crossTeam.length} yêu cầu từ các leader khác đang chờ bạn phê
-              duyệt
+              {crossTeam.length} requests from other leaders awaiting your approval
             </p>
           </div>
 
@@ -152,7 +151,7 @@ export default function PendingApprovalModal({ isOpen, onClose }: Props) {
           ) : crossTeam.length === 0 ? (
             <div className="py-12 text-center rounded-2xl border border-white/5 bg-white/[0.02]">
               <p className="text-sm text-muted">
-                Không có yêu cầu giao việc nào đang chờ.
+                No pending assignment requests.
               </p>
             </div>
           ) : (

@@ -86,7 +86,7 @@ function CriteriaTable({
             );
             return (
               <div className="flex justify-end px-4 py-2 bg-white/[0.02] border-t border-border/20">
-                <span className="text-xs text-muted mr-2">Điểm trung bình phần {section.id}:</span>
+                <span className="text-xs text-muted mr-2">Section {section.id} average score:</span>
                 <span className="text-xs font-bold text-primary-light">{avg.toFixed(1)} / 10</span>
               </div>
             );
@@ -97,7 +97,7 @@ function CriteriaTable({
   );
 }
 
-// Hiển thị 4 progress bars cũ (fallback)
+// Legacy 4 progress bars (fallback)
 function LegacyScoreBars({
   communication, attitude, learning, coding,
   aiCommunication, aiAttitude, aiLearning, aiCoding,
@@ -109,10 +109,10 @@ function LegacyScoreBars({
   hasAi: boolean;
 }) {
   const scoreItems = [
-    { label: "Giao tiếp (Communication)", final: communication, ai: aiCommunication },
-    { label: "Thái độ (Attitude)", final: attitude, ai: aiAttitude },
-    { label: "Tự học (Learning)", final: learning, ai: aiLearning },
-    { label: "Lập trình (Coding)", final: coding, ai: aiCoding },
+    { label: "Communication", final: communication, ai: aiCommunication },
+    { label: "Attitude", final: attitude, ai: aiAttitude },
+    { label: "Self-learning", final: learning, ai: aiLearning },
+    { label: "Coding", final: coding, ai: aiCoding },
   ];
 
   return (
@@ -124,7 +124,7 @@ function LegacyScoreBars({
             <div className="flex items-center gap-3">
               {hasAi && item.ai !== null && (
                 <span className="text-xs text-muted">
-                  AI gợi ý: <strong className="text-slate-400">{item.ai.toFixed(1)}</strong>
+                  AI suggestion: <strong className="text-slate-400">{item.ai.toFixed(1)}</strong>
                 </span>
               )}
               <span className="text-sm font-bold text-primary-light">
@@ -202,7 +202,7 @@ export default function WeeklyEvaluationDetailPage() {
         className="flex items-center gap-2 text-sm text-slate-400 transition hover:text-white"
       >
         <ArrowLeft className="h-4 w-4" />
-        Quay lại danh sách
+        Back to list
       </button>
 
       {/* Header card */}
@@ -215,14 +215,14 @@ export default function WeeklyEvaluationDetailPage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-                  {evaluation.intern?.fullName || "Thực tập sinh"}
+                  {evaluation.intern?.fullName || "Intern"}
                   <span className="text-sm font-normal px-2.5 py-0.5 rounded-full border border-primary-light/30 bg-primary-light/10 text-primary-light">
-                    Tuần {evaluation.week}
+                    Week {evaluation.week}
                   </span>
                   {hasRatings && (
                     <span className="text-xs font-normal px-2 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 flex items-center gap-1">
                       <ClipboardList className="h-3 w-3" />
-                      12 tiêu chí
+                      12 criteria
                     </span>
                   )}
                 </h1>
@@ -231,7 +231,7 @@ export default function WeeklyEvaluationDetailPage() {
                   <span>{evaluation.intern?.user?.email}</span>
                   <span className="text-slate-600 mx-2">|</span>
                   <Calendar className="h-4 w-4 text-slate-500" />
-                  <span>Đánh giá ngày {new Date(evaluation.createdAt).toLocaleDateString("vi-VN")}</span>
+                  <span>Evaluated on {new Date(evaluation.createdAt).toLocaleDateString("en-US")}</span>
                 </p>
               </div>
             </div>
@@ -253,13 +253,13 @@ export default function WeeklyEvaluationDetailPage() {
                 <h2 className="text-lg font-semibold flex items-center gap-2">
                   <BookOpen className="h-5 w-5 text-primary-light shrink-0" />
                   <span className="metal-text">
-                    {hasRatings ? "Bảng Đánh Giá 12 Tiêu Chí" : "Chi Tiết Điểm Năng Lực"}
+                    {hasRatings ? "12 Criteria Evaluation" : "Competency Score Details"}
                   </span>
                 </h2>
                 {evaluation.leaderEdited && (
                   <span className="text-xs px-2.5 py-1 rounded-full border border-amber-500/20 bg-amber-500/5 text-amber-400 flex items-center gap-1">
                     <Sparkles className="h-3 w-3" />
-                    Đã điều chỉnh sau gợi ý AI
+                    Adjusted after AI suggestion
                   </span>
                 )}
               </div>
@@ -287,11 +287,11 @@ export default function WeeklyEvaluationDetailPage() {
             <div className="rounded-3xl p-6 space-y-4">
               <h2 className="text-lg font-semibold flex items-center gap-2 border-b border-border/40 pb-4">
                 <MessageSquare className="h-5 w-5 text-primary-light shrink-0" />
-                <span className="metal-text">Nhận Xét & Đánh Giá</span>
+                <span className="metal-text">Comments & Evaluation</span>
               </h2>
               <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5">
                 <p className="text-slate-300 text-sm whitespace-pre-wrap leading-relaxed">
-                  {evaluation.comment || "Không có nhận xét."}
+                  {evaluation.comment || "No comments."}
                 </p>
               </div>
 
@@ -300,7 +300,7 @@ export default function WeeklyEvaluationDetailPage() {
                 <div className="space-y-2 mt-4">
                   <h3 className="text-xs font-semibold text-muted flex items-center gap-1">
                     <Sparkles className="h-3.5 w-3.5 text-primary-light" />
-                    Nhận xét gốc từ AI
+                    Original AI comment
                   </h3>
                   <div className="bg-primary-main/5 border border-primary-light/10 rounded-2xl p-4">
                     <p className="text-slate-400 text-xs whitespace-pre-wrap leading-relaxed italic">
@@ -319,26 +319,26 @@ export default function WeeklyEvaluationDetailPage() {
             <div className="rounded-3xl p-6 text-center space-y-6">
               <h2 className="text-lg font-semibold border-b border-border/40 pb-4 flex items-center justify-center gap-2">
                 <Star className="h-5 w-5 text-yellow-400 shrink-0" />
-                <span className="metal-text">Điểm Đánh Giá Chung</span>
+                <span className="metal-text">Overall Evaluation Score</span>
               </h2>
 
               <div className="space-y-2">
                 <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-primary-light">
                   {finalScore.toFixed(2)}
                 </div>
-                <div className="text-sm text-muted">trên thang điểm 10.00</div>
+                <div className="text-sm text-muted">on a scale of 10.00</div>
               </div>
 
               {hasAi && (
                 <div className="pt-4 border-t border-border/40 flex items-center justify-around text-xs">
                   <div className="text-center">
                     <div className="text-slate-400 font-bold">{finalScore.toFixed(2)}</div>
-                    <div className="text-muted mt-0.5">Điểm thực tế</div>
+                    <div className="text-muted mt-0.5">Actual score</div>
                   </div>
                   <div className="h-8 w-px bg-border/40" />
                   <div className="text-center">
                     <div className="text-slate-400 font-bold">{aiScore.toFixed(2)}</div>
-                    <div className="text-muted mt-0.5">AI đề xuất</div>
+                    <div className="text-muted mt-0.5">AI suggested</div>
                   </div>
                 </div>
               )}
@@ -346,10 +346,10 @@ export default function WeeklyEvaluationDetailPage() {
               {/* 4-group breakdown (computed from ratings or stored values) */}
               <div className="pt-4 border-t border-border/40 space-y-2 text-xs">
                 {[
-                  { label: "Giao tiếp", value: evaluation.communication },
-                  { label: "Thái độ",   value: evaluation.attitude },
-                  { label: "Tự học",    value: evaluation.learning },
-                  { label: "Lập trình", value: evaluation.coding },
+                  { label: "Communication", value: evaluation.communication },
+                  { label: "Attitude",   value: evaluation.attitude },
+                  { label: "Self-learning",    value: evaluation.learning },
+                  { label: "Coding", value: evaluation.coding },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex justify-between items-center">
                     <span className="text-muted">{label}:</span>
@@ -368,21 +368,21 @@ export default function WeeklyEvaluationDetailPage() {
 
               <div className="pt-4 border-t border-border/40 text-left space-y-2 text-xs">
                 <div className="flex justify-between text-muted">
-                  <span>Người đánh giá:</span>
+                  <span>Evaluator:</span>
                   <span className="font-semibold text-foreground">
                     {evaluation.leader?.fullName || evaluation.leader?.email || "Leader"}
                   </span>
                 </div>
                 <div className="flex justify-between text-muted">
-                  <span>Ngày tạo:</span>
+                  <span>Created:</span>
                   <span className="font-semibold text-foreground">
-                    {new Date(evaluation.createdAt).toLocaleDateString("vi-VN")}
+                    {new Date(evaluation.createdAt).toLocaleDateString("en-US")}
                   </span>
                 </div>
                 <div className="flex justify-between text-muted">
-                  <span>Cập nhật cuối:</span>
+                  <span>Last updated:</span>
                   <span className="font-semibold text-foreground">
-                    {new Date(evaluation.updatedAt).toLocaleDateString("vi-VN")}
+                    {new Date(evaluation.updatedAt).toLocaleDateString("en-US")}
                   </span>
                 </div>
               </div>

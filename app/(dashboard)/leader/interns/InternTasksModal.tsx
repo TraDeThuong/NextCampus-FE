@@ -48,12 +48,12 @@ export default function InternTasksModal({ intern, onClose }: Props) {
       onClick={onClose}
       className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-md"
     >
-      {/* Khung Metal Modal */}
+      {/* Metal Modal Frame */}
       <div
         onClick={(e) => e.stopPropagation()}
         className="relative flex w-full max-w-5xl h-[80vh] flex-col overflow-hidden rounded-2xl border border-slate-700/60 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 shadow-[0_0_50px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.05)] text-slate-100"
       >
-        {/* Lớp phản quang kim loại & Ambient Glow */}
+        {/* Metallic reflective layer & Ambient Glow */}
         <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.03),_transparent)]" />
         <div className="absolute -top-40 left-1/2 -translate-x-1/2 h-80 w-[600px] rounded-full bg-cyan-500/5 blur-[120px]" />
 
@@ -79,7 +79,7 @@ export default function InternTasksModal({ intern, onClose }: Props) {
           </button>
         </div>
 
-        {/* Body chính chia 2 cột */}
+        {/* Main body: 2-column layout */}
         <div className="flex flex-1 overflow-hidden relative">
           {listLoading ? (
             <div className="flex w-full items-center justify-center">
@@ -92,7 +92,7 @@ export default function InternTasksModal({ intern, onClose }: Props) {
             </div>
           ) : (
             <>
-              {/* CỘT TRÁI: Danh sách Task (Scrollable) */}
+              {/* LEFT COLUMN: Task List (Scrollable) */}
               <div className="w-2/5 border-r border-slate-800/80 overflow-y-auto p-4 space-y-2 bg-slate-950/40 custom-scrollbar">
                 <div className="px-2 pb-2 text-[10px] font-bold tracking-widest text-slate-500 uppercase font-mono">
                   Task Registry
@@ -107,7 +107,7 @@ export default function InternTasksModal({ intern, onClose }: Props) {
                 ))}
               </div>
 
-              {/* CỘT PHẢI: Chi tiết Task */}
+              {/* RIGHT COLUMN: Task Detail */}
               <div className="w-3/5 overflow-y-auto p-6 bg-slate-900/20 custom-scrollbar relative">
                 {selectedTaskId ? (
                   taskLoading ? (
@@ -137,7 +137,7 @@ export default function InternTasksModal({ intern, onClose }: Props) {
 }
 
 /* ==========================================
-   COMPONENT: TASK ROW BUTTON (CỘT TRÁI)
+   COMPONENT: TASK ROW BUTTON (LEFT COLUMN)
    ========================================== */
 function TaskRowButton({
   assignment,
@@ -166,7 +166,7 @@ function TaskRowButton({
           : "border-slate-850 bg-slate-900/40 text-slate-400 hover:border-slate-700 hover:bg-slate-900/80"
       }`}
     >
-      {/* Thanh hiển thị trạng thái viền trái dạng Metal Tag */}
+      {/* Metal Tag - status bar with left border */}
       <div className={`absolute left-0 top-1/4 h-1/2 w-[3px] rounded-r-full transition-all ${
         isSelected ? "bg-cyan-400" : (statusColors[assignment.status] || "bg-slate-700")
       }`} />
@@ -188,7 +188,7 @@ function TaskRowButton({
 }
 
 /* ==========================================
-   COMPONENT: PANEL DETAIL (CỘT PHẢI)
+   COMPONENT: PANEL DETAIL (RIGHT COLUMN)
    ========================================== */
 function TaskDetailPanel({
   task,
@@ -218,7 +218,7 @@ function TaskDetailPanel({
         <h3 className="text-xl font-bold tracking-tight text-white">{task.title}</h3>
       </div>
 
-      {/* Grid Specs Kim Loại Mịn */}
+      {/* Fine Metallic Grid Specs */}
       <div className="grid grid-cols-2 gap-3 bg-slate-950/40 border border-slate-850 p-4 rounded-xl shadow-inner">
         <DetailGridRow icon={Calendar} label="Target Deadline" value={new Date(task.deadline).toLocaleDateString("en-GB")} />
         <DetailGridRow icon={User} label="Assigned By" value={task.creator.fullName ?? task.creator.email} />

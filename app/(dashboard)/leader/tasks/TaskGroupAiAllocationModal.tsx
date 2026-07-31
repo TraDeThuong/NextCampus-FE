@@ -137,7 +137,7 @@ export default function TaskGroupAiAllocationModal({
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-lg font-bold text-white">AI Phân công hàng loạt</h2>
+                <h2 className="text-lg font-bold text-white">AI Batch Assignment</h2>
                 {data?.department && (
                   <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-sky-500/30 bg-sky-500/10 text-sky-400">
                     <Building className="h-3 w-3" />
@@ -146,7 +146,7 @@ export default function TaskGroupAiAllocationModal({
                 )}
               </div>
               <p className="text-sm text-slate-400 mt-0.5">
-                Nhóm công việc: <span className="text-white font-medium">{groupName}</span>
+                Task group: <span className="text-white font-medium">{groupName}</span>
               </p>
             </div>
           </div>
@@ -162,8 +162,8 @@ export default function TaskGroupAiAllocationModal({
                 <div className="absolute inset-0 rounded-full animate-ping bg-sky-400/10" />
               </div>
               <div className="text-center">
-                <p className="text-sm font-medium text-white">Đang phân tích và tính toán điểm phù hợp...</p>
-                <p className="text-xs text-slate-500 mt-1">Đánh giá workload, skill match, performance & cơ hội học tập</p>
+                <p className="text-sm font-medium text-white">Analyzing and computing compatibility scores...</p>
+                <p className="text-xs text-slate-500 mt-1">Evaluating workload, skill match, performance & learning opportunities</p>
               </div>
             </div>
           )}
@@ -172,16 +172,16 @@ export default function TaskGroupAiAllocationModal({
           {isError && (
             <div className="rounded-2xl border border-rose-500/20 bg-rose-500/5 p-6 text-center space-y-3">
               <AlertCircle className="h-10 w-10 text-rose-400 mx-auto" />
-              <p className="text-sm font-medium text-rose-300">Không thể đề xuất AI</p>
+              <p className="text-sm font-medium text-rose-300">Cannot generate AI suggestion</p>
               <p className="text-xs text-slate-400">
-                {error?.message ?? "Đã xảy ra lỗi. Vui lòng thử lại."}
+                {error?.message ?? "An error occurred. Please try again."}
               </p>
               <Button
                 variant="glass"
                 size="sm"
                 onClick={() => refetch()}
               >
-                Thử lại
+                Retry
               </Button>
             </div>
           )}
@@ -193,26 +193,26 @@ export default function TaskGroupAiAllocationModal({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-3 text-center">
                   <p className="text-2xl font-bold text-white">{data.summary.totalUnassignedTasks}</p>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Task chưa giao</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Unassigned</p>
                 </div>
                 <div className="rounded-xl border border-sky-500/30 bg-sky-500/5 p-3 text-center">
                   <p className="text-2xl font-bold text-sky-400">{data.summary.totalAllocated}</p>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Đã có gợi ý</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Suggested</p>
                 </div>
                 <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-3 text-center">
                   <p className="text-2xl font-bold text-amber-400">{data.summary.unallocatableTasks}</p>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Chưa có ứng viên</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">No candidates</p>
                 </div>
                 <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-3 text-center">
                   <p className="text-2xl font-bold text-violet-400">{data.summary.internsEvaluatedCount}</p>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Intern được duyệt</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Interns evaluated</p>
                 </div>
               </div>
 
               {/* Notice */}
               <p className="text-xs text-slate-400 bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 flex items-center gap-2">
                 <HelpCircle className="h-4 w-4 text-sky-400 shrink-0" />
-                <span>Leader có thể xem trước và tùy chỉnh người phụ trách (Owner/Support) từng task trước khi bấm nút xác nhận bên dưới.</span>
+                <span>Leaders can preview and customize the person in charge (Owner/Support) for each task before clicking the confirm button below.</span>
               </p>
 
               {/* Task Allocation List */}
@@ -258,7 +258,7 @@ export default function TaskGroupAiAllocationModal({
                       {/* AI Reason string */}
                       {task.reason && (
                         <p className="text-xs text-slate-400 italic">
-                          <span className="font-medium text-sky-400">Lý do AI:</span> {task.reason}
+                          <span className="font-medium text-sky-400">AI reason:</span> {task.reason}
                         </p>
                       )}
 
@@ -268,18 +268,18 @@ export default function TaskGroupAiAllocationModal({
                         <div>
                           <label className="flex items-center gap-1 text-[11px] font-semibold uppercase text-slate-400 mb-1">
                             <User className="h-3 w-3 text-sky-400" />
-                            Người phụ trách chính (Owner) *
+                            Primary Owner *
                           </label>
                           <select
                             value={currentDraft?.internId ?? ""}
                             onChange={(e) => handleOwnerChange(task.taskId, e.target.value)}
                             className="w-full rounded-xl border border-slate-700 bg-[#121624] px-3 py-2 text-xs text-white outline-none focus:border-sky-500"
                           >
-                            <option value="">-- Chưa chọn Owner --</option>
+                            <option value="">-- Select Owner --</option>
                             {interns.map((i) => (
                               <option key={i.id} value={i.id}>
                                 {i.fullName} {i.position?.name ? `(${i.position.name})` : ""}
-                                {task.suggestedOwner?.id === i.id ? " ★ AI gợi ý" : ""}
+                                {task.suggestedOwner?.id === i.id ? " ★ AI suggestion" : ""}
                               </option>
                             ))}
                           </select>
@@ -289,20 +289,20 @@ export default function TaskGroupAiAllocationModal({
                         <div>
                           <label className="flex items-center gap-1 text-[11px] font-semibold uppercase text-slate-400 mb-1">
                             <Users className="h-3 w-3 text-violet-400" />
-                            Người hỗ trợ (Support) (Không bắt buộc)
+                            Support (Optional)
                           </label>
                           <select
                             value={currentDraft?.supportId ?? ""}
                             onChange={(e) => handleSupportChange(task.taskId, e.target.value)}
                             className="w-full rounded-xl border border-slate-700 bg-[#121624] px-3 py-2 text-xs text-white outline-none focus:border-violet-500"
                           >
-                            <option value="">-- Không có Support --</option>
+                            <option value="">-- No Support --</option>
                             {interns
                               .filter((i) => i.id !== currentDraft?.internId)
                               .map((i) => (
                                 <option key={i.id} value={i.id}>
                                   {i.fullName} {i.position?.name ? `(${i.position.name})` : ""}
-                                  {task.suggestedSupport?.id === i.id ? " ★ AI gợi ý" : ""}
+                                  {task.suggestedSupport?.id === i.id ? " ★ AI suggestion" : ""}
                                 </option>
                               ))}
                           </select>
@@ -320,7 +320,7 @@ export default function TaskGroupAiAllocationModal({
         {data && (
           <div className="p-4 border-t border-slate-800 bg-slate-900/60 flex items-center justify-between shrink-0">
             <span className="text-xs text-slate-400">
-              Đã sẵn sàng giao: <strong className="text-sky-400">{selectedCount}</strong> / {data.summary.totalUnassignedTasks} tasks
+              Ready to assign: <strong className="text-sky-400">{selectedCount}</strong> / {data.summary.totalUnassignedTasks} tasks
             </span>
 
             <div className="flex gap-3">
@@ -330,7 +330,7 @@ export default function TaskGroupAiAllocationModal({
                 disabled={confirmMutation.isPending}
                 className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs text-slate-300 transition hover:text-white disabled:opacity-50"
               >
-                Hủy
+                Cancel
               </button>
               <Button
                 variant="primary"
@@ -340,7 +340,7 @@ export default function TaskGroupAiAllocationModal({
                 disabled={selectedCount === 0}
               >
                 {!confirmMutation.isPending && <CheckCircle2 className="h-4 w-4" />}
-                Xác nhận Phân công ({selectedCount})
+                Confirm Assignment ({selectedCount})
               </Button>
             </div>
           </div>

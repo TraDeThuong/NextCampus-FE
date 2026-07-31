@@ -62,7 +62,7 @@ export default function InternWeeklyEvaluationList() {
     router.push(`${pathname}?${nextParams.toString()}`);
   };
 
-  // Thống kê tổng quan
+  // Overview statistics
   const avgScore = evaluations.length
     ? evaluations.reduce((sum, e) => sum + e.totalScore, 0) / evaluations.length
     : null;
@@ -86,9 +86,9 @@ export default function InternWeeklyEvaluationList() {
           <Sparkles className="h-5 w-5 text-white" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold metal-text">Đánh Giá Tuần</h1>
+          <h1 className="text-2xl font-bold metal-text">Weekly Evaluation</h1>
           <p className="text-sm text-muted mt-0.5">
-            Theo dõi kết quả đánh giá hàng tuần từ Leader
+            Track weekly evaluation results from your Leader
           </p>
         </div>
       </div>
@@ -96,18 +96,18 @@ export default function InternWeeklyEvaluationList() {
       {/* Summary cards */}
       {evaluations.length > 0 && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {/* Điểm tuần gần nhất */}
+          {/* Latest week score */}
           <MetalCard className="p-5">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs text-muted font-medium uppercase tracking-wide">
-                  Tuần gần nhất
+                  Latest Week
                 </p>
                 <p className="mt-1.5 text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-primary-light">
                   {latestEval?.totalScore.toFixed(1)}
                 </p>
                 <p className="text-xs text-muted mt-1">
-                  Tuần {latestEval?.week} / 10
+                  Week {latestEval?.week} / 10
                 </p>
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/20">
@@ -116,18 +116,18 @@ export default function InternWeeklyEvaluationList() {
             </div>
           </MetalCard>
 
-          {/* Điểm trung bình */}
+          {/* Average score */}
           <MetalCard className="p-5">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs text-muted font-medium uppercase tracking-wide">
-                  Điểm trung bình
+                  Average Score
                 </p>
                 <p className="mt-1.5 text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-primary-light">
                   {avgScore !== null ? avgScore.toFixed(1) : "—"}
                 </p>
                 <p className="text-xs text-muted mt-1">
-                  Trên {evaluations.length} tuần
+                  Across {evaluations.length} weeks
                 </p>
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 border border-blue-500/20">
@@ -136,17 +136,17 @@ export default function InternWeeklyEvaluationList() {
             </div>
           </MetalCard>
 
-          {/* Đã xem */}
+          {/* Reviewed */}
           <MetalCard className="p-5">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs text-muted font-medium uppercase tracking-wide">
-                  Đã xác nhận xem
+                  Confirmed Read
                 </p>
                 <p className="mt-1.5 text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400">
                   {reviewedCount}/{evaluations.length}
                 </p>
-                <p className="text-xs text-muted mt-1">tuần</p>
+                <p className="text-xs text-muted mt-1">weeks</p>
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/20">
                 <CheckCircle2 className="h-5 w-5 text-amber-400" />
@@ -156,14 +156,14 @@ export default function InternWeeklyEvaluationList() {
         </div>
       )}
 
-      {/* Danh sách */}
+      {/* Evaluation list */}
       <MetalCard className="p-6">
         <div className="border-b border-white/10 pb-4 mb-5">
           <h2 className="text-lg font-semibold metal-text">
-            Lịch sử đánh giá
+            Evaluation History
           </h2>
           <p className="text-xs text-muted mt-1">
-            Click vào từng tuần để xem chi tiết và xác nhận đã đọc
+            Click each week to view details and confirm as read
           </p>
         </div>
 
@@ -173,16 +173,16 @@ export default function InternWeeklyEvaluationList() {
               <Sparkles className="h-8 w-8 text-muted" />
             </div>
             <p className="text-sm text-muted">
-              Chưa có đánh giá tuần nào. Hãy chờ Leader đánh giá!
+              No evaluations yet. Please wait for your Leader to evaluate!
             </p>
           </div>
         ) : (
           <Table columns="1.5fr 1.5fr 1fr 1fr">
             <Table.Header>
-              <span>Tuần</span>
-              <span>Điểm & Xếp Loại</span>
-              <span className="text-center">Trạng thái</span>
-              <span className="text-center">Chi tiết</span>
+              <span>Week</span>
+              <span>Score &amp; Rating</span>
+              <span className="text-center">Status</span>
+              <span className="text-center">Details</span>
             </Table.Header>
 
             <Table.Body
@@ -193,17 +193,17 @@ export default function InternWeeklyEvaluationList() {
 
                 return (
                   <Table.Row key={item.id}>
-                    {/* Tuần */}
+                    {/* Week */}
                     <div className="flex flex-col gap-0.5">
                       <span className="font-bold text-foreground text-sm">
-                        Tuần {item.week}
+                        Week {item.week}
                       </span>
                       <span className="text-[11px] text-muted">
-                        {new Date(item.createdAt).toLocaleDateString("vi-VN")}
+                        {new Date(item.createdAt).toLocaleDateString("en-US")}
                       </span>
                     </div>
 
-                    {/* Điểm tổng */}
+                    {/* Total score */}
                     <div className="flex flex-col gap-1 items-start">
                       <span className="text-sm font-extrabold text-foreground">
                         {item.totalScore.toFixed(1)} / 10
@@ -215,27 +215,27 @@ export default function InternWeeklyEvaluationList() {
                       </span>
                     </div>
 
-                    {/* Trạng thái đã xem */}
+                    {/* Review status */}
                     <div className="flex justify-center">
                       {isReviewed ? (
                         <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg border text-emerald-400 border-emerald-500/30 bg-emerald-500/10">
                           <CheckCircle2 className="h-3 w-3" />
-                          Đã xem
+                          Reviewed
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg border text-amber-400 border-amber-500/30 bg-amber-500/10">
                           <Clock className="h-3 w-3" />
-                          Chưa xem
+                          Unread
                         </span>
                       )}
                     </div>
 
-                    {/* Xem chi tiết */}
+                    {/* View details */}
                     <div className="flex justify-center">
                       <Link href={`/intern/weekly-evaluation/${item.id}`}>
                         <Button variant="glass" size="sm" className="flex items-center gap-1">
                           <Eye className="h-3.5 w-3.5" />
-                          <span>Xem</span>
+                          <span>View</span>
                         </Button>
                       </Link>
                     </div>
@@ -257,7 +257,7 @@ export default function InternWeeklyEvaluationList() {
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                   <span className="text-sm text-muted">
-                    Trang {currentPage} / {totalPages}
+                    Page {currentPage} / {totalPages}
                   </span>
                   <Button
                     variant="glass"

@@ -8,14 +8,14 @@ export function useUnreadCount() {
   const { state } = useAuth();
 
   return useQuery({
-    // Đưa state.isAuthenticated vào queryKey để tự động làm mới khi đăng nhập/đăng xuất
+    // Include state.isAuthenticated in queryKey to auto-refresh on login/logout
     queryKey: ["notifications", "unread-count", state.isAuthenticated],
     queryFn: async () => {
       if (!state.isAuthenticated) return 0;
       const data = await notificationService.getUnreadCount();
       return data.count ?? 0;
     },
-    // Chỉ kích hoạt query khi người dùng đã đăng nhập thành công
+    // Only activate query when user is authenticated
     enabled: !!state.isAuthenticated,
     staleTime: 1000 * 60 * 1,
   });

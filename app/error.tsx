@@ -23,9 +23,9 @@ export default function ErrorPage({
         </div>
 
         <div className="space-y-2">
-          <h1 className="text-3xl font-extrabold text-white">500 - Lỗi hệ thống</h1>
+          <h1 className="text-3xl font-extrabold text-white">500 - System Error</h1>
           <p className="text-sm text-slate-400">
-            Đã xảy ra lỗi không mong muốn trên hệ thống. Đội ngũ kỹ thuật đã được ghi nhận sự cố này.
+            An unexpected error occurred. The technical team has been notified of this incident.
           </p>
           {error.digest && (
             <p className="font-mono text-xs text-slate-500">
@@ -40,14 +40,14 @@ export default function ErrorPage({
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-white transition hover:bg-primary-dark focus:outline-none focus:ring-4 focus:ring-primary/20"
           >
             <RotateCcw className="h-4 w-4" />
-            Thử lại
+            Retry
           </button>
           <Link
             href="/"
             className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-white/10 hover:text-white"
           >
             <Home className="h-4 w-4" />
-            Quay lại trang chủ
+            Back to home
           </Link>
         </div>
       </div>

@@ -1,4 +1,4 @@
-// Dung de cap nhat fullname, email ko the cap nhat duoc 
+// Used to update fullname, email cannot be updated
 // PUT /auth/me
 
 "use client";

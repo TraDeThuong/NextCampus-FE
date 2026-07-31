@@ -4,9 +4,9 @@ import InternWeeklyEvaluationList from "./InternWeeklyEvaluationList";
 import Spinner from "@/components/ui/Spinner";
 
 export const metadata: Metadata = {
-  title: "Đánh giá tuần | NexCampus",
+  title: "Weekly Evaluation | NexCampus",
   description:
-    "Theo dõi kết quả đánh giá hàng tuần từ Leader, xem chi tiết từng tiêu chí và xác nhận đã đọc.",
+    "Track weekly evaluation results from your Leader, view detailed criteria scores and confirm reviewed status.",
 };
 
 export default function page() {

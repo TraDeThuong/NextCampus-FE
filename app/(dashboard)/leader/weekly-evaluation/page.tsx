@@ -4,7 +4,7 @@ import WeeklyEvaluationList from "./WeeklyEvaluationList";
 import Spinner from "@/components/ui/Spinner";
 
 export const metadata: Metadata = {
-  title: "Đánh giá tuần",
+  title: "Weekly Evaluation",
 };
 
 export default function page() {

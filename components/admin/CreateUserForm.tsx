@@ -7,24 +7,24 @@ export const CreateUserForm = () => {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"LEADER" | "INTERN">("INTERN");
 
-  // Gọi Hook React Query vừa viết ở trên
+  // React Query mutation hook
   const { mutate, isPending } = useCreateUser();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return alert("Vui lòng nhập email");
+    if (!email) return alert("Please enter an email");
 
-    // Kích hoạt gọi API thông qua mutation
+    // Trigger API call via mutation
     mutate({ email, roleName: role });
   };
 
   return (
     <div style={{ maxWidth: "400px", margin: "50px auto", padding: "20px", border: "1px solid #ccc", borderRadius: "8px" }}>
-      <h2>Tạo Tài Khoản Mới (ADMIN)</h2>
+      <h2>Create New Account (ADMIN)</h2>
       <form onSubmit={handleSubmit}>
-        {/* Trường nhập Email */}
+        {/* Email field */}
         <div style={{ marginBottom: "15px" }}>
-          <label style={{ display: "block", marginBottom: "5px" }}>Email nhân viên:</label>
+          <label style={{ display: "block", marginBottom: "5px" }}>Employee email:</label>
           <input
             type="email"
             value={email}
@@ -34,9 +34,9 @@ export const CreateUserForm = () => {
           />
         </div>
 
-        {/* Trường chọn Chức vụ (Chỉ truyền chữ LEADER / INTERN) */}
+        {/* Role selection (passes LEADER or INTERN string) */}
         <div style={{ marginBottom: "20px" }}>
-          <label style={{ display: "block", marginBottom: "5px" }}>Chức vụ:</label>
+          <label style={{ display: "block", marginBottom: "5px" }}>Role:</label>
           <select
             value={role}
             onChange={(e) => setRole(e.target.value as "LEADER" | "INTERN")}
@@ -47,7 +47,7 @@ export const CreateUserForm = () => {
           </select>
         </div>
 
-        {/* Nút Submit điều khiển trạng thái Loading */}
+        {/* Submit button with loading state */}
         <button
           type="submit"
           disabled={isPending}
@@ -61,7 +61,7 @@ export const CreateUserForm = () => {
             cursor: isPending ? "not-allowed" : "pointer"
           }}
         >
-          {isPending ? "Đang xử lý..." : "Tạo tài khoản"}
+          {isPending ? "Processing..." : "Create Account"}
         </button>
       </form>
     </div>

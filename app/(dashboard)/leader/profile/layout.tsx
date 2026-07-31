@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Hồ sơ cá nhân",
+  title: "My Profile",
 };
 
 export default function LeaderProfileLayout({

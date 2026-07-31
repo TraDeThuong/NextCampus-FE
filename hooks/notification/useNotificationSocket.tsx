@@ -23,12 +23,12 @@ export function useNotificationSocket() {
       if (!token || !state.isAuthenticated || !isMounted) return;
 
       try {
-        // 1. Lấy One-Time Ticket qua kênh API an toàn bằng Header Auth
+        // 1. Obtain One-Time Ticket via secure API channel using Header Auth
         const response = await notificationService.getTicket();
         if (!response.success || !response.ticket || !isMounted) return;
 
         const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
-        // Truyền ticket ngắn hạn thay vì Access Token dài hạn qua URL
+        // Pass short-lived ticket instead of long-lived Access Token via URL
         const streamUrl = `${rawApiUrl.replace(/\/$/, "")}/notifications/stream?ticket=${encodeURIComponent(response.ticket)}`;
 
         eventSource = new EventSource(streamUrl);
@@ -43,16 +43,16 @@ export function useNotificationSocket() {
             if (!event.data) return;
             const parsed = JSON.parse(event.data);
 
-            // Invalidate React Query cache (cả danh sách và unread-count) trên tất cả các Tab
+            // Invalidate React Query cache (both list and unread-count) across all tabs
             queryClient.invalidateQueries({ queryKey: ["notifications"] });
 
-            // Phân loại loại event
+            // Classify event type
             const type = parsed.type || (parsed.id ? "NOTIFICATION_NEW" : null);
             const payload = parsed.payload || (parsed.id ? parsed : null);
 
             if (type === "NOTIFICATION_NEW" && payload) {
               const notification = payload as Notification;
-              // Hiển thị Toast nổi
+              // Show popup Toast
               toast.custom(
                 (t) => (
                   <div
@@ -63,7 +63,7 @@ export function useNotificationSocket() {
                   >
                     <div className="flex items-center gap-2">
                       <span className="h-2.5 w-2.5 rounded-full bg-cyan-400 animate-pulse" />
-                      <p className="text-xs font-bold metal-text tracking-wide uppercase">Thông báo mới</p>
+                      <p className="text-xs font-bold metal-text tracking-wide uppercase">New Notification</p>
                     </div>
                     <p className="mt-1.5 text-sm font-semibold text-white truncate">{notification.title}</p>
                     <p className="mt-1 text-xs text-slate-300 line-clamp-2 leading-relaxed">{notification.content}</p>

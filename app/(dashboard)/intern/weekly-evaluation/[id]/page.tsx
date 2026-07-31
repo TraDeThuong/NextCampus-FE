@@ -49,7 +49,7 @@ function RatingBadge({ level }: { level: RatingLevel }) {
   );
 }
 
-// Hiển thị bảng 12 tiêu chí (chỉ đọc, không có AI comparison)
+// Read-only 12 criteria table (no AI comparison)
 function CriteriaTable({ ratings }: { ratings: EvaluationRatings }) {
   return (
     <div className="space-y-4">
@@ -102,7 +102,7 @@ function CriteriaTable({ ratings }: { ratings: EvaluationRatings }) {
             return (
               <div className="flex justify-end px-4 py-2 bg-white/[0.02] border-t border-border/20">
                 <span className="text-xs text-muted mr-2">
-                  Điểm TB phần {section.id}:
+                  Avg score section {section.id}:
                 </span>
                 <span className="text-xs font-bold text-primary-light">
                   {avg.toFixed(1)} / 10
@@ -116,7 +116,7 @@ function CriteriaTable({ ratings }: { ratings: EvaluationRatings }) {
   );
 }
 
-// Fallback: 4 progress bars cũ
+// Fallback: legacy 4 progress bars
 function LegacyScoreBars({
   communication,
   attitude,
@@ -129,10 +129,10 @@ function LegacyScoreBars({
   coding: number;
 }) {
   const items = [
-    { label: "Giao tiếp (Communication)", value: communication },
-    { label: "Thái độ (Attitude)", value: attitude },
-    { label: "Tự học (Learning)", value: learning },
-    { label: "Lập trình (Coding)", value: coding },
+    { label: "Communication", value: communication },
+    { label: "Attitude", value: attitude },
+    { label: "Self-learning", value: learning },
+    { label: "Coding", value: coding },
   ];
   return (
     <div className="space-y-6">
@@ -157,7 +157,7 @@ function LegacyScoreBars({
   );
 }
 
-// Biểu đồ tiến bộ theo tuần (dùng dữ liệu đã fetch từ tất cả evaluations)
+// Weekly progress chart (using data fetched from all evaluations)
 function ProgressChart({
   currentWeek,
   allEvaluations,
@@ -172,7 +172,7 @@ function ProgressChart({
     totalScore: number;
   }>;
 }) {
-  // Lấy tối đa 6 tuần gần nhất (bao gồm tuần hiện tại), sắp xếp tăng dần
+  // Get up to 6 most recent weeks (including current), sorted ascending
   const recent = [...allEvaluations]
     .sort((a, b) => a.week - b.week)
     .slice(-6);
@@ -180,16 +180,16 @@ function ProgressChart({
   if (recent.length < 2) return null;
 
   const groups = [
-    { label: "Giao tiếp", key: "communication" as const, color: "from-blue-500 to-blue-400" },
-    { label: "Thái độ", key: "attitude" as const, color: "from-emerald-500 to-emerald-400" },
-    { label: "Tự học", key: "learning" as const, color: "from-amber-500 to-amber-400" },
-    { label: "Lập trình", key: "coding" as const, color: "from-purple-500 to-purple-400" },
+    { label: "Communication", key: "communication" as const, color: "from-blue-500 to-blue-400" },
+    { label: "Attitude", key: "attitude" as const, color: "from-emerald-500 to-emerald-400" },
+    { label: "Self-learning", key: "learning" as const, color: "from-amber-500 to-amber-400" },
+    { label: "Coding", key: "coding" as const, color: "from-purple-500 to-purple-400" },
   ];
 
   return (
     <div className="space-y-5">
       <div className="text-xs text-muted">
-        Hiển thị {recent.length} tuần gần nhất
+        Showing {recent.length} recent weeks
       </div>
       {groups.map((g) => {
         const prev = recent.slice(-2)[0];
@@ -236,7 +236,7 @@ function ProgressChart({
                             : "from-white/10 to-white/20 opacity-60"
                         }`}
                         style={{ height: `${heightPct}%` }}
-                        title={`Tuần ${ev.week}: ${val.toFixed(1)}`}
+                        title={`Week ${ev.week}: ${val.toFixed(1)}`}
                       />
                     </div>
                     <span
@@ -311,7 +311,7 @@ export default function InternWeeklyEvaluationDetailPage() {
         className="flex items-center gap-2 text-sm text-slate-400 transition hover:text-white"
       >
         <ArrowLeft className="h-4 w-4" />
-        Quay lại danh sách
+        Back to list
       </button>
 
       {/* Header */}
@@ -324,37 +324,37 @@ export default function InternWeeklyEvaluationDetailPage() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-white flex flex-wrap items-center gap-2">
-                  <span>Đánh giá của bạn</span>
+                  <span>Your Evaluation</span>
                   <span className="text-sm font-normal px-2.5 py-0.5 rounded-full border border-primary-light/30 bg-primary-light/10 text-primary-light">
-                    Tuần {evaluation.week}
+                    Week {evaluation.week}
                   </span>
                   {hasRatings && (
                     <span className="text-xs font-normal px-2 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 flex items-center gap-1">
                       <ClipboardList className="h-3 w-3" />
-                      12 tiêu chí
+                      12 criteria
                     </span>
                   )}
                 </h1>
                 <p className="mt-1 text-sm text-slate-400 flex items-center gap-1">
                   <User className="h-4 w-4 text-slate-500" />
-                  <span>Đánh giá bởi {evaluation.leader?.fullName || evaluation.leader?.email || "Leader"}</span>
+                  <span>Evaluated by {evaluation.leader?.fullName || evaluation.leader?.email || "Leader"}</span>
                   <span className="text-slate-600 mx-2">|</span>
                   <Calendar className="h-4 w-4 text-slate-500" />
-                  <span>{new Date(evaluation.createdAt).toLocaleDateString("vi-VN")}</span>
+                  <span>{new Date(evaluation.createdAt).toLocaleDateString("en-US")}</span>
                 </p>
               </div>
             </div>
 
-            {/* Nút xác nhận đã xem */}
+            {/* Mark as reviewed button */}
             <div className="shrink-0">
               {isReviewed ? (
                 <div className="flex flex-col items-end gap-1">
                   <div className="flex items-center gap-2 px-4 py-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-sm font-semibold">
                     <CheckCircle2 className="h-4 w-4" />
-                    Đã xác nhận xem
+                    Confirmed Read
                   </div>
                   <span className="text-[11px] text-muted">
-                    {new Date(evaluation.reviewedAt!).toLocaleString("vi-VN")}
+                    {new Date(evaluation.reviewedAt!).toLocaleString("en-US")}
                   </span>
                 </div>
               ) : (
@@ -370,7 +370,7 @@ export default function InternWeeklyEvaluationDetailPage() {
                   ) : (
                     <CheckCircle2 className="h-4 w-4" />
                   )}
-                  {markReviewed.isPending ? "Đang xác nhận..." : "✓ Đã xem đánh giá"}
+                  {markReviewed.isPending ? "Confirming..." : "✓ Mark as Read"}
                 </Button>
               )}
             </div>
@@ -380,14 +380,14 @@ export default function InternWeeklyEvaluationDetailPage() {
 
       {/* Main layout */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Chi tiết tiêu chí */}
+        {/* Criteria details */}
         <div className="lg:col-span-2 space-y-6">
           <MetalCard>
             <div className="rounded-3xl p-6 space-y-6">
               <h2 className="text-lg font-semibold flex items-center gap-2 border-b border-border/40 pb-4">
                 <BookOpen className="h-5 w-5 text-primary-light shrink-0" />
                 <span className="metal-text">
-                  {hasRatings ? "Bảng Đánh Giá 12 Tiêu Chí" : "Chi Tiết Điểm Năng Lực"}
+                  {hasRatings ? "12 Criteria Evaluation" : "Competency Score Details"}
                 </span>
               </h2>
 
@@ -404,28 +404,28 @@ export default function InternWeeklyEvaluationDetailPage() {
             </div>
           </MetalCard>
 
-          {/* Nhận xét của Leader */}
+          {/* Leader Comments */}
           <MetalCard>
             <div className="rounded-3xl p-6 space-y-4">
               <h2 className="text-lg font-semibold flex items-center gap-2 border-b border-border/40 pb-4">
                 <MessageSquare className="h-5 w-5 text-primary-light shrink-0" />
-                <span className="metal-text">Nhận Xét Của Leader</span>
+                <span className="metal-text">Leader Comments</span>
               </h2>
               <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5">
                 <p className="text-slate-300 text-sm whitespace-pre-wrap leading-relaxed">
-                  {evaluation.comment || "Leader chưa để lại nhận xét."}
+                  {evaluation.comment || "Leader has not left any comments."}
                 </p>
               </div>
             </div>
           </MetalCard>
 
-          {/* Biểu đồ tiến bộ */}
+          {/* Progress chart */}
           {allEvaluations.length >= 2 && (
             <MetalCard>
               <div className="rounded-3xl p-6 space-y-4">
                 <h2 className="text-lg font-semibold flex items-center gap-2 border-b border-border/40 pb-4">
                   <TrendingUp className="h-5 w-5 text-primary-light shrink-0" />
-                  <span className="metal-text">Biểu Đồ Tiến Bộ</span>
+                  <span className="metal-text">Progress Chart</span>
                 </h2>
                 <ProgressChart
                   currentWeek={evaluation.week}
@@ -443,29 +443,29 @@ export default function InternWeeklyEvaluationDetailPage() {
           )}
         </div>
 
-        {/* Sidebar tổng điểm */}
+        {/* Score sidebar */}
         <div className="space-y-6 lg:sticky lg:top-6 self-start">
           <MetalCard>
             <div className="rounded-3xl p-6 text-center space-y-6">
               <h2 className="text-lg font-semibold border-b border-border/40 pb-4 flex items-center justify-center gap-2">
                 <Star className="h-5 w-5 text-yellow-400 shrink-0" />
-                <span className="metal-text">Điểm Đánh Giá</span>
+                <span className="metal-text">Evaluation Score</span>
               </h2>
 
               <div className="space-y-2">
                 <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-primary-light">
                   {finalScore.toFixed(2)}
                 </div>
-                <div className="text-sm text-muted">trên thang điểm 10.00</div>
+                <div className="text-sm text-muted">on a scale of 10.00</div>
               </div>
 
               {/* 4-group breakdown */}
               <div className="pt-4 border-t border-border/40 space-y-2 text-xs">
                 {[
-                  { label: "Giao tiếp", value: evaluation.communication },
-                  { label: "Thái độ", value: evaluation.attitude },
-                  { label: "Tự học", value: evaluation.learning },
-                  { label: "Lập trình", value: evaluation.coding },
+                  { label: "Communication", value: evaluation.communication },
+                  { label: "Attitude", value: evaluation.attitude },
+                  { label: "Self-learning", value: evaluation.learning },
+                  { label: "Coding", value: evaluation.coding },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex justify-between items-center">
                     <span className="text-muted">{label}:</span>
@@ -487,38 +487,38 @@ export default function InternWeeklyEvaluationDetailPage() {
               {/* Meta info */}
               <div className="pt-4 border-t border-border/40 text-left space-y-2 text-xs">
                 <div className="flex justify-between text-muted">
-                  <span>Người đánh giá:</span>
+                  <span>Evaluator:</span>
                   <span className="font-semibold text-foreground">
                     {evaluation.leader?.fullName || evaluation.leader?.email || "Leader"}
                   </span>
                 </div>
                 <div className="flex justify-between text-muted">
-                  <span>Ngày tạo:</span>
+                  <span>Created:</span>
                   <span className="font-semibold text-foreground">
-                    {new Date(evaluation.createdAt).toLocaleDateString("vi-VN")}
+                    {new Date(evaluation.createdAt).toLocaleDateString("en-US")}
                   </span>
                 </div>
                 <div className="flex justify-between text-muted">
-                  <span>Trạng thái:</span>
+                  <span>Status:</span>
                   <span className={`font-semibold flex items-center gap-1 ${isReviewed ? "text-emerald-400" : "text-amber-400"}`}>
                     {isReviewed ? (
                       <>
                         <CheckCircle2 className="h-3 w-3" />
-                        Đã xem
+                        Reviewed
                       </>
                     ) : (
                       <>
                         <Clock className="h-3 w-3" />
-                        Chưa xem
+                        Unread
                       </>
                     )}
                   </span>
                 </div>
                 {isReviewed && (
                   <div className="flex justify-between text-muted">
-                    <span>Xác nhận lúc:</span>
+                    <span>Confirmed at:</span>
                     <span className="font-semibold text-foreground text-right">
-                      {new Date(evaluation.reviewedAt!).toLocaleString("vi-VN")}
+                      {new Date(evaluation.reviewedAt!).toLocaleString("en-US")}
                     </span>
                   </div>
                 )}

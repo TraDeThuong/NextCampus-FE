@@ -11,12 +11,12 @@ export function useDeleteWeeklyEvaluation() {
     mutationFn: (id: string) => weeklyEvaluationService.deleteWeeklyEvaluation(id),
 
     onSuccess: () => {
-      toast.success("Xóa đánh giá tuần thành công!");
+      toast.success("Weekly evaluation deleted successfully!");
       queryClient.invalidateQueries({ queryKey: ["weeklyEvaluations"] });
     },
 
     onError: (error: any) => {
-      const msg = error?.response?.data?.message || "Lỗi khi xóa đánh giá tuần.";
+      const msg = error?.response?.data?.message || "Failed to delete weekly evaluation.";
       toast.error(msg);
     },
   });

@@ -19,7 +19,7 @@ export interface InviteDetailResponse {
   data: ApplicationInviteRow;
 }
 
-// 1. POST /applications/invites — Gửi lời mời nộp đơn (Admin)
+// 1. POST /applications/invites — Send application invite (Admin)
 export const createInviteService = async (
   payload: CreateInvitePayload,
 ): Promise<CreateInviteSuccessResponse> => {
@@ -30,7 +30,7 @@ export const createInviteService = async (
   return response.data;
 };
 
-// 2. GET /applications/invites/verify — Xác thực token (Public)
+// 2. GET /applications/invites/verify — Verify token (Public)
 export const verifyInviteService = async (
   token: string,
 ): Promise<VerifyInviteSuccessResponse> => {
@@ -41,7 +41,7 @@ export const verifyInviteService = async (
   return response.data;
 };
 
-// 3. PATCH /applications/invites/:id/revoke — Thu hồi lời mời (Admin)
+// 3. PATCH /applications/invites/:id/revoke — Revoke invite (Admin)
 export const revokeInviteService = async (
   id: string,
 ): Promise<MessageSuccessResponse> => {
@@ -51,7 +51,7 @@ export const revokeInviteService = async (
   return response.data;
 };
 
-// 4. POST /applications — Nộp đơn (Public)
+// 4. POST /applications — Submit application (Public)
 export const createApplicationService = async (
   payload: CreateApplicationPayload,
 ): Promise<ApplicationSuccessResponse> => {
@@ -81,7 +81,7 @@ export const createApplicationService = async (
   return response.data;
 };
 
-// 5. GET /applications — Danh sách đơn (Admin, Leader)
+// 5. GET /applications — List applications (Admin, Leader)
 export const getApplicationsService = async (
   params?: ApplicationQueryParams,
 ): Promise<ApplicationListResponse> => {
@@ -91,7 +91,7 @@ export const getApplicationsService = async (
   return response.data;
 };
 
-// 6. GET /applications/:id — Chi tiết đơn (Admin, Leader)
+// 6. GET /applications/:id — Application details (Admin, Leader)
 export const getApplicationService = async (
   id: string,
 ): Promise<ApplicationSuccessResponse> => {
@@ -101,7 +101,7 @@ export const getApplicationService = async (
   return response.data;
 };
 
-// 7. PATCH /applications/:id/review — Duyệt / từ chối đơn (Admin, Leader)
+// 7. PATCH /applications/:id/review — Approve / reject application (Admin, Leader)
 export const reviewApplicationService = async (
   id: string,
   payload: ReviewApplicationPayload,
@@ -113,7 +113,7 @@ export const reviewApplicationService = async (
   return response.data;
 };
 
-// 9. GET /applications/invites — Danh sách lời mời (Admin, Leader)
+// 9. GET /applications/invites — List invites (Admin, Leader)
 export const getApplicationInvitesService = async (
   params?: GetApplicationInvitesParams,
 ): Promise<ApplicationInviteListResponse> => {
@@ -124,7 +124,7 @@ export const getApplicationInvitesService = async (
   return response.data;
 };
 
-// 10. GET /applications/invites/:id — Chi tiêt 1 lời mời (Admin, Leader)
+// 10. GET /applications/invites/:id — Invite details (Admin, Leader)
 export const getInviteByIdService = async (
   id: string,
 ): Promise<InviteDetailResponse> => {

@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Tích hợp Discord",
+  title: "Discord Integration",
 };
 
 export default function page() {
   return (
     <div>
       <h1 className = "metal-text"> DISCORD PAGE </h1>
-      <p> Quan ly discord role </p>
-      <p> Theo doi </p>
+      <p> Manage Discord roles </p>
+      <p> Monitor </p>
     </div>
   );
 }

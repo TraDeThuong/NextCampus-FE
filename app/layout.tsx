@@ -8,10 +8,10 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: {
-    default: "NexCampus - Hệ thống Quản lý Thực tập sinh",
+    default: "NexCampus - Intern Management System",
     template: "%s | NexCampus",
   },
-  description: "Hệ thống quản lý thực tập sinh và theo dõi tiến độ công việc NexCampus.",
+  description: "NexCampus intern management and work progress tracking system.",
 };
 
 

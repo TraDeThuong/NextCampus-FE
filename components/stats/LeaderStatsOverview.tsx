@@ -17,6 +17,8 @@ import {
   FileCheck,
   Award,
   ShieldAlert,
+  ExternalLink,
+  AlertTriangle,
 } from "lucide-react";
 
 export default function LeaderStatsOverview() {
@@ -45,12 +47,12 @@ export default function LeaderStatsOverview() {
   if (isError || !response?.success) {
     return (
       <div className="rounded-2xl border border-danger/30 bg-danger/10 p-6 text-center text-danger space-y-3">
-        <p className="font-semibold">Lỗi khi tải dữ liệu thống kê Leader. Vui lòng kiểm tra lại kết nối mạng.</p>
+        <p className="font-semibold">Failed to load Leader statistics. Please check your network connection.</p>
         <button
           onClick={() => refetch()}
           className="px-4 py-2 rounded-xl bg-danger text-white text-xs font-bold hover:opacity-90 transition-all cursor-pointer"
         >
-          Thử lại
+          Retry
         </button>
       </div>
     );
@@ -66,7 +68,7 @@ export default function LeaderStatsOverview() {
     const filtered = allAssignments.filter((a) => a.status === statusKey);
     setModalConfig({
       isOpen: true,
-      title: `Chi Tiết Công Việc Nhóm - Trạng Thái: ${statusTitle}`,
+      title: `Team Task Details — Status: ${statusTitle}`,
       assignments: filtered,
     });
   };
@@ -74,7 +76,7 @@ export default function LeaderStatsOverview() {
   const handleOpenOverdueModal = () => {
     setModalConfig({
       isOpen: true,
-      title: `Danh Sách Task Quá Hạn Của Nhóm (${overdueAssignments.length})`,
+      title: `Team Overdue Task List (${overdueAssignments.length})`,
       assignments: overdueAssignments,
     });
   };
@@ -102,7 +104,7 @@ export default function LeaderStatsOverview() {
             Leader Team Operations Center
           </h1>
           <p className="text-sm text-muted">
-            Quản lý trực tiếp thực tập sinh, duyệt bài nộp & theo dõi tiến độ công việc nhóm
+            Directly manage interns, approve submissions & monitor team work progress
           </p>
         </div>
       </div>
@@ -110,54 +112,133 @@ export default function LeaderStatsOverview() {
       {/* Action-Oriented KPI Cards (Chỉ 5 chỉ số có giá trị hành động) */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
         <StatsCard
-          title="TTS Đang Quản Lý"
+          title="Managed Interns"
           value={stats.interns.active}
-          subtitle={`Tổng số: ${stats.interns.total} TTS`}
+          subtitle={`Total: ${stats.interns.total} interns`}
           icon={<Users className="h-6 w-6 text-primary-light" />}
           href="/leader/interns?status=ACTIVE"
           trend={{
-            text: `${stats.interns.completed} hoàn thành`,
+            text: `${stats.interns.completed} completed`,
             positive: true,
           }}
         />
 
         <StatsCard
-          title="Bài Nộp Chờ Duyệt"
+          title="Pending Submissions"
           value={stats.submissions.pending}
-          subtitle={`${stats.submissions.approved} bài đã duyệt`}
+          subtitle={`${stats.submissions.approved} approved`}
           icon={<FileCheck className="h-6 w-6 text-amber-400" />}
           href="/leader/review?status=PENDING"
           trend={{
-            text: stats.submissions.pending > 0 ? "Cần duyệt ngay" : "Hoàn thành duyệt",
+            text: stats.submissions.pending > 0 ? "Needs review" : "Review completed",
             positive: stats.submissions.pending === 0,
           }}
         />
 
         <StatsCard
-          title="Task Quá Hạn Trong Team"
+          title="Overdue Tasks in Team"
           value={overdueAssignments.length}
-          subtitle="Các task trễ deadline"
+          subtitle="Tasks past deadline"
           icon={<ShieldAlert className="h-6 w-6 text-rose-400" />}
           onCardClick={handleOpenOverdueModal}
           trend={{
-            text: overdueAssignments.length > 0 ? "Cần nhắc nhở TTS" : "Đúng tiến độ",
+            text: overdueAssignments.length > 0 ? "Remind interns" : "On schedule",
             positive: overdueAssignments.length === 0,
           }}
         />
 
         <StatsCard
-          title="Điểm Đánh Giá TB Nhóm"
+          title="Team Average Score"
           value={`${stats.weeklyEvaluations.avgScore}/10`}
-          subtitle={`${stats.weeklyEvaluations.total} lượt chấm điểm`}
+          subtitle={`${stats.weeklyEvaluations.total} evaluations`}
           icon={<Award className="h-6 w-6 text-emerald-400" />}
           href="/leader/weekly-evaluation"
           trend={{
-            text: "Điểm trung bình nhóm",
+            text: "Team average score",
             positive: stats.weeklyEvaluations.avgScore >= 7,
           }}
         />
 
         <PendingApprovalCard onOpenModal={() => setPendingModalOpen(true)} />
+
+        {/* Action Item 1: Pending Submissions */}
+        <Link
+          href="/leader/review?status=PENDING"
+          className="group relative overflow-hidden rounded-[24px] border border-amber-500/30 bg-amber-500/10 p-5 hover:border-amber-500/60 hover:bg-amber-500/15 transition-all shadow-glass"
+        >
+          <div className="flex items-start justify-between">
+            <div>
+              <span className="inline-flex items-center justify-center text-[11px] font-bold uppercase tracking-wider leading-none text-amber-400 bg-amber-500/20 px-2.5 py-1.5 rounded-full border border-amber-500/30">
+                Action required
+              </span>
+              <h3 className="text-2xl font-black text-amber-300 mt-2">
+                {stats.submissions.pending} Pending Submissions
+              </h3>
+              <p className="text-xs text-muted mt-1">
+                Submissions from interns waiting for Leader to score & give feedback
+              </p>
+            </div>
+            <div className="p-3 rounded-2xl bg-amber-500/20 text-amber-300 group-hover:scale-110 transition-transform">
+              <FileCheck className="h-6 w-6" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-amber-400 group-hover:underline">
+            Go to grading page <ExternalLink className="h-3.5 w-3.5" />
+          </div>
+        </Link>
+
+        {/* Action Item 2: Overdue Tasks Alert */}
+        <button
+          type="button"
+          onClick={handleOpenOverdueModal}
+          className="group text-left relative overflow-hidden rounded-[24px] border border-rose-500/30 bg-rose-500/10 p-5 hover:border-rose-500/60 hover:bg-rose-500/15 transition-all shadow-glass cursor-pointer"
+        >
+          <div className="flex items-start justify-between">
+            <div>
+              <span className="inline-flex items-center justify-center text-[11px] font-bold uppercase tracking-wider leading-none text-rose-400 bg-rose-500/20 px-2.5 py-1.5 rounded-full border border-rose-500/30">
+                Progress warning
+              </span>
+              <h3 className="text-2xl font-black text-rose-300 mt-2">
+                {overdueAssignments.length} Overdue Tasks
+              </h3>
+              <p className="text-xs text-muted mt-1">
+                Tasks assigned to interns have passed their deadline and are not yet completed
+              </p>
+            </div>
+            <div className="p-3 rounded-2xl bg-rose-500/20 text-rose-300 group-hover:scale-110 transition-transform">
+              <AlertTriangle className="h-6 w-6" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-rose-400 group-hover:underline">
+            View overdue tasks ↗
+          </div>
+        </button>
+
+        {/* Action Item 3: Weekly Evaluation Action */}
+        <Link
+          href="/leader/weekly-evaluation"
+          className="group relative overflow-hidden rounded-[24px] border border-indigo-500/30 bg-indigo-500/10 p-5 hover:border-indigo-500/60 hover:bg-indigo-500/15 transition-all shadow-glass"
+        >
+          <div className="flex items-start justify-between">
+            <div>
+              <span className="inline-flex items-center justify-center text-[11px] font-bold uppercase tracking-wider leading-none text-indigo-400 bg-indigo-500/20 px-2.5 py-1.5 rounded-full border border-indigo-500/30">
+                Periodic evaluation
+              </span>
+              <h3 className="text-2xl font-black text-indigo-300 mt-2">
+                Grade Weekly Evaluation
+              </h3>
+              <p className="text-xs text-muted mt-1">
+                Current team average score: <strong className="text-foreground">{stats.weeklyEvaluations.avgScore}/10</strong>
+              </p>
+            </div>
+            <div className="p-3 rounded-2xl bg-indigo-500/20 text-indigo-300 group-hover:scale-110 transition-transform">
+              <Award className="h-6 w-6" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-indigo-400 group-hover:underline">
+            Go to evaluation page <ExternalLink className="h-3.5 w-3.5" />
+          </div>
+        </Link>
       </div>
 
       {/* Intern Progress Table in Team */}
@@ -166,22 +247,27 @@ export default function LeaderStatsOverview() {
           <div>
             <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
               <Users className="h-6 w-6 text-primary-light shrink-0" />
-              <span className="metal-text">Tiến Độ Chi Tiết Thực Tập Sinh Trong Nhóm</span>
+              <span className="metal-text">Detailed Intern Progress in Team</span>
             </h3>
             <p className="text-xs text-muted mt-1">
-              Giám sát tiến độ hoàn thành công việc và điểm số trung bình của từng cá nhân
+              Monitor work completion progress and average scores of each individual
             </p>
           </div>
-
+          <Link
+            href="/leader/interns"
+            className="text-xs font-semibold text-primary-light hover:underline flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-primary-light/30 bg-primary-light/10"
+          >
+            Manage Interns <ExternalLink className="h-3.5 w-3.5" />
+          </Link>
         </div>
 
         <div className="mt-6">
           <Table columns="2.5fr 1.5fr 1.2fr 1.5fr">
             <Table.Header>
-              <span>Thực Tập Sinh</span>
-              <span>Tiến Độ Task</span>
-              <span>Điểm TB</span>
-              <span>Trạng Thái Tiến Độ</span>
+              <span>Intern</span>
+              <span>Task Progress</span>
+              <span>Avg Score</span>
+              <span>Progress Status</span>
             </Table.Header>
 
             <Table.Body
@@ -216,26 +302,26 @@ export default function LeaderStatsOverview() {
 
                     <div>
                       <span className="text-sm font-extrabold text-foreground">
-                        {intern.avgScore > 0 ? `${intern.avgScore}/10` : "Chưa chấm"}
+                        {intern.avgScore > 0 ? `${intern.avgScore}/10` : "Not scored"}
                       </span>
                     </div>
 
                     <div>
                       {intern.healthStatus === "HEALTHY" && (
                         <span className="inline-flex items-center justify-center text-xs font-semibold leading-none text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1.5 rounded-lg">
-                          Đúng tiến độ
+                          On track
                         </span>
                       )}
 
                       {intern.healthStatus === "WARNING" && (
                         <span className="inline-flex items-center justify-center text-xs font-semibold leading-none text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1.5 rounded-lg">
-                          Cần chú ý ({intern.overdueCount} task trễ)
+                          Needs attention ({intern.overdueCount} overdue)
                         </span>
                       )}
 
                       {intern.healthStatus === "DANGER" && (
                         <span className="inline-flex items-center justify-center text-xs font-semibold leading-none text-rose-400 bg-rose-500/10 border border-rose-500/30 px-2.5 py-1.5 rounded-lg">
-                          Nguy cơ chậm ({intern.overdueCount} task trễ)
+                          At risk ({intern.overdueCount} overdue)
                         </span>
                       )}
                     </div>
@@ -252,18 +338,18 @@ export default function LeaderStatsOverview() {
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
             <CheckCircle2 className="h-5 w-5 text-primary-light" />
-            Phân Bổ Trạng Thái Nhiệm Vụ Nhóm
+            Team Task Status Distribution
           </h3>
-          <span className="text-xs text-muted">Bấm vào từng dòng để xem danh sách Task</span>
+          <span className="text-xs text-muted">Click each row to view task list</span>
         </div>
 
         <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-center">
           <button
             type="button"
-            onClick={() => handleOpenStatusModal("PENDING_APPROVAL", "Chờ Phê Duyệt")}
+            onClick={() => handleOpenStatusModal("PENDING_APPROVAL", "Pending Approval")}
             className="p-3 rounded-xl border border-purple-500/20 bg-purple-500/10 hover:bg-purple-500/20 transition-all cursor-pointer"
           >
-            <p className="text-xs text-purple-400 font-medium">Chờ duyệt</p>
+            <p className="text-xs text-purple-400 font-medium">Pending</p>
             <p className="text-xl font-bold text-purple-300 mt-1">
               {stats.assignments.byStatus.pendingApproval}
             </p>
@@ -271,10 +357,10 @@ export default function LeaderStatsOverview() {
 
           <button
             type="button"
-            onClick={() => handleOpenStatusModal("TODO", "Cần Làm")}
+            onClick={() => handleOpenStatusModal("TODO", "To Do")}
             className="p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all cursor-pointer"
           >
-            <p className="text-xs text-muted font-medium">Cần làm</p>
+            <p className="text-xs text-muted font-medium">To Do</p>
             <p className="text-xl font-bold text-foreground mt-1">
               {stats.assignments.byStatus.todo}
             </p>
@@ -282,10 +368,10 @@ export default function LeaderStatsOverview() {
 
           <button
             type="button"
-            onClick={() => handleOpenStatusModal("IN_PROGRESS", "Đang Làm")}
+            onClick={() => handleOpenStatusModal("IN_PROGRESS", "In Progress")}
             className="p-3 rounded-xl border border-cyan-500/20 bg-cyan-500/10 hover:bg-cyan-500/20 transition-all cursor-pointer"
           >
-            <p className="text-xs text-cyan-400 font-medium">Đang làm</p>
+            <p className="text-xs text-cyan-400 font-medium">In Progress</p>
             <p className="text-xl font-bold text-cyan-300 mt-1">
               {stats.assignments.byStatus.inProgress}
             </p>
@@ -293,10 +379,10 @@ export default function LeaderStatsOverview() {
 
           <button
             type="button"
-            onClick={() => handleOpenStatusModal("REVIEW", "Chờ Duyệt Bài")}
+            onClick={() => handleOpenStatusModal("REVIEW", "Pending Review")}
             className="p-3 rounded-xl border border-amber-500/20 bg-amber-500/10 hover:bg-amber-500/20 transition-all cursor-pointer"
           >
-            <p className="text-xs text-amber-400 font-medium">Chờ duyệt</p>
+            <p className="text-xs text-amber-400 font-medium">Pending</p>
             <p className="text-xl font-bold text-amber-300 mt-1">
               {stats.assignments.byStatus.review}
             </p>
@@ -304,10 +390,10 @@ export default function LeaderStatsOverview() {
 
           <button
             type="button"
-            onClick={() => handleOpenStatusModal("DONE", "Hoàn Thành")}
+            onClick={() => handleOpenStatusModal("DONE", "Done")}
             className="p-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 hover:bg-emerald-500/20 transition-all cursor-pointer"
           >
-            <p className="text-xs text-emerald-400 font-medium">Hoàn thành</p>
+            <p className="text-xs text-emerald-400 font-medium">Done</p>
             <p className="text-xl font-bold text-emerald-300 mt-1">
               {stats.assignments.byStatus.done}
             </p>
@@ -315,10 +401,10 @@ export default function LeaderStatsOverview() {
 
           <button
             type="button"
-            onClick={() => handleOpenStatusModal("BLOCKED", "Bị Hoãn")}
+            onClick={() => handleOpenStatusModal("BLOCKED", "Blocked")}
             className="p-3 rounded-xl border border-rose-500/20 bg-rose-500/10 hover:bg-rose-500/20 transition-all cursor-pointer"
           >
-            <p className="text-xs text-rose-400 font-medium">Bị hoãn</p>
+            <p className="text-xs text-rose-400 font-medium">Blocked</p>
             <p className="text-xl font-bold text-rose-300 mt-1">
               {stats.assignments.byStatus.blocked}
             </p>

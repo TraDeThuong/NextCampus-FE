@@ -129,7 +129,7 @@ export default function TaskDetailPage() {
               className="ml-auto flex items-center gap-1.5 rounded-xl border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 text-xs font-semibold text-sky-400 hover:bg-sky-500/20 hover:border-sky-500/50 transition-all"
             >
               <Sparkles className="h-3.5 w-3.5" />
-              AI Phân công
+              AI Assignment
             </button>
           )}
         </div>
@@ -148,13 +148,13 @@ export default function TaskDetailPage() {
         />
       )}
 
-      {/* BỐ CỤC 2 CỘT HOÀN HẢO */}
+      {/* PERFECT 2-COLUMN LAYOUT */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
-        {/* CỘT TRÁI (2/3): NỘI DUNG CHÍNH CỦA TASK */}
+        {/* LEFT COLUMN (2/3): MAIN TASK CONTENT */}
         <div className="lg:col-span-2 space-y-6">
 
-          {/* Card: Chi tiết Nội dung & Tiêu chí */}
+          {/* Card: Content Details & Requirements */}
           <Card icon={<FileText className="h-4 w-4 text-emerald-400" />} title="Description & Requirements">
             <div className="space-y-6">
               {task.description && (
@@ -196,7 +196,7 @@ export default function TaskDetailPage() {
               <div className="space-y-4">
                 {task.dependsOn.length > 0 && (
                   <div className="space-y-2">
-                    <Label>Depends On (Tiền đề)</Label>
+                    <Label>Depends On (Prerequisites)</Label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {task.dependsOn.map((d) => (
                         <div key={d.id} className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/40 p-2.5 text-xs text-slate-300">
@@ -210,7 +210,7 @@ export default function TaskDetailPage() {
 
                 {task.dependencies.length > 0 && (
                   <div className="space-y-2">
-                    <Label>Depended By (Hệ quả)</Label>
+                    <Label>Depended By (Consequences)</Label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {task.dependencies.map((d) => (
                         <div key={d.id} className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/40 p-2.5 text-xs text-slate-300">
@@ -240,7 +240,7 @@ export default function TaskDetailPage() {
             </Card>
           )}
 
-          {/* Card: Tệp Đính Kèm */}
+          {/* Card: Attachments */}
           {task.attachments.length > 0 && (
             <Card icon={<Paperclip className="h-4 w-4 text-cyan-400" />} title={`Attachments (${task.attachments.length})`}>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -271,10 +271,10 @@ export default function TaskDetailPage() {
           )}
         </div>
 
-        {/* CỘT PHẢI (1/3): TOÀN BỘ METADATA & SIDE-INFO */}
+        {/* RIGHT COLUMN (1/3): ALL METADATA & SIDE-INFO */}
         <div className="space-y-5 lg:sticky lg:top-6">
 
-          {/* Nhóm 1: Tiến độ & Thời gian */}
+          {/* Group 1: Timeline & Progress */}
           <Card icon={<Clock className="h-4 w-4 text-amber-400" />} title="Timeline & Plan">
             <div className="space-y-4">
               <Field label="Deadline" value={fmtDate(task.deadline)} accent />
@@ -289,7 +289,7 @@ export default function TaskDetailPage() {
             </div>
           </Card>
 
-          {/* Nhóm 2: Thông tin phân công (Assignment) */}
+          {/* Group 2: Assignment Info */}
           {task.assignment && (
             <Card icon={<User className="h-4 w-4 text-indigo-400" />} title="Assignment Detail">
               <div className="space-y-4">
@@ -303,7 +303,7 @@ export default function TaskDetailPage() {
             </Card>
           )}
 
-          {/* Nhóm 3: Thông tin Quản trị hệ thống */}
+          {/* Group 3: System Admin Info */}
           <Card icon={<Layers className="h-4 w-4 text-sky-400" />} title="System Properties">
             <div className="space-y-4">
               <Field label="Task Group" value={task.taskGroup?.name} />
@@ -357,7 +357,7 @@ export default function TaskDetailPage() {
                     </span>
                   </div>
                   <span className="text-[11px] text-slate-500">
-                    {new Date(sub.submittedAt).toLocaleString("vi-VN")}
+                    {new Date(sub.submittedAt).toLocaleString("en-US")}
                   </span>
                 </div>
 
@@ -412,7 +412,7 @@ export default function TaskDetailPage() {
                       )}
                       {sub.reviewedAt && (
                         <span className="text-[10px] text-slate-600 ml-auto">
-                          {new Date(sub.reviewedAt).toLocaleString("vi-VN")}
+                          {new Date(sub.reviewedAt).toLocaleString("en-US")}
                         </span>
                       )}
                     </div>
@@ -446,7 +446,7 @@ export default function TaskDetailPage() {
   );
 }
 
-/* ─── COMPONENTS TIỆN ÍCH ĐÃ ĐƯỢC MỸ HÓA ─────────────────────────────────────────────── */
+/* ─── STYLED UTILITY COMPONENTS ─────────────────────────────────────────────── */
 
 function Card({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
   return (
@@ -484,7 +484,7 @@ function Label({ children }: { children: React.ReactNode }) {
 
 function fmtDate(dateStr: string | null | undefined): string {
   if (!dateStr) return "—";
-  return new Date(dateStr).toLocaleString("vi-VN", {
+  return new Date(dateStr).toLocaleString("en-US", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",

@@ -14,10 +14,10 @@ export default function WeeklyEvaluationHeader() {
           <div>
             <h2 className="text-2xl font-bold flex items-center gap-2">
               <Sparkles className="h-6 w-6 text-primary-light shrink-0" />
-              <span className="metal-text">Đánh Giá Tuần (Weekly Evaluation)</span>
+              <span className="metal-text">Weekly Evaluation</span>
             </h2>
             <p className="mt-1 text-sm text-slate-500">
-              Đánh giá thực tập sinh hàng tuần, nhận gợi ý thông minh từ AI và xuất báo cáo PDF.
+              Weekly intern evaluation, receive intelligent AI suggestions and export PDF reports.
             </p>
           </div>
 
@@ -26,7 +26,7 @@ export default function WeeklyEvaluationHeader() {
               <Modal.Open opens="create-evaluation">
                 <Button variant="primary" size="md">
                   <Plus className="h-4 w-4 mr-1" />
-                  Tạo Đánh Giá
+                  Create Evaluation
                 </Button>
               </Modal.Open>
               <Modal.Window name="create-evaluation" size="md">

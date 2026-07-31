@@ -73,14 +73,14 @@ export default function TaskGroupCreateModal({ onCloseModal }: Props) {
 
         <div>
           <label className="mb-1.5 block text-xs font-medium text-slate-300">
-            Department (Phòng ban)
+            Department (Department)
           </label>
           <select
             {...register("departmentId")}
             className="w-full rounded-xl border border-white/10 bg-[#121624] py-3 px-4 text-sm text-white outline-none transition focus:border-primary-light/50"
             disabled={deptsLoading}
           >
-            <option value="">-- Tất cả phòng ban (Chung) --</option>
+            <option value="">-- All departments (General) --</option>
             {departments.map((d) => (
               <option key={d.id} value={d.id}>
                 {d.name}

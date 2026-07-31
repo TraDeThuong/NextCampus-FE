@@ -43,7 +43,7 @@ export default function WeeklyEvaluationList() {
   const currentPage = meta?.page ?? 1;
 
   const handleDelete = async (id: string) => {
-    if (confirm("Bạn có chắc chắn muốn xóa đánh giá này không?")) {
+    if (confirm("Are you sure you want to delete this evaluation?")) {
       try {
         await deleteEvaluation.mutateAsync(id);
       } catch (err) {
@@ -81,10 +81,10 @@ export default function WeeklyEvaluationList() {
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-primary-light shrink-0" />
-            <span className="metal-text">Đánh Giá Tuần (Weekly Evaluation)</span>
+            <span className="metal-text">Weekly Evaluation</span>
           </h2>
           <p className="mt-1 text-sm text-slate-500">
-            Đánh giá thực tập sinh hàng tuần, nhận gợi ý thông minh từ AI và xuất báo cáo PDF.
+            Weekly intern evaluation, receive intelligent AI suggestions and export PDF reports.
           </p>
         </div>
 
@@ -93,7 +93,7 @@ export default function WeeklyEvaluationList() {
             <Modal.Open opens="create-evaluation">
               <Button variant="primary" size="md">
                 <Plus className="h-4 w-4 mr-1 inline" />
-                Tạo Đánh Giá
+                Create Evaluation
               </Button>
             </Modal.Open>
             <Modal.Window name="create-evaluation" size="md">
@@ -105,18 +105,18 @@ export default function WeeklyEvaluationList() {
 
       <Table columns="2.5fr 1fr 1.5fr 1fr 2fr">
         <Table.Header>
-          <span>Thực Tập Sinh</span>
-          <span>Tuần</span>
-          <span>Điểm &amp; Xếp Loại</span>
+          <span>Intern</span>
+          <span>Week</span>
+          <span>Score &amp; Rating</span>
           <span className="text-center">AI</span>
-          <span className="text-center">Thao Tác</span>
+          <span className="text-center">Actions</span>
         </Table.Header>
 
         <Table.Body
           data={evaluations}
           render={(item: WeeklyEvaluation) => {
             const level = getRatingLevel(item.totalScore);
-            const createdDate = new Date(item.createdAt).toLocaleDateString("vi-VN", {
+            const createdDate = new Date(item.createdAt).toLocaleDateString("en-US", {
               day: "2-digit", month: "2-digit", year: "numeric",
             });
 
@@ -125,7 +125,7 @@ export default function WeeklyEvaluationList() {
                 {/* Intern Info */}
                 <div className="flex flex-col">
                   <p className="font-bold text-foreground text-sm">
-                    {item.intern?.fullName || "Chưa xác định"}
+                    {item.intern?.fullName || "Unidentified"}
                   </p>
                   <p className="text-xs text-muted">
                     {item.intern?.user?.email || ""}
@@ -134,7 +134,7 @@ export default function WeeklyEvaluationList() {
 
                 {/* Week + Date */}
                 <div className="flex flex-col gap-0.5">
-                  <span className="font-semibold text-foreground text-sm">Tuần {item.week}</span>
+                  <span className="font-semibold text-foreground text-sm">Week {item.week}</span>
                   <span className="text-[11px] text-muted">{createdDate}</span>
                 </div>
 
@@ -158,7 +158,7 @@ export default function WeeklyEvaluationList() {
                   ) : (
                     <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg border text-slate-500 border-white/10 bg-white/5">
                       <Bot className="h-3 w-3" />
-                      Chưa
+                      No
                     </span>
                   )}
                 </div>
@@ -167,8 +167,8 @@ export default function WeeklyEvaluationList() {
                 <div className="flex items-center justify-center gap-2">
                   <Link href={`/leader/weekly-evaluation/${item.id}`}>
                     <Button variant="glass" size="sm" className="flex items-center gap-1">
-                      <Eye className="h-3.5 w-3.5 mr-1" />
-                      <span>Xem</span>
+                      <Eye className="h-3.5 w-3.5" />
+                      <span>View</span>
                     </Button>
                   </Link>
 
@@ -201,7 +201,7 @@ export default function WeeklyEvaluationList() {
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <span className="text-sm text-muted">
-                Trang {currentPage} / {totalPages}
+                Page {currentPage} of {totalPages}
               </span>
               <Button
                 variant="glass"

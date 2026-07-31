@@ -6,12 +6,12 @@ import { pdfExportService } from "@/services/pdf-export.service";
 
 async function triggerDownload(fileUrl: string) {
   const fileName = decodeURIComponent(
-    fileUrl.split("/").pop()?.split("?")[0] ?? "bao-cao-tuan.pdf"
+    fileUrl.split("/").pop()?.split("?")[0] ?? "weekly-report.pdf"
   );
 
-  // Phải fetch về blob trước vì file ở domain ngoài (Supabase Storage).
-  // Nếu dùng thẳng URL cross-origin, trình duyệt bỏ qua thuộc tính `download`
-  // và mở trong tab mới thay vì lưu về máy.
+  // Must fetch as blob because file is on external domain (Supabase Storage).
+  // Using the cross-origin URL directly causes the browser to ignore the
+  // `download` attribute and open in a new tab instead of saving locally.
   const res = await fetch(fileUrl);
   const blob = await res.blob();
   const blobUrl = URL.createObjectURL(blob);
@@ -33,14 +33,14 @@ export function useExportWeeklyEvaluation() {
       const fileUrl = response.data.fileUrl;
       if (fileUrl) {
         triggerDownload(fileUrl);
-        toast.success("Xuất báo cáo PDF thành công! File đang được tải xuống.");
+        toast.success("PDF report exported successfully! Downloading...");
       } else {
-        toast.error("Không tìm thấy đường dẫn file PDF.");
+        toast.error("PDF file URL not found.");
       }
     },
 
     onError: () => {
-      toast.error("Xuất báo cáo thất bại. Vui lòng thử lại.");
+      toast.error("Failed to export report. Please try again.");
     },
   });
 }

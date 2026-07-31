@@ -43,23 +43,23 @@ export default function TaskAssignmentModal({
             {title}
           </h2>
           <p className="text-xs text-muted mt-1">
-            Hiển thị danh sách chi tiết công việc, thực tập sinh phụ trách và hạn chót ({assignments.length} mục)
+            Showing detailed task list, assigned interns, and deadlines ({assignments.length} items)
           </p>
         </div>
 
         {/* Empty State vs Table */}
         {assignments.length === 0 ? (
           <div className="py-12 text-center rounded-2xl border border-white/5 bg-white/[0.02]">
-            <p className="text-sm text-muted">Không có nhiệm vụ nào thuộc danh mục này.</p>
+            <p className="text-sm text-muted">No tasks found in this category.</p>
           </div>
         ) : (
           <Table columns="2fr 1.5fr 1.5fr 1fr 1fr">
             <Table.Header>
-              <span>Nhiệm vụ / Task</span>
-              <span>Thực Tập Sinh</span>
-              <span>Leader Giao Việc</span>
-              <span>Hạn Chót</span>
-              <span>Trạng Thái</span>
+              <span>Task</span>
+              <span>Intern</span>
+              <span>Assigned By</span>
+              <span>Deadline</span>
+              <span>Status</span>
             </Table.Header>
 
             <Table.Body
@@ -79,7 +79,7 @@ export default function TaskAssignmentModal({
                           : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                       }`}
                     >
-                      Ưu tiên: {item.taskPriority}
+                      Priority: {item.taskPriority}
                     </span>
                   </div>
 
@@ -101,15 +101,15 @@ export default function TaskAssignmentModal({
                           item.isOverdue ? "text-rose-400 font-bold" : "text-muted"
                         }`}
                       >
-                        {new Date(item.taskDeadline).toLocaleDateString("vi-VN")}
+                        {new Date(item.taskDeadline).toLocaleDateString("en-US")}
                         {item.isOverdue && (
                           <span className="block text-[10px] text-rose-400">
-                            ⚠ Đã Quá Hạn
+                            ⚠ Overdue
                           </span>
                         )}
                       </span>
                     ) : (
-                      <span className="text-xs text-muted">Không giới hạn</span>
+                      <span className="text-xs text-muted">No deadline</span>
                     )}
                   </div>
 

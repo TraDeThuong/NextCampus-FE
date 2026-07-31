@@ -1,4 +1,4 @@
-// Dùng để lấy thông tin người dùng hiện tại.
+// Fetch current user information.
 // GET /auth/me
 
 "use client";
@@ -36,7 +36,7 @@ export function useProfile() {
     };
 }
 
-// // Su dung
+// // Usage
 // const { profile, isLoading } = useProfile();
 
 // if (isLoading) {

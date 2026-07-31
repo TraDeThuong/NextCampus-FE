@@ -7,7 +7,7 @@ import Spinner from "@/components/ui/Spinner";
 import MetalCard from "@/components/ui/MetalCard";
 
 export const metadata: Metadata = {
-  title: "Chính sách & Quy định",
+  title: "Policies & Regulations",
 };
 
 export default function ManagePolicies() {

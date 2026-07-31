@@ -243,12 +243,12 @@ export default function TaskReviewModal({ assignmentId, onClose }: Props) {
               ) : (
                 <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
                   <label className="mb-2 block text-sm font-medium text-foreground">
-                    Nhận xét / Góp ý
+                    Comments / Feedback
                   </label>
                   <textarea
                     value={reviewComment}
                     onChange={(e) => setReviewComment(e.target.value)}
-                    placeholder="Viết nhận xét, góp ý cho intern..."
+                    placeholder="Write comments and feedback for the intern..."
                     rows={3}
                     className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-primary-light/40 focus:outline-none resize-none"
                     disabled={isProcessing}

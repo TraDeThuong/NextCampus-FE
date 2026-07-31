@@ -8,7 +8,7 @@ import Spinner from "@/components/ui/Spinner";
 import MetalCard from "@/components/ui/MetalCard";
 
 export const metadata: Metadata = {
-  title: "Quản lý thực tập sinh",
+  title: "Manage Interns",
 };
 
 export default function InternManagementPage() {

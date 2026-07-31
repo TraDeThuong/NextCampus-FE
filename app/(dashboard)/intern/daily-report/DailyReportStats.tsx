@@ -35,7 +35,7 @@ export default function DailyReportStats({
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 w-full items-stretch">
 
-      {/* CỘT TRÁI: CÁC THẺ THỐNG KÊ (Chiếm 2/3 không gian trên màn hình lớn) */}
+      {/* LEFT COLUMN: STAT CARDS (1/3 space on large screens) */}
       <div className="lg:col-span-1 flex flex-col gap-4 justify-between">
         <StatsCard
           title="Working Days"
@@ -59,10 +59,10 @@ export default function DailyReportStats({
         />
       </div>
 
-      {/* CỘT PHẢI: BIỂU ĐỒ LỚN, ĐẲNG CẤP (Chiếm 1/3 không gian) */}
+      {/* RIGHT COLUMN: LARGE PREMIUM CHART (2/3 space) */}
       <MetalCard className="p-6 flex flex-col justify-between min-h-[300px] relative overflow-hidden backdrop-blur-md border border-white/10 shadow-lg rounded-2xl bg-slate-50/50 dark:bg-slate-900/50">
 
-        {/* Tiêu đề góc trên */}
+        {/* Top-left title */}
         <div>
           <h4 className="text-sm font-bold tracking-wide text-slate-300 dark:text-slate-200">
             Submission Analytics
@@ -70,7 +70,7 @@ export default function DailyReportStats({
           <p className="text-xs text-slate-400 mt-0.5">Visualized report attendance</p>
         </div>
 
-        {/* Vùng chứa Biểu đồ phóng to */}
+        {/* Enlarged chart container */}
         <div className="relative w-full h-[180px] flex items-center justify-center my-4">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -95,7 +95,7 @@ export default function DailyReportStats({
             </PieChart>
           </ResponsiveContainer>
 
-          {/* Khối text trung tâm cực đại */}
+          {/* Center text block */}
           <div className="absolute flex flex-col items-center justify-center pointer-events-none">
             <span className="text-3xl font-black tracking-tight metal-text dark:text-white">
               {submissionRate}%
@@ -106,7 +106,7 @@ export default function DailyReportStats({
           </div>
         </div>
 
-        {/* Chú thích (Legend) Premium dưới đáy */}
+        {/* Premium Legend at bottom */}
         <div className="grid grid-cols-2 gap-2 pt-4 border-t border-slate-200/60 dark:border-slate-800/60">
           <div className="flex flex-col items-center p-2 rounded-xl bg-sky-500/5 dark:bg-sky-500/10 border border-sky-500/10">
             <div className="flex items-center gap-1.5 text-[11px] font-semibold text-sky-600 dark:text-sky-400">

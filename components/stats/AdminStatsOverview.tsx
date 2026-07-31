@@ -52,12 +52,12 @@ export default function AdminStatsOverview() {
   if (isError || !response?.success) {
     return (
       <div className="rounded-2xl border border-danger/30 bg-danger/10 p-6 text-center text-danger space-y-3">
-        <p className="font-semibold">Lỗi khi tải dữ liệu thống kê Admin. Vui lòng kiểm tra lại kết nối mạng.</p>
+        <p className="font-semibold">Failed to load Admin statistics. Please check your network connection.</p>
         <button
           onClick={() => refetch()}
           className="px-4 py-2 rounded-xl bg-danger text-white text-xs font-bold hover:opacity-90 transition-all cursor-pointer"
         >
-          Thử lại
+          Retry
         </button>
       </div>
     );
@@ -77,7 +77,7 @@ export default function AdminStatsOverview() {
   const handleOpenOverdueModal = () => {
     setModalConfig({
       isOpen: true,
-      title: `Danh Sách Tất Cả Task Quá Hạn Toàn Hệ Thống (${overdueAssignments.length})`,
+      title: `All Overdue Tasks — System-Wide (${overdueAssignments.length})`,
       assignments: overdueAssignments,
     });
   };
@@ -104,7 +104,7 @@ export default function AdminStatsOverview() {
             </span>
           </div>
           <p className="text-sm text-muted mt-1">
-            Quản trị cấp cao toàn hệ thống • Giám sát sức khỏe tổng thể, nhóm Leader & xử lý tác vụ nhanh
+            Enterprise system administration • Monitor overall health, Leader teams & quick task actions
           </p>
         </div>
       </div>
@@ -112,37 +112,37 @@ export default function AdminStatsOverview() {
       {/* Level 1: Health & Performance KPI Cards (KPIs "Sống") */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <StatsCard
-          title="TTS Đang Thực Tập"
+          title="Active Interns"
           value={stats.interns.active}
-          subtitle={`Tỷ lệ giữ chân: ${Math.round((stats.interns.active / (stats.interns.total || 1)) * 100)}%`}
+          subtitle={`Retention rate: ${Math.round((stats.interns.active / (stats.interns.total || 1)) * 100)}%`}
           icon={<Users className="h-6 w-6 text-primary-light" />}
           href="/admin/interns?status=ACTIVE"
           trend={{
-            text: `${stats.interns.completed} đã hoàn thành`,
+            text: `${stats.interns.completed} completed`,
             positive: true,
           }}
         />
 
         <StatsCard
-          title="Đội Ngũ Leader"
+          title="Leader Team"
           value={stats.system.leaders}
-          subtitle={`Quản lý ${stats.system.departments} phòng ban`}
+          subtitle={`Managing ${stats.system.departments} departments`}
           icon={<UserCheck className="h-6 w-6 text-indigo-400" />}
           href="/admin/leaders"
           trend={{
-            text: "Cấp quản trị nhóm",
+            text: "Team management tier",
             positive: true,
           }}
         />
 
         <StatsCard
-          title="Đơn Ứng Tuyển Chờ Duyệt"
+          title="Pending Applications"
           value={stats.applications.pending}
-          subtitle={`Trên tổng ${stats.applications.total} đơn ứng tuyển`}
+          subtitle={`Out of ${stats.applications.total} total applications`}
           icon={<FileText className="h-6 w-6 text-amber-400" />}
           href="/admin/onboarding?inviteStatus=USED&applicationStatus=PENDING"
           trend={{
-            text: stats.applications.pending > 0 ? "Cần duyệt ngay" : "Đã xử lý xong",
+            text: stats.applications.pending > 0 ? "Needs review" : "All processed",
             positive: stats.applications.pending === 0,
           }}
         />
@@ -154,10 +154,10 @@ export default function AdminStatsOverview() {
           <div>
             <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
               <UserCheck className="h-6 w-6 text-indigo-400 shrink-0" />
-              <span className="metal-text">Hiệu Suất Tiến Độ Theo Từng Nhóm Leader</span>
+              <span className="metal-text">Leader Team Performance & Progress</span>
             </h3>
             <p className="text-xs text-muted mt-1">
-              Hiển thị danh sách nhóm Leader quản lý ({displayedLeaderTeams.length}/{leaderTeams.length} nhóm)
+              Showing managed Leader teams ({displayedLeaderTeams.length}/{leaderTeams.length} teams)
             </p>
           </div>
 
@@ -170,11 +170,11 @@ export default function AdminStatsOverview() {
               >
                 {showAllLeaders ? (
                   <>
-                    Thu gọn Top 5 <ChevronUp className="h-3.5 w-3.5" />
+                    Collapse to Top 5 <ChevronUp className="h-3.5 w-3.5" />
                   </>
                 ) : (
                   <>
-                    Xem tất cả ({leaderTeams.length}) <ChevronDown className="h-3.5 w-3.5" />
+                    View all ({leaderTeams.length}) <ChevronDown className="h-3.5 w-3.5" />
                   </>
                 )}
               </button>
@@ -185,11 +185,11 @@ export default function AdminStatsOverview() {
         <div className="mt-6">
           <Table columns="2fr 1.2fr 1fr 2.5fr 1fr">
             <Table.Header>
-              <span>Leader / Đội Nhóm</span>
-              <span>Phòng Ban</span>
-              <span>Quy Mô TTS</span>
-              <span>Tiến Độ & % Hoàn Thành</span>
-              <span>Rủi Ro Task</span>
+              <span>Leader / Team</span>
+              <span>Department</span>
+              <span>Interns</span>
+              <span>Progress & Completion</span>
+              <span>Task Risk</span>
             </Table.Header>
 
             <Table.Body
@@ -226,7 +226,7 @@ export default function AdminStatsOverview() {
                           {percentDone}% Done ({team.assignments.done}/{team.totalAssignments} Task)
                         </span>
                         <span className="text-muted text-[11px]">
-                          {team.assignments.inProgress} đang làm • {team.assignments.review} chờ duyệt
+                          {team.assignments.inProgress} in progress • {team.assignments.review} pending review
                         </span>
                       </div>
 
@@ -265,11 +265,11 @@ export default function AdminStatsOverview() {
                     <div>
                       {team.overdueCount > 0 ? (
                         <span className="inline-flex items-center gap-1 text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/30 px-2.5 py-1 rounded-lg">
-                          ⚠ {team.overdueCount} task trễ
+                          ⚠ {team.overdueCount} overdue
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
-                          ✓ Đúng tiến độ
+                          ✓ On track
                         </span>
                       )}
                     </div>
@@ -295,7 +295,7 @@ export default function AdminStatsOverview() {
                 href="/admin/activity-logs"
                 className="text-xs text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1 transition-colors"
               >
-                Xem tất cả
+                View all
                 <ExternalLink className="h-3 w-3" />
               </Link>
             </div>
@@ -328,7 +328,7 @@ export default function AdminStatsOverview() {
                   </div>
 
                   <span className="text-[10px] text-muted shrink-0">
-                    {new Date(act.createdAt).toLocaleTimeString("vi-VN", {
+                    {new Date(act.createdAt).toLocaleTimeString("en-US", {
                       hour: "2-digit",
                       minute: "2-digit",
                     })}
@@ -337,7 +337,7 @@ export default function AdminStatsOverview() {
               ))
             ) : (
               <p className="text-xs text-muted text-center py-6">
-                Chưa có hoạt động mới ghi nhận.
+                No recent activity recorded.
               </p>
             )}
           </div>
@@ -348,7 +348,7 @@ export default function AdminStatsOverview() {
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
             <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-amber-400" />
-              Mục Cần Xử Lý Ngay (Action Alerts)
+              Action Required (Alerts)
             </h3>
           </div>
 
@@ -364,13 +364,13 @@ export default function AdminStatsOverview() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-foreground group-hover:text-amber-300 transition-colors">
-                    {stats.applications.pending} Đơn ứng tuyển chờ xử lý
+                    {stats.applications.pending} Pending applications
                   </p>
-                  <p className="text-[11px] text-muted">Cần duyệt hoặc từ chối ứng viên mới</p>
+                  <p className="text-[11px] text-muted">Review and approve or reject new applicants</p>
                 </div>
               </div>
               <span className="text-xs font-bold text-amber-400 flex items-center gap-1">
-                Xử lý <ExternalLink className="h-3.5 w-3.5" />
+                Process <ExternalLink className="h-3.5 w-3.5" />
               </span>
             </Link>
 
@@ -386,13 +386,13 @@ export default function AdminStatsOverview() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-foreground group-hover:text-rose-300 transition-colors">
-                    {stats.tasks.overdue} Task quá hạn toàn công ty
+                    {stats.tasks.overdue} Company-wide overdue tasks
                   </p>
-                  <p className="text-[11px] text-muted">Bấm để soi danh sách ai bị quá hạn</p>
+                  <p className="text-[11px] text-muted">Click to view all overdue assignments</p>
                 </div>
               </div>
               <span className="text-xs font-bold text-rose-400 flex items-center gap-1">
-                Chi tiết <Eye className="h-3.5 w-3.5" />
+                Details <Eye className="h-3.5 w-3.5" />
               </span>
             </button>
 
@@ -407,13 +407,13 @@ export default function AdminStatsOverview() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-foreground">
-                    {stats.interns.dropped} Thực tập sinh đã huỷ / thôi học
+                    {stats.interns.dropped} Dropped / withdrawn interns
                   </p>
-                  <p className="text-[11px] text-muted">Danh sách thực tập sinh dừng chương trình</p>
+                  <p className="text-[11px] text-muted">List of interns who left the program</p>
                 </div>
               </div>
               <span className="text-xs font-semibold text-muted group-hover:text-foreground flex items-center gap-1">
-                Xem <ExternalLink className="h-3.5 w-3.5" />
+                View <ExternalLink className="h-3.5 w-3.5" />
               </span>
             </Link>
           </div>

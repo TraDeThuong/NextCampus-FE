@@ -213,7 +213,7 @@ export default function LeaderTableTasks() {
                   className="flex items-center gap-1.5 text-xs text-sky-400 border border-sky-500/20 hover:bg-sky-500/10 transition-all font-semibold"
                 >
                   <Sparkles className="h-3.5 w-3.5 animate-pulse" />
-                  AI Phân công
+                  AI Assignment
                 </Button>
               )}
             </div>
@@ -254,7 +254,7 @@ export default function LeaderTableTasks() {
                                 onClick={() => { setTaskMenuOpen(null); setAiTask({ taskId: task.id, taskTitle: task.title, isAssigned: false }); }}
                                 className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-sky-400 hover:bg-sky-500/10 transition font-medium"
                               >
-                                <Sparkles className="h-3 w-3" />AI Phân công
+                                <Sparkles className="h-3 w-3" />AI Assignment
                               </button>
                             )}
                             <button
@@ -404,7 +404,7 @@ function ViewGroup({
 
       <div className="space-y-2 rounded-xl border border-border bg-white/5 p-4">
         <DetailRow label="ID" value={group.id} mono />
-        <DetailRow label="Department" value={group.department?.name ?? "Chung (Tất cả)"} />
+        <DetailRow label="Department" value={group.department?.name ?? "General (All)"} />
         <DetailRow label="Description" value={group.description ?? "—"} />
         <DetailRow label="Created" value={new Date(group.createdAt).toLocaleString("vi-VN")} />
         <DetailRow label="Updated" value={new Date(group.updatedAt).toLocaleString("vi-VN")} />
@@ -482,12 +482,12 @@ function EditGroup({ groupId, onClose }: { groupId: string; onClose: () => void 
           {errors.name && <p className="mt-1 text-xs text-red-400">{errors.name.message}</p>}
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-foreground">Department (Phòng ban)</label>
+          <label className="mb-1.5 block text-sm font-medium text-foreground">Department (Department)</label>
           <select
             {...register("departmentId")}
             className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground focus:border-primary-light/40 focus:outline-none"
           >
-            <option value="">-- Tất cả phòng ban (Chung) --</option>
+            <option value="">-- All departments (General) --</option>
             {departments.map((d) => (
               <option key={d.id} value={d.id}>
                 {d.name}

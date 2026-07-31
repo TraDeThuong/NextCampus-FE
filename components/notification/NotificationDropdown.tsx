@@ -33,7 +33,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
   };
 
   const handleDeleteItem = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation(); // Ngăn mở/đánh dấu đọc khi click vào nút xóa
+    e.stopPropagation(); // Prevent open/mark-read when clicking delete button
     deleteNotification(id);
   };
 
@@ -54,7 +54,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
   const formatTime = (dateString: string) => {
     try {
       const date = new Date(dateString);
-      return date.toLocaleDateString("vi-VN", {
+      return date.toLocaleDateString("en-US", {
         hour: "2-digit",
         minute: "2-digit",
         day: "2-digit",
@@ -70,10 +70,10 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
       {/* Header */}
       <div className="flex items-center justify-between border-b border-white/10 pb-3">
         <div className="flex items-center gap-2">
-          <h3 className="font-semibold metal-text tracking-wide text-sm">THÔNG BÁO</h3>
+          <h3 className="font-semibold metal-text tracking-wide text-sm">NOTIFICATIONS</h3>
           {unreadNotifications.length > 0 && (
             <span className="rounded-full bg-cyan-400/20 px-2 py-0.5 text-xs font-medium text-cyan-300 border border-cyan-400/30">
-              {unreadNotifications.length} mới
+              {unreadNotifications.length} new
             </span>
           )}
         </div>
@@ -83,10 +83,10 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
             <button
               onClick={handleMarkAllRead}
               className="flex items-center gap-1 text-xs text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer"
-              title="Đánh dấu tất cả là đã đọc"
+              title="Mark all as read"
             >
               <Check size={14} />
-              <span>Đã đọc</span>
+              <span>Mark read</span>
             </button>
           )}
 
@@ -94,10 +94,10 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
             <button
               onClick={handleClearRead}
               className="flex items-center gap-1 text-xs text-slate-400 hover:text-red-400 transition-colors cursor-pointer"
-              title="Xóa các thông báo đã đọc"
+              title="Clear read notifications"
             >
               <Trash2 size={13} />
-              <span>Dọn dẹp</span>
+              <span>Clear</span>
             </button>
           )}
         </div>
@@ -112,7 +112,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
         ) : notifications.length === 0 ? (
           <div className="flex h-36 flex-col items-center justify-center gap-2 text-slate-400 text-xs">
             <BellOff className="h-8 w-8 text-slate-600" />
-            <p>Không có thông báo nào</p>
+            <p>No notifications</p>
           </div>
         ) : (
           notifications.map((item: Notification) => (
@@ -152,7 +152,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
                 <button
                   onClick={(e) => handleDeleteItem(e, item.id)}
                   className="text-slate-400 hover:text-red-400 transition-colors p-1 cursor-pointer"
-                  title="Xóa thông báo này"
+                  title="Delete this notification"
                 >
                   <Trash2 size={14} />
                 </button>

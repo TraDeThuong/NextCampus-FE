@@ -36,17 +36,17 @@ type Props = {
 
 const riskConfig = {
   LOW: {
-    label: "Rủi ro thấp",
+    label: "Low risk",
     icon: <CheckCircle2 className="h-3.5 w-3.5" />,
     className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
   },
   MEDIUM: {
-    label: "Rủi ro trung bình",
+    label: "Medium risk",
     icon: <Clock className="h-3.5 w-3.5" />,
     className: "border-amber-500/30 bg-amber-500/10 text-amber-400",
   },
   HIGH: {
-    label: "Rủi ro cao",
+    label: "High risk",
     icon: <ShieldAlert className="h-3.5 w-3.5" />,
     className: "border-rose-500/30 bg-rose-500/10 text-rose-400",
   },
@@ -170,7 +170,7 @@ function CandidateCard({
           isLoading={assigning}
         >
           {!assigning && <User className="h-3.5 w-3.5" />}
-          Giao
+          Assign
         </Button>
       )}
     </div>
@@ -240,7 +240,7 @@ export default function TaskAiRecommendationModal({
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-lg font-bold text-white">Phân công bằng AI</h2>
+                <h2 className="text-lg font-bold text-white">AI Assignment</h2>
                 {data?.meta.aiFailed && (
                   <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-400">
                     Fallback
@@ -259,8 +259,8 @@ export default function TaskAiRecommendationModal({
                 <div className="absolute inset-0 rounded-full animate-ping bg-sky-400/10" />
               </div>
               <div className="text-center">
-                <p className="text-sm font-medium text-white">AI đang phân tích...</p>
-                <p className="text-xs text-slate-500 mt-1">Đánh giá workload, skill match và learning opportunity</p>
+                <p className="text-sm font-medium text-white">AI is analyzing...</p>
+                <p className="text-xs text-slate-500 mt-1">Evaluating workload, skill match and learning opportunity</p>
               </div>
             </div>
           )}
@@ -269,16 +269,16 @@ export default function TaskAiRecommendationModal({
           {isError && (
             <div className="rounded-2xl border border-rose-500/20 bg-rose-500/5 p-6 text-center space-y-3">
               <XCircle className="h-10 w-10 text-rose-400 mx-auto" />
-              <p className="text-sm font-medium text-rose-300">Không thể lấy đề xuất AI</p>
+              <p className="text-sm font-medium text-rose-300">Cannot get AI suggestion</p>
               <p className="text-xs text-slate-400">
-                {error?.message ?? "Vui lòng thử lại sau."}
+                {error?.message ?? "Please try again later."}
               </p>
               <Button
                 variant="glass"
                 size="sm"
                 onClick={() => refetch()}
               >
-                Thử lại
+                Retry
               </Button>
             </div>
           )}
@@ -291,7 +291,7 @@ export default function TaskAiRecommendationModal({
                 <div className="flex items-center gap-3 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
                   <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400" />
                   <p className="text-sm text-amber-300">
-                    Task đã được giao. Kết quả AI chỉ mang tính tham khảo.
+                    Task already assigned. AI results are for reference only.
                   </p>
                 </div>
               )}
@@ -326,7 +326,7 @@ export default function TaskAiRecommendationModal({
                   }`}
                 >
                   <Brain className="h-3.5 w-3.5" />
-                  Tóm tắt AI
+                  AI Summary
                 </button>
                 <button
                   onClick={() => setActiveTab("candidates")}
@@ -381,7 +381,7 @@ export default function TaskAiRecommendationModal({
                     <div className="flex items-center gap-2">
                       <Brain className="h-4 w-4 text-sky-400" />
                       <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">
-                        Lý do đề xuất
+                        Recommendation Reasons
                       </h3>
                     </div>
                     <ul className="space-y-2">
@@ -400,7 +400,7 @@ export default function TaskAiRecommendationModal({
                       <div className="flex items-center gap-2">
                         <TrendingUp className="h-3.5 w-3.5 text-amber-400" />
                         <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                          Phân tích Workload
+                          Workload Analysis
                         </h3>
                       </div>
                       <p className="text-sm text-slate-300 leading-relaxed">{data.workloadAnalysis}</p>
@@ -409,7 +409,7 @@ export default function TaskAiRecommendationModal({
                       <div className="flex items-center gap-2">
                         <Star className="h-3.5 w-3.5 text-violet-400" />
                         <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                          Cơ hội học tập
+                          Learning Opportunity
                         </h3>
                       </div>
                       <p className="text-sm text-slate-300 leading-relaxed">{data.learningOpportunity}</p>
@@ -418,7 +418,7 @@ export default function TaskAiRecommendationModal({
 
                   {/* Disclaimer */}
                   <p className="text-center text-[11px] text-slate-600 italic">
-                    AI chỉ đề xuất — Leader là người chốt quyết định cuối cùng.
+                    AI only suggests — Leader makes the final decision.
                   </p>
                 </div>
               )}
@@ -498,7 +498,7 @@ export default function TaskAiRecommendationModal({
                             isLoading={assignMutation.isPending}
                             className="shrink-0"
                           >
-                            Giao
+                            Assign
                           </Button>
                         )}
                       </div>

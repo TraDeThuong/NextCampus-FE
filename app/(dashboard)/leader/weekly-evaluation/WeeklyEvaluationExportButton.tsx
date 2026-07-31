@@ -19,8 +19,8 @@ export default function WeeklyEvaluationExportButton({ id }: Props) {
       isLoading={isPending}
       className="flex items-center gap-1.5"
     >
-      <FileDown className="h-4 w-4 mr-1" />
-      <span>Xuất PDF</span>
+      <FileDown className="h-4 w-4" />
+      <span>Export PDF</span>
     </Button>
   );
 }

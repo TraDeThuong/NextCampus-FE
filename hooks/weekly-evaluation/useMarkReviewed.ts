@@ -9,7 +9,7 @@ export function useMarkReviewed() {
   return useMutation({
     mutationFn: (id: string) => weeklyEvaluationService.markReviewed(id),
     onSuccess: (_, id) => {
-      // Invalidate chi tiết và danh sách để cập nhật trạng thái "đã xem"
+      // Invalidate detail and list to update reviewed status
       queryClient.invalidateQueries({ queryKey: ["weeklyEvaluation", id] });
       queryClient.invalidateQueries({ queryKey: ["weeklyEvaluations"] });
     },

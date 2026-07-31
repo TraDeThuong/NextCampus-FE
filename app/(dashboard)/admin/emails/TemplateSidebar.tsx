@@ -29,8 +29,8 @@ export const TEMPLATE_CATALOG = [
     variables: ["taskTitle", "deadline"],
     channels: ["web", "email"],
     defaults: {
-      titleTemplate: "Bạn đã được giao công việc mới",
-      contentTemplate: 'Công việc: "{{taskTitle}}". Hạn nộp: {{deadline}}',
+      titleTemplate: "You have been assigned a new task",
+      contentTemplate: 'Task: "{{taskTitle}}". Deadline: {{deadline}}',
       emailSubjectTemplate: null,
       emailContentTemplate: null,
     },
@@ -44,9 +44,9 @@ export const TEMPLATE_CATALOG = [
     variables: ["internName", "taskTitle", "attempt"],
     channels: ["web", "email"],
     defaults: {
-      titleTemplate: "Bản nộp bài mới cần duyệt",
+      titleTemplate: "New submission requires review",
       contentTemplate:
-        'Thực tập sinh {{internName}} đã nộp bài cho công việc "{{taskTitle}}" (Lần {{attempt}}).',
+        'Intern {{internName}} submitted work for task "{{taskTitle}}" (Attempt {{attempt}}).',
       emailSubjectTemplate: null,
       emailContentTemplate: null,
     },
@@ -60,9 +60,9 @@ export const TEMPLATE_CATALOG = [
     variables: ["taskTitle", "attempt", "reviewStatus"],
     channels: ["web", "email"],
     defaults: {
-      titleTemplate: "Kết quả duyệt bài nộp",
+      titleTemplate: "Submission review result",
       contentTemplate:
-        'Bài nộp cho công việc "{{taskTitle}}" (Lần {{attempt}}) đã được duyệt: {{reviewStatus}}.',
+        'Submission for task "{{taskTitle}}" (Attempt {{attempt}}) has been reviewed: {{reviewStatus}}.',
       emailSubjectTemplate: null,
       emailContentTemplate: null,
     },
@@ -76,9 +76,9 @@ export const TEMPLATE_CATALOG = [
     variables: ["internName"],
     channels: ["web", "email"],
     defaults: {
-      titleTemplate: "Báo cáo hàng ngày mới",
+      titleTemplate: "New daily report submitted",
       contentTemplate:
-        "Thực tập sinh {{internName}} đã gửi báo cáo hàng ngày.",
+        "Intern {{internName}} has submitted a daily report.",
       emailSubjectTemplate: null,
       emailContentTemplate: null,
     },
@@ -92,9 +92,9 @@ export const TEMPLATE_CATALOG = [
     variables: ["week", "totalScore"],
     channels: ["web", "email"],
     defaults: {
-      titleTemplate: "Đánh giá hàng tuần mới",
+      titleTemplate: "New weekly evaluation published",
       contentTemplate:
-        "Bạn nhận được đánh giá tuần {{week}} với tổng điểm là {{totalScore}}/10.",
+        "You have received a week {{week}} evaluation with a total score of {{totalScore}}/10.",
       emailSubjectTemplate: null,
       emailContentTemplate: null,
     },
@@ -108,9 +108,9 @@ export const TEMPLATE_CATALOG = [
     variables: ["taskTitle", "deadline"],
     channels: ["web", "email"],
     defaults: {
-      titleTemplate: "Nhắc nhở hoàn thành công việc",
+      titleTemplate: "Task deadline reminder",
       contentTemplate:
-        'Công việc "{{taskTitle}}" của bạn có hạn nộp vào lúc {{deadline}}. Vui lòng hoàn thành đúng hạn.',
+        'Your task "{{taskTitle}}" is due on {{deadline}}. Please complete it on time.',
       emailSubjectTemplate: null,
       emailContentTemplate: null,
     },
@@ -124,9 +124,9 @@ export const TEMPLATE_CATALOG = [
     variables: ["internName", "week"],
     channels: ["web", "email"],
     defaults: {
-      titleTemplate: "Nhắc nhở đánh giá thực tập sinh",
+      titleTemplate: "Intern evaluation reminder",
       contentTemplate:
-        'Thực tập sinh {{internName}} chưa có đánh giá cho tuần {{week}}. Vui lòng thực hiện đánh giá.',
+        'Intern {{internName}} has not been evaluated for week {{week}}. Please complete the evaluation.',
       emailSubjectTemplate: null,
       emailContentTemplate: null,
     },
@@ -142,9 +142,9 @@ export const TEMPLATE_CATALOG = [
     defaults: {
       titleTemplate: "",
       contentTemplate: "",
-      emailSubjectTemplate: "[NexCampus] Thư mời nộp đơn đăng ký thực tập",
+      emailSubjectTemplate: "[NexCampus] Internship Application Invitation",
       emailContentTemplate:
-        'Chào bạn,<br/><br/>Bạn đã nhận được lời mời tham gia ứng tuyển thực tập tại NexCampus.<br/>Vui lòng nhấn vào liên kết dưới đây để điền thông tin đơn ứng tuyển (liên kết này chỉ có giá trị sử dụng một lần và hết hạn sau 24 giờ):<br/><p style="margin: 16px 0;"><a href="{{applyUrl}}" style="display:inline-block;background-color:#4f46e5;color:#ffffff;padding:10px 20px;text-decoration:none;border-radius:4px;font-weight:bold;">Nộp đơn ứng tuyển</a></p>Hoặc sao chép liên kết này vào trình duyệt của bạn:<br/><a href="{{applyUrl}}">{{applyUrl}}</a><br/><br/>Trân trọng,<br/>Đội ngũ NexCampus.',
+        'Hello,<br/><br/>You have been invited to apply for an internship at NexCampus.<br/>Please click the link below to fill in your application (this link is single-use and expires after 24 hours):<br/><p style="margin: 16px 0;"><a href="{{applyUrl}}" style="display:inline-block;background-color:#4f46e5;color:#ffffff;padding:10px 20px;text-decoration:none;border-radius:4px;font-weight:bold;">Submit Application</a></p>Or copy this link into your browser:<br/><a href="{{applyUrl}}">{{applyUrl}}</a><br/><br/>Best regards,<br/>The NexCampus Team.',
     },
   },
   {
@@ -158,9 +158,9 @@ export const TEMPLATE_CATALOG = [
     defaults: {
       titleTemplate: "",
       contentTemplate: "",
-      emailSubjectTemplate: "[NexCampus] Tài khoản thực tập sinh của bạn đã được tạo",
+      emailSubjectTemplate: "[NexCampus] Your Intern Account Has Been Created",
       emailContentTemplate:
-        'Chào mừng bạn đến với NexCampus!<br/><br/>Đơn đăng ký thực tập của bạn tại NexCampus đã được phê duyệt.<br/>Tài khoản của bạn đã được khởi tạo thành công trên hệ thống. Dưới đây là thông tin đăng nhập của bạn:<br/><ul><li><strong>Email đăng nhập:</strong> {{email}}</li><li><strong>Mật khẩu:</strong> {{password}}</li></ul>Vui lòng truy cập <a href="{{loginUrl}}" style="color:#4f46e5;font-weight:bold;">NexCampus</a> để đăng nhập và đổi mật khẩu của bạn để bảo mật tài khoản.<br/><br/>Trân trọng,<br/>Đội ngũ NexCampus.',
+        'Welcome to NexCampus!<br/><br/>Your internship application at NexCampus has been approved.<br/>Your account has been successfully created on the system. Below are your login credentials:<br/><ul><li><strong>Login email:</strong> {{email}}</li><li><strong>Password:</strong> {{password}}</li></ul>Please visit <a href="{{loginUrl}}" style="color:#4f46e5;font-weight:bold;">NexCampus</a> to sign in and change your password to secure your account.<br/><br/>Best regards,<br/>The NexCampus Team.',
     },
   },
   {
@@ -174,9 +174,9 @@ export const TEMPLATE_CATALOG = [
     defaults: {
       titleTemplate: "",
       contentTemplate: "",
-      emailSubjectTemplate: "[NexCampus] Kết quả đăng ký thực tập tại NexCampus",
+      emailSubjectTemplate: "[NexCampus] Internship Application Result",
       emailContentTemplate:
-        'Chào bạn,<br/><br/>Cảm ơn bạn đã quan tâm và nộp đơn đăng ký thực tập tại NexCampus.<br/>Sau khi xem xét kỹ lưỡng, chúng tôi rất tiếc phải thông báo rằng đơn đăng ký của bạn chưa phù hợp với các tiêu chí tuyển chọn hiện tại của chúng tôi.<br/>Thông tin chi tiết về đơn đăng ký của bạn:<br/><ul><li><strong>Họ và tên:</strong> {{fullName}}</li><li><strong>Vị trí ứng tuyển:</strong> {{position}}</li><li><strong>Phòng ban:</strong> {{department}}</li></ul>Chúng tôi rất hy vọng sẽ có cơ hội được hợp tác với bạn trong các chương trình tiếp theo. Chúc bạn luôn nhiều sức khỏe và thành công trên con đường sự nghiệp sắp tới.<br/><br/>Trân trọng,<br/>Đội ngũ NexCampus.',
+        'Hello,<br/><br/>Thank you for your interest in applying for an internship at NexCampus.<br/>After careful consideration, we regret to inform you that your application does not meet our current selection criteria.<br/>Details about your application:<br/><ul><li><strong>Full name:</strong> {{fullName}}</li><li><strong>Position applied:</strong> {{position}}</li><li><strong>Department:</strong> {{department}}</li></ul>We hope to have the opportunity to work with you in future programs. Wishing you good health and success in your career journey ahead.<br/><br/>Best regards,<br/>The NexCampus Team.',
     },
   },
   {
@@ -190,9 +190,9 @@ export const TEMPLATE_CATALOG = [
     defaults: {
       titleTemplate: "",
       contentTemplate: "",
-      emailSubjectTemplate: "[NexCampus] Tài khoản của bạn đã được tạo",
+      emailSubjectTemplate: "[NexCampus] Your Account Has Been Created",
       emailContentTemplate:
-        'Chào mừng bạn đến với NexCampus!<br/><br/>Tài khoản của bạn đã được quản trị viên khởi tạo thành công trên hệ thống. Dưới đây là thông tin đăng nhập của bạn:<br/><ul><li><strong>Email đăng nhập:</strong> {{email}}</li><li><strong>Mật khẩu:</strong> {{password}}</li></ul>Vui lòng truy cập <a href="{{loginUrl}}" style="color:#4f46e5;font-weight:bold;">NexCampus</a> để đăng nhập và đổi mật khẩu của bạn để bảo mật tài khoản.<br/><br/>Trân trọng,<br/>Đội ngũ NexCampus.',
+        'Welcome to NexCampus!<br/><br/>Your account has been successfully created by an administrator. Below are your login credentials:<br/><ul><li><strong>Login email:</strong> {{email}}</li><li><strong>Password:</strong> {{password}}</li></ul>Please visit <a href="{{loginUrl}}" style="color:#4f46e5;font-weight:bold;">NexCampus</a> to sign in and change your password to secure your account.<br/><br/>Best regards,<br/>The NexCampus Team.',
     },
   },
   {
@@ -206,9 +206,9 @@ export const TEMPLATE_CATALOG = [
     defaults: {
       titleTemplate: "",
       contentTemplate: "",
-      emailSubjectTemplate: "[NexCampus] Yêu cầu khôi phục mật khẩu tài khoản",
+      emailSubjectTemplate: "[NexCampus] Password Reset Request",
       emailContentTemplate:
-        'Chào {{fullName}},<br/><br/>Hệ thống NexCampus ghi nhận một yêu cầu khôi phục mật khẩu cho tài khoản của bạn với chi tiết thiết bị bên dưới:<br/><br/><table style="width:100%;border-collapse:collapse;margin:16px 0;background-color:#0f172a;color:#f8fafc;border-radius:8px;overflow:hidden;"><tr style="border-bottom:1px solid #1e293b;"><td style="padding:10px 16px;color:#94a3b8;width:140px;">Thời gian yêu cầu:</td><td style="padding:10px 16px;font-weight:bold;">{{time}}</td></tr><tr style="border-bottom:1px solid #1e293b;"><td style="padding:10px 16px;color:#94a3b8;">Địa chỉ IP:</td><td style="padding:10px 16px;font-weight:bold;">{{ip}}</td></tr><tr style="border-bottom:1px solid #1e293b;"><td style="padding:10px 16px;color:#94a3b8;">Vị trí (ước tính):</td><td style="padding:10px 16px;font-weight:bold;">{{location}}</td></tr><tr style="border-bottom:1px solid #1e293b;"><td style="padding:10px 16px;color:#94a3b8;">Thiết bị:</td><td style="padding:10px 16px;font-weight:bold;">{{device}}</td></tr><tr style="border-bottom:1px solid #1e293b;"><td style="padding:10px 16px;color:#94a3b8;">Hệ điều hành:</td><td style="padding:10px 16px;font-weight:bold;">{{os}}</td></tr><tr><td style="padding:10px 16px;color:#94a3b8;">Trình duyệt:</td><td style="padding:10px 16px;font-weight:bold;">{{browser}}</td></tr></table>Vui lòng nhấn vào liên kết dưới đây để đặt lại mật khẩu mới (liên kết có hiệu lực trong 1 giờ):<br/><p style="margin: 20px 0;"><a href="{{resetLink}}" style="display:inline-block;background-color:#4f46e5;color:#ffffff;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;box-shadow:0 4px 12px rgba(79,70,229,0.3);">🔑 Đặt lại mật khẩu</a></p>Hoặc sao chép liên kết này vào trình duyệt:<br/><a href="{{resetLink}}">{{resetLink}}</a><br/><br/>Nếu không phải bạn yêu cầu, vui lòng bỏ qua email này hoặc liên hệ quản trị viên.<br/><br/>Trân trọng,<br/>Đội ngũ NexCampus.',
+        'Hello {{fullName}},<br/><br/>The NexCampus system received a password reset request for your account with the device details below:<br/><br/><table style="width:100%;border-collapse:collapse;margin:16px 0;background-color:#0f172a;color:#f8fafc;border-radius:8px;overflow:hidden;"><tr style="border-bottom:1px solid #1e293b;"><td style="padding:10px 16px;color:#94a3b8;width:140px;">Request time:</td><td style="padding:10px 16px;font-weight:bold;">{{time}}</td></tr><tr style="border-bottom:1px solid #1e293b;"><td style="padding:10px 16px;color:#94a3b8;">IP address:</td><td style="padding:10px 16px;font-weight:bold;">{{ip}}</td></tr><tr style="border-bottom:1px solid #1e293b;"><td style="padding:10px 16px;color:#94a3b8;">Location (estimated):</td><td style="padding:10px 16px;font-weight:bold;">{{location}}</td></tr><tr style="border-bottom:1px solid #1e293b;"><td style="padding:10px 16px;color:#94a3b8;">Device:</td><td style="padding:10px 16px;font-weight:bold;">{{device}}</td></tr><tr style="border-bottom:1px solid #1e293b;"><td style="padding:10px 16px;color:#94a3b8;">Operating system:</td><td style="padding:10px 16px;font-weight:bold;">{{os}}</td></tr><tr><td style="padding:10px 16px;color:#94a3b8;">Browser:</td><td style="padding:10px 16px;font-weight:bold;">{{browser}}</td></tr></table>Please click the link below to set a new password (link is valid for 1 hour):<br/><p style="margin: 20px 0;"><a href="{{resetLink}}" style="display:inline-block;background-color:#4f46e5;color:#ffffff;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;box-shadow:0 4px 12px rgba(79,70,229,0.3);">Reset Password</a></p>Or copy this link into your browser:<br/><a href="{{resetLink}}">{{resetLink}}</a><br/><br/>If you did not request this, please ignore this email or contact your administrator.<br/><br/>Best regards,<br/>The NexCampus Team.',
     },
   },
   {
@@ -222,9 +222,9 @@ export const TEMPLATE_CATALOG = [
     defaults: {
       titleTemplate: "",
       contentTemplate: "",
-      emailSubjectTemplate: "[NexCampus] Cảnh báo bảo mật: Đăng nhập từ thiết bị/vị trí mới",
+      emailSubjectTemplate: "[NexCampus] Security Alert: New Login Detected",
       emailContentTemplate:
-        'Chào {{fullName}},<br/><br/>Hệ thống NexCampus ghi nhận một lượt đăng nhập mới vào tài khoản của bạn với chi tiết bảo mật bên dưới:<br/><br/><table style="width:100%;border-collapse:collapse;margin:16px 0;background-color:#0f172a;color:#f8fafc;border-radius:8px;overflow:hidden;"><tr style="border-bottom:1px solid #1e293b;"><td style="padding:10px 16px;color:#94a3b8;width:140px;">Thời gian:</td><td style="padding:10px 16px;font-weight:bold;">{{time}}</td></tr><tr style="border-bottom:1px solid #1e293b;"><td style="padding:10px 16px;color:#94a3b8;">Địa chỉ IP:</td><td style="padding:10px 16px;font-weight:bold;">{{ip}}</td></tr><tr style="border-bottom:1px solid #1e293b;"><td style="padding:10px 16px;color:#94a3b8;">Vị trí (ước tính):</td><td style="padding:10px 16px;font-weight:bold;">{{location}}</td></tr><tr style="border-bottom:1px solid #1e293b;"><td style="padding:10px 16px;color:#94a3b8;">Thiết bị:</td><td style="padding:10px 16px;font-weight:bold;">{{device}}</td></tr><tr style="border-bottom:1px solid #1e293b;"><td style="padding:10px 16px;color:#94a3b8;">Hệ điều hành:</td><td style="padding:10px 16px;font-weight:bold;">{{os}}</td></tr><tr><td style="padding:10px 16px;color:#94a3b8;">Trình duyệt:</td><td style="padding:10px 16px;font-weight:bold;">{{browser}}</td></tr></table>Nếu chính bạn thực hiện đăng nhập này, bạn có thể bỏ qua email này.<br/><br/>Nếu <strong style="color:#ef4444;">ĐÂY KHÔNG PHẢI LÀ BẠN</strong>, tài khoản của bạn có nguy cơ bị xâm nhập. Vui lòng nhấn vào nút bên dưới để vô hiệu hóa phiên đăng nhập này ngay lập tức:<br/><p style="margin: 20px 0;"><a href="{{revokeUrl}}" style="display:inline-block;background-color:#dc2626;color:#ffffff;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;box-shadow:0 4px 12px rgba(220,38,38,0.3);">⚠️ ĐÂY KHÔNG PHẢI TÔI (Khóa phiên ngay)</a></p>Trân trọng,<br/>Đội ngũ NexCampus.',
+        'Hello {{fullName}},<br/><br/>The NexCampus system detected a new login to your account with the security details below:<br/><br/><table style="width:100%;border-collapse:collapse;margin:16px 0;background-color:#0f172a;color:#f8fafc;border-radius:8px;overflow:hidden;"><tr style="border-bottom:1px solid #1e293b;"><td style="padding:10px 16px;color:#94a3b8;width:140px;">Time:</td><td style="padding:10px 16px;font-weight:bold;">{{time}}</td></tr><tr style="border-bottom:1px solid #1e293b;"><td style="padding:10px 16px;color:#94a3b8;">IP address:</td><td style="padding:10px 16px;font-weight:bold;">{{ip}}</td></tr><tr style="border-bottom:1px solid #1e293b;"><td style="padding:10px 16px;color:#94a3b8;">Location (estimated):</td><td style="padding:10px 16px;font-weight:bold;">{{location}}</td></tr><tr style="border-bottom:1px solid #1e293b;"><td style="padding:10px 16px;color:#94a3b8;">Device:</td><td style="padding:10px 16px;font-weight:bold;">{{device}}</td></tr><tr style="border-bottom:1px solid #1e293b;"><td style="padding:10px 16px;color:#94a3b8;">Operating system:</td><td style="padding:10px 16px;font-weight:bold;">{{os}}</td></tr><tr><td style="padding:10px 16px;color:#94a3b8;">Browser:</td><td style="padding:10px 16px;font-weight:bold;">{{browser}}</td></tr></table>If this was you, you can safely ignore this email.<br/><br/>If <strong style="color:#ef4444;">THIS WAS NOT YOU</strong>, your account may be compromised. Please click the button below to revoke this session immediately:<br/><p style="margin: 20px 0;"><a href="{{revokeUrl}}" style="display:inline-block;background-color:#dc2626;color:#ffffff;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;box-shadow:0 4px 12px rgba(220,38,38,0.3);">THIS WAS NOT ME (Revoke Session Now)</a></p>Best regards,<br/>The NexCampus Team.',
     },
   },
 ] as const;

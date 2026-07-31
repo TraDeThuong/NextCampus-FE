@@ -11,10 +11,10 @@ export function useClearReadNotifications() {
     mutationFn: () => notificationService.clearReadNotifications(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
-      toast.success("Đã dọn dẹp các thông báo đã đọc.");
+      toast.success("Read notifications cleared.");
     },
     onError: () => {
-      toast.error("Không thể dọn dẹp thông báo đã đọc.");
+      toast.error("Failed to clear read notifications.");
     },
   });
 }

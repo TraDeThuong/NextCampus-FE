@@ -13,13 +13,13 @@ export function useUpdateWeeklyEvaluation() {
       weeklyEvaluationService.updateWeeklyEvaluation(id, payload),
 
     onSuccess: (_, { id }) => {
-      toast.success("Cập nhật đánh giá thành công!");
+      toast.success("Evaluation updated successfully!");
       queryClient.invalidateQueries({ queryKey: ["weeklyEvaluations"] });
       queryClient.invalidateQueries({ queryKey: ["weeklyEvaluation", id] });
     },
 
     onError: (error: any) => {
-      const msg = error?.response?.data?.message || "Lỗi khi cập nhật đánh giá.";
+      const msg = error?.response?.data?.message || "Failed to update evaluation.";
       toast.error(msg);
     },
   });

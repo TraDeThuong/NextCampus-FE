@@ -37,9 +37,9 @@ type FormValues = z.infer<typeof schema>;
 // ─── Sample values for Live Preview ───────────────────────────────────────
 
 const SAMPLE_VALUES: Record<string, string> = {
-  taskTitle: "Xây dựng tính năng đăng nhập",
+  taskTitle: "Build login feature",
   deadline: "25/07/2026 17:00",
-  internName: "Nguyễn Văn A",
+  internName: "John Doe",
   attempt: "2",
   reviewStatus: "APPROVED",
   week: "4",
@@ -48,13 +48,13 @@ const SAMPLE_VALUES: Record<string, string> = {
   email: "candidate@example.com",
   password: "SecureTempPassword123!",
   loginUrl: "https://nexcampus.vn/login",
-  fullName: "Trần Thị B",
+  fullName: "Jane Smith",
   position: "NodeJS Developer Intern",
   department: "Product Engineering",
   resetLink: "https://nexcampus.vn/reset-password?token=reset-token-xyz789",
   time: "21/07/2026 22:00:00",
   ip: "113.161.12.34",
-  location: "TP. Hồ Chí Minh, Việt Nam",
+  location: "Ho Chi Minh City, Vietnam",
   device: "Desktop",
   os: "Windows 11",
   browser: "Google Chrome",
@@ -419,7 +419,7 @@ export default function TemplateEditor({ type, template }: Props) {
                 {...webTitleRest}
                 ref={(el) => { webTitleRhfRef(el); webTitleRef.current = el; }}
                 type="text"
-                placeholder="e.g., Bạn đã được giao công việc mới"
+                placeholder="e.g., You have been assigned a new task"
                 onFocus={() => (lastFocusedRef.current = "webTitle")}
                 className={inputClass}
               />

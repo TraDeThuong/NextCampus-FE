@@ -8,7 +8,7 @@ import Spinner from "@/components/ui/Spinner";
 import MetalCard from "@/components/ui/MetalCard";
 
 export const metadata: Metadata = {
-  title: "Quản lý Trưởng nhóm",
+  title: "Manage Leaders",
 };
 
 export default function ManageLeaders() {

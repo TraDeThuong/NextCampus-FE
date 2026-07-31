@@ -8,12 +8,12 @@ export const useCreateUser = () => {
   return useMutation({
     mutationFn: (payload: CreateUserPayload) => createUserService(payload),
     onSuccess: (data) => {
-      alert("Tạo tài khoản thành công! Hệ thống đã gửi email.");
+      alert("Account created successfully! An email has been sent.");
       queryClient.invalidateQueries({ queryKey: ["users"] });
     },
     onError: (error: any) => {
-      const errorMsg = error.response?.data?.message || "Đã có lỗi xảy ra";
-      alert(`Thất bại: ${errorMsg}`);
+      const errorMsg = error.response?.data?.message || "An error occurred";
+      alert(`Failed: ${errorMsg}`);
     },
   });
 };

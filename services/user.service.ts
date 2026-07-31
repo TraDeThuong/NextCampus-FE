@@ -8,7 +8,7 @@ import {
 } from "@/types/user";
 import { MessageSuccessResponse } from "@/types/auth";
 
-// 1. GET /users — Danh sách user (phân trang, filter, sort)
+// 1. GET /users — List users (pagination, filter, sort)
 export const getUsersService = async (
   params?: UserQueryParams,
 ): Promise<UserListResponse> => {
@@ -16,13 +16,13 @@ export const getUsersService = async (
   return response.data;
 };
 
-// 2. GET /users/:id — Chi tiết user
+// 2. GET /users/:id — User details
 export const getUserService = async (id: string): Promise<UserSuccessResponse> => {
   const response = await api.get<UserSuccessResponse>(`/users/${id}`);
   return response.data;
 };
 
-// 3. POST /users — Tạo user mới
+// 3. POST /users — Create new user
 export const createUserService = async (payload: CreateUserPayload) => {
   const response = await api.post("/users", payload);
   return response.data;
@@ -38,7 +38,7 @@ export const uploadAvatarService = async (file: File): Promise<UserSuccessRespon
   return response.data;
 };
 
-// 5. PUT /users/:id — Cập nhật user
+// 5. PUT /users/:id — Update user
 export const updateUserService = async (
   id: string,
   payload: UpdateUserPayload,
@@ -47,13 +47,13 @@ export const updateUserService = async (
   return response.data;
 };
 
-// 6. DELETE /users/:id — Xoá mềm user
+// 6. DELETE /users/:id — Soft delete user
 export const deleteUserService = async (id: string): Promise<UserSuccessResponse> => {
   const response = await api.delete<UserSuccessResponse>(`/users/${id}`);
   return response.data;
 };
 
-// 7. PATCH /users/change-password — Đổi mật khẩu
+// 7. PATCH /users/change-password — Change password
 // export const changePasswordService = async (
 //   payload: ChangePasswordPayload,
 // ): Promise<MessageSuccessResponse> => {

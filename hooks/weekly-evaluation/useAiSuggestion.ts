@@ -10,11 +10,11 @@ export function useAiSuggestion() {
     mutationFn: (payload: AiSuggestionPayload) => weeklyEvaluationService.getAiSuggestion(payload),
 
     onSuccess: () => {
-      toast.success("Đã lấy gợi ý từ AI thành công!");
+      toast.success("AI suggestions loaded successfully!");
     },
 
     onError: (error: any) => {
-      const msg = error?.response?.data?.message || "Lỗi khi lấy gợi ý từ AI. Hãy kiểm tra bài nộp / báo cáo của thực tập sinh trong tuần.";
+      const msg = error?.response?.data?.message || "Failed to load AI suggestions. Check the intern's submissions/reports for this week.";
       toast.error(msg);
     },
   });

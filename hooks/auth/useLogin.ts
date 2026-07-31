@@ -82,11 +82,11 @@ export function useLogin() {
             const message = error.response?.data?.message;
 
             if (code === "USER_INACTIVE" || message?.toLowerCase().includes("inactive")) {
-                toast.error("Tài khoản của bạn đã bị khóa hoặc ngừng hoạt động.");
+                toast.error("Your account has been locked or deactivated.");
             } else if (message === "Invalid credentials" || error.response?.status === 401) {
-                toast.error("Tài khoản hoặc mật khẩu không chính xác.");
+                toast.error("Invalid email or password.");
             } else {
-                toast.error(message || "Đăng nhập thất bại. Vui lòng thử lại.");
+                toast.error(message || "Login failed. Please try again.");
             }
         },
     });
@@ -101,10 +101,10 @@ export function useLogin() {
         const msg = loginMutation.error.response?.data?.message;
 
         if (code === "USER_INACTIVE" || msg?.toLowerCase().includes("inactive")) {
-            return "Tài khoản của bạn đã bị khóa hoặc ngừng hoạt động.";
+            return "Your account has been locked or deactivated.";
         }
         if (msg === "Invalid credentials" || loginMutation.error.response?.status === 401) {
-            return "Tên đăng nhập hoặc mật khẩu không chính xác.";
+            return "Invalid email or password.";
         }
         return msg;
     };

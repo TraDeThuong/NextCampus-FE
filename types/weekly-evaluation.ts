@@ -1,15 +1,15 @@
 import type { Intern } from "./intern";
 
 // ─── Rating Level ─────────────────────────────────────────────────────────────
-// 5 mức xếp loại: TOT=10, KHA=8, TB=6, TBY=4, YEU=2
+// 5 rating levels: TOT=10, KHA=8, TB=6, TBY=4, YEU=2
 export type RatingLevel = "TOT" | "KHA" | "TB" | "TBY" | "YEU";
 
 export const RATING_LABELS: Record<RatingLevel, string> = {
-  TOT: "Tốt",
-  KHA: "Khá",
-  TB: "Trung bình",
-  TBY: "Trung bình yếu",
-  YEU: "Yếu",
+  TOT: "Excellent",
+  KHA: "Good",
+  TB: "Average",
+  TBY: "Below Average",
+  YEU: "Poor",
 };
 
 export const RATING_SCORES: Record<RatingLevel, number> = {
@@ -29,57 +29,57 @@ export const RATING_COLORS: Record<RatingLevel, string> = {
 };
 
 /**
- * 12 tiêu chí đánh giá theo mẫu mới.
+ * 12 evaluation criteria (new template).
  */
 export interface EvaluationRatings {
-  // Phần I: Kỷ luật và tư chất
-  ruleCompliance: RatingLevel;   // 1. Thực hiện nội quy của cơ quan
-  workAttitude: RatingLevel;     // 2. Thái độ làm việc
-  learningCapacity: RatingLevel; // 3. Năng lực tiếp thu
-  resilience: RatingLevel;       // 4. Khả năng vượt khó, chịu áp lực
-  communication: RatingLevel;    // 5. Giao tiếp và ứng xử
+  // Section I: Discipline & Aptitude
+  ruleCompliance: RatingLevel;   // 1. Compliance with organizational rules
+  workAttitude: RatingLevel;     // 2. Work attitude
+  learningCapacity: RatingLevel; // 3. Learning capacity
+  resilience: RatingLevel;       // 4. Resilience & stress tolerance
+  communication: RatingLevel;    // 5. Communication & interpersonal skills
 
-  // Phần II: Khả năng chuyên môn
-  knowledge: RatingLevel;        // 1. Kiến thức
-  practicalSkills: RatingLevel;  // 2. Kỹ năng thực hành
-  foreignLanguage: RatingLevel;  // 3. Năng lực ngoại ngữ
-  teamwork: RatingLevel;         // 4. Kỹ năng làm việc nhóm
-  creativity: RatingLevel;       // 5. Tính sáng tạo
+  // Section II: Professional competence
+  knowledge: RatingLevel;        // 1. Knowledge
+  practicalSkills: RatingLevel;  // 2. Practical skills
+  foreignLanguage: RatingLevel;  // 3. Foreign language proficiency
+  teamwork: RatingLevel;         // 4. Teamwork skills
+  creativity: RatingLevel;       // 5. Creativity
 
-  // Phần III: Kết quả thực hiện đề tài
-  contentQuality: RatingLevel;   // 1. Thực hiện yêu cầu về nội dung
-  progressDelivery: RatingLevel; // 2. Thực hiện yêu cầu về tiến độ
+  // Section III: Project delivery results
+  contentQuality: RatingLevel;   // 1. Content quality delivery
+  progressDelivery: RatingLevel; // 2. Progress & timeline adherence
 }
 
 export const CRITERIA_SECTIONS = [
   {
     id: "I",
-    label: "Kỷ luật và tư chất",
+    label: "Discipline & Aptitude",
     criteria: [
-      { key: "ruleCompliance" as keyof EvaluationRatings, label: "Thực hiện nội quy của cơ quan" },
-      { key: "workAttitude" as keyof EvaluationRatings, label: "Thái độ làm việc" },
-      { key: "learningCapacity" as keyof EvaluationRatings, label: "Năng lực tiếp thu" },
-      { key: "resilience" as keyof EvaluationRatings, label: "Khả năng vượt khó, chịu áp lực" },
-      { key: "communication" as keyof EvaluationRatings, label: "Giao tiếp và ứng xử" },
+      { key: "ruleCompliance" as keyof EvaluationRatings, label: "Compliance with organizational rules" },
+      { key: "workAttitude" as keyof EvaluationRatings, label: "Work attitude" },
+      { key: "learningCapacity" as keyof EvaluationRatings, label: "Learning capacity" },
+      { key: "resilience" as keyof EvaluationRatings, label: "Resilience & stress tolerance" },
+      { key: "communication" as keyof EvaluationRatings, label: "Communication & interpersonal skills" },
     ],
   },
   {
     id: "II",
-    label: "Khả năng chuyên môn",
+    label: "Professional Competence",
     criteria: [
-      { key: "knowledge" as keyof EvaluationRatings, label: "Kiến thức" },
-      { key: "practicalSkills" as keyof EvaluationRatings, label: "Kỹ năng thực hành" },
-      { key: "foreignLanguage" as keyof EvaluationRatings, label: "Năng lực ngoại ngữ" },
-      { key: "teamwork" as keyof EvaluationRatings, label: "Kỹ năng làm việc nhóm" },
-      { key: "creativity" as keyof EvaluationRatings, label: "Tính sáng tạo" },
+      { key: "knowledge" as keyof EvaluationRatings, label: "Knowledge" },
+      { key: "practicalSkills" as keyof EvaluationRatings, label: "Practical skills" },
+      { key: "foreignLanguage" as keyof EvaluationRatings, label: "Foreign language proficiency" },
+      { key: "teamwork" as keyof EvaluationRatings, label: "Teamwork skills" },
+      { key: "creativity" as keyof EvaluationRatings, label: "Creativity" },
     ],
   },
   {
     id: "III",
-    label: "Kết quả thực hiện đề tài",
+    label: "Project Delivery Results",
     criteria: [
-      { key: "contentQuality" as keyof EvaluationRatings, label: "Thực hiện yêu cầu về nội dung" },
-      { key: "progressDelivery" as keyof EvaluationRatings, label: "Thực hiện yêu cầu về tiến độ" },
+      { key: "contentQuality" as keyof EvaluationRatings, label: "Content quality delivery" },
+      { key: "progressDelivery" as keyof EvaluationRatings, label: "Progress & timeline adherence" },
     ],
   },
 ] as const;
@@ -169,7 +169,7 @@ export interface CreateWeeklyEvaluationPayload {
   internId: string;
   week: number;
   ratings: EvaluationRatings;
-  // Tính toán tự động, gửi để tương thích ngược
+  // Auto-calculated; sent for backward compatibility
   communication: number;
   attitude: number;
   learning: number;
