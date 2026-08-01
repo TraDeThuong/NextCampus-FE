@@ -38,6 +38,7 @@ export interface LeaderListResponse {
 export interface LeaderQueryParams {
     fullName?: string;
     departmentId?: string;
+    department?: string;
     isActive?: boolean;
     sortBy?: "createdAt" | "fullName";
     order?: "asc" | "desc";
