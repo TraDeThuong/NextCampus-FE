@@ -14,7 +14,7 @@ import Spinner from "@/components/ui/Spinner";
 import LeaderRow from "./LeaderRow";
 
 const COLUMNS =
-    "minmax(200px,2fr) minmax(110px,1fr) minmax(120px,1fr) 70px 100px 40px";
+    "minmax(220px,2.5fr) minmax(180px,1.5fr) minmax(180px,1.5fr) 80px 100px 40px";
 
 export default function LeaderTable() {
     const searchParams = useSearchParams();

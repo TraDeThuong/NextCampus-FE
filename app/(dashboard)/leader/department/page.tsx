@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import DepartmentHeader from "./DepartmentHeader";
+import DepartmentFilter from "./DepartmentFilter";
 import DepartmentTable from "./DepartmentTable";
 
 export const metadata: Metadata = {
@@ -10,6 +11,7 @@ export default function page() {
     return (
         <div className="space-y-6">
             <DepartmentHeader />
+            <DepartmentFilter />
             <DepartmentTable />
         </div>
     );

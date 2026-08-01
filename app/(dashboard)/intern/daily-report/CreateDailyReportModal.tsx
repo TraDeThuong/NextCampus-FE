@@ -6,6 +6,13 @@ import { X, FileText, Link, Video, Loader2, Paperclip } from "lucide-react";
 import { useCreateDailyReport } from "@/hooks/daily-report/useCreateDailyReport";
 import { useUploadVideoDemo } from "@/hooks/daily-report/useUploadVideoDemo";
 import { useUploadReportAttachment } from "@/hooks/report-attachment/useUploadReportAttachment";
+import { toast } from "react-hot-toast";
+import {
+  ATTACHMENT_MIME_TYPES,
+  exceedsUploadLimit,
+  UPLOAD_LIMITS_MB,
+  VIDEO_MIME_TYPES,
+} from "@/lib/upload-policy";
 
 type Props = {
   onClose: () => void;
@@ -22,6 +29,48 @@ export default function CreateDailyReportModal({ onClose }: Props) {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [attachments, setAttachments] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  function handleVideoFileChange(file: File | undefined) {
+    if (!file) {
+      setVideoFile(null);
+      return;
+    }
+    if (!VIDEO_MIME_TYPES.has(file.type)) {
+      setVideoFile(null);
+      toast.error("Video must be an MP4 or WEBM file.");
+      return;
+    }
+    if (exceedsUploadLimit(file, UPLOAD_LIMITS_MB.reportVideo)) {
+      setVideoFile(null);
+      toast.error(`Video must not exceed ${UPLOAD_LIMITS_MB.reportVideo} MB.`);
+      return;
+    }
+    setVideoFile(file);
+  }
+
+  function handleAttachmentFilesChange(files: File[]) {
+    const remainingSlots = Math.max(0, 5 - attachments.length);
+    const accepted: File[] = [];
+
+    for (const file of files.slice(0, remainingSlots)) {
+      if (!ATTACHMENT_MIME_TYPES.has(file.type)) {
+        toast.error(`"${file.name}" has an unsupported file type.`);
+        continue;
+      }
+      if (exceedsUploadLimit(file, UPLOAD_LIMITS_MB.reportAttachment)) {
+        toast.error(`"${file.name}" exceeds ${UPLOAD_LIMITS_MB.reportAttachment} MB.`);
+        continue;
+      }
+      accepted.push(file);
+    }
+
+    if (files.length > remainingSlots) {
+      toast.error("A daily report can contain at most 5 attachments.");
+    }
+    if (accepted.length > 0) {
+      setAttachments((current) => [...current, ...accepted]);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -171,9 +220,7 @@ export default function CreateDailyReportModal({ onClose }: Props) {
                     type="file"
                     accept="video/mp4,video/webm"
                     disabled={isPending || !!videoLink.trim()}
-                    onChange={(e) =>
-                      setVideoFile(e.target.files?.[0] ?? null)
-                    }
+                    onChange={(e) => handleVideoFileChange(e.target.files?.[0])}
                     className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-400 file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 file:cursor-pointer outline-none disabled:opacity-50"
                   />
                 )}
@@ -214,13 +261,18 @@ export default function CreateDailyReportModal({ onClose }: Props) {
                 <input
                   type="file"
                   multiple
+                  accept="image/jpeg,image/png,image/webp,image/gif,.pdf,.doc,.docx,.zip,.rar,.7z"
                   disabled={isPending}
                   onChange={(e) => {
                     const files = Array.from(e.target.files ?? []);
-                    setAttachments((prev) => [...prev, ...files]);
+                    handleAttachmentFilesChange(files);
+                    e.target.value = "";
                   }}
                   className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-400 file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 file:cursor-pointer outline-none disabled:opacity-50"
                 />
+                <p className="text-xs text-slate-500">
+                  Up to 5 files, {UPLOAD_LIMITS_MB.reportAttachment} MB each.
+                </p>
               </div>
             </div>
 

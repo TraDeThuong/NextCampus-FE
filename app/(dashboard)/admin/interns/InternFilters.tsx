@@ -2,8 +2,6 @@
 
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 
-import { useDepartments } from "@/hooks/department/useDepartments";
-import { usePositions } from "@/hooks/department/usePositions";
 import FilterSelect from "@/components/ui/FilterSelect";
 import MetalCard from "@/components/ui/MetalCard";
 
@@ -18,13 +16,6 @@ export default function InternFilters() {
     const pathname = usePathname();
     const router = useRouter();
 
-    const { data: deptData } = useDepartments();
-    const departments = deptData?.data ?? [];
-
-    const selectedDeptId = searchParams.get("departmentId") ?? "";
-    const { data: posData } = usePositions(selectedDeptId || undefined);
-    const positions = posData?.data ?? [];
-
     function updateParam(key: string, value: string) {
         const params = new URLSearchParams(searchParams.toString());
 
@@ -32,11 +23,6 @@ export default function InternFilters() {
             params.delete(key);
         } else {
             params.set(key, value);
-        }
-
-        // Reset dependent filters
-        if (key === "departmentId") {
-            params.delete("positionId");
         }
 
         params.set("page", "1");
@@ -65,31 +51,40 @@ export default function InternFilters() {
                 </div>
 
                 {/* Department */}
-                <FilterSelect
-                    label="Department"
-                    filterField="departmentId"
-                    options={departments.map((d) => ({
-                        value: d.id,
-                        label: d.name,
-                    }))}
-                    placeholder="All Departments"
-                />
+                <div className="flex flex-col gap-3">
+                    <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">
+                        Department
+                    </label>
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Search department..."
+                            defaultValue={searchParams.get("department") ?? ""}
+                            onChange={(e) =>
+                                updateParam("department", e.target.value)
+                            }
+                            className="w-full rounded-2xl border border-border bg-card py-3 px-5 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted"
+                        />
+                    </div>
+                </div>
 
-                {/* Position (cascading) */}
-                <FilterSelect
-                    label="Position"
-                    filterField="positionId"
-                    options={positions.map((p) => ({
-                        value: p.id,
-                        label: p.name,
-                    }))}
-                    placeholder={
-                        selectedDeptId
-                            ? "All Positions"
-                            : "Select department first"
-                    }
-                    disabled={!selectedDeptId}
-                />
+                {/* Position */}
+                <div className="flex flex-col gap-3">
+                    <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">
+                        Position
+                    </label>
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Search position..."
+                            defaultValue={searchParams.get("position") ?? ""}
+                            onChange={(e) =>
+                                updateParam("position", e.target.value)
+                            }
+                            className="w-full rounded-2xl border border-border bg-card py-3 px-5 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted"
+                        />
+                    </div>
+                </div>
 
                 {/* Leader */}
                 <div className="flex flex-col gap-3">

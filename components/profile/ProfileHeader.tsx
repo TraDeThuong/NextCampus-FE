@@ -10,7 +10,9 @@ import {
 
 import { useRef, useState } from "react";
 import { Camera, Loader2 } from "lucide-react";
+import { toast } from "react-hot-toast";
 import { useUploadAvatar } from "@/hooks/profile/useUploadAvatar";
+import { exceedsUploadLimit, IMAGE_MIME_TYPES, UPLOAD_LIMITS_MB } from "@/lib/upload-policy";
 import MetalCard from "../ui/MetalCard";
 import { MeUser } from "@/types/auth";
 
@@ -45,8 +47,14 @@ export default function ProfileHeader({
         const file = event.target.files?.[0];
 
         if (!file) return;
-        if (!file.type.startsWith("image/")) return;
-        if (file.size > 50 * 1024 * 1024) return;
+        if (!IMAGE_MIME_TYPES.has(file.type)) {
+            toast.error("Please choose a JPEG, PNG, WEBP, or GIF image.");
+            return;
+        }
+        if (exceedsUploadLimit(file, UPLOAD_LIMITS_MB.avatar)) {
+            toast.error(`Avatar must not exceed ${UPLOAD_LIMITS_MB.avatar} MB.`);
+            return;
+        }
 
         const previewUrl = URL.createObjectURL(file);
         setPreview(previewUrl);

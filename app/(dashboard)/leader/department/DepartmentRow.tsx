@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { MoreVertical, Edit3, Plus, X, Loader2, Settings, Briefcase } from "lucide-react";
+import { useState } from "react";
+import { Settings, Briefcase, X, Edit3, Loader2, Plus } from "lucide-react";
 import type { Department } from "@/types/department";
 import { useCreatePosition } from "@/hooks/department/useCreatePosition";
 import { useUpdatePosition } from "@/hooks/department/useUpdatePosition";
@@ -15,19 +15,6 @@ type DepartmentRowProps = {
 };
 
 export default function DepartmentRow({ department }: DepartmentRowProps) {
-    const [menuOpen, setMenuOpen] = useState(false);
-    const menuRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        function handleClick(e: MouseEvent) {
-            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-                setMenuOpen(false);
-            }
-        }
-        document.addEventListener("mousedown", handleClick);
-        return () => document.removeEventListener("mousedown", handleClick);
-    }, []);
-
     return (
         <Modal>
             <Table.Row>
@@ -54,30 +41,41 @@ export default function DepartmentRow({ department }: DepartmentRowProps) {
                     )}
                 </div>
 
-                {/* Actions Dropdown — Leader: Manage Positions only */}
-                <div className="relative text-right pr-4" ref={menuRef}>
-                    <button
-                        type="button"
-                        onClick={() => setMenuOpen((prev) => !prev)}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-slate-400 transition hover:border-white/10 hover:bg-white/5 hover:text-white"
-                    >
-                        <MoreVertical className="h-4 w-4" />
-                    </button>
-
-                    {menuOpen && (
-                        <div className="absolute right-0 top-full z-50 mt-2 w-44 rounded-2xl border border-white/10 bg-[#0f172a] p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl text-left">
-                            <Modal.Open opens={`leader-manage-positions-${department.id}`}>
-                                <button
-                                    type="button"
-                                    onClick={() => setMenuOpen(false)}
-                                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
-                                >
-                                    <Settings className="h-4 w-4" />
-                                    Positions
-                                </button>
-                            </Modal.Open>
+                {/* Leaders */}
+                <div className="text-sm min-w-0 pr-4">
+                    {department.leaders && department.leaders.length > 0 ? (
+                        <div className="flex flex-col gap-2">
+                            {department.leaders.map((leader) => {
+                                const name = leader.user.fullName;
+                                const email = leader.user.email;
+                                return (
+                                    <div key={leader.id} className="flex flex-col min-w-0">
+                                        <span className="font-medium text-white truncate" title={name || "No name"}>
+                                            {name || "No name"}
+                                        </span>
+                                        <span className="text-xs text-slate-400 truncate" title={email}>
+                                            {email}
+                                        </span>
+                                    </div>
+                                );
+                            })}
                         </div>
+                    ) : (
+                        <span className="text-xs text-slate-500 italic">No leader</span>
                     )}
+                </div>
+
+                {/* Actions Button — Leader: Manage Positions directly (no dropdown needed since it's the only action) */}
+                <div className="text-right pr-4">
+                    <Modal.Open opens={`leader-manage-positions-${department.id}`}>
+                        <button
+                            type="button"
+                            title="Manage Positions"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-slate-400 transition hover:border-white/10 hover:bg-white/5 hover:text-white"
+                        >
+                            <Settings className="h-4 w-4" />
+                        </button>
+                    </Modal.Open>
                 </div>
             </Table.Row>
 

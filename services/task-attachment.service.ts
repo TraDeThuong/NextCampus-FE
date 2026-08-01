@@ -35,7 +35,7 @@ export const taskAttachmentService = {
     return response.data;
   },
 
-  // POST /tasks/:taskId/attachments (batch — uploads up to 5 files)
+  // POST /tasks/:taskId/attachments (batch — uploads up to 3 files)
   uploadMultiple: async (
     taskId: string,
     files: File[],
