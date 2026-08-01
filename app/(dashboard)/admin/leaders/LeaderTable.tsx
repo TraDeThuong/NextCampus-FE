@@ -25,13 +25,13 @@ export default function LeaderTable() {
         const p: LeaderQueryParams = {};
 
         const fullName = searchParams.get("fullName");
-        const departmentId = searchParams.get("departmentId");
+        const department = searchParams.get("department");
         const isActive = searchParams.get("isActive");
         const page = searchParams.get("page");
         const limit = searchParams.get("limit");
 
         if (fullName) p.fullName = fullName;
-        if (departmentId) p.departmentId = departmentId;
+        if (department) p.department = department;
         if (isActive) p.isActive = isActive === "true";
         if (page) p.page = Number(page);
         if (limit) p.limit = Number(limit);
