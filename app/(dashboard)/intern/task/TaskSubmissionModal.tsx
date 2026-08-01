@@ -7,6 +7,8 @@ import { useCreateTaskSubmission } from "@/hooks/task-submission/useCreateTaskSu
 import { useUpdateTaskSubmission } from "@/hooks/task-submission/useUpdateTaskSubmission";
 import { useUploadSubmissionVideo } from "@/hooks/task-submission/useUploadSubmissionVideo";
 import type { TaskSubmission } from "@/types/task-submission";
+import { toast } from "react-hot-toast";
+import { exceedsUploadLimit, UPLOAD_LIMITS_MB, VIDEO_MIME_TYPES } from "@/lib/upload-policy";
 
 type Props = {
   assignmentId: string;
@@ -27,6 +29,24 @@ export default function TaskSubmissionModal({ assignmentId, submission, readOnly
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [note, setNote] = useState(submission?.note ?? "");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  function handleVideoFileChange(file: File | undefined) {
+    if (!file) {
+      setVideoFile(null);
+      return;
+    }
+    if (!VIDEO_MIME_TYPES.has(file.type)) {
+      setVideoFile(null);
+      toast.error("Video must be an MP4 or WEBM file.");
+      return;
+    }
+    if (exceedsUploadLimit(file, UPLOAD_LIMITS_MB.submissionVideo)) {
+      setVideoFile(null);
+      toast.error(`Video must not exceed ${UPLOAD_LIMITS_MB.submissionVideo} MB.`);
+      return;
+    }
+    setVideoFile(file);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -192,7 +212,7 @@ export default function TaskSubmissionModal({ assignmentId, submission, readOnly
                         type="file"
                         accept="video/mp4,video/webm"
                         disabled={isPending || !!videoLink.trim()}
-                        onChange={(e) => setVideoFile(e.target.files?.[0] ?? null)}
+                        onChange={(e) => handleVideoFileChange(e.target.files?.[0])}
                         className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-400 file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 file:cursor-pointer outline-none disabled:opacity-50"
                       />
                     )}

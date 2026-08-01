@@ -44,6 +44,8 @@ export interface InternQueryParams {
     fullName?: string;
     departmentId?: string;
     positionId?: string;
+    department?: string;
+    position?: string;
     status?: "ACTIVE" | "COMPLETED" | "DROPPED";
     leaderId?: string;
     leader?: string;

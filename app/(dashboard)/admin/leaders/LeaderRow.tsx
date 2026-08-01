@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { MoreVertical, Eye, Trash2, Loader2 } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
 import type { Leader } from "@/types/leader";
 import { useDeleteLeader } from "@/hooks/leader/useDeleteLeader";
@@ -14,6 +14,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import Table from "@/components/ui/Table";
 import Modal from "@/components/ui/Modal";
+import InlineSelect from "@/components/ui/InlineSelect";
 
 type LeaderRowProps = {
     leader: Leader;
@@ -32,11 +33,39 @@ export default function LeaderRow({ leader }: LeaderRowProps) {
     const [updatingField, setUpdatingField] = useState<
         "department" | "position" | null
     >(null);
-    const [editingDept, setEditingDept] = useState(false);
-    const [editingPos, setEditingPos] = useState(false);
-    const [posValue, setPosValue] = useState(leader.position ?? "");
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
+
+    const handleDepartmentChange = useCallback(
+        (newDeptId: string | null) => {
+            setUpdatingField("department");
+            updateLeader(
+                {
+                    id: leader.id,
+                    payload: {
+                        departmentId: newDeptId || null,
+                        position: null,
+                    },
+                },
+                { onSettled: () => setUpdatingField(null) },
+            );
+        },
+        [leader.id, updateLeader],
+    );
+
+    const handlePositionChange = useCallback(
+        (newPos: string | null) => {
+            setUpdatingField("position");
+            updateLeader(
+                {
+                    id: leader.id,
+                    payload: { position: newPos || null },
+                },
+                { onSettled: () => setUpdatingField(null) },
+            );
+        },
+        [leader.id, updateLeader],
+    );
 
     const queryClient = useQueryClient();
     const { mutate: toggleActive } = useMutation({
@@ -96,119 +125,40 @@ export default function LeaderRow({ leader }: LeaderRowProps) {
 
                 {/* Department */}
                 <div className="text-sm text-slate-400">
-                    {editingDept ? (
-                        <select
-                            value={leader.departmentId ?? ""}
-                            onChange={(e) => {
-                                setUpdatingField("department");
-                                updateLeader(
-                                    {
-                                        id: leader.id,
-                                        payload: { departmentId: e.target.value || null },
-                                    },
-                                    { onSettled: () => setUpdatingField(null) },
-                                );
-                                setEditingDept(false);
-                            }}
-                            onBlur={() => setEditingDept(false)}
-                            autoFocus
-                            disabled={updatingField === "department"}
-                            className="w-full rounded-lg border border-cyan-400/30 bg-[#0f172a] px-2 py-1 text-xs text-white outline-none cursor-pointer"
-                        >
-                            <option value="" className="bg-[#0b1020] text-slate-300">
-                                Not set
-                            </option>
-                            {departments.map((d) => (
-                                <option
-                                    key={d.id}
-                                    value={d.id}
-                                    className="bg-[#0b1020] text-slate-200"
-                                >
-                                    {d.name}
-                                </option>
-                            ))}
-                        </select>
-                    ) : (
-                        <button
-                            type="button"
-                            onClick={() => setEditingDept(true)}
-                            disabled={updatingField === "department"}
-                            className="text-left transition hover:text-cyan-400 disabled:opacity-50"
-                        >
-                            {updatingField === "department" ? (
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : leader.department?.name ? (
-                                leader.department.name
-                            ) : (
-                                <span className="italic text-slate-600">Not set</span>
-                            )}
-                        </button>
-                    )}
+                    <InlineSelect
+                        ariaLabel="Department"
+                        value={leader.departmentId}
+                        placeholder="Not set"
+                        loading={updatingField === "department"}
+                        onChange={handleDepartmentChange}
+                        options={[
+                            { value: null, label: "Not set" },
+                            ...departments.map((d) => ({
+                                value: d.id,
+                                label: d.name,
+                            })),
+                        ]}
+                    />
                 </div>
 
                 {/* Position */}
                 <div className="text-sm text-slate-400">
-                    {editingPos ? (
-                        <select
-                            value={posValue}
-                            onChange={(e) => {
-                                const val = e.target.value;
-                                setPosValue(val);
-                                setUpdatingField("position");
-                                updateLeader(
-                                    {
-                                        id: leader.id,
-                                        payload: {
-                                            position: val || null,
-                                        },
-                                    },
-                                    {
-                                        onSettled: () => setUpdatingField(null),
-                                    }
-                                );
-                                setEditingPos(false);
-                            }}
-                            onBlur={() => setEditingPos(false)}
-                            autoFocus
-                            disabled={updatingField === "position"}
-                            className="w-full rounded-lg border border-cyan-400/30 bg-[#0f172a] px-2 py-1 text-xs text-white outline-none cursor-pointer"
-                        >
-                            <option value="" className="bg-[#0b1020] text-slate-300">
-                                Not set
-                            </option>
-                            {availablePositions.map((pos) => (
-                                <option
-                                    key={pos.id}
-                                    value={pos.name}
-                                    className="bg-[#0b1020] text-slate-200"
-                                >
-                                    {pos.name}
-                                </option>
-                            ))}
-                        </select>
-                    ) : (
-                        <button
-                            type="button"
-                            onClick={() => {
-                                if (!leader.departmentId) {
-                                    toast.error("Please select a department first.");
-                                    return;
-                                }
-                                setPosValue(leader.position ?? "");
-                                setEditingPos(true);
-                            }}
-                            disabled={updatingField === "position"}
-                            className="text-left transition hover:text-cyan-400 disabled:opacity-50"
-                        >
-                            {updatingField === "position" ? (
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : leader.position ? (
-                                leader.position
-                            ) : (
-                                <span className="italic text-slate-600">Not set</span>
-                            )}
-                        </button>
-                    )}
+                    <InlineSelect
+                        ariaLabel="Position"
+                        value={leader.position}
+                        placeholder="Not set"
+                        loading={updatingField === "position"}
+                        disabled={!leader.departmentId}
+                        onDisabledClick={() => toast.error("Please select a department first.")}
+                        onChange={handlePositionChange}
+                        options={[
+                            { value: null, label: "Not set" },
+                            ...availablePositions.map((pos) => ({
+                                value: pos.name,
+                                label: pos.name,
+                            })),
+                        ]}
+                    />
                 </div>
 
                 {/* Intern Count */}

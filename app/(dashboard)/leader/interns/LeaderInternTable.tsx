@@ -30,15 +30,15 @@ export default function LeaderInternTable() {
     const p: InternQueryParams = {};
 
     const fullName = searchParams.get("fullName");
-    const departmentId = searchParams.get("departmentId");
-    const positionId = searchParams.get("positionId");
+    const department = searchParams.get("department");
+    const position = searchParams.get("position");
     const status = searchParams.get("status");
     const page = searchParams.get("page");
     const limit = searchParams.get("limit");
 
     if (fullName) p.fullName = fullName;
-    if (departmentId) p.departmentId = departmentId;
-    if (positionId) p.positionId = positionId;
+    if (department) p.department = department;
+    if (position) p.position = position;
     if (status) p.status = status as InternQueryParams["status"];
     if (page) p.page = Number(page);
     if (limit) p.limit = Number(limit);

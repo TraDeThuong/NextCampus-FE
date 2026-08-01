@@ -28,18 +28,19 @@ import { useCreateTaskAssignment } from "@/hooks/task-assignment/useCreateTaskAs
 import { taskAttachmentService } from "@/services/task-attachment.service";
 import { AuthContext } from "@/contexts/AuthContext";
 import type { CreateTaskPayload } from "@/types/task";
+import { UPLOAD_LIMITS_MB } from "@/lib/upload-policy";
 
 const TODAY = new Date().toISOString().split("T")[0];
 const MAX_FILES = 10;
 const MAX_LINKS = 10;
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
-const BATCH_SIZE = 5;
+const MAX_FILE_SIZE = UPLOAD_LIMITS_MB.taskAttachment * 1024 * 1024;
+const BATCH_SIZE = 3;
 
 const ALLOWED_TYPES = new Set([
   "image/jpeg","image/png","image/webp","image/gif",
   "application/pdf","application/msword",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "application/zip","application/x-zip-compressed","application/x-rar-compressed","application/x-7z-compressed",
+  "application/zip","application/x-zip-compressed","application/x-rar-compressed","application/vnd.rar","application/x-7z-compressed",
   "video/mp4","video/webm",
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet","application/vnd.ms-excel",
 ]);
@@ -150,7 +151,7 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
         break;
       }
       if (file.size > MAX_FILE_SIZE) {
-        toast.error(`"${file.name}" exceeds 50MB limit`);
+        toast.error(`"${file.name}" exceeds ${UPLOAD_LIMITS_MB.taskAttachment}MB limit`);
         continue;
       }
       if (!ALLOWED_TYPES.has(file.type)) {

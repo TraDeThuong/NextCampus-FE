@@ -11,6 +11,8 @@ import { useExecuteImport } from "@/hooks/task/useExecuteImport";
 import { taskGroupService } from "@/services/task-group.service";
 import type { ImportPreviewData, ImportResultData } from "@/types/task";
 import TaskImportInstructions from "./TaskImportInstructions";
+import { toast } from "react-hot-toast";
+import { exceedsUploadLimit, UPLOAD_LIMITS_MB } from "@/lib/upload-policy";
 
 interface Props {
   onCloseModal?: () => void;
@@ -49,6 +51,21 @@ export default function TaskImportModal({ onCloseModal }: Props) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (!f) return;
+    if (
+      !f.name.toLowerCase().endsWith(".xlsx") ||
+      f.type !== "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" &&
+      f.type !== "application/octet-stream" &&
+      f.type !== ""
+    ) {
+      toast.error("Please choose a valid .xlsx workbook.");
+      e.target.value = "";
+      return;
+    }
+    if (exceedsUploadLimit(f, UPLOAD_LIMITS_MB.taskImport)) {
+      toast.error(`Workbook must not exceed ${UPLOAD_LIMITS_MB.taskImport} MB.`);
+      e.target.value = "";
+      return;
+    }
     setFile(f);
     previewMutation.mutate(
       { file: f, taskGroupId: taskGroupId || undefined, taskGroupName: taskGroupName || undefined },

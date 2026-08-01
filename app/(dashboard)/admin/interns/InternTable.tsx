@@ -25,8 +25,8 @@ export default function InternTable() {
         const p: InternQueryParams = {};
 
         const fullName = searchParams.get("fullName");
-        const departmentId = searchParams.get("departmentId");
-        const positionId = searchParams.get("positionId");
+        const department = searchParams.get("department");
+        const position = searchParams.get("position");
         const status = searchParams.get("status");
         const leaderId = searchParams.get("leaderId");
         const leader = searchParams.get("leader");
@@ -34,8 +34,8 @@ export default function InternTable() {
         const limit = searchParams.get("limit");
 
         if (fullName) p.fullName = fullName;
-        if (departmentId) p.departmentId = departmentId;
-        if (positionId) p.positionId = positionId;
+        if (department) p.department = department;
+        if (position) p.position = position;
         if (status) p.status = status as InternQueryParams["status"];
         if (leaderId) p.leaderId = leaderId;
         if (leader) p.leader = leader;
