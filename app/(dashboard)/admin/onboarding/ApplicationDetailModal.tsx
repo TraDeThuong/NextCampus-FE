@@ -9,6 +9,8 @@ import {
   Building2,
   Briefcase,
   AlertTriangle,
+  Paperclip,
+  Download,
 } from "lucide-react";
 
 import { useInviteDetail } from "@/hooks/application/useInviteDetail";
@@ -57,6 +59,12 @@ function formatDateTime(dateStr: string) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 function DetailRow({
@@ -173,12 +181,22 @@ export default function ApplicationDetail({ id }: Props) {
             <DetailRow icon={Phone} label="Phone" value={app.phone} />
             <DetailRow
               icon={Building2}
-              label="Department"
+              label="Preferred Department"
+              value={app.preferredDepartment ?? "—"}
+            />
+            <DetailRow
+              icon={Briefcase}
+              label="Preferred Position"
+              value={app.preferredPosition ?? "—"}
+            />
+            <DetailRow
+              icon={Building2}
+              label="Assigned Department"
               value={app.department?.name ?? "—"}
             />
             <DetailRow
               icon={Briefcase}
-              label="Position"
+              label="Assigned Position"
               value={app.position?.name ?? "—"}
             />
             <DetailRow
@@ -196,6 +214,42 @@ export default function ApplicationDetail({ id }: Props) {
               label="Submitted"
               value={formatDateTime(app.createdAt)}
             />
+          </div>
+        </MetalCard>
+      )}
+
+      {app && app.attachments && app.attachments.length > 0 && (
+        <MetalCard className="p-6">
+          <div className="mb-4 flex items-center gap-2">
+            <Paperclip className="h-4 w-4 shrink-0 text-cyan-400" />
+            <h2 className="text-sm font-semibold uppercase tracking-[0.15em] text-[var(--primary-light)]">
+              Attachments ({app.attachments.length})
+            </h2>
+          </div>
+
+          <div className="space-y-2">
+            {app.attachments.map((attachment) => (
+              <a
+                key={attachment.id}
+                href={attachment.fileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 transition hover:border-cyan-400/20 hover:bg-white/10"
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cyan-500/10">
+                  <Paperclip className="h-4 w-4 text-cyan-400" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-foreground transition group-hover:text-cyan-300">
+                    {attachment.fileName}
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted">
+                    {formatFileSize(attachment.fileSize)} · {attachment.mimeType}
+                  </p>
+                </div>
+                <Download className="h-4 w-4 shrink-0 text-slate-500 transition group-hover:text-cyan-400" />
+              </a>
+            ))}
           </div>
         </MetalCard>
       )}
@@ -220,7 +274,12 @@ export default function ApplicationDetail({ id }: Props) {
           <>
             <Button
               variant="primary"
-              disabled={isBusy}
+              disabled={isBusy || !app.department || !app.position}
+              title={
+                !app.department || !app.position
+                  ? "Assign a department and position in the onboarding table first"
+                  : undefined
+              }
               onClick={() => {
                 reviewApp(
                   { id: app.id, payload: { status: "APPROVED" } },

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
@@ -21,21 +21,69 @@ import {
 
 import { useVerifyInvite } from "@/hooks/application/useVerifyInvite";
 import { useCreateApplication } from "@/hooks/application/useCreateApplication";
-import { useDepartments } from "@/hooks/department/useDepartments";
-import { usePositions } from "@/hooks/department/usePositions";
 import { getActiveRegulationService } from "@/services/regulation.service";
 import Spinner from "@/components/ui/Spinner";
+import {
+  APPLICATION_PREFERRED_DEPARTMENTS,
+  getApplicationPreferredPositions,
+} from "@/constants/application-preferences";
 
 const MAX_FILES = 5;
 const MAX_FILE_SIZE_MB = 10;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+const BUSINESS_TIME_ZONE = "Asia/Ho_Chi_Minh";
+
+function getBusinessToday(): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: BUSINESS_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
+
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function parseDateOnly(value: string): Date | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return null;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(Date.UTC(year, month - 1, day));
+
+  if (
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() !== month - 1 ||
+    date.getUTCDate() !== day
+  ) {
+    return null;
+  }
+
+  return date;
+}
 
 const formSchema = z.object({
   fullName: z.string().min(1, "Full name is required").max(100),
   phone: z.string().min(9, "Phone must be at least 9 digits").max(15),
-  departmentId: z.string().min(1, "Department is required"),
-  positionId: z.string().min(1, "Position is required"),
-  startDate: z.string().min(1, "Start date is required"),
+  preferredDepartment: z.string().min(1, "Preferred department is required"),
+  preferredPosition: z.string().min(1, "Preferred position is required"),
+  startDate: z
+    .string()
+    .min(1, "Start date is required")
+    .refine((value) => !value || parseDateOnly(value) !== null, {
+      message: "Start date is invalid",
+    })
+    .refine(
+      (value) => !value || !parseDateOnly(value) || value >= getBusinessToday(),
+      { message: "Start date cannot be in the past" },
+    )
+    .refine((value) => {
+      const date = parseDateOnly(value);
+      return !date || ![0, 6].includes(date.getUTCDay());
+    }, "Start date cannot be Saturday or Sunday"),
   duration: z
     .number({ message: "Must be a positive number" })
     .int()
@@ -69,37 +117,31 @@ export default function FormPage() {
 
   const email = verifyData?.data?.email ?? "";
 
-  const { data: deptData, isLoading: deptLoading } = useDepartments();
-  const departments = deptData?.data ?? [];
-
   const {
     register,
     handleSubmit,
-    watch,
     setValue,
+    control,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       fullName: "",
       phone: "",
-      departmentId: "",
-      positionId: "",
+      preferredDepartment: "",
+      preferredPosition: "",
       startDate: "",
-      duration: undefined as any,
+      duration: undefined,
     },
   });
 
-  const selectedDepartmentId = watch("departmentId");
-  const { data: posData, isLoading: posLoading } = usePositions(
-    selectedDepartmentId || undefined,
+  const selectedPreferredDepartment = useWatch({
+    control,
+    name: "preferredDepartment",
+  });
+  const preferredPositions = getApplicationPreferredPositions(
+    selectedPreferredDepartment,
   );
-  const positions = posData?.data ?? [];
-
-  // Reset position when department changes
-  useEffect(() => {
-    setValue("positionId", "");
-  }, [selectedDepartmentId, setValue]);
 
   // ─── File upload state ────────────────────────────────────────────────────
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -145,8 +187,8 @@ export default function FormPage() {
         fullName: data.fullName,
         email,
         phone: data.phone,
-        departmentId: data.departmentId,
-        positionId: data.positionId,
+        preferredDepartment: data.preferredDepartment,
+        preferredPosition: data.preferredPosition,
         startDate: data.startDate,
         duration: data.duration,
         token,
@@ -217,54 +259,53 @@ export default function FormPage() {
         </Field>
 
         <Field
-          label="Department"
+          label="Preferred Department"
           icon={Building2}
-          error={errors.departmentId?.message}
+          error={errors.preferredDepartment?.message}
         >
           <div className="relative">
             <select
-              {...register("departmentId")}
-              disabled={deptLoading}
+              {...register("preferredDepartment")}
+              onChange={(event) => {
+                setValue("preferredDepartment", event.target.value, {
+                  shouldValidate: true,
+                });
+                setValue("preferredPosition", "");
+              }}
               className={selectClass}
             >
-              <option value="">Select department...</option>
-              {departments.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
+              <option value="">Select preferred department...</option>
+              {APPLICATION_PREFERRED_DEPARTMENTS.map((department) => (
+                <option key={department} value={department}>
+                  {department}
                 </option>
               ))}
             </select>
-            {deptLoading && (
-              <Loader2 className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-zinc-500" />
-            )}
           </div>
         </Field>
 
         <Field
-          label="Position"
+          label="Preferred Position"
           icon={Briefcase}
-          error={errors.positionId?.message}
+          error={errors.preferredPosition?.message}
         >
           <div className="relative">
             <select
-              {...register("positionId")}
-              disabled={!selectedDepartmentId || posLoading}
+              {...register("preferredPosition")}
+              disabled={!selectedPreferredDepartment}
               className={selectClass}
             >
               <option value="">
-                {!selectedDepartmentId
-                  ? "Select department first..."
-                  : "Select position..."}
+                {!selectedPreferredDepartment
+                  ? "Select preferred department first..."
+                  : "Select preferred position..."}
               </option>
-              {positions.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
+              {preferredPositions.map((position) => (
+                <option key={position} value={position}>
+                  {position}
                 </option>
               ))}
             </select>
-            {posLoading && (
-              <Loader2 className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-zinc-500" />
-            )}
           </div>
         </Field>
 
@@ -276,6 +317,7 @@ export default function FormPage() {
           <input
             type="date"
             {...register("startDate")}
+            min={getBusinessToday()}
             className={inputClass}
           />
         </Field>

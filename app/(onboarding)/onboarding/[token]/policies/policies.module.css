@@ -1,0 +1,35 @@
+.content ol,
+.content ul {
+  margin-block: 1rem;
+  padding-inline-start: 1.75rem;
+}
+
+.content ol > li,
+.content li[data-list="ordered"] {
+  list-style-type: decimal;
+}
+
+.content ul > li,
+.content li[data-list="bullet"] {
+  list-style-type: disc;
+}
+
+.content li + li {
+  margin-top: 0.5rem;
+}
+
+.content :global(.ql-align-left) {
+  text-align: left;
+}
+
+.content :global(.ql-align-center) {
+  text-align: center;
+}
+
+.content :global(.ql-align-right) {
+  text-align: right;
+}
+
+.content :global(.ql-align-justify) {
+  text-align: justify;
+}

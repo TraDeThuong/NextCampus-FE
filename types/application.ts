@@ -16,6 +16,8 @@ export interface Application {
   fullName: string;
   email: string;
   phone: string;
+  preferredDepartment: string | null;
+  preferredPosition: string | null;
   department: { id: string; name: string } | null;
   position: { id: string; name: string } | null;
   startDate: string;
@@ -103,8 +105,8 @@ export interface CreateApplicationPayload {
   fullName: string;
   email: string;
   phone: string;
-  departmentId: string;
-  positionId: string;
+  preferredDepartment: string;
+  preferredPosition: string;
   startDate: string;
   duration: number;
   token: string;
@@ -119,6 +121,11 @@ export interface CreateInvitePayload {
 
 export interface ReviewApplicationPayload {
   status: "APPROVED" | "REJECTED";
+}
+
+export interface AssignApplicationPayload {
+  departmentId: string | null;
+  positionId: string | null;
 }
 
 // ─── Invite list (GET /applications/invites) ──────────────────────────────
@@ -136,12 +143,15 @@ export interface ApplicationInviteRow {
     fullName: string;
     email: string;
     phone: string;
+    preferredDepartment: string | null;
+    preferredPosition: string | null;
     department: { id: string; name: string } | null;
     position: { id: string; name: string } | null;
     status: ApplicationStatus;
     startDate: string;
     duration: number;
     createdAt: string;
+    attachments?: ApplicationAttachment[];
   } | null;
   creator: {
     id: string;

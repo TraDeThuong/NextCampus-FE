@@ -216,34 +216,36 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
         </div>
 
         {/* Participants — always visible for Leader */}
-        <div className="space-y-3 flex gap-10">
-          {interns.length > 0 && (
-            <div className = "w-126">
-              <label className={labelClass}><Users className="mr-1 inline h-3.5 w-3.5" />Your Interns</label>
-              <div className="mt-1.5 h-[200px] space-y-0.5 overflow-y-auto custom-scrollbar rounded-xl border border-white/10 bg-white/[0.02] p-2">
-                {interns.map((intern) => (
-                  <label key={intern.userId} className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition ${selectedParticipantIds.includes(intern.userId) ? "bg-primary-main/10" : "hover:bg-white/5"}`}>
-                    <input type="checkbox" checked={selectedParticipantIds.includes(intern.userId)} onChange={() => toggleParticipant(intern.userId)} className="accent-primary-main" />
-                    <span className="text-sm text-slate-300">{intern.fullName}</span>
-                  </label>
-                ))}
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {interns.length > 0 && (
+              <div className="min-w-0">
+                <label className={labelClass}><Users className="mr-1 inline h-3.5 w-3.5" />Your Interns</label>
+                <div className="mt-1.5 h-[200px] space-y-0.5 overflow-y-auto custom-scrollbar rounded-xl border border-white/10 bg-white/[0.02] p-2">
+                  {interns.map((intern) => (
+                    <label key={intern.userId} className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition ${selectedParticipantIds.includes(intern.userId) ? "bg-primary-main/10" : "hover:bg-white/5"}`}>
+                      <input type="checkbox" checked={selectedParticipantIds.includes(intern.userId)} onChange={() => toggleParticipant(intern.userId)} className="accent-primary-main" />
+                      <span className="text-sm text-slate-300">{intern.fullName}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {leaders.length > 0 && (
-            <div className = "w-126">
-              <label className={labelClass}>Other Leaders</label>
-              <div className="mt-1.5 h-[200px] space-y-0.5 overflow-y-auto custom-scrollbar rounded-xl border border-white/10 bg-white/[0.02] p-2">
-                {leaders.map((leader) => (
-                  <label key={leader.id} className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition ${selectedParticipantIds.includes(leader.id) ? "bg-primary-main/10" : "hover:bg-white/5"}`}>
-                    <input type="checkbox" checked={selectedParticipantIds.includes(leader.id)} onChange={() => toggleParticipant(leader.id)} className="accent-primary-main" />
-                    <span className="text-sm text-slate-300">{leader.fullName}</span>
-                  </label>
-                ))}
+            {leaders.length > 0 && (
+              <div className="min-w-0">
+                <label className={labelClass}>Other Leaders</label>
+                <div className="mt-1.5 h-[200px] space-y-0.5 overflow-y-auto custom-scrollbar rounded-xl border border-white/10 bg-white/[0.02] p-2">
+                  {leaders.map((leader) => (
+                    <label key={leader.id} className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition ${selectedParticipantIds.includes(leader.id) ? "bg-primary-main/10" : "hover:bg-white/5"}`}>
+                      <input type="checkbox" checked={selectedParticipantIds.includes(leader.id)} onChange={() => toggleParticipant(leader.id)} className="accent-primary-main" />
+                      <span className="text-sm text-slate-300">{leader.fullName}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {selectedParticipantIds.length > 0 && (
             <p className="text-xs text-slate-500">{selectedParticipantIds.length} selected</p>

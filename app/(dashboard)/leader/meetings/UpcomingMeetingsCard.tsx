@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Calendar, Clock } from "lucide-react";
 import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
@@ -23,21 +24,28 @@ export default function UpcomingMeetingsCard({
 }: {
   onMeetingClick?: (id: string) => void;
 }) {
-  const today = new Date();
-  const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
-  const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59).toISOString();
+  const [upcomingFrom] = useState(() => new Date().toISOString());
 
-  const { data, isPending } = useMeetings({
-    startTimeFrom: startOfDay,
-    startTimeTo: endOfDay,
+  const { data: ongoingData, isPending: isOngoingPending } = useMeetings({
+    status: "ONGOING",
+    sortBy: "startTime",
+    order: "desc",
+    limit: 10,
+  });
+
+  const { data: scheduledData, isPending: isScheduledPending } = useMeetings({
+    status: "SCHEDULED",
+    startTimeFrom: upcomingFrom,
     sortBy: "startTime",
     order: "asc",
     limit: 10,
   });
 
-  const meetings = (data?.data ?? []).filter(
-    (m) => m.status === "SCHEDULED" || m.status === "ONGOING",
-  );
+  const meetings = [
+    ...(ongoingData?.data ?? []),
+    ...(scheduledData?.data ?? []),
+  ].slice(0, 10);
+  const isPending = isOngoingPending || isScheduledPending;
 
   return (
     <MetalCard className="h-full">

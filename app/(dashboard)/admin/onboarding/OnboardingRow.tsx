@@ -18,9 +18,14 @@ import { useRevokeInvite } from "@/hooks/application/useRevokeInvite";
 import { useReviewApplication } from "@/hooks/application/useReviewApplication";
 import { useDeleteApplication } from "@/hooks/application/useDeleteApplication";
 import { useCreateInvite } from "@/hooks/application/useCreateInvite";
+import { useAssignApplication } from "@/hooks/application/useAssignApplication";
+import { useDepartments } from "@/hooks/department/useDepartments";
+import { usePositions } from "@/hooks/department/usePositions";
 import type { ApplicationInviteRow } from "@/types/application";
 import Modal from "@/components/ui/Modal";
 import Table from "@/components/ui/Table";
+import InlineSelect from "@/components/ui/InlineSelect";
+import { toast } from "react-hot-toast";
 
 function statusBadge(status: string, colors: Record<string, string>) {
     return (
@@ -65,15 +70,45 @@ export default function OnboardingRow({ invite }: Props) {
     const { mutate: reviewApp, isPending: reviewing } = useReviewApplication();
     const { mutate: deleteApp, isPending: deleting } = useDeleteApplication();
     const { mutate: createInvite, isPending: resending } = useCreateInvite();
+    const { mutate: assignApplication, isPending: assigning } =
+        useAssignApplication();
 
-    const isBusy = revoking || reviewing || deleting || resending;
+    const application = invite.application;
+    const appStatus = application?.status ?? null;
+    const canAssign = invite.status === "USED" && appStatus === "PENDING";
+    const assignedDepartmentId = application?.department?.id ?? null;
+    const assignedPositionId = application?.position?.id ?? null;
+
+    const { data: departmentData } = useDepartments();
+    const departments = departmentData?.data ?? [];
+    const { data: positionData } = usePositions(
+        assignedDepartmentId ?? undefined,
+    );
+    const positions = positionData?.data ?? [];
+
+    const isBusy = revoking || reviewing || deleting || resending || assigning;
 
     const candidate = invite.application
         ? invite.application.fullName
         : invite.email;
-    const department = invite.application?.department?.name ?? "—";
-    const position = invite.application?.position?.name ?? "—";
-    const appStatus = invite.application?.status ?? null;
+    const department = application?.department?.name ?? "—";
+    const position = application?.position?.name ?? "—";
+
+    function handleDepartmentChange(departmentId: string | null) {
+        if (!application || !canAssign) return;
+        assignApplication({
+            id: application.id,
+            payload: { departmentId, positionId: null },
+        });
+    }
+
+    function handlePositionChange(positionId: string | null) {
+        if (!application || !canAssign || !assignedDepartmentId) return;
+        assignApplication({
+            id: application.id,
+            payload: { departmentId: assignedDepartmentId, positionId },
+        });
+    }
 
     function handleCopyLink() {
         const link = `${window.location.origin}/apply?token=${invite.token ?? ""}`;
@@ -89,6 +124,13 @@ export default function OnboardingRow({ invite }: Props) {
 
     function handleReview(status: "APPROVED" | "REJECTED") {
         if (!invite.application) return;
+        if (
+            status === "APPROVED" &&
+            (!assignedDepartmentId || !assignedPositionId)
+        ) {
+            toast.error("Assign a department and position before approval.");
+            return;
+        }
         reviewApp({ id: invite.application.id, payload: { status } });
         setMenuOpen(false);
     }
@@ -122,13 +164,73 @@ export default function OnboardingRow({ invite }: Props) {
                         {invite.email}
                     </p>
                 )}
+                {application?.preferredDepartment && (
+                    <p className="truncate text-xs text-slate-500">
+                        Prefers {application.preferredDepartment}
+                        {application.preferredPosition
+                            ? ` · ${application.preferredPosition}`
+                            : ""}
+                    </p>
+                )}
             </div>
 
             {/* Department */}
-            <div className="truncate text-sm text-muted">{department}</div>
+            <div className="min-w-0 text-sm text-muted">
+                {canAssign ? (
+                    <InlineSelect
+                        ariaLabel="Assigned department"
+                        value={assignedDepartmentId}
+                        placeholder={
+                            application?.preferredDepartment
+                                ? `Assign (${application.preferredDepartment})`
+                                : "Assign department"
+                        }
+                        loading={assigning}
+                        onChange={handleDepartmentChange}
+                        options={[
+                            { value: null, label: "Not set" },
+                            ...departments.map((item) => ({
+                                value: item.id,
+                                label: item.name,
+                            })),
+                        ]}
+                    />
+                ) : (
+                    department
+                )}
+            </div>
 
             {/* Position */}
-            <div className="truncate text-sm text-muted">{position}</div>
+            <div className="min-w-0 text-sm text-muted">
+                {canAssign ? (
+                    <InlineSelect
+                        ariaLabel="Assigned position"
+                        value={assignedPositionId}
+                        placeholder={
+                            assignedDepartmentId
+                                ? application?.preferredPosition
+                                    ? `Assign (${application.preferredPosition})`
+                                    : "Assign position"
+                                : "Department first"
+                        }
+                        loading={assigning}
+                        disabled={!assignedDepartmentId}
+                        onDisabledClick={() =>
+                            toast.error("Assign a department first.")
+                        }
+                        onChange={handlePositionChange}
+                        options={[
+                            { value: null, label: "Not set" },
+                            ...positions.map((item) => ({
+                                value: item.id,
+                                label: item.name,
+                            })),
+                        ]}
+                    />
+                ) : (
+                    position
+                )}
+            </div>
 
             {/* Invite Status */}
             <div>{statusBadge(invite.status, INVITE_COLORS)}</div>
@@ -235,7 +337,15 @@ export default function OnboardingRow({ invite }: Props) {
                                             <Modal.Open
                                                 opens={`approve-${invite.id}`}
                                             >
-                                                <button className="flex w-full items-center gap-2 px-4 py-2 text-sm text-emerald-400 transition-colors hover:bg-card-hover">
+                                                <button
+                                                    disabled={!assignedDepartmentId || !assignedPositionId}
+                                                    title={
+                                                        !assignedDepartmentId || !assignedPositionId
+                                                            ? "Assign a department and position first"
+                                                            : undefined
+                                                    }
+                                                    className="flex w-full items-center gap-2 px-4 py-2 text-sm text-emerald-400 transition-colors hover:bg-card-hover disabled:cursor-not-allowed disabled:opacity-40"
+                                                >
                                                     <CheckCircle2 className="h-3.5 w-3.5" />
                                                     Approve
                                                 </button>

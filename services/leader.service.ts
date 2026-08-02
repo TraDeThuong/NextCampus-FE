@@ -5,10 +5,26 @@ import type {
     LeaderQueryParams,
     CreateLeaderPayload,
     UpdateLeaderPayload,
+    UpdateMeLeaderPayload,
 } from "@/types/leader";
 import type { MessageSuccessResponse } from "@/types/auth";
 
 export const leaderService = {
+    getMyLeader: async (): Promise<LeaderSuccessResponse> => {
+        const response = await api.get<LeaderSuccessResponse>("/leaders/me");
+        return response.data;
+    },
+
+    updateMyLeader: async (
+        payload: UpdateMeLeaderPayload,
+    ): Promise<LeaderSuccessResponse> => {
+        const response = await api.put<LeaderSuccessResponse>(
+            "/leaders/me",
+            payload,
+        );
+        return response.data;
+    },
+
     getLeaders: async (
         params?: LeaderQueryParams,
     ): Promise<LeaderListResponse> => {
