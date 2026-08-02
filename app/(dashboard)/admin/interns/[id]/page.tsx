@@ -24,7 +24,7 @@ import { useInternDetail } from "@/hooks/intern/useInternDetail";
 import { useUpdateIntern } from "@/hooks/intern/useUpdateIntern";
 import { useDepartments } from "@/hooks/department/useDepartments";
 import { usePositions } from "@/hooks/department/usePositions";
-import { useLeaders } from "@/hooks/user/useLeaders";
+import { useLeaders } from "@/hooks/leader/useLeaders";
 import type { Intern } from "@/types/intern";
 import MetalCard from "@/components/ui/MetalCard";
 import Modal from "@/components/ui/Modal";
@@ -344,16 +344,29 @@ function InternshipInfo({ intern }: { intern: Intern }) {
                         label="Mentor / Leader"
                         value={intern.leader?.fullName ?? "Not assigned"}
                         options={leaders.map((l) => ({
-                            value: l.id,
-                            label: l.fullName ?? l.email,
+                            value: l.userId,
+                            label: l.user.fullName ? `${l.user.fullName} (${l.user.email})` : l.user.email,
                         }))}
                         currentId={intern.leaderId ?? ""}
-                        onChange={(id) =>
+                        onChange={(id) => {
+                            const selectedLeader = id
+                                ? leaders.find((l) => l.userId === id)
+                                : null;
+                            const hasSingleDepartment = selectedLeader?.departments?.length === 1;
+
                             updateIntern({
                                 id: intern.id,
-                                payload: { leaderId: id || null },
-                            })
-                        }
+                                payload: {
+                                    leaderId: id || null,
+                                    ...(hasSingleDepartment ? {
+                                        departmentId: selectedLeader.departments[0].id,
+                                    } : {
+                                        departmentId: null,
+                                        positionId: null,
+                                    }),
+                                },
+                            });
+                        }}
                     />
 
                     <InfoRow

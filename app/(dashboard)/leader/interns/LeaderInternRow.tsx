@@ -1,12 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { Eye, Circle } from "lucide-react";
 
 import type { Intern } from "@/types/intern";
 import type { InternTeamProgress } from "@/types/stats";
+import { useUpdateIntern } from "@/hooks/intern/useUpdateIntern";
+import { useDepartments } from "@/hooks/department/useDepartments";
+import { usePositions } from "@/hooks/department/usePositions";
+import InlineSelect from "@/components/ui/InlineSelect";
 import Table from "@/components/ui/Table";
 import InternTasksModal from "./InternTasksModal";
 import InternOverdueModal from "./InternOverdueModal";
@@ -20,6 +24,48 @@ export default function LeaderInternRow({ intern, taskProgress }: LeaderInternRo
   const router = useRouter();
   const [tasksModalOpen, setTasksModalOpen] = useState(false);
   const [overdueModalOpen, setOverdueModalOpen] = useState(false);
+
+  const { mutate: updateIntern } = useUpdateIntern();
+  const [updatingField, setUpdatingField] = useState<
+    "department" | "position" | null
+  >(null);
+
+  const { data: deptsData } = useDepartments();
+  const departments = deptsData?.data ?? [];
+
+  const { data: posData } = usePositions(intern.department?.id ?? undefined);
+  const positions = posData?.data ?? [];
+
+  const handleDepartmentChange = useCallback(
+    (newDepartmentId: string | null) => {
+      setUpdatingField("department");
+      updateIntern(
+        {
+          id: intern.id,
+          payload: {
+            departmentId: newDepartmentId,
+            positionId: null,
+          },
+        },
+        { onSettled: () => setUpdatingField(null) },
+      );
+    },
+    [intern.id, updateIntern],
+  );
+
+  const handlePositionChange = useCallback(
+    (newPositionId: string | null) => {
+      setUpdatingField("position");
+      updateIntern(
+        {
+          id: intern.id,
+          payload: { positionId: newPositionId || undefined },
+        },
+        { onSettled: () => setUpdatingField(null) },
+      );
+    },
+    [intern.id, updateIntern],
+  );
 
   const endDate = new Date(intern.startDate);
   endDate.setMonth(endDate.getMonth() + intern.duration);
@@ -60,16 +106,38 @@ export default function LeaderInternRow({ intern, taskProgress }: LeaderInternRo
 
         {/* Department */}
         <div className="text-sm text-slate-400">
-          {intern.department?.name ?? (
-            <span className="italic text-slate-600">Not set</span>
-          )}
+          <InlineSelect
+            ariaLabel="Department"
+            value={intern.department?.id ?? null}
+            placeholder="Not set"
+            loading={updatingField === "department"}
+            onChange={handleDepartmentChange}
+            options={[
+              { value: null, label: "Not set" },
+              ...departments.map((d) => ({
+                value: d.id,
+                label: d.name,
+              })),
+            ]}
+          />
         </div>
 
         {/* Position */}
         <div className="text-sm text-slate-400">
-          {intern.position?.name ?? (
-            <span className="italic text-slate-600">Not set</span>
-          )}
+          <InlineSelect
+            ariaLabel="Position"
+            value={intern.position?.id ?? null}
+            placeholder="Not set"
+            loading={updatingField === "position"}
+            onChange={handlePositionChange}
+            options={[
+              { value: null, label: "Not set" },
+              ...positions.map((p) => ({
+                value: p.id,
+                label: p.name,
+              })),
+            ]}
+          />
         </div>
 
         {/* Duration */}

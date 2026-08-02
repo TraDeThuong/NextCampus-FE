@@ -86,8 +86,8 @@ export interface UpdateInternPayload {
     leaderId?: string | null;
     fullName?: string;
     phone?: string;
-    departmentId?: string;
-    positionId?: string;
+    departmentId?: string | null;
+    positionId?: string | null;
     startDate?: string;
     duration?: number;
     discordUsername?: string | null;

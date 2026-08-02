@@ -162,8 +162,8 @@ export interface ImportTaskRow {
   deadline: string;
   startDate?: string;
   priority: TaskPriority;
-  ownerName?: string;
-  supportName?: string;
+  ownerEmail?: string;
+  supportEmail?: string;
   phase?: string;
   module?: string;
   estDays?: number;
@@ -177,7 +177,8 @@ export interface ImportPreviewData {
   validRows: ImportTaskRow[];
   errorRows: { rowIndex: number; excelCode?: string; errors: string[] }[];
   internMappings: {
-    ownerName: string;
+    ownerAlias: string;
+    email: string;
     internId: string | null;
     internFullName: string | null;
   }[];
