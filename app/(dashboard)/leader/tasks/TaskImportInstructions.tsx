@@ -12,8 +12,8 @@ const COLUMNS_TASK_PHAN_CONG = [
   { name: "Due", required: true, desc: "Due date. Supports: Excel date format, DD/MM/YYYY, or ISO (YYYY-MM-DD)." },
   { name: "Priority", required: true, desc: "Priority level:", codes: ["P0 (HIGH)", "P1 (MEDIUM)", "P2 (LOW)"] },
   { name: "Start", required: false, desc: "Start date (same format as Due)." },
-  { name: "Owner", required: false, desc: 'Full name of the assigned intern. Must match the name in the system. If different, use the "Lists" sheet to map.' },
-  { name: "Support", required: false, desc: "Full name of the supporting intern. Cannot be assigned without an Owner." },
+  { name: "Owner", required: false, desc: 'Email of the assigned intern, or an alias mapped to an email in the "Lists" sheet.' },
+  { name: "Support", required: false, desc: 'Email of the supporting intern, or an alias mapped to an email in the "Lists" sheet. Cannot be assigned without an Owner.' },
   { name: "Status", required: false, desc: "Status:", codes: ["To Do", "In Progress", "Review", "Done", "Blocked"], extra: "Default: To Do." },
   { name: "Mô tả", required: false, desc: "Task description." },
   { name: "Giai đoạn", required: false, desc: "Phase name, e.g.:", code: "Phase 1 - Foundation" },
@@ -27,7 +27,7 @@ const COLUMNS_TASK_PHAN_CONG = [
 
 const COLUMNS_LISTS = [
   { name: "Owners", required: false, desc: "Display name in Excel (in the Owner/Support column of the Task_Phan_Cong sheet)." },
-  { name: "Name", required: false, desc: "Intern name in the system. Used to map when the Excel name differs from the system name." },
+  { name: "Email", required: false, desc: "Unique email of the intern account in the system. When matched, the preview displays the intern's full name." },
 ];
 
 function RequiredBadge({ required }: { required: boolean }) {
@@ -126,7 +126,7 @@ export default function TaskImportInstructions({ onClose }: TaskImportInstructio
           Sheet: Lists (optional)
         </h4>
         <p className="mb-3 text-sm text-muted">
-          This sheet is only needed when intern names in Excel differ from system names.
+          This sheet is only needed when using aliases instead of entering intern emails directly.
         </p>
         <div className="grid grid-cols-[160px_80px_1fr] gap-4 border-b border-white/10 pb-2 text-xs font-medium text-muted">
           <div>Column Name</div>

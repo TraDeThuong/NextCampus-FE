@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
 import { useDepartments } from "@/hooks/department/useDepartments";
+import { useLeaders } from "@/hooks/leader/useLeaders";
 import Table from "@/components/ui/Table";
 import Modal from "@/components/ui/Modal";
 import MetalCard from "@/components/ui/MetalCard";
@@ -17,8 +18,14 @@ export default function DepartmentTable() {
     const leader = searchParams.get("leader") ?? undefined;
 
     const { data, isPending, isError } = useDepartments({ name, leader });
+    const {
+        data: leadersData,
+        isPending: leadersPending,
+        isError: leadersError,
+    } = useLeaders({ limit: 100, sortBy: "fullName", order: "asc" });
 
     const departments = data?.data ?? [];
+    const leaders = leadersData?.data ?? [];
 
     if (isPending) {
         return (
@@ -68,7 +75,13 @@ export default function DepartmentTable() {
                 <Table.Body
                     data={departments}
                     render={(dept) => (
-                        <DepartmentRow key={dept.id} department={dept} />
+                        <DepartmentRow
+                            key={dept.id}
+                            department={dept}
+                            leaders={leaders}
+                            leadersLoading={leadersPending}
+                            leadersError={leadersError}
+                        />
                     )}
                 />
             </Table>

@@ -7,6 +7,7 @@ import {
   CreateInvitePayload,
   CreateInviteSuccessResponse,
   ReviewApplicationPayload,
+  AssignApplicationPayload,
   VerifyInviteSuccessResponse,
   ApplicationInviteListResponse,
   GetApplicationInvitesParams,
@@ -59,8 +60,8 @@ export const createApplicationService = async (
   formData.append("fullName", payload.fullName);
   formData.append("email", payload.email);
   formData.append("phone", payload.phone);
-  formData.append("departmentId", payload.departmentId);
-  formData.append("positionId", payload.positionId);
+  formData.append("preferredDepartment", payload.preferredDepartment);
+  formData.append("preferredPosition", payload.preferredPosition);
   formData.append("startDate", payload.startDate);
   formData.append("duration", String(payload.duration));
   formData.append("token", payload.token);
@@ -108,6 +109,17 @@ export const reviewApplicationService = async (
 ): Promise<ApplicationSuccessResponse> => {
   const response = await api.patch<ApplicationSuccessResponse>(
     `/applications/${id}/review`,
+    payload,
+  );
+  return response.data;
+};
+
+export const assignApplicationService = async (
+  id: string,
+  payload: AssignApplicationPayload,
+): Promise<ApplicationSuccessResponse> => {
+  const response = await api.patch<ApplicationSuccessResponse>(
+    `/applications/${id}/assignment`,
     payload,
   );
   return response.data;

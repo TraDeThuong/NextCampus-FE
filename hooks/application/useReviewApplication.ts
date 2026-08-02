@@ -2,12 +2,21 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import { AxiosError } from "axios";
 
 import { reviewApplicationService } from "@/services/application.service";
 import type { ReviewApplicationPayload, ApplicationInviteRow, Application } from "@/types/application";
+import type { ApiErrorResponse } from "@/types/auth";
 
-type InviteListData = { data: ApplicationInviteRow[]; meta: any };
-type AppListData = { data: Application[]; meta: any };
+type PaginationMeta = {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+};
+
+type InviteListData = { data: ApplicationInviteRow[]; meta: PaginationMeta };
+type AppListData = { data: Application[]; meta: PaginationMeta };
 
 export function useReviewApplication() {
     const queryClient = useQueryClient();
@@ -82,14 +91,16 @@ export function useReviewApplication() {
             queryClient.invalidateQueries({ queryKey: ["applications"] });
         },
 
-        onError: (_err, _vars, ctx) => {
+        onError: (error: AxiosError<ApiErrorResponse>, _vars, ctx) => {
             ctx?.prevInvites?.forEach(([key, data]) =>
                 queryClient.setQueryData(key, data),
             );
             ctx?.prevApps?.forEach(([key, data]) =>
                 queryClient.setQueryData(key, data),
             );
-            toast.error("Failed to review application.");
+            toast.error(
+                error.response?.data?.message ?? "Failed to review application.",
+            );
         },
     });
 }

@@ -16,6 +16,7 @@ import { useDeleteIntern } from "@/hooks/intern/useDeleteIntern";
 import { useLeaders } from "@/hooks/leader/useLeaders";
 import { useUpdateIntern } from "@/hooks/intern/useUpdateIntern";
 import { usePositions } from "@/hooks/department/usePositions";
+import { useDepartments } from "@/hooks/department/useDepartments";
 import Table from "@/components/ui/Table";
 import Modal from "@/components/ui/Modal";
 import InlineSelect from "@/components/ui/InlineSelect";
@@ -30,9 +31,12 @@ export default function InternRow({ intern }: InternRowProps) {
     const { data: leadersData } = useLeaders();
     const { mutate: updateIntern } = useUpdateIntern();
     const [updatingField, setUpdatingField] = useState<
-        "position" | "leader" | "status" | null
+        "department" | "position" | "leader" | "status" | null
     >(null);
     const leaders = useMemo(() => leadersData?.data ?? [], [leadersData?.data]);
+
+    const { data: deptsData } = useDepartments();
+    const departments = deptsData?.data ?? [];
 
     const { data: posData } = usePositions(intern.department?.id ?? undefined);
     const positions = posData?.data ?? [];
@@ -68,13 +72,18 @@ export default function InternRow({ intern }: InternRowProps) {
             const selectedLeader = newLeaderId
                 ? leaders.find((l) => l.userId === newLeaderId)
                 : null;
+            const hasSingleDepartment = selectedLeader?.departments?.length === 1;
+
             updateIntern(
                 {
                     id: intern.id,
                     payload: {
                         leaderId: newLeaderId,
-                        ...(selectedLeader && {
-                            departmentId: selectedLeader.departmentId ?? undefined,
+                        ...(hasSingleDepartment ? {
+                            departmentId: selectedLeader.departments[0].id,
+                        } : {
+                            departmentId: null,
+                            positionId: null,
                         }),
                     },
                 },
@@ -91,6 +100,23 @@ export default function InternRow({ intern }: InternRowProps) {
                 {
                     id: intern.id,
                     payload: { positionId: newPositionId || undefined },
+                },
+                { onSettled: () => setUpdatingField(null) },
+            );
+        },
+        [intern.id, updateIntern],
+    );
+
+    const handleDepartmentChange = useCallback(
+        (newDepartmentId: string | null) => {
+            setUpdatingField("department");
+            updateIntern(
+                {
+                    id: intern.id,
+                    payload: {
+                        departmentId: newDepartmentId,
+                        positionId: null,
+                    },
                 },
                 { onSettled: () => setUpdatingField(null) },
             );
@@ -137,9 +163,20 @@ export default function InternRow({ intern }: InternRowProps) {
 
                 {/* Department */}
                 <div className="text-sm text-slate-400">
-                    {intern.department?.name ?? (
-                        <span className="italic text-slate-600">Not set</span>
-                    )}
+                    <InlineSelect
+                        ariaLabel="Department"
+                        value={intern.department?.id ?? null}
+                        placeholder="Not set"
+                        loading={updatingField === "department"}
+                        onChange={handleDepartmentChange}
+                        options={[
+                            { value: null, label: "Not set" },
+                            ...departments.map((d) => ({
+                                value: d.id,
+                                label: d.name,
+                            })),
+                        ]}
+                    />
                 </div>
 
                 {/* Position */}

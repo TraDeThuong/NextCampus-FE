@@ -1,18 +1,21 @@
 "use client";
 
 import ChangePasswordCard from "@/components/profile/ChangePasswordCard";
+import LeaderInfoCard from "@/components/profile/LeaderInfoCard";
 import ProfileActions from "@/components/profile/ProfileActions";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileInfoCard from "@/components/profile/ProfileInfoCard";
 import FullPageLoading from "@/components/ui/FullPageLoading";
 import { useProfile } from "@/hooks/profile/useProfile";
+import { useLeader } from "@/hooks/profile/useLeader";
 
 
-export default function AdminProfilePage() {
-    const { profile, isLoading } = useProfile();
+export default function LeaderProfilePage() {
+    const { profile, isLoading: profileLoading } = useProfile();
+    const { leader, isLoading: leaderLoading } = useLeader();
 
-    if (isLoading) {
-        return <FullPageLoading/>;
+    if (profileLoading || leaderLoading) {
+        return <FullPageLoading />;
     }
 
     if (!profile) {
@@ -48,6 +51,8 @@ export default function AdminProfilePage() {
                 {/* Left column */}
                 <div className="space-y-6 xl:col-span-2">
                     <ProfileInfoCard profile={profile} />
+
+                    {leader && <LeaderInfoCard leader={leader} />}
 
                     <ChangePasswordCard />
                 </div>

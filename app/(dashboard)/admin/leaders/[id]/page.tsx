@@ -24,6 +24,7 @@ import { toast } from "react-hot-toast";
 import type { Leader } from "@/types/leader";
 import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
+import LeaderDepartmentSelect from "../LeaderDepartmentSelect";
 
 export default function LeaderDetailPage() {
     const params = useParams<{ id: string }>();
@@ -139,8 +140,16 @@ function LeaderInfo({ leader }: { leader: Leader }) {
     const { mutate: updateLeader } = useUpdateLeader();
     const { data: deptData } = useDepartments();
     const departments = deptData?.data ?? [];
-    const selectedDept = departments.find((d) => d.id === leader.departmentId);
-    const availablePositions = selectedDept ? selectedDept.positions : [];
+    const managedDepartmentIds = new Set(
+        leader.departments.map((department) => department.id),
+    );
+    const availablePositions = departments
+        .filter((department) => managedDepartmentIds.has(department.id))
+        .flatMap((department) => department.positions)
+        .filter(
+            (position, index, positions) =>
+                positions.findIndex((item) => item.name === position.name) === index,
+        );
 
     return (
         <MetalCard>
@@ -171,7 +180,7 @@ function LeaderInfo({ leader }: { leader: Leader }) {
                         }))}
                         currentId={leader.position ?? ""}
                         onChange={(posName) => {
-                            if (!leader.departmentId) {
+                            if (leader.departments.length === 0) {
                                 toast.error("Please select a department first.");
                                 return;
                             }
@@ -188,7 +197,6 @@ function LeaderInfo({ leader }: { leader: Leader }) {
 }
 
 function DepartmentCard({ leader }: { leader: Leader }) {
-    const { mutate: updateLeader } = useUpdateLeader();
     const { data: deptData } = useDepartments();
     const departments = deptData?.data ?? [];
 
@@ -197,22 +205,18 @@ function DepartmentCard({ leader }: { leader: Leader }) {
             <div className="rounded-3xl p-6">
                 <h2 className="text-lg font-semibold metal-text">Department</h2>
                 <div className="mt-5 space-y-4">
-                    <InlineSelectRow
-                        icon={Building2}
-                        label="Department"
-                        value={leader.department?.name ?? "Not set"}
-                        options={departments.map((d) => ({
-                            value: d.id,
-                            label: d.name,
-                        }))}
-                        currentId={leader.departmentId ?? ""}
-                        onChange={(id) =>
-                            updateLeader({
-                                id: leader.id,
-                                payload: { departmentId: id || null },
-                            })
-                        }
-                    />
+                    <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3 text-sm text-slate-400">
+                            <Building2 className="h-4 w-4" />
+                            <span>Departments</span>
+                        </div>
+                        <div className="min-w-0 max-w-[240px] text-sm text-slate-400">
+                            <LeaderDepartmentSelect
+                                leader={leader}
+                                departments={departments}
+                            />
+                        </div>
+                    </div>
                     <InfoRow
                         icon={Circle}
                         label="Interns Managed"

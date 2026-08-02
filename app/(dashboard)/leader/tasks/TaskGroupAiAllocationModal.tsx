@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   X,
   Sparkles,
-  Check,
   User,
   Users,
   Loader2,
@@ -19,8 +18,8 @@ import {
   useGroupAiRecommendation,
   useConfirmGroupAiAllocation,
 } from "@/hooks/task-group/useGroupAiAllocation";
-import { useInterns } from "@/hooks/intern/useInterns";
-import type { GroupTaskAiRecommendationItem } from "@/types/task-allocation";
+import { useTaskGroup } from "@/hooks/task-group/useTaskGroup";
+import { useAuth } from "@/hooks/auth/useAuth";
 
 interface Props {
   groupId: string;
@@ -46,45 +45,55 @@ export default function TaskGroupAiAllocationModal({
   onClose,
 }: Props) {
   const { data, isLoading, isError, error, refetch } = useGroupAiRecommendation(groupId);
+  const { data: groupData } = useTaskGroup(groupId);
+  const { state } = useAuth();
   const confirmMutation = useConfirmGroupAiAllocation();
-  const { data: internsData } = useInterns();
-  const interns = internsData?.data ?? [];
+  const interns = (groupData?.data.members ?? [])
+    .map((member) => member.intern)
+    .filter(
+      (intern) =>
+        intern.status === "ACTIVE" &&
+        (state.user?.role !== "LEADER" || intern.leaderId === state.user.id),
+    );
 
-  const [drafts, setDrafts] = useState<Record<string, DraftAssignment>>({});
-
-  useEffect(() => {
-    if (data?.tasks) {
-      const initialDrafts: Record<string, DraftAssignment> = {};
-      data.tasks.forEach((t) => {
-        if (t.suggestedOwner) {
-          initialDrafts[t.taskId] = {
-            taskId: t.taskId,
-            internId: t.suggestedOwner.id,
-            supportId: t.suggestedSupport?.id ?? null,
-          };
-        }
-      });
-      setDrafts(initialDrafts);
-    }
-  }, [data]);
+  const [draftOverrides, setDraftOverrides] = useState<
+    Record<string, DraftAssignment>
+  >({});
+  const drafts = useMemo(() => {
+    const initialDrafts: Record<string, DraftAssignment> = {};
+    data?.tasks.forEach((task) => {
+      if (task.suggestedOwner) {
+        initialDrafts[task.taskId] = {
+          taskId: task.taskId,
+          internId: task.suggestedOwner.id,
+          supportId: task.suggestedSupport?.id ?? null,
+        };
+      }
+    });
+    return { ...initialDrafts, ...draftOverrides };
+  }, [data, draftOverrides]);
 
   const handleOwnerChange = (taskId: string, internId: string) => {
-    setDrafts((prev) => ({
+    const currentDraft = drafts[taskId];
+    setDraftOverrides((prev) => ({
       ...prev,
       [taskId]: {
         taskId,
         internId,
-        supportId: prev[taskId]?.supportId === internId ? null : prev[taskId]?.supportId ?? null,
+        supportId:
+          currentDraft?.supportId === internId
+            ? null
+            : currentDraft?.supportId ?? null,
       },
     }));
   };
 
   const handleSupportChange = (taskId: string, supportId: string) => {
-    setDrafts((prev) => ({
+    setDraftOverrides((prev) => ({
       ...prev,
       [taskId]: {
         taskId,
-        internId: prev[taskId]?.internId ?? "",
+        internId: drafts[taskId]?.internId ?? "",
         supportId: supportId === "" ? null : supportId,
       },
     }));
@@ -190,7 +199,7 @@ export default function TaskGroupAiAllocationModal({
           {data && (
             <>
               {/* Summary Metrics */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                 <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-3 text-center">
                   <p className="text-2xl font-bold text-white">{data.summary.totalUnassignedTasks}</p>
                   <p className="text-[11px] text-slate-400 mt-0.5">Task chưa giao</p>
@@ -206,6 +215,12 @@ export default function TaskGroupAiAllocationModal({
                 <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-3 text-center">
                   <p className="text-2xl font-bold text-violet-400">{data.summary.internsEvaluatedCount}</p>
                   <p className="text-[11px] text-slate-400 mt-0.5">Intern được duyệt</p>
+                </div>
+                <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-3 text-center">
+                  <p className="text-2xl font-bold text-emerald-400">
+                    {data.summary.membersUsedCount}/{data.summary.totalMemberCount}
+                  </p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Thành viên tham gia</p>
                 </div>
               </div>
 

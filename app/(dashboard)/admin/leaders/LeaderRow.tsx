@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { MoreVertical, Eye, Trash2, Loader2 } from "lucide-react";
+import { MoreVertical, Eye, Trash2 } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 
 import type { Leader } from "@/types/leader";
@@ -15,6 +15,7 @@ import { toast } from "react-hot-toast";
 import Table from "@/components/ui/Table";
 import Modal from "@/components/ui/Modal";
 import InlineSelect from "@/components/ui/InlineSelect";
+import LeaderDepartmentSelect from "./LeaderDepartmentSelect";
 
 type LeaderRowProps = {
     leader: Leader;
@@ -22,36 +23,27 @@ type LeaderRowProps = {
 
 export default function LeaderRow({ leader }: LeaderRowProps) {
     const router = useRouter();
-    const { mutate: deleteLeader, isPending: deleting } = useDeleteLeader();
+    const { mutate: deleteLeader } = useDeleteLeader();
     const { mutate: updateLeader } = useUpdateLeader();
     const { data: deptData } = useDepartments();
     const departments = deptData?.data ?? [];
 
-    const selectedDept = departments.find((d) => d.id === leader.departmentId);
-    const availablePositions = selectedDept ? selectedDept.positions : [];
+    const managedDepartmentIds = new Set(
+        leader.departments.map((department) => department.id),
+    );
+    const availablePositions = departments
+        .filter((department) => managedDepartmentIds.has(department.id))
+        .flatMap((department) => department.positions)
+        .filter(
+            (position, index, positions) =>
+                positions.findIndex((item) => item.name === position.name) === index,
+        );
 
     const [updatingField, setUpdatingField] = useState<
-        "department" | "position" | null
+        "position" | null
     >(null);
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
-
-    const handleDepartmentChange = useCallback(
-        (newDeptId: string | null) => {
-            setUpdatingField("department");
-            updateLeader(
-                {
-                    id: leader.id,
-                    payload: {
-                        departmentId: newDeptId || null,
-                        position: null,
-                    },
-                },
-                { onSettled: () => setUpdatingField(null) },
-            );
-        },
-        [leader.id, updateLeader],
-    );
 
     const handlePositionChange = useCallback(
         (newPos: string | null) => {
@@ -125,19 +117,9 @@ export default function LeaderRow({ leader }: LeaderRowProps) {
 
                 {/* Department */}
                 <div className="text-sm text-slate-400">
-                    <InlineSelect
-                        ariaLabel="Department"
-                        value={leader.departmentId}
-                        placeholder="Not set"
-                        loading={updatingField === "department"}
-                        onChange={handleDepartmentChange}
-                        options={[
-                            { value: null, label: "Not set" },
-                            ...departments.map((d) => ({
-                                value: d.id,
-                                label: d.name,
-                            })),
-                        ]}
+                    <LeaderDepartmentSelect
+                        leader={leader}
+                        departments={departments}
                     />
                 </div>
 
@@ -148,7 +130,7 @@ export default function LeaderRow({ leader }: LeaderRowProps) {
                         value={leader.position}
                         placeholder="Not set"
                         loading={updatingField === "position"}
-                        disabled={!leader.departmentId}
+                        disabled={leader.departments.length === 0}
                         onDisabledClick={() => toast.error("Please select a department first.")}
                         onChange={handlePositionChange}
                         options={[

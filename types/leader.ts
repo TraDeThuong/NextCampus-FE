@@ -1,3 +1,10 @@
+export const MAX_LEADER_DEPARTMENTS = 3;
+
+export interface LeaderDepartment {
+    id: string;
+    name: string;
+}
+
 export interface LeaderUser {
     id: string;
     email: string;
@@ -15,6 +22,8 @@ export interface Leader {
     createdAt: string;
     updatedAt: string;
     user: LeaderUser;
+    departments: LeaderDepartment[];
+    /** @deprecated Use departments. */
     department: { id: string; name: string } | null;
     internCount?: number;
 }
@@ -48,13 +57,21 @@ export interface LeaderQueryParams {
 
 export interface CreateLeaderPayload {
     userId: string;
+    departmentIds?: string[];
+    /** @deprecated Use departmentIds. */
     departmentId?: string;
     position?: string;
     phone?: string;
 }
 
 export interface UpdateLeaderPayload {
+    departmentIds?: string[];
+    /** @deprecated Use departmentIds. */
     departmentId?: string | null;
     position?: string | null;
     phone?: string;
+}
+
+export interface UpdateMeLeaderPayload {
+    phone?: string | null;
 }
