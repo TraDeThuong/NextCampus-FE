@@ -91,6 +91,8 @@ export interface GroupAiRecommendation {
     totalAllocated: number;
     unallocatableTasks: number;
     internsEvaluatedCount: number;
+    membersUsedCount: number;
+    totalMemberCount: number;
   };
 }
 

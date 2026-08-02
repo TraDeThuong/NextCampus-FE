@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { MoreVertical, Trash2, Edit3, Plus, X, Loader2, Settings, Briefcase } from "lucide-react";
+import { MoreVertical, Trash2, Edit3, X, Loader2, Settings, Briefcase } from "lucide-react";
 import type { Department } from "@/types/department";
+import type { Leader } from "@/types/leader";
 import { useDeleteDepartment } from "@/hooks/department/useDeleteDepartment";
 import { useUpdateDepartment } from "@/hooks/department/useUpdateDepartment";
 import { useCreatePosition } from "@/hooks/department/useCreatePosition";
@@ -13,12 +14,21 @@ import { PREDEFINED_DEPARTMENTS, PREDEFINED_POSITIONS, GENERAL_POSITIONS } from 
 import Table from "@/components/ui/Table";
 import Modal from "@/components/ui/Modal";
 import { toast } from "react-hot-toast";
+import DepartmentLeaderSelect from "./DepartmentLeaderSelect";
 
 type DepartmentRowProps = {
     department: Department;
+    leaders: Leader[];
+    leadersLoading: boolean;
+    leadersError: boolean;
 };
 
-export default function DepartmentRow({ department }: DepartmentRowProps) {
+export default function DepartmentRow({
+    department,
+    leaders,
+    leadersLoading,
+    leadersError,
+}: DepartmentRowProps) {
     const { mutate: deleteDepartment } = useDeleteDepartment();
     const { mutate: updateDepartment } = useUpdateDepartment();
     const { data: deptData } = useDepartments();
@@ -151,26 +161,12 @@ export default function DepartmentRow({ department }: DepartmentRowProps) {
 
                 {/* Leaders */}
                 <div className="text-sm min-w-0 pr-4">
-                    {department.leaders && department.leaders.length > 0 ? (
-                        <div className="flex flex-col gap-2">
-                            {department.leaders.map((leader) => {
-                                const name = leader.user.fullName;
-                                const email = leader.user.email;
-                                return (
-                                    <div key={leader.id} className="flex flex-col min-w-0">
-                                        <span className="font-medium text-white truncate" title={name || "No name"}>
-                                            {name || "No name"}
-                                        </span>
-                                        <span className="text-xs text-slate-400 truncate" title={email}>
-                                            {email}
-                                        </span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    ) : (
-                        <span className="text-xs text-slate-500 italic">No leader</span>
-                    )}
+                    <DepartmentLeaderSelect
+                        department={department}
+                        leaders={leaders}
+                        loading={leadersLoading}
+                        error={leadersError}
+                    />
                 </div>
 
                 {/* Actions Dropdown */}
@@ -242,7 +238,6 @@ export default function DepartmentRow({ department }: DepartmentRowProps) {
 
 function ManagePositions({
     department,
-    onCloseModal,
 }: {
     department: Department;
     onCloseModal?: () => void;
@@ -266,8 +261,7 @@ function ManagePositions({
         (p) => p.name.toLowerCase().trim() === newPositionName.toLowerCase().trim()
     );
 
-    const handleAdd = (e: React.FormEvent) => {
-        e.preventDefault();
+    const addPosition = () => {
         const trimmed = newPositionName.trim();
         if (!trimmed) return;
         createPosition(
@@ -282,6 +276,11 @@ function ManagePositions({
                 },
             }
         );
+    };
+
+    const handleAdd = (e: React.FormEvent) => {
+        e.preventDefault();
+        addPosition();
     };
 
     const handleAddPosKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -301,7 +300,7 @@ function ManagePositions({
             }
         } else if (e.key === "Enter") {
             e.preventDefault();
-            handleAdd(e as any);
+            addPosition();
         }
     };
 

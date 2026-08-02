@@ -23,9 +23,10 @@ import { useUpdateTaskAssignment } from "@/hooks/task-assignment/useUpdateTaskAs
 import { useDeleteTaskAssignment } from "@/hooks/task-assignment/useDeleteTaskAssignment";
 import { AuthContext } from "@/contexts/AuthContext";
 import TaskEditModal from "./TaskEditModal";
+import TaskGroupMemberSelector from "./TaskGroupMemberSelector";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
-import type { UpdateTaskGroupPayload } from "@/types/task-group";
+import type { TaskGroup, UpdateTaskGroupPayload } from "@/types/task-group";
 import type { TaskQueryParams } from "@/types/task";
 
 type GroupAction = { type: "view" | "edit" | "delete"; groupId: string; groupName: string } | null;
@@ -405,6 +406,10 @@ function ViewGroup({
       <div className="space-y-2 rounded-xl border border-border bg-white/5 p-4">
         <DetailRow label="ID" value={group.id} mono />
         <DetailRow label="Department" value={group.department?.name ?? "Chung (Tất cả)"} />
+        <DetailRow label="Team members" value={String(group._count?.members ?? group.members?.length ?? 0)} />
+        <DetailRow label="Max workload" value={`${group.maxWorkloadDays} ngày`} />
+        <DetailRow label="Max active tasks" value={group.maxActiveTasks ? String(group.maxActiveTasks) : "Không giới hạn"} />
+        <DetailRow label="Require all members" value={group.requireAllMembers ? "Có" : "Không"} />
         <DetailRow label="Description" value={group.description ?? "—"} />
         <DetailRow label="Created" value={new Date(group.createdAt).toLocaleString("vi-VN")} />
         <DetailRow label="Updated" value={new Date(group.updatedAt).toLocaleString("vi-VN")} />
@@ -433,32 +438,43 @@ function ViewGroup({
 
 function EditGroup({ groupId, onClose }: { groupId: string; onClose: () => void }) {
   const { data, isLoading } = useTaskGroup(groupId);
-  const { data: deptData } = useDepartments();
-  const departments = deptData?.data ?? [];
-  const updateMutation = useUpdateTaskGroup();
   const group = data?.data;
-  const { register, handleSubmit, formState: { errors } } = useForm<UpdateTaskGroupPayload>({
-    values: group
-      ? {
-          name: group.name,
-          description: group.description ?? "",
-          departmentId: group.departmentId ?? "",
-        }
-      : undefined,
-  });
 
   if (isLoading) return <div className="flex justify-center py-8"><Spinner size="sm" /></div>;
   if (!group) return <p className="py-4 text-center text-sm text-muted">Group not found.</p>;
+
+  return <EditGroupForm group={group} onClose={onClose} />;
+}
+
+function EditGroupForm({ group, onClose }: { group: TaskGroup; onClose: () => void }) {
+  const { data: deptData } = useDepartments();
+  const departments = deptData?.data ?? [];
+  const updateMutation = useUpdateTaskGroup();
+  const [departmentId, setDepartmentId] = useState(group.departmentId ?? "");
+  const [memberIds, setMemberIds] = useState(
+    group.members?.map((member) => member.internId) ?? [],
+  );
+  const { register, handleSubmit, formState: { errors } } = useForm<UpdateTaskGroupPayload>({
+    defaultValues: {
+      name: group.name,
+      description: group.description ?? "",
+      departmentId: group.departmentId ?? "",
+      maxWorkloadDays: group.maxWorkloadDays,
+      maxActiveTasks: group.maxActiveTasks,
+      requireAllMembers: group.requireAllMembers,
+    },
+  });
 
   return (
     <form
       onSubmit={handleSubmit((payload) =>
         updateMutation.mutate(
           {
-            id: groupId,
+            id: group.id,
             payload: {
               ...payload,
               departmentId: payload.departmentId || null,
+              memberIds,
             },
           },
           { onSuccess: onClose },
@@ -472,7 +488,7 @@ function EditGroup({ groupId, onClose }: { groupId: string; onClose: () => void 
         </div>
         <div>
           <h3 className="text-lg font-semibold text-foreground">Edit Group</h3>
-          <p className="mt-0.5 text-sm text-muted">Update name, department and description.</p>
+          <p className="mt-0.5 text-sm text-muted">Update team, capacity and group information.</p>
         </div>
       </div>
       <div className="space-y-4">
@@ -484,7 +500,12 @@ function EditGroup({ groupId, onClose }: { groupId: string; onClose: () => void 
         <div>
           <label className="mb-1.5 block text-sm font-medium text-foreground">Department (Phòng ban)</label>
           <select
-            {...register("departmentId")}
+            {...register("departmentId", {
+              onChange: (event) => {
+                setDepartmentId(event.target.value);
+                setMemberIds([]);
+              },
+            })}
             className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground focus:border-primary-light/40 focus:outline-none"
           >
             <option value="">-- Tất cả phòng ban (Chung) --</option>
@@ -495,6 +516,28 @@ function EditGroup({ groupId, onClose }: { groupId: string; onClose: () => void 
             ))}
           </select>
         </div>
+        <TaskGroupMemberSelector
+          departmentId={departmentId}
+          selectedIds={memberIds}
+          onChange={setMemberIds}
+        />
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">Tải tối đa (ngày)</label>
+            <input type="number" min={0.5} step={0.5} {...register("maxWorkloadDays", { valueAsNumber: true })} className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground focus:border-primary-light/40 focus:outline-none" />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">Số task active tối đa</label>
+            <input type="number" min={1} placeholder="Không giới hạn" {...register("maxActiveTasks", { setValueAs: (value) => value === "" ? null : Number(value) })} className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-primary-light/40 focus:outline-none" />
+          </div>
+        </div>
+        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-white/5 p-3">
+          <input type="checkbox" {...register("requireAllMembers")} className="mt-0.5 h-4 w-4 accent-sky-500" />
+          <span>
+            <span className="block text-sm text-foreground">Dùng đủ thành viên</span>
+            <span className="block text-xs text-muted">Mỗi thành viên phải tham gia ít nhất một task với vai trò Owner hoặc Support.</span>
+          </span>
+        </label>
         <div>
           <label className="mb-1.5 block text-sm font-medium text-foreground">Description</label>
           <textarea rows={3} {...register("description")} placeholder="Optional description..." className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-primary-light/40 focus:outline-none resize-none" />

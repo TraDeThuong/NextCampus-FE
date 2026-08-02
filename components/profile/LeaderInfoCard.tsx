@@ -80,8 +80,12 @@ export default function LeaderInfoCard({ leader }: LeaderInfoCardProps) {
                     <div className="grid gap-4 md:grid-cols-2">
                         <InfoField
                             icon={Building2}
-                            label="Department"
-                            value={leader.department?.name ?? "Not set"}
+                            label="Departments"
+                            value={
+                                leader.departments
+                                    .map((department) => department.name)
+                                    .join(", ") || "Not set"
+                            }
                         />
                         <InfoField
                             icon={Briefcase}
