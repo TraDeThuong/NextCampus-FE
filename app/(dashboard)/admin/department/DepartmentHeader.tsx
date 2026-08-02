@@ -90,9 +90,6 @@ function AddDepartmentForm({
     const deptExists = departments.some(
         (d) => d.name.toLowerCase().trim() === (deptName || "").toLowerCase().trim()
     );
-    const posExistsInList = addedPositions.some(
-        (p) => p.toLowerCase().trim() === posInput.toLowerCase().trim()
-    );
 
     const availablePredefinedPositions = deptName
         ? PREDEFINED_POSITIONS[deptName] || GENERAL_POSITIONS
@@ -102,10 +99,6 @@ function AddDepartmentForm({
         e.preventDefault();
         const trimmed = posInput.trim();
         if (!trimmed) return;
-        if (addedPositions.includes(trimmed)) {
-            toast.error("This position is already in the list.");
-            return;
-        }
         setAddedPositions([...addedPositions, trimmed]);
         setPosInput("");
         setOriginalPosTyped("");
@@ -272,17 +265,12 @@ function AddDepartmentForm({
                                 <button
                                     type="button"
                                     onClick={handleAddPosition}
-                                    disabled={!posInput.trim() || posExistsInList}
+                                    disabled={!posInput.trim()}
                                     className="flex items-center justify-center rounded-xl bg-cyan-600/20 hover:bg-cyan-600/40 text-cyan-300 border border-cyan-400/20 px-4 transition shrink-0"
                                 >
                                     <Plus className="h-4 w-4" />
                                 </button>
                             </div>
-                            {posExistsInList && (
-                                <p className="text-xs text-yellow-500 mt-1 flex items-center gap-1">
-                                    ⚠️ Already in the list.
-                                </p>
-                            )}
                         </div>
                     </div>
                 )}
