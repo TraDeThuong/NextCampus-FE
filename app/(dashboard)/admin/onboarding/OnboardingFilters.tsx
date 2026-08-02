@@ -96,14 +96,14 @@ export default function OnboardingFilters() {
 
         {/* Department */}
         <FilterSelect
-          label="Department"
+          label="Assigned Department"
           filterField="departmentId"
           options={departmentOptions}
         />
 
         {/* Position */}
         <FilterSelect
-          label="Position"
+          label="Assigned Position"
           filterField="positionId"
           options={positionOptions}
         />

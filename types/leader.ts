@@ -58,3 +58,7 @@ export interface UpdateLeaderPayload {
     position?: string | null;
     phone?: string;
 }
+
+export interface UpdateMeLeaderPayload {
+    phone?: string | null;
+}

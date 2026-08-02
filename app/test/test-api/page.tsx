@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useCreateApplication } from "@/hooks/application/useCreateApplication";
 
 export default function TestApiPage() {
-    const [result, setResult] = useState<any>(null);
+    const [result, setResult] = useState<unknown>(null);
 
     const { mutate, isPending } = useCreateApplication();
 
@@ -14,8 +14,8 @@ export default function TestApiPage() {
                 fullName: "Test User",
                 email: "test@example.com",
                 phone: "0123456789",
-                departmentId: "00000000-0000-0000-0000-000000000001",
-                positionId: "00000000-0000-0000-0000-000000000001",
+                preferredDepartment: "Engineering",
+                preferredPosition: "Backend Intern",
                 startDate: "2026-07-15",
                 duration: 3,
                 token: "test-token",

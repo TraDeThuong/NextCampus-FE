@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Calendar, Clock } from "lucide-react";
 import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
@@ -36,34 +37,28 @@ export default function UpcomingMeetingsCard({
 }: {
   onMeetingClick?: (id: string) => void;
 }) {
-  const today = new Date();
+  const [upcomingFrom] = useState(() => new Date().toISOString());
 
-  const startOfDay = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate(),
-  ).toISOString();
-
-  const endOfDay = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate(),
-    23,
-    59,
-    59,
-  ).toISOString();
-
-  const { data, isPending } = useMeetings({
-    startTimeFrom: startOfDay,
-    startTimeTo: endOfDay,
+  const { data: ongoingData, isPending: isOngoingPending } = useMeetings({
+    status: "ONGOING",
     sortBy: "startTime",
-    order: "asc",
-    limit: 20,
+    order: "desc",
+    limit: 10,
   });
 
-  const meetings = (data?.data ?? []).filter(
-    (m) => m.status === "SCHEDULED" || m.status === "ONGOING",
-  );
+  const { data: scheduledData, isPending: isScheduledPending } = useMeetings({
+    status: "SCHEDULED",
+    startTimeFrom: upcomingFrom,
+    sortBy: "startTime",
+    order: "asc",
+    limit: 10,
+  });
+
+  const meetings = [
+    ...(ongoingData?.data ?? []),
+    ...(scheduledData?.data ?? []),
+  ].slice(0, 10);
+  const isPending = isOngoingPending || isScheduledPending;
 
   return (
     <MetalCard className="h-full">
@@ -73,7 +68,7 @@ export default function UpcomingMeetingsCard({
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-primary-light" />
             <h3 className="text-sm font-semibold metal-text">
-              Upcoming Meetings
+              Upcoming & Ongoing
             </h3>
           </div>
 
@@ -90,7 +85,7 @@ export default function UpcomingMeetingsCard({
           <div className="flex flex-1 flex-col items-center justify-center text-center">
             <Calendar className="mb-2 h-7 w-7 text-slate-600" />
             <p className="text-sm text-slate-500">
-              No meetings today
+              No upcoming meetings
             </p>
           </div>
         ) : (

@@ -6,7 +6,6 @@ import {
   Users,
   UserCheck,
   Rocket,
-  MessageCircle,
   FileText,
   UserRoundPen,
   History
@@ -27,7 +26,6 @@ const menus = [
   { name: "Onboarding", href: "/admin/onboarding", icon: Rocket },
   { name: "Mails", href: "/admin/emails", icon: MdOutlineMailOutline },
   { name: "Meetings", href:"/admin/mettings", icon:LuAlarmClock},
-  { name: "Discord", href: "/admin/discord", icon: MessageCircle },
   { name: "Policies", href: "/admin/policies", icon: FileText },
   { name: "Activity Logs", href: "/admin/activity-logs", icon: History },
   { name: "Profile", href: "/admin/profile", icon: UserRoundPen },

@@ -13,6 +13,7 @@ import { getActiveRegulationService } from "@/services/regulation.service";
 import type { Regulation } from "@/types/regulation";
 import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
+import styles from "./policies.module.css";
 
 import DOMPurify from "isomorphic-dompurify";
 
@@ -155,7 +156,7 @@ return (
       </div>
 
       <div
-        className="
+        className={`${styles.content}
           prose prose-invert
           max-h-[60vh]
           overflow-y-auto
@@ -164,7 +165,7 @@ return (
           prose-headings:text-white
           prose-p:text-zinc-300
           prose-li:text-zinc-300
-        "
+        `}
         dangerouslySetInnerHTML={{
           __html: sanitizedContent,
         }}
