@@ -55,6 +55,8 @@ export interface MeLeader {
     id: string;
     phone: string | null;
     position: string | null;
+    departments: { id: string; name: string }[];
+    /** @deprecated Use departments. */
     department: { id: string; name: string } | null;
 }
 

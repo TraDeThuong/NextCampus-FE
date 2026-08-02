@@ -308,17 +308,19 @@ export default function TaskImportModal({ onCloseModal }: Props) {
               <h3 className="mb-2 text-sm font-semibold text-foreground">
                 Intern Mappings
               </h3>
-              <Table columns="1fr 1fr 120px">
+              <Table columns="1fr 1.4fr 1fr 120px">
                 <Table.Header>
-                  <div>Excel Name</div>
+                  <div>Excel Alias</div>
+                  <div>Email</div>
                   <div>System Name</div>
                   <div>Status</div>
                 </Table.Header>
                 <Table.Body
                   data={previewData.internMappings}
                   render={(m) => (
-                    <Table.Row key={m.ownerName}>
-                      <div className="text-sm">{m.ownerName}</div>
+                    <Table.Row key={`${m.ownerAlias}-${m.email}`}>
+                      <div className="text-sm">{m.ownerAlias}</div>
+                      <div className="truncate text-sm text-muted">{m.email}</div>
                       <div className="text-sm text-muted">
                         {m.internFullName ?? "—"}
                       </div>
@@ -362,7 +364,10 @@ export default function TaskImportModal({ onCloseModal }: Props) {
                       <div className="font-mono text-sm">{row.excelCode}</div>
                       <div className="truncate text-sm">{row.title}</div>
                       <div className="text-sm text-muted">
-                        {row.ownerName ?? "—"}
+                        {previewData.internMappings.find(
+                          (mapping) =>
+                            mapping.email.toLowerCase() === row.ownerEmail?.toLowerCase(),
+                        )?.internFullName ?? row.ownerEmail ?? "—"}
                       </div>
                       <div>
                         <PriorityBadge priority={row.priority} />
