@@ -108,8 +108,8 @@ export default function OnboardingTable() {
       >
         <Table.Header>
           <div>Candidate</div>
-          <div>Department</div>
-          <div>Position</div>
+          <div>Assigned Dept.</div>
+          <div>Assigned Position</div>
           <div>Invite</div>
           <div>App</div>
           <div>Sent</div>
