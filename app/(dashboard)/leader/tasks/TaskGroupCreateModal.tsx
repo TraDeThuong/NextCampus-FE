@@ -135,7 +135,7 @@ export default function TaskGroupCreateModal({ onCloseModal }: Props) {
               min={1}
               placeholder="Không giới hạn"
               {...register("maxActiveTasks", {
-                setValueAs: (value) => (value === "" ? null : Number(value)),
+                setValueAs: (value) => (value === "" || value === null || value === undefined) ? null : Number(value),
               })}
               className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-primary-light/50 placeholder:text-slate-600"
             />

@@ -5,6 +5,8 @@ import {
   createContext,
   useContext,
   useState,
+  isValidElement,
+  Fragment,
   type ReactElement,
   type ReactNode,
 } from "react";
@@ -23,7 +25,7 @@ interface OpenProps {
 }
 
 interface WindowProps {
-  children: ReactElement<{ onCloseModal?: () => void }>;
+  children: ReactNode;
   name: string;
   size?: "sm" | "md" | "lg";
 }
@@ -156,9 +158,13 @@ function Window({ children, name, size = "lg" }: WindowProps) {
         </button>
 
         <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
-          {cloneElement(children, {
-            onCloseModal: close,
-          })}
+          {isValidElement(children) &&
+          typeof children.type !== "string" &&
+          children.type !== Fragment
+            ? cloneElement(children as ReactElement<{ onCloseModal?: () => void }>, {
+                onCloseModal: close,
+              })
+            : children}
         </div>
       </div>
     </div>,

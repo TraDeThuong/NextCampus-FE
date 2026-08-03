@@ -138,8 +138,8 @@ export default function LeaderTableTasks() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_1fr]">
         {/* Left: Task Groups */}
-        <MetalCard>
-          <div className="p-4">
+        <MetalCard className="min-h-[240px]">
+          <div className="p-4 pb-24">
             <div className="mb-3 flex items-center gap-2">
               <Layers className="h-4 w-4 text-primary-light" />
               <h3 className="text-sm font-semibold metal-text">Task Groups</h3>
@@ -192,8 +192,8 @@ export default function LeaderTableTasks() {
         </MetalCard>
 
         {/* Right: Task Table */}
-        <MetalCard>
-          <div className="p-4">
+        <MetalCard className="min-h-[240px]">
+          <div className="p-4 pb-24">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-semibold flex items-center">
                 <span className="metal-text">Tasks</span>
@@ -213,7 +213,7 @@ export default function LeaderTableTasks() {
                   }}
                   className="flex items-center gap-1.5 text-xs text-sky-400 border border-sky-500/20 hover:bg-sky-500/10 transition-all font-semibold"
                 >
-                  <Sparkles className="h-3.5 w-3.5 animate-pulse" />
+                  <Sparkles className="h-3.5 w-3.5 mr-1 animate-pulse" />
                   AI Phân công
                 </Button>
               )}
@@ -249,7 +249,7 @@ export default function LeaderTableTasks() {
                           <MoreHorizontal className="h-3.5 w-3.5" />
                         </button>
                         {taskMenuOpen === task.id && (
-                          <div ref={taskMenuRef} className="absolute right-0 top-full z-50 mt-1 w-28 rounded-xl border border-border bg-[#0f172a] p-1 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl">
+                          <div ref={taskMenuRef} className="absolute right-0 top-full z-50 mt-1 w-32 rounded-xl border border-border bg-[#0f172a] p-1 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl">
                             {(!task.assignment || !task.assignment.internId) && !checkIsOverdue(task.deadline) && (
                               <button
                                 onClick={() => { setTaskMenuOpen(null); setAiTask({ taskId: task.id, taskTitle: task.title, isAssigned: false }); }}
@@ -436,14 +436,22 @@ function ViewGroup({
 
 /* ─── Edit Group ────────────────────────────────────────────── */
 
-function EditGroup({ groupId, onClose }: { groupId: string; onClose: () => void }) {
+function EditGroup({
+  groupId,
+  onClose,
+  onCloseModal,
+}: {
+  groupId: string;
+  onClose: () => void;
+  onCloseModal?: () => void;
+}) {
   const { data, isLoading } = useTaskGroup(groupId);
   const group = data?.data;
 
   if (isLoading) return <div className="flex justify-center py-8"><Spinner size="sm" /></div>;
   if (!group) return <p className="py-4 text-center text-sm text-muted">Group not found.</p>;
 
-  return <EditGroupForm group={group} onClose={onClose} />;
+  return <EditGroupForm group={group} onClose={() => { onClose(); onCloseModal?.(); }} />;
 }
 
 function EditGroupForm({ group, onClose }: { group: TaskGroup; onClose: () => void }) {
@@ -528,7 +536,7 @@ function EditGroupForm({ group, onClose }: { group: TaskGroup; onClose: () => vo
           </div>
           <div>
             <label className="mb-1.5 block text-sm font-medium text-foreground">Số task active tối đa</label>
-            <input type="number" min={1} placeholder="Không giới hạn" {...register("maxActiveTasks", { setValueAs: (value) => value === "" ? null : Number(value) })} className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-primary-light/40 focus:outline-none" />
+            <input type="number" min={1} placeholder="Không giới hạn" {...register("maxActiveTasks", { setValueAs: (value) => (value === "" || value === null || value === undefined) ? null : Number(value) })} className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-primary-light/40 focus:outline-none" />
           </div>
         </div>
         <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-white/5 p-3">
@@ -545,7 +553,7 @@ function EditGroupForm({ group, onClose }: { group: TaskGroup; onClose: () => vo
       </div>
       <div className="flex justify-end gap-3 pt-1">
         <Button type="button" variant="glass" size="md" onClick={onClose}>Cancel</Button>
-        <Button type="submit" variant="primary" size="md" isLoading={updateMutation.isPending}>{updateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Pencil className="h-4 w-4" />}Save Changes</Button>
+        <Button type="submit" variant="primary" size="md" isLoading={updateMutation.isPending}>{updateMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Pencil className="h-4 w-4 mr-2" />}Save Changes</Button>
       </div>
     </form>
   );
