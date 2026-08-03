@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { taskGroupService } from "@/services/task-group.service";
 import type { CreateTaskGroupPayload } from "@/types/task-group";
+import axios from "axios";
 
 export function useCreateTaskGroup() {
   const queryClient = useQueryClient();
@@ -17,8 +18,12 @@ export function useCreateTaskGroup() {
       queryClient.invalidateQueries({ queryKey: ["task-groups"] });
     },
 
-    onError: () => {
-      toast.error("Failed to create task group.");
+    onError: (error) => {
+      const message =
+        axios.isAxiosError(error) && error.response?.data?.message
+          ? error.response.data.message
+          : "Failed to create task group.";
+      toast.error(message);
     },
   });
 }

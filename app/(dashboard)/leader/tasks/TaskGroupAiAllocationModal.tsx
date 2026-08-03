@@ -20,6 +20,7 @@ import {
 } from "@/hooks/task-group/useGroupAiAllocation";
 import { useTaskGroup } from "@/hooks/task-group/useTaskGroup";
 import { useAuth } from "@/hooks/auth/useAuth";
+import axios from "axios";
 
 interface Props {
   groupId: string;
@@ -48,6 +49,14 @@ export default function TaskGroupAiAllocationModal({
   const { data: groupData } = useTaskGroup(groupId);
   const { state } = useAuth();
   const confirmMutation = useConfirmGroupAiAllocation();
+
+  const errorMessage = useMemo(() => {
+    if (!error) return null;
+    if (axios.isAxiosError(error) && error.response?.data?.message) {
+      return error.response.data.message;
+    }
+    return error.message;
+  }, [error]);
   const interns = (groupData?.data.members ?? [])
     .map((member) => member.intern)
     .filter(
@@ -183,7 +192,7 @@ export default function TaskGroupAiAllocationModal({
               <AlertCircle className="h-10 w-10 text-rose-400 mx-auto" />
               <p className="text-sm font-medium text-rose-300">Không thể đề xuất AI</p>
               <p className="text-xs text-slate-400">
-                {error?.message ?? "Đã xảy ra lỗi. Vui lòng thử lại."}
+                {errorMessage ?? "Đã xảy ra lỗi. Vui lòng thử lại."}
               </p>
               <Button
                 variant="glass"
@@ -354,7 +363,7 @@ export default function TaskGroupAiAllocationModal({
                 isLoading={confirmMutation.isPending}
                 disabled={selectedCount === 0}
               >
-                {!confirmMutation.isPending && <CheckCircle2 className="h-4 w-4" />}
+                {!confirmMutation.isPending && <CheckCircle2 className="h-4 w-4 mr-2" />}
                 Xác nhận Phân công ({selectedCount})
               </Button>
             </div>

@@ -516,11 +516,12 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
                 <label className="mb-1 block text-sm font-medium text-foreground">Est. Days</label>
                 <input
                   type="number"
-                  min={1}
+                  step="any"
+                  min={0.1}
                   placeholder="Number of days"
                   {...register("estDays", {
                     valueAsNumber: true,
-                    min: { value: 1, message: "Must be at least 1 day" },
+                    min: { value: 0.1, message: "Must be at least 0.1 days" },
                     max: { value: 365, message: "Must be under 365 days" },
                   })}
                   className={inputClass("estDays")}
