@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { taskGroupService } from "@/services/task-group.service";
 import type { UpdateTaskGroupPayload } from "@/types/task-group";
+import axios from "axios";
 
 export function useUpdateTaskGroup() {
   const queryClient = useQueryClient();
@@ -23,8 +24,12 @@ export function useUpdateTaskGroup() {
       queryClient.invalidateQueries({ queryKey: ["task-group", variables.id] });
     },
 
-    onError: () => {
-      toast.error("Failed to update task group.");
+    onError: (error) => {
+      const message =
+        axios.isAxiosError(error) && error.response?.data?.message
+          ? error.response.data.message
+          : "Failed to update task group.";
+      toast.error(message);
     },
   });
 }
