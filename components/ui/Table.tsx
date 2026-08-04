@@ -56,18 +56,21 @@ const Table: CompoundTable = function Table({
 }: TableProps) {
   return (
     <TableContext.Provider value={{ columns }}>
-      <div
-        role="table"
-        className={`
-          rounded-3xl
-          border border-border
-          bg-card
-          shadow-glass
-          backdrop-blur-xl
-          ${className}
-        `}
-      >
-        {children}
+      <div className="w-full overflow-x-auto no-scrollbar">
+        <div
+          role="table"
+          className={`
+            min-w-[800px] xl:min-w-full
+            rounded-3xl
+            border border-border
+            bg-card
+            shadow-glass
+            backdrop-blur-xl
+            ${className}
+          `}
+        >
+          {children}
+        </div>
       </div>
     </TableContext.Provider>
   );
