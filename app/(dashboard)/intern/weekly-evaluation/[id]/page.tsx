@@ -13,6 +13,7 @@ import {
   Clock,
   TrendingUp,
   TrendingDown,
+  Sparkles,
 } from "lucide-react";
 import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
@@ -49,8 +50,14 @@ function RatingBadge({ level }: { level: RatingLevel }) {
   );
 }
 
-// Hiển thị bảng 12 tiêu chí (chỉ đọc, không có AI comparison)
-function CriteriaTable({ ratings }: { ratings: EvaluationRatings }) {
+// Hiển thị bảng 12 tiêu chí (có AI comparison nếu có aiRatings)
+function CriteriaTable({
+  ratings,
+  aiRatings,
+}: {
+  ratings: EvaluationRatings;
+  aiRatings?: EvaluationRatings | null;
+}) {
   return (
     <div className="space-y-4">
       {CRITERIA_SECTIONS.map((section) => (
@@ -72,6 +79,8 @@ function CriteriaTable({ ratings }: { ratings: EvaluationRatings }) {
           <div className="divide-y divide-border/20">
             {section.criteria.map((criterion, idx) => {
               const level = ratings[criterion.key];
+              const aiLevel = aiRatings?.[criterion.key];
+              const isDiff = aiLevel && aiLevel !== level;
               return (
                 <div
                   key={criterion.key}
@@ -83,7 +92,17 @@ function CriteriaTable({ ratings }: { ratings: EvaluationRatings }) {
                   <span className="flex-1 text-sm text-slate-300">
                     {criterion.label}
                   </span>
-                  <RatingBadge level={level} />
+                  <div className="flex items-center gap-2 shrink-0">
+                    {aiLevel && isDiff && (
+                      <div className="flex items-center gap-1">
+                        <Sparkles className="h-3 w-3 text-primary-light/50" />
+                        <span className={`text-xs px-2 py-0.5 rounded border opacity-60 ${RATING_COLORS[aiLevel]}`}>
+                          {RATING_LABELS[aiLevel]}
+                        </span>
+                      </div>
+                    )}
+                    <RatingBadge level={level} />
+                  </div>
                 </div>
               );
             })}
@@ -384,15 +403,23 @@ export default function InternWeeklyEvaluationDetailPage() {
         <div className="lg:col-span-2 space-y-6">
           <MetalCard>
             <div className="rounded-3xl p-6 space-y-6">
-              <h2 className="text-lg font-semibold flex items-center gap-2 border-b border-border/40 pb-4">
-                <BookOpen className="h-5 w-5 text-primary-light shrink-0" />
-                <span className="metal-text">
-                  {hasRatings ? "Bảng Đánh Giá 12 Tiêu Chí" : "Chi Tiết Điểm Năng Lực"}
-                </span>
-              </h2>
+              <div className="flex items-center justify-between border-b border-border/40 pb-4">
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                  <BookOpen className="h-5 w-5 text-primary-light shrink-0" />
+                  <span className="metal-text">
+                    {hasRatings ? "Bảng Đánh Giá 12 Tiêu Chí" : "Chi Tiết Điểm Năng Lực"}
+                  </span>
+                </h2>
+                {evaluation.leaderEdited && (
+                  <span className="text-xs px-2.5 py-1 rounded-full border border-amber-500/20 bg-amber-500/5 text-amber-400 flex items-center gap-1">
+                    <Sparkles className="h-3 w-3" />
+                    Đã điều chỉnh sau gợi ý AI
+                  </span>
+                )}
+              </div>
 
               {hasRatings && ratings ? (
-                <CriteriaTable ratings={ratings} />
+                <CriteriaTable ratings={ratings} aiRatings={evaluation.aiRatings} />
               ) : (
                 <LegacyScoreBars
                   communication={evaluation.communication}
@@ -416,6 +443,21 @@ export default function InternWeeklyEvaluationDetailPage() {
                   {evaluation.comment || "Leader chưa để lại nhận xét."}
                 </p>
               </div>
+
+              {/* AI original comment comparison */}
+              {evaluation.aiComment && evaluation.leaderEdited && (
+                <div className="space-y-2 mt-4">
+                  <h3 className="text-xs font-semibold text-muted flex items-center gap-1">
+                    <Sparkles className="h-3.5 w-3.5 text-primary-light" />
+                    Nhận xét gốc từ AI
+                  </h3>
+                  <div className="bg-primary-main/5 border border-primary-light/10 rounded-2xl p-4">
+                    <p className="text-slate-400 text-xs whitespace-pre-wrap leading-relaxed italic">
+                      {evaluation.aiComment}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           </MetalCard>
 
