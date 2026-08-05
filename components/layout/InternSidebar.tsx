@@ -10,19 +10,7 @@ import {
   UserRoundPen,
 } from "lucide-react";
 import { LuAlarmClock } from "react-icons/lu";
-
-const menus = [
-  { name: "Dashboard", href: "/intern/dashboard", icon: LayoutDashboard },
-  { name: "Task", href: "/intern/task", icon: CheckSquare },
-  { name: "Daily Report", href: "/intern/daily-report", icon: FileClock },
-  { name: "Meetings", href: "/intern/meetings", icon: LuAlarmClock },
-  {
-    name: "Weekly Evaluation",
-    href: "/intern/weekly-evaluation",
-    icon: ClipboardCheck,
-  },
-  { name: "Profile", href: "/intern/profile", icon: UserRoundPen },
-];
+import { useLanguage } from "@/hooks/useLanguage";
 
 const baseClass =
   "flex items-center justify-center w-14 h-14 rounded-2xl border transition-all duration-300 shadow-shadow-soft cursor-pointer";
@@ -35,6 +23,16 @@ const inactiveClass =
 
 export default function InternSidebar() {
   const pathname = usePathname();
+  const { t } = useLanguage();
+
+  const menus = [
+    { name: t("intern.nav.dashboard"),        href: "/intern/dashboard",         icon: LayoutDashboard },
+    { name: t("intern.nav.task"),             href: "/intern/task",              icon: CheckSquare },
+    { name: t("intern.nav.dailyReport"),      href: "/intern/daily-report",      icon: FileClock },
+    { name: t("intern.nav.meetings"),         href: "/intern/meetings",          icon: LuAlarmClock },
+    { name: t("intern.nav.weeklyEvaluation"), href: "/intern/weekly-evaluation", icon: ClipboardCheck },
+    { name: t("intern.nav.profile"),          href: "/intern/profile",           icon: UserRoundPen },
+  ];
 
   return (
     <aside className="flex min-h-screen flex-col items-center px-4 py-10">

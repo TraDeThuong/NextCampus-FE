@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { LogOut, User, Menu } from "lucide-react";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { useLogout } from "@/hooks/auth/useLogout";
+import { useLanguage } from "@/hooks/useLanguage";
 import Spinner from "../ui/Spinner";
 import NotificationBell from "../notification/NotificationBell";
 
@@ -16,12 +16,9 @@ type HeaderProps = {
 };
 
 export default function Header({ role, onMenuClick }: HeaderProps) {
-    const [language, setLanguage] = useState<"vn" | "en">("vn");
+    const { language, toggleLanguage, t } = useLanguage();
     const { state } = useAuth();
     const { logoutMutate, isLoading } = useLogout();
-    const toggleLanguage = () => {
-        setLanguage((prev) => (prev === "vn" ? "en" : "vn"));
-    };
 
     const handleLogout = () => {
         logoutMutate();
@@ -34,7 +31,7 @@ export default function Header({ role, onMenuClick }: HeaderProps) {
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md">
           <Spinner size="lg" />
           <p className="mt-4 text-white/80 text-sm font-medium tracking-wide animate-pulse">
-            Logging out, please wait...
+            {t("header.loggingOut")}
           </p>
         </div>,
         document.body
@@ -51,7 +48,7 @@ export default function Header({ role, onMenuClick }: HeaderProps) {
             <Menu size={20} />
           </button>
           <h2 className="text-base sm:text-xl metal-text font-semibold tracking-wide truncate">
-            {role} DASHBOARD
+            {role} {t("header.dashboard")}
           </h2>
         </div>
 
