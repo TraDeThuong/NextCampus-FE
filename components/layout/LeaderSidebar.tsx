@@ -12,21 +12,7 @@ import {
   Building2,
 } from "lucide-react";
 import { LuAlarmClock } from "react-icons/lu";
-
-const menus = [
-  { name: "Dashboard", href: "/leader/dashboard", icon: LayoutDashboard },
-  { name: "Interns", href: "/leader/interns", icon: Users },
-  { name: "Department", href: "/leader/department", icon: Building2 },
-  { name: "Tasks", href: "/leader/tasks", icon: CheckSquare },
-  { name: "Daily Reports", href: "/leader/daily-reports", icon: ClipboardCheck },
-  { name: "Meetings", href: "/leader/meetings", icon: LuAlarmClock },
-  {
-    name: "Weekly Evaluation",
-    href: "/leader/weekly-evaluation",
-    icon: FileBarChart,
-  },
-  { name: "Profile", href: "/leader/profile", icon: UserRoundPen },
-];
+import { useLanguage } from "@/hooks/useLanguage";
 
 const baseClass =
   "flex items-center justify-center w-14 h-14 rounded-2xl border transition-all duration-300 shadow-shadow-soft cursor-pointer";
@@ -39,6 +25,18 @@ const inactiveClass =
 
 export default function LeaderSidebar() {
   const pathname = usePathname();
+  const { t } = useLanguage();
+
+  const menus = [
+    { name: t("leader.nav.dashboard"),        href: "/leader/dashboard",         icon: LayoutDashboard },
+    { name: t("leader.nav.interns"),          href: "/leader/interns",           icon: Users },
+    { name: t("leader.nav.department"),       href: "/leader/department",        icon: Building2 },
+    { name: t("leader.nav.tasks"),            href: "/leader/tasks",             icon: CheckSquare },
+    { name: t("leader.nav.dailyReports"),     href: "/leader/daily-reports",     icon: ClipboardCheck },
+    { name: t("leader.nav.meetings"),         href: "/leader/meetings",          icon: LuAlarmClock },
+    { name: t("leader.nav.weeklyEvaluation"), href: "/leader/weekly-evaluation", icon: FileBarChart },
+    { name: t("leader.nav.profile"),          href: "/leader/profile",           icon: UserRoundPen },
+  ];
 
   return (
     <aside className="flex min-h-screen flex-col items-center px-4 py-10">

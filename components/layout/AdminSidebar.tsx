@@ -16,23 +16,26 @@ import { PiBuildingOfficeLight } from "react-icons/pi";
 import { MdManageAccounts } from "react-icons/md";
 import { usePathname } from "next/navigation";
 import { MdOutlineMailOutline } from "react-icons/md";
-
-const menus = [
-  { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-  { name: "Admin Team", href: "/admin/admin-team", icon: MdManageAccounts },
-  { name: "Leaders", href: "/admin/leaders", icon: UserCheck },
-  { name: "Interns", href: "/admin/interns", icon: Users },
-  { name: "Department", href: "/admin/department", icon: PiBuildingOfficeLight },
-  { name: "Onboarding", href: "/admin/onboarding", icon: Rocket },
-  { name: "Mails", href: "/admin/emails", icon: MdOutlineMailOutline },
-  { name: "Meetings", href:"/admin/mettings", icon:LuAlarmClock},
-  { name: "Policies", href: "/admin/policies", icon: FileText },
-  { name: "Activity Logs", href: "/admin/activity-logs", icon: History },
-  { name: "Profile", href: "/admin/profile", icon: UserRoundPen },
-];
+import { useLanguage } from "@/hooks/useLanguage";
 
 export default function AdminSidebar() {
-  const pathname = usePathname()
+  const pathname = usePathname();
+  const { t } = useLanguage();
+
+  const menus = [
+    { name: t("admin.nav.dashboard"),     href: "/admin/dashboard",     icon: LayoutDashboard },
+    { name: t("admin.nav.adminTeam"),     href: "/admin/admin-team",    icon: MdManageAccounts },
+    { name: t("admin.nav.leaders"),       href: "/admin/leaders",       icon: UserCheck },
+    { name: t("admin.nav.interns"),       href: "/admin/interns",       icon: Users },
+    { name: t("admin.nav.department"),    href: "/admin/department",    icon: PiBuildingOfficeLight },
+    { name: t("admin.nav.onboarding"),    href: "/admin/onboarding",    icon: Rocket },
+    { name: t("admin.nav.mails"),         href: "/admin/emails",        icon: MdOutlineMailOutline },
+    { name: t("admin.nav.meetings"),      href: "/admin/mettings",      icon: LuAlarmClock },
+    { name: t("admin.nav.policies"),      href: "/admin/policies",      icon: FileText },
+    { name: t("admin.nav.activityLogs"), href: "/admin/activity-logs", icon: History },
+    { name: t("admin.nav.profile"),       href: "/admin/profile",       icon: UserRoundPen },
+  ];
+
   return (
     <aside
       className="flex flex-col items-center min-h-screen py-2 px-4 ">

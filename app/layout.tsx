@@ -4,6 +4,7 @@ import ReactQueryProvider from "@/providers/ReactQueryProvider";
 import { ReactNode } from "react";
 import ToastProvider from "@/providers/ToastProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -36,10 +37,12 @@ export default function RootLayout({ children } : {children: ReactNode}) {
     >
       <body suppressHydrationWarning>
         <ReactQueryProvider>
-          <AuthProvider>
-            {children}
-            <ToastProvider />
-          </AuthProvider>
+          <LanguageProvider>
+            <AuthProvider>
+              {children}
+              <ToastProvider />
+            </AuthProvider>
+          </LanguageProvider>
         </ReactQueryProvider>
       </body>
     </html>
