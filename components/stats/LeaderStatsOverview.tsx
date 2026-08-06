@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useLeaderStats } from "@/hooks/stats/useLeaderStats";
 import StatsCard from "./StatsCard";
 import Spinner from "../ui/Spinner";
@@ -126,7 +125,7 @@ export default function LeaderStatsOverview() {
           value={stats.submissions.pending}
           subtitle={`${stats.submissions.approved} bài đã duyệt`}
           icon={<FileCheck className="h-6 w-6 text-amber-400" />}
-          href="/leader/review?status=PENDING"
+          href="/leader/tasks?status=REVIEW"
           trend={{
             text: stats.submissions.pending > 0 ? "Cần duyệt ngay" : "Hoàn thành duyệt",
             positive: stats.submissions.pending === 0,
