@@ -89,7 +89,7 @@
   }
 
   h1, h2, h3 {
-    font-family: var(--font-heading);
+    font-family: var(--font-heading), var(--font-heading-vi);
     font-weight: 400;
   }
 

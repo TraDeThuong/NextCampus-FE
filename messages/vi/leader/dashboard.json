@@ -2,7 +2,7 @@
   "leader": {
     "dashboard": {
       "metaTitle": "Tổng quan (Leader)",
-      "title": "Leader Team Operations Center",
+      "title": "Trung Tâm Điều Hành Nhóm",
       "description": "Quản lý trực tiếp thực tập sinh, duyệt bài nộp & theo dõi tiến độ công việc nhóm",
       "loadError": "Lỗi khi tải dữ liệu thống kê Leader. Vui lòng kiểm tra lại kết nối mạng.",
       "retry": "Thử lại",

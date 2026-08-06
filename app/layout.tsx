@@ -1,4 +1,4 @@
-import { Black_Ops_One, Ubuntu } from "next/font/google";
+import { Black_Ops_One, Saira_Stencil_One, Ubuntu } from "next/font/google";
 import "./globals.css";
 import { ReactNode } from "react";
 import type { Metadata } from "next";
@@ -17,6 +17,12 @@ const headingFont = Black_Ops_One({
   variable: "--font-heading",
 });
 
+const headingFontVi = Saira_Stencil_One({
+  subsets: ["latin", "vietnamese"],
+  weight: "400",
+  variable: "--font-heading-vi",
+});
+
 const bodyFont = Ubuntu({
   subsets: ["latin"],
   weight: ["300", "400", "500", "700"],
@@ -27,7 +33,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en"
-      className={`${headingFont.variable} ${bodyFont.variable}`}
+      className={`${headingFont.variable} ${headingFontVi.variable} ${bodyFont.variable}`}
       suppressHydrationWarning
     >
       <body suppressHydrationWarning>{children}</body>
