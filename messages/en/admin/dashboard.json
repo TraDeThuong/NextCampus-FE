@@ -1,0 +1,53 @@
+{
+  "admin": {
+    "dashboard": {
+      "metaTitle": "Dashboard (Admin)",
+      "title": "Admin Executive Control Center",
+      "badge": "System Admin",
+      "subtitle": "Senior system administration • Monitor overall health, Leader teams & quick task handling",
+      "errorLoad": "Failed to load admin statistics. Please check your network connection.",
+      "activeInterns": "Active Interns",
+      "retentionRate": "Retention rate: {pct}%",
+      "completed": "{n} completed",
+      "leaderTeam": "Leader Team",
+      "managingDepts": "Managing {n} departments",
+      "adminLevel": "Team management level",
+      "pendingApps": "Pending Applications",
+      "totalApps": "Out of {n} total applications",
+      "needReview": "Need review now",
+      "allDone": "All processed",
+      "leaderPerformance": "Leader Team Performance Progress",
+      "showingGroups": "Showing leader groups ({n}/{m} groups)",
+      "collapseTop5": "Collapse Top 5",
+      "viewAllN": "View all ({n})",
+      "colLeader": "Leader / Team",
+      "colDepartment": "Department",
+      "colInternCount": "Intern Count",
+      "colProgress": "Progress & % Completion",
+      "colTaskRisk": "Task Risk",
+      "internCount": "{n} Interns",
+      "percentDone": "{pct}% Done ({done}/{total} Tasks)",
+      "inProgressReview": "{inProgress} in progress • {review} pending review",
+      "overdueTasks": "{n} tasks overdue",
+      "recentActivity": "Recent Activity",
+      "noActivity": "No recent activity recorded.",
+      "actionAlerts": "Action Alerts",
+      "pendingAppsCount": "{n} Pending applications",
+      "needApproveReject": "Need to approve or reject new candidates",
+      "overdueTasksCount": "{n} Overdue tasks company-wide",
+      "clickToSeeOverdue": "Click to see the overdue list",
+      "droppedInterns": "{n} Dropped / discontinued interns",
+      "droppedList": "List of discontinued interns",
+      "overdueModalTitle": "All Overdue Tasks System-Wide ({n})"
+    },
+    "taskModal": {
+      "showingItems": "Showing detailed task list, assigned interns and deadlines ({n} items)",
+      "noTasks": "No tasks in this category.",
+      "colTask": "Task",
+      "colIntern": "Intern",
+      "colLeader": "Assigned By",
+      "colDeadline": "Deadline",
+      "colStatus": "Status"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "leader": {
+    "dailyReports": {
+      "metaTitle": "Daily Reports",
+      "title": "Daily Reports",
+      "description": "Select an intern to view their reports",
+      "selectCalendar": "Select an intern to view their calendar.",
+
+      "totalInterns": "Total Interns",
+      "assignedToYou": "Assigned to you",
+      "submittedToday": "Submitted Today",
+      "percentOfInterns": "{percent}% of interns",
+      "missingToday": "Missing Today",
+      "notSubmittedYet": "Haven't submitted yet",
+      "weekRate": "Week Rate",
+      "workingDays": "{days} working days this week",
+
+      "interns": "Interns ({count})",
+      "noInterns": "No interns assigned.",
+
+      "missingReport": "Missing Daily Report",
+      "missingReportDesc": "You have not submitted a daily report for this date.",
+      "noReportSelected": "No Report Selected",
+      "noReportHint": "Click on a highlighted date in the calendar to view the daily report details.",
+      "reportTitle": "Daily Report",
+      "content": "Content",
+      "prLink": "PR Link",
+      "videoDemo": "Video Demo",
+      "viewVideo": "View Video",
+      "attachments": "Attachments ({count})",
+      "edit": "Edit"
+    }
+  }
+}

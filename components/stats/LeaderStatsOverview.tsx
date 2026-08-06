@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useLeaderStats } from "@/hooks/stats/useLeaderStats";
 import StatsCard from "./StatsCard";
 import Spinner from "../ui/Spinner";
@@ -11,15 +11,10 @@ import PendingApprovalCard from "./PendingApprovalCard";
 import PendingApprovalModal from "./PendingApprovalModal";
 import Table from "../ui/Table";
 import { AssignmentDetail } from "@/types/stats";
-import {
-  Users,
-  CheckCircle2,
-  FileCheck,
-  Award,
-  ShieldAlert,
-} from "lucide-react";
+import { Users, CheckCircle2, FileCheck, Award, ShieldAlert } from "lucide-react";
 
 export default function LeaderStatsOverview() {
+  const t = useTranslations("leader.dashboard");
   const { data: response, isLoading, isError, refetch } = useLeaderStats();
 
   const [modalConfig, setModalConfig] = useState<{
@@ -45,12 +40,12 @@ export default function LeaderStatsOverview() {
   if (isError || !response?.success) {
     return (
       <div className="rounded-2xl border border-danger/30 bg-danger/10 p-6 text-center text-danger space-y-3">
-        <p className="font-semibold">Lỗi khi tải dữ liệu thống kê Leader. Vui lòng kiểm tra lại kết nối mạng.</p>
+        <p className="font-semibold">{t("loadError")}</p>
         <button
           onClick={() => refetch()}
           className="px-4 py-2 rounded-xl bg-danger text-white text-xs font-bold hover:opacity-90 transition-all cursor-pointer"
         >
-          Thử lại
+          {t("retry")}
         </button>
       </div>
     );
@@ -62,11 +57,47 @@ export default function LeaderStatsOverview() {
   const overdueAssignments = rawOverdue.filter((a) => a.isOverdue);
   const internProgress = stats.internProgress ?? [];
 
-  const handleOpenStatusModal = (statusKey: string, statusTitle: string) => {
+  const statusLabels: Record<string, string> = {
+    PENDING_APPROVAL: t("statusPendingApproval"),
+    TODO: t("statusTodo"),
+    IN_PROGRESS: t("statusInProgress"),
+    REVIEW: t("statusReview"),
+    DONE: t("statusDone"),
+    BLOCKED: t("statusBlocked"),
+  };
+
+  const statusColors: Record<string, { border: string; bg: string; hoverBg: string; text: string; textBold: string }> = {
+    PENDING_APPROVAL: {
+      border: "border-purple-500/20", bg: "bg-purple-500/10", hoverBg: "hover:bg-purple-500/20",
+      text: "text-purple-400", textBold: "text-purple-300",
+    },
+    TODO: {
+      border: "border-white/10", bg: "bg-white/5", hoverBg: "hover:bg-white/10",
+      text: "text-muted", textBold: "text-foreground",
+    },
+    IN_PROGRESS: {
+      border: "border-cyan-500/20", bg: "bg-cyan-500/10", hoverBg: "hover:bg-cyan-500/20",
+      text: "text-cyan-400", textBold: "text-cyan-300",
+    },
+    REVIEW: {
+      border: "border-amber-500/20", bg: "bg-amber-500/10", hoverBg: "hover:bg-amber-500/20",
+      text: "text-amber-400", textBold: "text-amber-300",
+    },
+    DONE: {
+      border: "border-emerald-500/20", bg: "bg-emerald-500/10", hoverBg: "hover:bg-emerald-500/20",
+      text: "text-emerald-400", textBold: "text-emerald-300",
+    },
+    BLOCKED: {
+      border: "border-rose-500/20", bg: "bg-rose-500/10", hoverBg: "hover:bg-rose-500/20",
+      text: "text-rose-400", textBold: "text-rose-300",
+    },
+  };
+
+  const handleOpenStatusModal = (statusKey: string) => {
     const filtered = allAssignments.filter((a) => a.status === statusKey);
     setModalConfig({
       isOpen: true,
-      title: `Chi Tiết Công Việc Nhóm - Trạng Thái: ${statusTitle}`,
+      title: t("statusDetailTitle", { status: statusLabels[statusKey] ?? statusKey }),
       assignments: filtered,
     });
   };
@@ -74,14 +105,13 @@ export default function LeaderStatsOverview() {
   const handleOpenOverdueModal = () => {
     setModalConfig({
       isOpen: true,
-      title: `Danh Sách Task Quá Hạn Của Nhóm (${overdueAssignments.length})`,
+      title: t("overdueListTitle", { count: overdueAssignments.length }),
       assignments: overdueAssignments,
     });
   };
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      {/* Modal View Details */}
       <TaskAssignmentModal
         isOpen={modalConfig.isOpen}
         onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
@@ -89,70 +119,65 @@ export default function LeaderStatsOverview() {
         assignments={modalConfig.assignments}
       />
 
-      {/* Modal Pending Approval */}
       <PendingApprovalModal
         isOpen={pendingModalOpen}
         onClose={() => setPendingModalOpen(false)}
       />
 
-      {/* Header Banner */}
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-extrabold text-foreground metal-text">
-            Leader Team Operations Center
+            {t("title")}
           </h1>
-          <p className="text-sm text-muted">
-            Quản lý trực tiếp thực tập sinh, duyệt bài nộp & theo dõi tiến độ công việc nhóm
-          </p>
+          <p className="text-sm text-muted">{t("description")}</p>
         </div>
       </div>
 
-      {/* Action-Oriented KPI Cards (Chỉ 5 chỉ số có giá trị hành động) */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
         <StatsCard
-          title="TTS Đang Quản Lý"
+          title={t("activeInterns")}
           value={stats.interns.active}
-          subtitle={`Tổng số: ${stats.interns.total} TTS`}
+          subtitle={t("activeInternsSubtitle", { total: stats.interns.total })}
           icon={<Users className="h-6 w-6 text-primary-light" />}
           href="/leader/interns?status=ACTIVE"
           trend={{
-            text: `${stats.interns.completed} hoàn thành`,
+            text: t("completedCount", { count: stats.interns.completed }),
             positive: true,
           }}
         />
 
         <StatsCard
-          title="Bài Nộp Chờ Duyệt"
+          title={t("pendingSubmissions")}
           value={stats.submissions.pending}
-          subtitle={`${stats.submissions.approved} bài đã duyệt`}
+          subtitle={t("approvedSubmissions", { count: stats.submissions.approved })}
           icon={<FileCheck className="h-6 w-6 text-amber-400" />}
           href="/leader/review?status=PENDING"
           trend={{
-            text: stats.submissions.pending > 0 ? "Cần duyệt ngay" : "Hoàn thành duyệt",
+            text: stats.submissions.pending > 0 ? t("needsApproval") : t("approvalDone"),
             positive: stats.submissions.pending === 0,
           }}
         />
 
         <StatsCard
-          title="Task Quá Hạn Trong Team"
+          title={t("overdueTasks")}
           value={overdueAssignments.length}
-          subtitle="Các task trễ deadline"
+          subtitle={t("overdueTasksSubtitle")}
           icon={<ShieldAlert className="h-6 w-6 text-rose-400" />}
           onCardClick={handleOpenOverdueModal}
           trend={{
-            text: overdueAssignments.length > 0 ? "Cần nhắc nhở TTS" : "Đúng tiến độ",
+            text: overdueAssignments.length > 0 ? t("remindInterns") : t("onTrack"),
             positive: overdueAssignments.length === 0,
           }}
         />
 
         <StatsCard
-          title="Điểm Đánh Giá TB Nhóm"
+          title={t("avgScore")}
           value={`${stats.weeklyEvaluations.avgScore}/10`}
-          subtitle={`${stats.weeklyEvaluations.total} lượt chấm điểm`}
+          subtitle={t("avgScoreSubtitle", { count: stats.weeklyEvaluations.total })}
           icon={<Award className="h-6 w-6 text-emerald-400" />}
           href="/leader/weekly-evaluation"
           trend={{
-            text: "Điểm trung bình nhóm",
+            text: t("avgScoreLabel"),
             positive: stats.weeklyEvaluations.avgScore >= 7,
           }}
         />
@@ -160,28 +185,24 @@ export default function LeaderStatsOverview() {
         <PendingApprovalCard onOpenModal={() => setPendingModalOpen(true)} />
       </div>
 
-      {/* Intern Progress Table in Team */}
       <MetalCard className="p-6">
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <div>
             <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
               <Users className="h-6 w-6 text-primary-light shrink-0" />
-              <span className="metal-text">Tiến Độ Chi Tiết Thực Tập Sinh Trong Nhóm</span>
+              <span className="metal-text">{t("internProgressTitle")}</span>
             </h3>
-            <p className="text-xs text-muted mt-1">
-              Giám sát tiến độ hoàn thành công việc và điểm số trung bình của từng cá nhân
-            </p>
+            <p className="text-xs text-muted mt-1">{t("internProgressDesc")}</p>
           </div>
-
         </div>
 
         <div className="mt-6">
           <Table columns="2.5fr 1.5fr 1.2fr 1.5fr">
             <Table.Header>
-              <span>Thực Tập Sinh</span>
-              <span>Tiến Độ Task</span>
-              <span>Điểm TB</span>
-              <span>Trạng Thái Tiến Độ</span>
+              <span>{t("colIntern")}</span>
+              <span>{t("colTaskProgress")}</span>
+              <span>{t("colAvgScore")}</span>
+              <span>{t("colHealthStatus")}</span>
             </Table.Header>
 
             <Table.Body
@@ -193,16 +214,14 @@ export default function LeaderStatsOverview() {
                 return (
                   <Table.Row key={intern.internId}>
                     <div>
-                      <p className="font-bold text-foreground text-sm">
-                        {intern.internName}
-                      </p>
+                      <p className="font-bold text-foreground text-sm">{intern.internName}</p>
                       <p className="text-xs text-muted">{intern.internEmail}</p>
                     </div>
 
                     <div>
                       <div className="flex justify-between items-center text-xs mb-1">
                         <span className="text-foreground font-semibold">
-                          {intern.completedTasks}/{intern.totalTasks} Task
+                          {t("taskCount", { completed: intern.completedTasks, total: intern.totalTasks })}
                         </span>
                         <span className="text-muted">{percent}%</span>
                       </div>
@@ -216,26 +235,24 @@ export default function LeaderStatsOverview() {
 
                     <div>
                       <span className="text-sm font-extrabold text-foreground">
-                        {intern.avgScore > 0 ? `${intern.avgScore}/10` : "Chưa chấm"}
+                        {intern.avgScore > 0 ? `${intern.avgScore}/10` : t("notGraded")}
                       </span>
                     </div>
 
                     <div>
                       {intern.healthStatus === "HEALTHY" && (
                         <span className="inline-flex items-center justify-center text-xs font-semibold leading-none text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1.5 rounded-lg">
-                          Đúng tiến độ
+                          {t("healthy")}
                         </span>
                       )}
-
                       {intern.healthStatus === "WARNING" && (
                         <span className="inline-flex items-center justify-center text-xs font-semibold leading-none text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1.5 rounded-lg">
-                          Cần chú ý ({intern.overdueCount} task trễ)
+                          {t("warning", { count: intern.overdueCount })}
                         </span>
                       )}
-
                       {intern.healthStatus === "DANGER" && (
                         <span className="inline-flex items-center justify-center text-xs font-semibold leading-none text-rose-400 bg-rose-500/10 border border-rose-500/30 px-2.5 py-1.5 rounded-lg">
-                          Nguy cơ chậm ({intern.overdueCount} task trễ)
+                          {t("danger", { count: intern.overdueCount })}
                         </span>
                       )}
                     </div>
@@ -247,82 +264,31 @@ export default function LeaderStatsOverview() {
         </div>
       </MetalCard>
 
-      {/* Task Status Clickable Breakdown */}
       <MetalCard className="p-6">
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
             <CheckCircle2 className="h-5 w-5 text-primary-light" />
-            Phân Bổ Trạng Thái Nhiệm Vụ Nhóm
+            {t("taskStatusTitle")}
           </h3>
-          <span className="text-xs text-muted">Bấm vào từng dòng để xem danh sách Task</span>
+          <span className="text-xs text-muted">{t("taskStatusSubtitle")}</span>
         </div>
 
         <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-center">
-          <button
-            type="button"
-            onClick={() => handleOpenStatusModal("PENDING_APPROVAL", "Chờ Phê Duyệt")}
-            className="p-3 rounded-xl border border-purple-500/20 bg-purple-500/10 hover:bg-purple-500/20 transition-all cursor-pointer"
-          >
-            <p className="text-xs text-purple-400 font-medium">Chờ duyệt</p>
-            <p className="text-xl font-bold text-purple-300 mt-1">
-              {stats.assignments.byStatus.pendingApproval}
-            </p>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleOpenStatusModal("TODO", "Cần Làm")}
-            className="p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all cursor-pointer"
-          >
-            <p className="text-xs text-muted font-medium">Cần làm</p>
-            <p className="text-xl font-bold text-foreground mt-1">
-              {stats.assignments.byStatus.todo}
-            </p>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleOpenStatusModal("IN_PROGRESS", "Đang Làm")}
-            className="p-3 rounded-xl border border-cyan-500/20 bg-cyan-500/10 hover:bg-cyan-500/20 transition-all cursor-pointer"
-          >
-            <p className="text-xs text-cyan-400 font-medium">Đang làm</p>
-            <p className="text-xl font-bold text-cyan-300 mt-1">
-              {stats.assignments.byStatus.inProgress}
-            </p>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleOpenStatusModal("REVIEW", "Chờ Duyệt Bài")}
-            className="p-3 rounded-xl border border-amber-500/20 bg-amber-500/10 hover:bg-amber-500/20 transition-all cursor-pointer"
-          >
-            <p className="text-xs text-amber-400 font-medium">Chờ duyệt</p>
-            <p className="text-xl font-bold text-amber-300 mt-1">
-              {stats.assignments.byStatus.review}
-            </p>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleOpenStatusModal("DONE", "Hoàn Thành")}
-            className="p-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 hover:bg-emerald-500/20 transition-all cursor-pointer"
-          >
-            <p className="text-xs text-emerald-400 font-medium">Hoàn thành</p>
-            <p className="text-xl font-bold text-emerald-300 mt-1">
-              {stats.assignments.byStatus.done}
-            </p>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleOpenStatusModal("BLOCKED", "Bị Hoãn")}
-            className="p-3 rounded-xl border border-rose-500/20 bg-rose-500/10 hover:bg-rose-500/20 transition-all cursor-pointer"
-          >
-            <p className="text-xs text-rose-400 font-medium">Bị hoãn</p>
-            <p className="text-xl font-bold text-rose-300 mt-1">
-              {stats.assignments.byStatus.blocked}
-            </p>
-          </button>
+          {Object.entries(statusColors).map(([key, color]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => handleOpenStatusModal(key)}
+              className={`p-3 rounded-xl border ${color.border} ${color.bg} ${color.hoverBg} transition-all cursor-pointer`}
+            >
+              <p className={`text-xs ${color.text} font-medium`}>
+                {statusLabels[key]}
+              </p>
+              <p className={`text-xl font-bold ${color.textBold} mt-1`}>
+                {stats.assignments.byStatus[key as keyof typeof stats.assignments.byStatus] ?? 0}
+              </p>
+            </button>
+          ))}
         </div>
       </MetalCard>
     </div>

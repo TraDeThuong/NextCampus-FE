@@ -1,0 +1,17 @@
+{
+  "admin": {
+    "nav": {
+      "dashboard": "Tổng quan",
+      "adminTeam": "Nhóm Admin",
+      "leaders": "Leader",
+      "interns": "Thực tập sinh",
+      "department": "Phòng ban",
+      "onboarding": "Onboarding",
+      "mails": "Email",
+      "meetings": "Cuộc họp",
+      "policies": "Chính sách",
+      "activityLogs": "Nhật ký",
+      "profile": "Hồ sơ"
+    }
+  }
+}

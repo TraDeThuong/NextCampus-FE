@@ -2,6 +2,7 @@
 
 import { useContext } from "react";
 import { Clock } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { AuthContext } from "@/contexts/AuthContext";
 import { useTaskAssignments } from "@/hooks/task-assignment/useTaskAssignments";
 import StatsCard from "./StatsCard";
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export default function PendingApprovalCard({ onOpenModal }: Props) {
+  const t = useTranslations("leader.dashboard");
   const auth = useContext(AuthContext);
   const currentUserId = auth?.state.user?.id;
 
@@ -25,13 +27,13 @@ export default function PendingApprovalCard({ onOpenModal }: Props) {
 
   return (
     <StatsCard
-      title="Yêu Cầu Phê Duyệt"
+      title={t("pendingApproval")}
       value={crossTeam.length}
-      subtitle="Yêu cầu giao việc từ Leader khác"
+      subtitle={t("pendingApprovalSubtitle")}
       icon={<Clock className="h-6 w-6 text-amber-400" />}
       onCardClick={onOpenModal}
       trend={{
-        text: crossTeam.length > 0 ? "Cần phê duyệt" : "Đã duyệt hết",
+        text: crossTeam.length > 0 ? t("needsYourApproval") : t("allApproved"),
         positive: crossTeam.length === 0,
       }}
     />

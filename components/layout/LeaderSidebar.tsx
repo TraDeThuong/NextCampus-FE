@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link } from "@/i18n/navigation";
+import { usePathname } from "@/i18n/navigation";
 import {
   LayoutDashboard,
   Users,
@@ -12,7 +12,7 @@ import {
   Building2,
 } from "lucide-react";
 import { LuAlarmClock } from "react-icons/lu";
-import { useLanguage } from "@/hooks/useLanguage";
+import { useTranslations } from "next-intl";
 
 const baseClass =
   "flex items-center justify-center w-14 h-14 rounded-2xl border transition-all duration-300 shadow-shadow-soft cursor-pointer";
@@ -25,7 +25,7 @@ const inactiveClass =
 
 export default function LeaderSidebar() {
   const pathname = usePathname();
-  const { t } = useLanguage();
+  const t = useTranslations();
 
   const menus = [
     { name: t("leader.nav.dashboard"),        href: "/leader/dashboard",         icon: LayoutDashboard },

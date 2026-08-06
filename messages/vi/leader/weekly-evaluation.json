@@ -1,0 +1,110 @@
+{
+  "leader": {
+    "weeklyEvaluation": {
+      "metaTitle": "Đánh giá tuần",
+      "title": "Đánh Giá Tuần (Weekly Evaluation)",
+      "description": "Đánh giá thực tập sinh hàng tuần, nhận gợi ý thông minh từ AI và xuất báo cáo PDF.",
+      "createEvaluation": "Tạo Đánh Giá",
+      "exportPdf": "Xuất PDF",
+      "backToList": "Quay lại danh sách",
+
+      "colIntern": "Thực Tập Sinh",
+      "colWeek": "Tuần",
+      "colScore": "Điểm & Xếp Loại",
+      "colAi": "AI",
+      "colActions": "Thao Tác",
+      "week": "Tuần {n}",
+      "unknown": "Chưa xác định",
+      "aiLabel": "AI",
+      "notYet": "Chưa",
+      "view": "Xem",
+      "deleteConfirm": "Bạn có chắc chắn muốn xóa đánh giá này không?",
+      "pagination": "Trang {page} / {totalPages}",
+
+      "createModal": {
+        "title": "Tạo Đánh Giá Tuần",
+        "description": "Đánh giá năng lực của thực tập sinh theo 12 tiêu chí và 5 mức xếp loại.",
+        "intern": "Thực Tập Sinh",
+        "selectIntern": "-- Chọn thực tập sinh --",
+        "loadingInterns": "Đang tải danh sách...",
+        "week": "Tuần Đánh Giá",
+        "currentWeek": "Tuần hiện tại: {week} (Khoảng từ 1 đến {max})",
+        "weekendNotice": "Đánh giá tuần hiện tại sẽ bắt đầu mở từ Thứ Bảy (sau 11:00 sáng).",
+        "weekAlreadyEvaluated": "Tuần này đã được đánh giá cho học viên này trước đó.",
+        "selectRatings": "Chọn mức xếp loại cho 12 tiêu chí bên dưới:",
+        "getAiSuggestion": "Nhận gợi ý từ AI",
+        "communication": "Giao tiếp",
+        "attitude": "Thái độ",
+        "learning": "Tự học",
+        "coding": "Lập trình",
+        "totalScore": "Tổng điểm TB",
+        "comment": "Nhận xét",
+        "commentPlaceholder": "Nhập nhận xét chi tiết về thực tập sinh trong tuần...",
+        "useAiComment": "Dùng nhận xét của AI",
+        "cancel": "Hủy",
+        "saveEvaluation": "Lưu Đánh Giá",
+        "selectInternFirst": "Vui lòng chọn thực tập sinh trước.",
+        "enterValidWeek": "Vui lòng nhập tuần đánh giá hợp lệ.",
+        "weekRange": "Tuần đánh giá phải nằm trong khoảng từ 1 đến {max}.",
+        "weekendOnly": "Chỉ có thể đánh giá tuần hiện tại từ Thứ Bảy (sau 11:00 sáng) đến hết Chủ Nhật.",
+        "weekAlreadyExists": "Tuần {week} đã được đánh giá cho thực tập sinh này.",
+        "aiSuggestionReceived": "Đã nhận gợi ý từ AI!",
+        "criteriaCount": "({count} tiêu chí)"
+      },
+
+      "detail": {
+        "unknownIntern": "Thực tập sinh",
+        "week": "Tuần {n}",
+        "criteria12": "12 tiêu chí",
+        "evaluatedOn": "Đánh giá ngày {date}",
+        "criteriaTable": "Bảng Đánh Giá 12 Tiêu Chí",
+        "scoreDetail": "Chi Tiết Điểm Năng Lực",
+        "adjustedAfterAi": "Đã điều chỉnh sau gợi ý AI",
+        "review": "Nhận Xét & Đánh Giá",
+        "noComment": "Không có nhận xét.",
+        "originalAiComment": "Nhận xét gốc từ AI",
+        "overallScore": "Điểm Đánh Giá Chung",
+        "outOf": "trên thang điểm 10.00",
+        "finalScore": "Điểm thực tế",
+        "aiSuggested": "AI đề xuất",
+        "communication": "Giao tiếp",
+        "attitude": "Thái độ",
+        "learning": "Tự học",
+        "coding": "Lập trình",
+        "evaluator": "Người đánh giá:",
+        "createdAt": "Ngày tạo:",
+        "updatedAt": "Cập nhật cuối:",
+        "sectionScore": "Điểm trung bình phần {id}:",
+        "aiHint": "AI gợi ý:",
+        "leader": "Leader"
+      },
+
+      "sections": {
+        "I": "Kỷ luật và tư chất",
+        "II": "Khả năng chuyên môn",
+        "III": "Kết quả thực hiện đề tài"
+      },
+      "criteria": {
+        "ruleCompliance": "Thực hiện nội quy của cơ quan",
+        "workAttitude": "Thái độ làm việc",
+        "learningCapacity": "Năng lực tiếp thu",
+        "resilience": "Khả năng vượt khó, chịu áp lực",
+        "communication": "Giao tiếp và ứng xử",
+        "knowledge": "Kiến thức",
+        "practicalSkills": "Kỹ năng thực hành",
+        "foreignLanguage": "Năng lực ngoại ngữ",
+        "teamwork": "Kỹ năng làm việc nhóm",
+        "creativity": "Tính sáng tạo",
+        "contentQuality": "Thực hiện yêu cầu về nội dung",
+        "progressDelivery": "Thực hiện yêu cầu về tiến độ"
+      },
+      "ratings": {
+        "TOT": "Tốt",
+        "KHA": "Khá",
+        "TB": "Trung bình",
+        "TBY": "Trung bình yếu",
+        "YEU": "Yếu"
+      }
+    }
+  }
+}

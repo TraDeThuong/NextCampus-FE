@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { AssignmentDetail } from "@/types/stats";
 import Table from "../ui/Table";
 import { HiXMark } from "react-icons/hi2";
@@ -19,6 +20,7 @@ export default function TaskAssignmentModal({
   title,
   assignments,
 }: TaskAssignmentModalProps) {
+  const t = useTranslations();
   const ref = useOutsideClick<HTMLDivElement>(onClose);
 
   if (!isOpen) return null;
@@ -43,23 +45,23 @@ export default function TaskAssignmentModal({
             {title}
           </h2>
           <p className="text-xs text-muted mt-1">
-            Hiển thị danh sách chi tiết công việc, thực tập sinh phụ trách và hạn chót ({assignments.length} mục)
+            {t("admin.taskModal.showingItems", { n: assignments.length })}
           </p>
         </div>
 
         {/* Empty State vs Table */}
         {assignments.length === 0 ? (
           <div className="py-12 text-center rounded-2xl border border-white/5 bg-white/[0.02]">
-            <p className="text-sm text-muted">Không có nhiệm vụ nào thuộc danh mục này.</p>
+            <p className="text-sm text-muted">{t("admin.taskModal.noTasks")}</p>
           </div>
         ) : (
           <Table columns="2fr 1.5fr 1.5fr 1fr 1fr">
             <Table.Header>
-              <span>Nhiệm vụ / Task</span>
-              <span>Thực Tập Sinh</span>
-              <span>Leader Giao Việc</span>
-              <span>Hạn Chót</span>
-              <span>Trạng Thái</span>
+              <span>{t("admin.taskModal.colTask")}</span>
+              <span>{t("admin.taskModal.colIntern")}</span>
+              <span>{t("admin.taskModal.colLeader")}</span>
+              <span>{t("admin.taskModal.colDeadline")}</span>
+              <span>{t("admin.taskModal.colStatus")}</span>
             </Table.Header>
 
             <Table.Body
@@ -79,7 +81,7 @@ export default function TaskAssignmentModal({
                           : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                       }`}
                     >
-                      Ưu tiên: {item.taskPriority}
+                      {t("common.priority", { priority: item.taskPriority })}
                     </span>
                   </div>
 
@@ -104,12 +106,12 @@ export default function TaskAssignmentModal({
                         {new Date(item.taskDeadline).toLocaleDateString("vi-VN")}
                         {item.isOverdue && (
                           <span className="block text-[10px] text-rose-400">
-                            ⚠ Đã Quá Hạn
+                            {t("common.overdue")}
                           </span>
                         )}
                       </span>
                     ) : (
-                      <span className="text-xs text-muted">Không giới hạn</span>
+                      <span className="text-xs text-muted">{t("common.noLimit")}</span>
                     )}
                   </div>
 

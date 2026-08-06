@@ -1,0 +1,42 @@
+{
+  "admin": {
+    "policies": {
+      "metaTitle": "Policy & Regulation Management",
+      "title": "Policy & Regulation Management",
+      "description": "Manage company policies, onboarding agreements, and documents.",
+      "addPolicy": "Add Policy",
+      "createTitle": "Create New Policy",
+      "createDesc": "Fill in the details below to publish a new regulation.",
+      "policyTitle": "Policy Title",
+      "titlePlaceholder": "e.g., Company Onboarding Regulation 2026",
+      "content": "Content",
+      "contentPlaceholder": "Write policy details with beautiful Word-like formatting...",
+      "activateImmediately": "Activate this policy immediately (will deactivate previous active policy)",
+      "cancel": "Cancel",
+      "createPolicy": "Create Policy",
+      "searchTitle": "Search Title",
+      "searchPlaceholder": "Search policy title...",
+      "status": "Status",
+      "colTitle": "Policy & Description",
+      "colVersion": "Version",
+      "colCreated": "Created Date",
+      "colUpdated": "Last Updated",
+      "colStatus": "Status",
+      "loadError": "Failed to load policies.",
+      "noPolicies": "No policies found.",
+      "active": "Active",
+      "draftInactive": "Draft/Inactive",
+      "editContent": "Edit Content",
+      "activating": "Activating...",
+      "setActive": "Set as Active",
+      "deletePolicy": "Delete Policy",
+      "editTitle": "Edit Policy",
+      "editDesc": "Make changes to the policy title and content.",
+      "editContentPlaceholder": "Edit policy details with beautiful Word-like formatting...",
+      "saveChanges": "Save Changes",
+      "deleteTitle": "Delete Policy",
+      "deleteConfirm": "Are you sure you want to delete policy <strong>{title}</strong>? This action cannot be undone.",
+      "confirmDelete": "Confirm Delete"
+    }
+  }
+}

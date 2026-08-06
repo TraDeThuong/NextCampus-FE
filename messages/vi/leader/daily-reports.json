@@ -1,0 +1,34 @@
+{
+  "leader": {
+    "dailyReports": {
+      "metaTitle": "Báo cáo hằng ngày",
+      "title": "Báo Cáo Hằng Ngày",
+      "description": "Chọn thực tập sinh để xem báo cáo",
+      "selectCalendar": "Chọn thực tập sinh để xem lịch báo cáo.",
+
+      "totalInterns": "Tổng thực tập sinh",
+      "assignedToYou": "Được giao cho bạn",
+      "submittedToday": "Đã nộp hôm nay",
+      "percentOfInterns": "{percent}% thực tập sinh",
+      "missingToday": "Chưa nộp hôm nay",
+      "notSubmittedYet": "Chưa nộp báo cáo",
+      "weekRate": "Tỉ lệ trong tuần",
+      "workingDays": "{days} ngày làm việc tuần này",
+
+      "interns": "Thực tập sinh ({count})",
+      "noInterns": "Không có thực tập sinh được phân công.",
+
+      "missingReport": "Thiếu Báo Cáo Hằng Ngày",
+      "missingReportDesc": "Bạn chưa nộp báo cáo hằng ngày cho ngày này.",
+      "noReportSelected": "Chưa Chọn Báo Cáo",
+      "noReportHint": "Nhấp vào ngày được tô sáng trên lịch để xem chi tiết báo cáo hằng ngày.",
+      "reportTitle": "Báo Cáo Hằng Ngày",
+      "content": "Nội dung",
+      "prLink": "Liên kết PR",
+      "videoDemo": "Video Demo",
+      "viewVideo": "Xem Video",
+      "attachments": "Tệp đính kèm ({count})",
+      "edit": "Chỉnh sửa"
+    }
+  }
+}

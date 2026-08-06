@@ -2,6 +2,7 @@
 
 import { ReactNode } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import MetalCard from "../ui/MetalCard";
 
 interface StatsCardProps {
@@ -29,6 +30,7 @@ export default function StatsCard({
   className = "",
   onCardClick,
 }: StatsCardProps) {
+  const t = useTranslations();
   const content = (
     <MetalCard className={`p-6 ${href ? "cursor-pointer group/card" : ""} ${className}`}>
       <div className="flex items-start justify-between">
@@ -70,7 +72,7 @@ export default function StatsCard({
           </span>
           {href && (
             <span className="text-[11px] text-muted opacity-0 group-hover/card:opacity-100 transition-opacity font-normal">
-              View details
+              {t("common.viewDetails")}
             </span>
           )}
         </div>

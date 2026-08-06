@@ -1,0 +1,51 @@
+{
+  "intern": {
+    "dashboard": {
+      "metaTitle": "Overview",
+      "loadError": "Error loading personal statistics. Please check your network connection.",
+      "retry": "Retry",
+
+      "greeting": "Hello, {name}! 👋",
+      "welcome": "Welcome back • Track task progress and submit daily reports",
+      "submitTodayReport": "Submit Today's Daily Report",
+
+      "tasksInProgress": "Tasks In Progress",
+      "totalTasks": "Total tasks: {n}",
+      "completionRate": "{n}% Completed",
+      "tasksCompleted": "Tasks Completed",
+      "completedOf": "Completed {done}/{total}",
+      "updateProgress": "Update work progress",
+      "todaysReport": "Today's Report",
+      "submitted": "Submitted",
+      "notSubmitted": "Not Submitted",
+      "onTime": "✓ On time",
+      "submitByEvening": "Submit by 18:00",
+      "completeStatus": "Complete",
+      "submitNowStatus": "Submit now",
+      "weeklyScore": "Weekly Score",
+      "avgScore": "Average: {score}/10",
+      "scoreResults": "Score results",
+
+      "tasksToDos": "Tasks & To-Dos",
+      "viewAllTasks": "View All Tasks",
+      "dailyReport": "Daily Report",
+      "reportSubmittedMsg": "You have submitted your daily report for today.",
+      "reportNotSubmittedMsg": "Please update the tasks you have worked on today.",
+      "submitNow": "Submit now",
+      "recentlyAssigned": "Recently Assigned Tasks",
+      "colTaskName": "Task Name",
+      "colPriority": "Priority",
+      "colStatusDeadline": "Status / Deadline",
+      "leader": "Leader:",
+      "internshipProgress": "Internship Progress",
+      "completed": "Completed",
+      "completedTasksMsg": "You have completed <strong>{done}</strong> out of <strong>{total}</strong> assigned tasks.",
+      "viewTaskDetails": "View Task Details",
+
+      "needsRework": "Needs Rework",
+      "submissionsReworked": "{n} Submission{plural} Requested Rework",
+      "resubmitHint": "Your leader has requested changes and resubmission for the following tasks",
+      "resubmit": "Resubmit"
+    }
+  }
+}

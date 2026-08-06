@@ -1,0 +1,17 @@
+{
+  "admin": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "adminTeam": "Admin Team",
+      "leaders": "Leaders",
+      "interns": "Interns",
+      "department": "Department",
+      "onboarding": "Onboarding",
+      "mails": "Mails",
+      "meetings": "Meetings",
+      "policies": "Policies",
+      "activityLogs": "Activity Logs",
+      "profile": "Profile"
+    }
+  }
+}

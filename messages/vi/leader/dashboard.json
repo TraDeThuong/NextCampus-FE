@@ -1,0 +1,65 @@
+{
+  "leader": {
+    "dashboard": {
+      "metaTitle": "Tổng quan (Leader)",
+      "title": "Leader Team Operations Center",
+      "description": "Quản lý trực tiếp thực tập sinh, duyệt bài nộp & theo dõi tiến độ công việc nhóm",
+      "loadError": "Lỗi khi tải dữ liệu thống kê Leader. Vui lòng kiểm tra lại kết nối mạng.",
+      "retry": "Thử lại",
+
+      "activeInterns": "TTS Đang Quản Lý",
+      "activeInternsSubtitle": "Tổng số: {total} TTS",
+      "completedCount": "{count} hoàn thành",
+
+      "pendingSubmissions": "Bài Nộp Chờ Duyệt",
+      "approvedSubmissions": "{count} bài đã duyệt",
+      "needsApproval": "Cần duyệt ngay",
+      "approvalDone": "Hoàn thành duyệt",
+
+      "overdueTasks": "Task Quá Hạn Trong Team",
+      "overdueTasksSubtitle": "Các task trễ deadline",
+      "remindInterns": "Cần nhắc nhở TTS",
+      "onTrack": "Đúng tiến độ",
+
+      "avgScore": "Điểm Đánh Giá TB Nhóm",
+      "avgScoreSubtitle": "{count} lượt chấm điểm",
+      "avgScoreLabel": "Điểm trung bình nhóm",
+
+      "pendingApproval": "Yêu Cầu Phê Duyệt",
+      "pendingApprovalSubtitle": "Yêu cầu giao việc từ Leader khác",
+      "needsYourApproval": "Cần phê duyệt",
+      "allApproved": "Đã duyệt hết",
+
+      "internProgressTitle": "Tiến Độ Chi Tiết Thực Tập Sinh Trong Nhóm",
+      "internProgressDesc": "Giám sát tiến độ hoàn thành công việc và điểm số trung bình của từng cá nhân",
+      "colIntern": "Thực Tập Sinh",
+      "colTaskProgress": "Tiến Độ Task",
+      "colAvgScore": "Điểm TB",
+      "colHealthStatus": "Trạng Thái Tiến Độ",
+      "taskCount": "{completed}/{total} Task",
+      "notGraded": "Chưa chấm",
+      "healthy": "Đúng tiến độ",
+      "warning": "Cần chú ý ({count} task trễ)",
+      "danger": "Nguy cơ chậm ({count} task trễ)",
+
+      "taskStatusTitle": "Phân Bổ Trạng Thái Nhiệm Vụ Nhóm",
+      "taskStatusSubtitle": "Bấm vào từng dòng để xem danh sách Task",
+      "statusPendingApproval": "Chờ duyệt",
+      "statusTodo": "Cần làm",
+      "statusInProgress": "Đang làm",
+      "statusReview": "Chờ duyệt",
+      "statusDone": "Hoàn thành",
+      "statusBlocked": "Bị hoãn",
+
+      "statusDetailTitle": "Chi Tiết Công Việc Nhóm - Trạng Thái: {status}",
+      "overdueListTitle": "Danh Sách Task Quá Hạn Của Nhóm ({count})",
+
+      "pendingModalTitle": "Yêu Cầu Giao Việc Chờ Phê Duyệt",
+      "pendingModalDesc": "{count} yêu cầu từ các leader khác đang chờ bạn phê duyệt",
+      "requestedBy": "Yêu cầu bởi:",
+      "approve": "Phê duyệt",
+      "reject": "Từ chối",
+      "pendingModalEmpty": "Không có yêu cầu giao việc nào đang chờ."
+    }
+  }
+}

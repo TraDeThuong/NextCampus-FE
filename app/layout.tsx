@@ -1,10 +1,6 @@
 import { Black_Ops_One, Ubuntu } from "next/font/google";
 import "./globals.css";
-import ReactQueryProvider from "@/providers/ReactQueryProvider";
 import { ReactNode } from "react";
-import ToastProvider from "@/providers/ToastProvider";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { LanguageProvider } from "@/contexts/LanguageContext";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -14,7 +10,6 @@ export const metadata: Metadata = {
   },
   description: "Hệ thống quản lý thực tập sinh và theo dõi tiến độ công việc NexCampus.",
 };
-
 
 const headingFont = Black_Ops_One({
   subsets: ["latin"],
@@ -28,23 +23,14 @@ const bodyFont = Ubuntu({
   variable: "--font-body",
 });
 
-export default function RootLayout({ children } : {children: ReactNode}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en"
       className={`${headingFont.variable} ${bodyFont.variable}`}
       suppressHydrationWarning
     >
-      <body suppressHydrationWarning>
-        <ReactQueryProvider>
-          <LanguageProvider>
-            <AuthProvider>
-              {children}
-              <ToastProvider />
-            </AuthProvider>
-          </LanguageProvider>
-        </ReactQueryProvider>
-      </body>
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }

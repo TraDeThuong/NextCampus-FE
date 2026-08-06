@@ -1,0 +1,19 @@
+{
+  "common": {
+    "viewDetails": "Xem chi tiết",
+    "retry": "Thử lại",
+    "viewAll": "Xem tất cả",
+    "view": "Xem",
+    "handle": "Xử lý",
+    "details": "Chi tiết",
+    "noLimit": "Không giới hạn",
+    "priority": "Ưu tiên: {priority}",
+    "overdue": "⚠ Đã Quá Hạn",
+    "onTrack": "✓ Đúng tiến độ"
+  },
+  "header": {
+    "logout": "Đăng xuất",
+    "loggingOut": "Đang đăng xuất...",
+    "dashboard": "BẢNG ĐIỀU KHIỂN"
+  }
+}

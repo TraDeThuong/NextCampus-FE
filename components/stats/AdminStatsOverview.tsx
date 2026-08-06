@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useAdminStats } from "@/hooks/stats/useAdminStats";
 import StatsCard from "./StatsCard";
 import Spinner from "../ui/Spinner";
@@ -27,6 +28,7 @@ import {
 } from "lucide-react";
 
 export default function AdminStatsOverview() {
+  const t = useTranslations();
   const { data: response, isLoading, isError, refetch } = useAdminStats();
 
   const [modalConfig, setModalConfig] = useState<{
@@ -52,12 +54,12 @@ export default function AdminStatsOverview() {
   if (isError || !response?.success) {
     return (
       <div className="rounded-2xl border border-danger/30 bg-danger/10 p-6 text-center text-danger space-y-3">
-        <p className="font-semibold">Lỗi khi tải dữ liệu thống kê Admin. Vui lòng kiểm tra lại kết nối mạng.</p>
+        <p className="font-semibold">{t("admin.dashboard.errorLoad")}</p>
         <button
           onClick={() => refetch()}
           className="px-4 py-2 rounded-xl bg-danger text-white text-xs font-bold hover:opacity-90 transition-all cursor-pointer"
         >
-          Thử lại
+          {t("common.retry")}
         </button>
       </div>
     );
@@ -77,7 +79,7 @@ export default function AdminStatsOverview() {
   const handleOpenOverdueModal = () => {
     setModalConfig({
       isOpen: true,
-      title: `Danh Sách Tất Cả Task Quá Hạn Toàn Hệ Thống (${overdueAssignments.length})`,
+      title: t("admin.dashboard.overdueModalTitle", { n: overdueAssignments.length }),
       assignments: overdueAssignments,
     });
   };
@@ -97,14 +99,14 @@ export default function AdminStatsOverview() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-3xl font-extrabold text-foreground metal-text">
-              Admin Executive Control Center
+              {t("admin.dashboard.title")}
             </h1>
             <span className="rounded-full border border-primary-light/30 bg-primary-light/10 px-3 py-0.5 text-xs font-semibold text-primary-light">
-              System Admin
+              {t("admin.dashboard.badge")}
             </span>
           </div>
           <p className="text-sm text-muted mt-1">
-            Quản trị cấp cao toàn hệ thống • Giám sát sức khỏe tổng thể, nhóm Leader & xử lý tác vụ nhanh
+            {t("admin.dashboard.subtitle")}
           </p>
         </div>
       </div>
@@ -112,37 +114,37 @@ export default function AdminStatsOverview() {
       {/* Level 1: Health & Performance KPI Cards (KPIs "Sống") */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <StatsCard
-          title="TTS Đang Thực Tập"
+          title={t("admin.dashboard.activeInterns")}
           value={stats.interns.active}
-          subtitle={`Tỷ lệ giữ chân: ${Math.round((stats.interns.active / (stats.interns.total || 1)) * 100)}%`}
+          subtitle={t("admin.dashboard.retentionRate", { pct: Math.round((stats.interns.active / (stats.interns.total || 1)) * 100) })}
           icon={<Users className="h-6 w-6 text-primary-light" />}
           href="/admin/interns?status=ACTIVE"
           trend={{
-            text: `${stats.interns.completed} đã hoàn thành`,
+            text: t("admin.dashboard.completed", { n: stats.interns.completed }),
             positive: true,
           }}
         />
 
         <StatsCard
-          title="Đội Ngũ Leader"
+          title={t("admin.dashboard.leaderTeam")}
           value={stats.system.leaders}
-          subtitle={`Quản lý ${stats.system.departments} phòng ban`}
+          subtitle={t("admin.dashboard.managingDepts", { n: stats.system.departments })}
           icon={<UserCheck className="h-6 w-6 text-indigo-400" />}
           href="/admin/leaders"
           trend={{
-            text: "Cấp quản trị nhóm",
+            text: t("admin.dashboard.adminLevel"),
             positive: true,
           }}
         />
 
         <StatsCard
-          title="Đơn Ứng Tuyển Chờ Duyệt"
+          title={t("admin.dashboard.pendingApps")}
           value={stats.applications.pending}
-          subtitle={`Trên tổng ${stats.applications.total} đơn ứng tuyển`}
+          subtitle={t("admin.dashboard.totalApps", { n: stats.applications.total })}
           icon={<FileText className="h-6 w-6 text-amber-400" />}
           href="/admin/onboarding?inviteStatus=USED&applicationStatus=PENDING"
           trend={{
-            text: stats.applications.pending > 0 ? "Cần duyệt ngay" : "Đã xử lý xong",
+            text: stats.applications.pending > 0 ? t("admin.dashboard.needReview") : t("admin.dashboard.allDone"),
             positive: stats.applications.pending === 0,
           }}
         />
@@ -154,10 +156,10 @@ export default function AdminStatsOverview() {
           <div>
             <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
               <UserCheck className="h-6 w-6 text-indigo-400 shrink-0" />
-              <span className="metal-text">Hiệu Suất Tiến Độ Theo Từng Nhóm Leader</span>
+              <span className="metal-text">{t("admin.dashboard.leaderPerformance")}</span>
             </h3>
             <p className="text-xs text-muted mt-1">
-              Hiển thị danh sách nhóm Leader quản lý ({displayedLeaderTeams.length}/{leaderTeams.length} nhóm)
+              {t("admin.dashboard.showingGroups", { n: displayedLeaderTeams.length, m: leaderTeams.length })}
             </p>
           </div>
 
@@ -170,11 +172,11 @@ export default function AdminStatsOverview() {
               >
                 {showAllLeaders ? (
                   <>
-                    Thu gọn Top 5 <ChevronUp className="h-3.5 w-3.5" />
+                    {t("admin.dashboard.collapseTop5")} <ChevronUp className="h-3.5 w-3.5" />
                   </>
                 ) : (
                   <>
-                    Xem tất cả ({leaderTeams.length}) <ChevronDown className="h-3.5 w-3.5" />
+                    {t("admin.dashboard.viewAllN", { n: leaderTeams.length })} <ChevronDown className="h-3.5 w-3.5" />
                   </>
                 )}
               </button>
@@ -185,11 +187,11 @@ export default function AdminStatsOverview() {
         <div className="mt-6">
           <Table columns="2fr 1.2fr 1fr 2.5fr 1fr">
             <Table.Header>
-              <span>Leader / Đội Nhóm</span>
-              <span>Phòng Ban</span>
-              <span>Quy Mô TTS</span>
-              <span>Tiến Độ & % Hoàn Thành</span>
-              <span>Rủi Ro Task</span>
+              <span>{t("admin.dashboard.colLeader")}</span>
+              <span>{t("admin.dashboard.colDepartment")}</span>
+              <span>{t("admin.dashboard.colInternCount")}</span>
+              <span>{t("admin.dashboard.colProgress")}</span>
+              <span>{t("admin.dashboard.colTaskRisk")}</span>
             </Table.Header>
 
             <Table.Body
@@ -215,7 +217,7 @@ export default function AdminStatsOverview() {
 
                     <div>
                       <span className="text-sm font-semibold text-foreground">
-                        {team.totalInterns} TTS
+                        {t("admin.dashboard.internCount", { n: team.totalInterns })}
                       </span>
                     </div>
 
@@ -223,10 +225,10 @@ export default function AdminStatsOverview() {
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-center text-xs">
                         <span className="font-bold text-emerald-400">
-                          {percentDone}% Done ({team.assignments.done}/{team.totalAssignments} Task)
+                          {t("admin.dashboard.percentDone", { pct: percentDone, done: team.assignments.done, total: team.totalAssignments })}
                         </span>
                         <span className="text-muted text-[11px]">
-                          {team.assignments.inProgress} đang làm • {team.assignments.review} chờ duyệt
+                          {t("admin.dashboard.inProgressReview", { inProgress: team.assignments.inProgress, review: team.assignments.review })}
                         </span>
                       </div>
 
@@ -265,11 +267,11 @@ export default function AdminStatsOverview() {
                     <div>
                       {team.overdueCount > 0 ? (
                         <span className="inline-flex items-center gap-1 text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/30 px-2.5 py-1 rounded-lg">
-                          ⚠ {team.overdueCount} task trễ
+                          ⚠ {t("admin.dashboard.overdueTasks", { n: team.overdueCount })}
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
-                          ✓ Đúng tiến độ
+                          {t("common.onTrack")}
                         </span>
                       )}
                     </div>
@@ -288,14 +290,14 @@ export default function AdminStatsOverview() {
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
             <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
               <Activity className="h-5 w-5 text-indigo-400" />
-              Nhật Ký Hoạt Động Gần Đây (Recent Activity)
+              {t("admin.dashboard.recentActivity")}
             </h3>
             <div className="flex items-center gap-3">
               <Link
                 href="/admin/activity-logs"
                 className="text-xs text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1 transition-colors"
               >
-                Xem tất cả
+                {t("common.viewAll")}
                 <ExternalLink className="h-3 w-3" />
               </Link>
             </div>
@@ -337,7 +339,7 @@ export default function AdminStatsOverview() {
               ))
             ) : (
               <p className="text-xs text-muted text-center py-6">
-                Chưa có hoạt động mới ghi nhận.
+                {t("admin.dashboard.noActivity")}
               </p>
             )}
           </div>
@@ -348,7 +350,7 @@ export default function AdminStatsOverview() {
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
             <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-amber-400" />
-              Mục Cần Xử Lý Ngay (Action Alerts)
+              {t("admin.dashboard.actionAlerts")}
             </h3>
           </div>
 
@@ -364,13 +366,13 @@ export default function AdminStatsOverview() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-foreground group-hover:text-amber-300 transition-colors">
-                    {stats.applications.pending} Đơn ứng tuyển chờ xử lý
+                    {t("admin.dashboard.pendingAppsCount", { n: stats.applications.pending })}
                   </p>
-                  <p className="text-[11px] text-muted">Cần duyệt hoặc từ chối ứng viên mới</p>
+                  <p className="text-[11px] text-muted">{t("admin.dashboard.needApproveReject")}</p>
                 </div>
               </div>
               <span className="text-xs font-bold text-amber-400 flex items-center gap-1">
-                Xử lý <ExternalLink className="h-3.5 w-3.5" />
+                {t("common.handle")} <ExternalLink className="h-3.5 w-3.5" />
               </span>
             </Link>
 
@@ -386,13 +388,13 @@ export default function AdminStatsOverview() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-foreground group-hover:text-rose-300 transition-colors">
-                    {stats.tasks.overdue} Task quá hạn toàn công ty
+                    {t("admin.dashboard.overdueTasksCount", { n: stats.tasks.overdue })}
                   </p>
-                  <p className="text-[11px] text-muted">Bấm để soi danh sách ai bị quá hạn</p>
+                  <p className="text-[11px] text-muted">{t("admin.dashboard.clickToSeeOverdue")}</p>
                 </div>
               </div>
               <span className="text-xs font-bold text-rose-400 flex items-center gap-1">
-                Chi tiết <Eye className="h-3.5 w-3.5" />
+                {t("common.details")} <Eye className="h-3.5 w-3.5" />
               </span>
             </button>
 
@@ -407,13 +409,13 @@ export default function AdminStatsOverview() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-foreground">
-                    {stats.interns.dropped} Thực tập sinh đã huỷ / thôi học
+                    {t("admin.dashboard.droppedInterns", { n: stats.interns.dropped })}
                   </p>
-                  <p className="text-[11px] text-muted">Danh sách thực tập sinh dừng chương trình</p>
+                  <p className="text-[11px] text-muted">{t("admin.dashboard.droppedList")}</p>
                 </div>
               </div>
               <span className="text-xs font-semibold text-muted group-hover:text-foreground flex items-center gap-1">
-                Xem <ExternalLink className="h-3.5 w-3.5" />
+                {t("common.view")} <ExternalLink className="h-3.5 w-3.5" />
               </span>
             </Link>
           </div>

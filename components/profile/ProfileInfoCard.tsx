@@ -2,13 +2,8 @@
 
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import {
-    Mail,
-    Shield,
-    Calendar,
-    User,
-    Fingerprint,
-} from "lucide-react";
+import { Mail, Shield, Calendar, User, Fingerprint } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { useUpdateProfile } from "@/hooks/profile/useUpdateProfile";
 import { MeUser } from "@/types/auth";
@@ -23,9 +18,8 @@ type FormValues = {
     fullName: string;
 };
 
-export default function ProfileInfoCard({
-    profile,
-}: ProfileInfoCardProps) {
+export default function ProfileInfoCard({ profile }: ProfileInfoCardProps) {
+    const t = useTranslations("admin.profile");
     const { updateProfileAsync, isPending } = useUpdateProfile();
 
     const {
@@ -34,28 +28,19 @@ export default function ProfileInfoCard({
         reset,
         formState: { errors, isDirty },
     } = useForm<FormValues>({
-        defaultValues: {
-            fullName: profile.fullName,
-        },
+        defaultValues: { fullName: profile.fullName },
     });
 
     useEffect(() => {
-        reset({
-            fullName: profile.fullName,
-        });
+        reset({ fullName: profile.fullName });
     }, [profile, reset]);
 
     const onSubmit = async (data: FormValues) => {
-        await updateProfileAsync({
-            fullName: data.fullName,
-        });
+        await updateProfileAsync({ fullName: data.fullName });
     };
 
     const roleName = profile.role;
-
-    const createdAt = new Date(
-        profile.createdAt,
-    ).toLocaleDateString("en-GB", {
+    const createdAt = new Date(profile.createdAt).toLocaleDateString("en-GB", {
         day: "2-digit",
         month: "short",
         year: "numeric",
@@ -66,39 +51,30 @@ export default function ProfileInfoCard({
             <section className="rounded-3xl border border-slate-200 p-6 shadow-sm">
                 <div className="mb-6">
                     <h2 className="text-xl font-semibold metal-text">
-                        Personal Information
+                        {t("personalInfo")}
                     </h2>
-
                     <p className="mt-1 text-sm text-slate-500">
-                        Update your profile information.
+                        {t("personalInfoDesc")}
                     </p>
                 </div>
 
-                <form
-                    onSubmit={handleSubmit(onSubmit)}
-                    className="space-y-6"
-                >
-                    {/* Full name */}
-
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                     <div>
                         <label className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
                             <User className="h-4 w-4" />
-                            Full name
+                            {t("fullName")}
                         </label>
-
                         <input
                             type="text"
                             {...register("fullName", {
-                                required: "Full name is required",
+                                required: t("fullNameRequired"),
                                 minLength: {
                                     value: 2,
-                                    message:
-                                        "Full name must contain at least 2 characters",
+                                    message: t("fullNameMinLength"),
                                 },
                             })}
                             className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-slate-400 text-white"
                         />
-
                         {errors.fullName && (
                             <p className="mt-2 text-sm text-red-500">
                                 {errors.fullName.message}
@@ -106,55 +82,27 @@ export default function ProfileInfoCard({
                         )}
                     </div>
 
-                    {/* Read-only fields */}
-
-                    <div className="grid gap-4 md:grid-cols-2 ">
-                        <ReadonlyField
-                            icon={<Mail className="h-4 w-4" />}
-                            label="Email"
-                            value={profile.email}
-                        />
-
-                        <ReadonlyField
-                            icon={<Shield className="h-4 w-4" />}
-                            label="Role"
-                            value={roleName}
-                        />
-
-                        <ReadonlyField
-                            icon={<Fingerprint className="h-4 w-4" />}
-                            label="User ID"
-                            value={profile.id}
-                        />
-
-                        <ReadonlyField
-                            icon={<Calendar className="h-4 w-4" />}
-                            label="Created at"
-                            value={createdAt}
-                        />
-
+                    <div className="grid gap-4 md:grid-cols-2">
+                        <ReadonlyField icon={<Mail className="h-4 w-4" />} label={t("email")} value={profile.email} />
+                        <ReadonlyField icon={<Shield className="h-4 w-4" />} label={t("role")} value={roleName} />
+                        <ReadonlyField icon={<Fingerprint className="h-4 w-4" />} label={t("userId")} value={profile.id} />
+                        <ReadonlyField icon={<Calendar className="h-4 w-4" />} label={t("createdAt")} value={createdAt} />
                     </div>
 
-                    {
-                        isDirty && (
-                            <div className="flex justify-end gap-3">
-                                <button
-                                    type="button"
-                                    onClick={() => reset()}
-                                    className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 transition hover:border-white/20 hover:text-white"
-                                >
-                                    Cancel
-                                </button>
-
-                                <Button
-                                    type="submit"
-                                    disabled={isPending}
-                                    variant="glass">
-                                        {isPending ? "Saving..." : "Save changes"}
-                                </Button>
-                            </div>
-                        )
-                    }
+                    {isDirty && (
+                        <div className="flex justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={() => reset()}
+                                className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 transition hover:border-white/20 hover:text-white"
+                            >
+                                {t("cancel")}
+                            </button>
+                            <Button type="submit" disabled={isPending} variant="glass">
+                                {isPending ? t("saving") : t("saveChanges")}
+                            </Button>
+                        </div>
+                    )}
                 </form>
             </section>
         </MetalCard>
@@ -167,22 +115,14 @@ type ReadonlyFieldProps = {
     icon: React.ReactNode;
 };
 
-function ReadonlyField({
-    label,
-    value,
-    icon,
-}: ReadonlyFieldProps) {
+function ReadonlyField({ label, value, icon }: ReadonlyFieldProps) {
     return (
         <div className="rounded-2xl border border-slate-200 p-4">
             <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-500">
                 {icon}
-
                 <span>{label}</span>
             </div>
-
-            <p className="break-all text-sm font-medium text-white">
-                {value}
-            </p>
+            <p className="break-all text-sm font-medium text-white">{value}</p>
         </div>
     );
 }
