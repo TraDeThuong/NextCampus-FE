@@ -95,7 +95,10 @@ export default function Header({ role, onMenuClick }: HeaderProps) {
                 <User className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
             )}
-            <p className="hidden sm:block text-sm sm:text-lg font-medium metal-text">
+            <p
+              className="hidden sm:block text-sm sm:text-lg font-medium metal-text"
+              style={{ fontFamily: "var(--font-body-vi), sans-serif" }}
+            >
               {state.user?.fullName ?? "User"}
             </p>
           </Link>

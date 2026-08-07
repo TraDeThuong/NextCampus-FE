@@ -318,7 +318,12 @@ export default function FormPage() {
             type="date"
             {...register("startDate")}
             min={getBusinessToday()}
-            className={inputClass}
+            className={`${inputClass} cursor-pointer`}
+            onClick={(e) => {
+              try {
+                e.currentTarget.showPicker();
+              } catch {}
+            }}
           />
         </Field>
 
@@ -441,7 +446,7 @@ function Field({
         {label}
       </label>
       <div className="relative">
-        <Icon className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+        <Icon className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500 pointer-events-none" />
         {children}
       </div>
       {error && <p className="mt-1.5 text-xs text-red-400">{error}</p>}

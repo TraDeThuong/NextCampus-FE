@@ -56,11 +56,21 @@ const Table: CompoundTable = function Table({
 }: TableProps) {
   return (
     <TableContext.Provider value={{ columns }}>
-      <div className="w-full overflow-x-auto no-scrollbar">
+      <div
+        className="
+          w-full min-w-0 max-w-full overflow-x-auto pb-2
+          [scrollbar-color:rgba(255,255,255,0.14)_transparent]
+          [scrollbar-width:thin]
+          [&::-webkit-scrollbar]:h-2
+          [&::-webkit-scrollbar-thumb]:rounded-full
+          [&::-webkit-scrollbar-thumb]:bg-white/15
+          [&::-webkit-scrollbar-track]:bg-transparent
+        "
+      >
         <div
           role="table"
           className={`
-            min-w-[800px] xl:min-w-full
+            w-fit min-w-full
             rounded-3xl
             border border-border
             bg-card
@@ -84,14 +94,15 @@ function Header({ children }: HeaderProps) {
       role="row"
       style={{ gridTemplateColumns: columns }}
       className="
-        grid items-center gap-x-8
+        grid items-center gap-x-4 md:gap-x-6
         border-b border-white/10
         bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.02)_100%)]
-        px-8 py-4
+        px-4 md:px-6 py-4
         text-xs font-semibold uppercase tracking-[0.15em]
         text-[var(--primary-light)]
         backdrop-blur-xl
         rounded-t-[23px]
+        [&>*]:min-w-0
       "
     >
       {children}
@@ -108,13 +119,14 @@ function Row({ children, className = "", onClick }: RowProps) {
       style={{ gridTemplateColumns: columns }}
       onClick={onClick}
       className={`
-        grid items-center gap-x-8
+        grid items-center gap-x-4 md:gap-x-6
         border-b border-white/5
-        px-8 py-4
+        px-4 md:px-6 py-4
         text-foreground
         transition-all duration-200
         hover:bg-white/[0.03]
         last:border-b-0
+        [&>*]:min-w-0
         ${onClick ? "cursor-pointer" : ""}
         ${className}
       `}

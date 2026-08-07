@@ -14,6 +14,19 @@
   "header": {
     "logout": "Đăng xuất",
     "loggingOut": "Đang đăng xuất...",
-    "dashboard": "BẢNG ĐIỀU KHIỂN"
+    "dashboard": "BẢNG ĐIỀU KHIỂN",
+    "notification": {
+      "label": "Thông báo",
+      "title": "Thông báo",
+      "newCount": "{count} mới",
+      "markAllRead": "Đã đọc",
+      "markAllReadTitle": "Đánh dấu tất cả là đã đọc",
+      "clearRead": "Dọn dẹp",
+      "clearReadTitle": "Xóa các thông báo đã đọc",
+      "empty": "Không có thông báo nào",
+      "deleteTitle": "Xóa thông báo này",
+      "details": "Chi tiết thông báo",
+      "back": "Quay lại danh sách thông báo"
+    }
   }
 }

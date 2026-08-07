@@ -113,7 +113,7 @@ export default function LeaderTaskStats() {
         {isLoading ? (
           <div className="flex items-center justify-center py-12"><Spinner /></div>
         ) : overview ? (
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[700px_1fr]">
+          <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-[minmax(0,700px)_minmax(280px,1fr)]">
             <div className="grid grid-cols-2 gap-4">
               <StatButton icon={<Timer className="h-5 w-5 text-blue-400" />} color="blue" value={overview.totalTasks} label={t("totalTasks")} onClick={() => setModal({ type: "tasks", title: t("totalTasks"), filters: {} })} />
               <StatButton icon={<Layers className="h-5 w-5 text-purple-400" />} color="purple" value={totalGroups} label={t("totalGroups")} onClick={() => setModal({ type: "groups", title: t("totalGroups"), filters: {}, groups: taskGroupsData?.data ?? [] })} />

@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { Bell } from "lucide-react";
-import { useNotifications } from "@/hooks/notification/useNotifications";
+import { useTranslations } from "next-intl";
 import { useUnreadCount } from "@/hooks/notification/useUnreadCount";
 import { useNotificationSocket } from "@/hooks/notification/useNotificationSocket";
 import useOutsideClick from "@/hooks/useOutsideClick";
 import NotificationDropdown from "./NotificationDropdown";
 
 export default function NotificationBell() {
+  const t = useTranslations("header.notification");
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useOutsideClick<HTMLDivElement>(() => setIsOpen(false));
 
@@ -21,7 +22,8 @@ export default function NotificationBell() {
       <button
         onClick={() => setIsOpen((prev) => !prev)}
         className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/10 backdrop-blur-lg text-white/70 transition-all duration-300 hover:bg-white/20 hover:text-white cursor-pointer"
-        aria-label="Thông báo"
+        aria-label={t("label")}
+        title={t("label")}
       >
         <Bell size={18} />
         {unreadCount > 0 && (
@@ -31,7 +33,7 @@ export default function NotificationBell() {
         )}
       </button>
 
-      {isOpen && <NotificationDropdown onClose={() => setIsOpen(false)} />}
+      {isOpen && <NotificationDropdown />}
     </div>
   );
 }

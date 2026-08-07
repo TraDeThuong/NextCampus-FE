@@ -93,6 +93,15 @@ export default function LeaderStatsOverview() {
     },
   };
 
+  const statusKeyToStatsKey: Record<string, keyof typeof stats.assignments.byStatus> = {
+    PENDING_APPROVAL: "pendingApproval",
+    TODO: "todo",
+    IN_PROGRESS: "inProgress",
+    REVIEW: "review",
+    DONE: "done",
+    BLOCKED: "blocked",
+  };
+
   const handleOpenStatusModal = (statusKey: string) => {
     const filtered = allAssignments.filter((a) => a.status === statusKey);
     setModalConfig({
@@ -285,7 +294,7 @@ export default function LeaderStatsOverview() {
                 {statusLabels[key]}
               </p>
               <p className={`text-xl font-bold ${color.textBold} mt-1`}>
-                {stats.assignments.byStatus[key as keyof typeof stats.assignments.byStatus] ?? 0}
+                {stats.assignments.byStatus[statusKeyToStatsKey[key]] ?? 0}
               </p>
             </button>
           ))}

@@ -14,6 +14,19 @@
   "header": {
     "logout": "Logout",
     "loggingOut": "Logging out, please wait...",
-    "dashboard": "DASHBOARD"
+    "dashboard": "DASHBOARD",
+    "notification": {
+      "label": "Notifications",
+      "title": "Notifications",
+      "newCount": "{count} new",
+      "markAllRead": "Read all",
+      "markAllReadTitle": "Mark all notifications as read",
+      "clearRead": "Clear",
+      "clearReadTitle": "Clear read notifications",
+      "empty": "No notifications",
+      "deleteTitle": "Delete this notification",
+      "details": "Notification details",
+      "back": "Back to notifications"
+    }
   }
 }

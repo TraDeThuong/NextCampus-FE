@@ -35,6 +35,7 @@ if (!globalForMessages.messageCache) {
   globalForMessages.messageCache = {};
 }
 const messageCache = globalForMessages.messageCache;
+const shouldCacheMessages = process.env.NODE_ENV === "production";
 
 /**
  * Load all message files for a given locale and merge them into one object.
@@ -42,7 +43,7 @@ const messageCache = globalForMessages.messageCache;
 export async function loadLocaleMessages(
   locale: string,
 ): Promise<AbstractIntlMessages> {
-  if (messageCache[locale]) {
+  if (shouldCacheMessages && messageCache[locale]) {
     return messageCache[locale];
   }
 
@@ -192,6 +193,11 @@ export async function loadLocaleMessages(
   ).default;
   deepMerge(files, internProfile);
 
-  messageCache[locale] = files as AbstractIntlMessages;
-  return messageCache[locale];
+  const messages = files as AbstractIntlMessages;
+
+  if (shouldCacheMessages) {
+    messageCache[locale] = messages;
+  }
+
+  return messages;
 }
