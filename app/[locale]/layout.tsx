@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
-import { loadLocaleMessages } from "@/i18n/load-messages";
 import ReactQueryProvider from "@/providers/ReactQueryProvider";
 import ToastProvider from "@/providers/ToastProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
-import LocaleProvider from "@/providers/LocaleProvider";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
 import { ReactNode } from "react";
 
 export default async function LocaleLayout({
@@ -20,22 +20,16 @@ export default async function LocaleLayout({
     notFound();
   }
 
-  const [viMessages, enMessages] = await Promise.all([
-    loadLocaleMessages("vi"),
-    loadLocaleMessages("en"),
-  ]);
+  const messages = await getMessages();
 
   return (
-    <LocaleProvider
-      initialLocale={locale}
-      allMessages={{ vi: viMessages, en: enMessages }}
-    >
+    <NextIntlClientProvider locale={locale} messages={messages}>
       <ReactQueryProvider>
         <AuthProvider>
           {children}
           <ToastProvider />
         </AuthProvider>
       </ReactQueryProvider>
-    </LocaleProvider>
+    </NextIntlClientProvider>
   );
 }

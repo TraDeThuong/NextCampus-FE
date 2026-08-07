@@ -32,7 +32,7 @@ const bodyFont = Ubuntu({
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
-      lang="en"
+      lang="vi"
       className={`${headingFont.variable} ${headingFontVi.variable} ${bodyFont.variable}`}
       suppressHydrationWarning
     >

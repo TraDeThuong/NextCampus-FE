@@ -2,12 +2,12 @@
 
 import { createPortal } from "react-dom";
 import Image from "next/image";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter, usePathname } from "@/i18n/navigation";
+import { useSearchParams } from "next/navigation";
 import { LogOut, User, Menu } from "lucide-react";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { useLogout } from "@/hooks/auth/useLogout";
 import { useTranslations, useLocale } from "next-intl";
-import { useLocaleSwitcher } from "@/providers/LocaleProvider";
 import Spinner from "../ui/Spinner";
 import NotificationBell from "../notification/NotificationBell";
 
@@ -19,7 +19,9 @@ type HeaderProps = {
 export default function Header({ role, onMenuClick }: HeaderProps) {
     const t = useTranslations();
     const locale = useLocale();
-    const { setLocale } = useLocaleSwitcher();
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
     const { state } = useAuth();
     const { logoutMutate, isLoading } = useLogout();
 
@@ -28,7 +30,10 @@ export default function Header({ role, onMenuClick }: HeaderProps) {
     };
 
     const toggleLanguage = () => {
-      setLocale(locale === "vi" ? "en" : "vi");
+      const nextLocale = locale === "vi" ? "en" : "vi";
+      const currentSearch = searchParams.toString();
+      const href = currentSearch ? `${pathname}?${currentSearch}` : pathname;
+      router.replace(href, { locale: nextLocale });
     };
 
   return (

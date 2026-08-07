@@ -27,12 +27,18 @@ function deepMerge(
   return target;
 }
 
+const messageCache: Record<string, AbstractIntlMessages> = {};
+
 /**
  * Load all message files for a given locale and merge them into one object.
  */
 export async function loadLocaleMessages(
   locale: string,
 ): Promise<AbstractIntlMessages> {
+  if (messageCache[locale]) {
+    return messageCache[locale];
+  }
+
   const files: Record<string, unknown> = {};
 
   // Common
@@ -179,5 +185,6 @@ export async function loadLocaleMessages(
   ).default;
   deepMerge(files, internProfile);
 
-  return files as AbstractIntlMessages;
+  messageCache[locale] = files as AbstractIntlMessages;
+  return messageCache[locale];
 }
