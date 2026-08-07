@@ -1,0 +1,69 @@
+{
+  "intern": {
+    "dailyReport": {
+      "metaTitle": "Báo cáo hằng ngày",
+      "title": "Báo Cáo Hằng Ngày",
+      "description": "Xem lịch thực tập và báo cáo hằng ngày của bạn.",
+      "createReport": "Tạo Báo Cáo Hằng Ngày",
+      "editReport": "Chỉnh Sửa Báo Cáo",
+      "loadError": "Không thể tải dữ liệu thực tập.",
+
+      "workingDays": "Ngày Làm Việc",
+      "workingDaysDesc": "Từ ngày bắt đầu đến hôm nay (trừ Chủ Nhật)",
+      "reported": "Đã Báo Cáo",
+      "submissionRate": "Tỉ lệ nộp {rate}%",
+      "missing": "Thiếu",
+      "missingDesc": "Ngày chưa báo cáo",
+      "submissionAnalytics": "Thống Kê Nộp Báo Cáo",
+      "analyticsDesc": "Trực quan hoá tỉ lệ nộp báo cáo",
+      "rate": "Tỉ lệ",
+      "days": "ngày",
+      "thisWeek": "Tuần Này",
+      "monToday": "Thứ 2 – Hôm nay",
+      "daysReported": "ngày đã báo cáo tuần này",
+      "completePercent": "Hoàn thành {percent}%",
+      "noWorkingDays": "Chưa có ngày làm việc",
+
+      "createModal": {
+        "title": "Tạo Báo Cáo Hằng Ngày",
+        "description": "Nộp báo cáo công việc hôm nay với liên kết PR và video demo.",
+        "reportContent": "Nội Dung Báo Cáo",
+        "contentPlaceholder": "Mô tả những gì bạn đã làm hôm nay...",
+        "prLink": "Liên Kết PR",
+        "prPlaceholder": "https://github.com/user/repo/pull/1",
+        "videoDemo": "Video Demo",
+        "videoPlaceholder": "Dán URL video...",
+        "or": "HOẶC",
+        "remove": "Gỡ",
+        "attachments": "Tệp Đính Kèm",
+        "attachmentsHint": "Tối đa 5 tệp, mỗi tệp {limit} MB.",
+        "cancel": "Huỷ",
+        "submit": "Nộp",
+        "videoTypeError": "Video phải là file MP4 hoặc WEBM.",
+        "videoSizeError": "Video không được vượt quá {limit} MB.",
+        "unsupportedType": "\"{name}\" có định dạng không được hỗ trợ.",
+        "fileSizeError": "\"{name}\" vượt quá {limit} MB.",
+        "maxAttachments": "Báo cáo hằng ngày chỉ được tối đa 5 tệp đính kèm."
+      },
+
+      "editModal": {
+        "title": "Chỉnh Sửa Báo Cáo",
+        "description": "Cập nhật báo cáo công việc hôm nay.",
+        "reportContent": "Nội Dung Báo Cáo",
+        "contentPlaceholder": "Mô tả những gì bạn đã làm hôm nay...",
+        "prLink": "Liên Kết PR",
+        "prPlaceholder": "https://github.com/user/repo/pull/1",
+        "videoDemo": "Video Demo",
+        "videoPlaceholder": "Dán URL video...",
+        "attachments": "Tệp Đính Kèm",
+        "newLabel": "(mới)",
+        "remove": "Gỡ",
+        "delete": "Xoá",
+        "cancel": "Huỷ",
+        "update": "Cập Nhật",
+        "deleteConfirmTitle": "Xoá Báo Cáo",
+        "deleteConfirmDesc": "Hành động này không thể hoàn tác."
+      }
+    }
+  }
+}

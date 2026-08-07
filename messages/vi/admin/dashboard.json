@@ -1,0 +1,53 @@
+{
+  "admin": {
+    "dashboard": {
+      "metaTitle": "Tổng quan (Admin)",
+      "title": "Admin Executive Control Center",
+      "badge": "System Admin",
+      "subtitle": "Quản trị cấp cao toàn hệ thống • Giám sát sức khỏe tổng thể, nhóm Leader & xử lý tác vụ nhanh",
+      "errorLoad": "Lỗi khi tải dữ liệu thống kê Admin. Vui lòng kiểm tra lại kết nối mạng.",
+      "activeInterns": "TTS Đang Thực Tập",
+      "retentionRate": "Tỷ lệ giữ chân: {pct}%",
+      "completed": "{n} đã hoàn thành",
+      "leaderTeam": "Đội Ngũ Leader",
+      "managingDepts": "Quản lý {n} phòng ban",
+      "adminLevel": "Cấp quản trị nhóm",
+      "pendingApps": "Đơn Ứng Tuyển Chờ Duyệt",
+      "totalApps": "Trên tổng {n} đơn ứng tuyển",
+      "needReview": "Cần duyệt ngay",
+      "allDone": "Đã xử lý xong",
+      "leaderPerformance": "Hiệu Suất Tiến Độ Theo Từng Nhóm Leader",
+      "showingGroups": "Hiển thị danh sách nhóm Leader quản lý ({n}/{m} nhóm)",
+      "collapseTop5": "Thu gọn Top 5",
+      "viewAllN": "Xem tất cả ({n})",
+      "colLeader": "Leader / Đội Nhóm",
+      "colDepartment": "Phòng Ban",
+      "colInternCount": "Quy Mô TTS",
+      "colProgress": "Tiến Độ & % Hoàn Thành",
+      "colTaskRisk": "Rủi Ro Task",
+      "internCount": "{n} TTS",
+      "percentDone": "{pct}% Done ({done}/{total} Task)",
+      "inProgressReview": "{inProgress} đang làm • {review} chờ duyệt",
+      "overdueTasks": "{n} task trễ",
+      "recentActivity": "Nhật Ký Hoạt Động Gần Đây",
+      "noActivity": "Chưa có hoạt động mới ghi nhận.",
+      "actionAlerts": "Mục Cần Xử Lý Ngay (Action Alerts)",
+      "pendingAppsCount": "{n} Đơn ứng tuyển chờ xử lý",
+      "needApproveReject": "Cần duyệt hoặc từ chối ứng viên mới",
+      "overdueTasksCount": "{n} Task quá hạn toàn công ty",
+      "clickToSeeOverdue": "Bấm để soi danh sách ai bị quá hạn",
+      "droppedInterns": "{n} Thực tập sinh đã huỷ / thôi học",
+      "droppedList": "Danh sách thực tập sinh dừng chương trình",
+      "overdueModalTitle": "Danh Sách Tất Cả Task Quá Hạn Toàn Hệ Thống ({n})"
+    },
+    "taskModal": {
+      "showingItems": "Hiển thị danh sách chi tiết công việc, thực tập sinh phụ trách và hạn chót ({n} mục)",
+      "noTasks": "Không có nhiệm vụ nào thuộc danh mục này.",
+      "colTask": "Nhiệm vụ / Task",
+      "colIntern": "Thực Tập Sinh",
+      "colLeader": "Leader Giao Việc",
+      "colDeadline": "Hạn Chót",
+      "colStatus": "Trạng Thái"
+    }
+  }
+}

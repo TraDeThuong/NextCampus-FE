@@ -1,0 +1,33 @@
+{
+  "intern": {
+    "profile": {
+      "metaTitle": "My Profile",
+      "title": "My Profile",
+      "description": "Manage your personal information and account settings.",
+      "loadError": "Unable to load profile",
+      "loadErrorDesc": "Please refresh the page and try again.",
+
+      "internshipInfo": "Internship Information",
+      "internshipInfoDesc": "Update your internship information.",
+      "phone": "Phone",
+      "phoneRequired": "Phone is required",
+      "phoneMinLength": "Phone must be at least 9 digits",
+      "discordUsername": "Discord Username",
+      "discordPlaceholder": "username#0000",
+      "department": "Department",
+      "position": "Position",
+      "startDate": "Start Date",
+      "duration": "Duration",
+      "durationMonths": "{n} month{plural}",
+      "estEnd": "Est. end",
+      "status": "Status",
+      "active": "Active",
+      "completed": "Completed",
+      "dropped": "Dropped",
+      "leader": "Leader",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "saveChanges": "Save changes"
+    }
+  }
+}

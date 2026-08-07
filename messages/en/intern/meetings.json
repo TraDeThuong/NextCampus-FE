@@ -1,0 +1,60 @@
+{
+  "intern": {
+    "meetings": {
+      "metaTitle": "Meetings",
+      "title": "Meetings",
+      "description": "Meetings you are invited to participate in.",
+
+      "total": "Total",
+      "scheduled": "Scheduled",
+      "ongoing": "Ongoing",
+      "completed": "Completed",
+      "statsError": "Failed to load stats.",
+
+      "upcomingOngoing": "Upcoming & Ongoing",
+      "noMeetingsToday": "No meetings today",
+      "host": "Host:",
+
+      "thisWeek": "This Week",
+      "noMeetingsThisWeek": "No meetings this week",
+      "noMeetings": "No meetings",
+      "accepted": "Accepted",
+      "declined": "Declined",
+      "pending": "Pending",
+
+      "calendarError": "Failed to load meetings.",
+      "invited": "Invited",
+      "cancelled": "Cancelled",
+      "scheduleHint": "Schedule a meeting",
+      "moreCount": "+{n} more",
+
+      "detailModal": {
+        "loadError": "Failed to load meeting details.",
+        "allMembers": "All members",
+        "leaders": "{n} leader{plural}",
+        "host": "Host:",
+        "createdBy": "Created by:",
+        "participants": "Participants",
+        "absenceRequests": "Absence Requests",
+        "note": "Note:",
+        "leaveMeeting": "Leave meeting",
+        "declineInvitation": "Decline invitation",
+        "reasonPlaceholder": "Reason (required)...",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "youAccepted": "You've accepted this meeting.",
+        "youInvited": "You're invited to this meeting.",
+        "accept": "Accept",
+        "leave": "Leave",
+        "decline": "Decline",
+        "approve": "Approve",
+        "reject": "Reject",
+        "cancelMeetingTitle": "Cancel this meeting?",
+        "cancelMeetingDesc": "The meeting will be marked as cancelled and all participants will be notified.",
+        "noKeepIt": "No, keep it",
+        "yesCancelIt": "Yes, cancel it",
+        "cancelMeeting": "Cancel Meeting"
+      }
+    }
+  }
+}

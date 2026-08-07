@@ -1,0 +1,14 @@
+{
+  "leader": {
+    "nav": {
+      "dashboard": "Tổng quan",
+      "interns": "Thực tập sinh",
+      "department": "Phòng ban",
+      "tasks": "Nhiệm vụ",
+      "dailyReports": "Báo cáo ngày",
+      "meetings": "Cuộc họp",
+      "weeklyEvaluation": "Đánh giá tuần",
+      "profile": "Hồ sơ"
+    }
+  }
+}

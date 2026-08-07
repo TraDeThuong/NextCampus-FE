@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import {
   LayoutDashboard,
   Users,
@@ -14,13 +14,13 @@ import {
 import { LuAlarmClock } from "react-icons/lu";
 import { PiBuildingOfficeLight } from "react-icons/pi";
 import { MdManageAccounts } from "react-icons/md";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/i18n/navigation";
 import { MdOutlineMailOutline } from "react-icons/md";
-import { useLanguage } from "@/hooks/useLanguage";
+import { useTranslations } from "next-intl";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
-  const { t } = useLanguage();
+  const t = useTranslations();
 
   const menus = [
     { name: t("admin.nav.dashboard"),     href: "/admin/dashboard",     icon: LayoutDashboard },

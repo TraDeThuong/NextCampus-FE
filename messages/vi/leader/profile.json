@@ -1,0 +1,23 @@
+{
+  "leader": {
+    "profile": {
+      "metaTitle": "Hồ sơ cá nhân",
+      "title": "Hồ sơ của tôi",
+      "description": "Quản lý thông tin cá nhân và cài đặt tài khoản.",
+      "loadError": "Không thể tải hồ sơ",
+      "loadErrorDesc": "Vui lòng làm mới trang và thử lại.",
+
+      "leaderInfo": "Thông tin Leader",
+      "leaderInfoDesc": "Cập nhật thông tin leader của bạn.",
+      "phone": "Số điện thoại",
+      "phonePlaceholder": "Thêm số điện thoại",
+      "invalidPhone": "Số điện thoại Việt Nam không hợp lệ",
+      "departments": "Phòng ban",
+      "position": "Vị trí",
+      "notSet": "Chưa đặt",
+      "cancel": "Huỷ",
+      "saving": "Đang lưu...",
+      "saveChanges": "Lưu thay đổi"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "intern": {
+    "nav": {
+      "dashboard": "Tổng quan",
+      "task": "Nhiệm vụ",
+      "dailyReport": "Báo cáo ngày",
+      "meetings": "Cuộc họp",
+      "weeklyEvaluation": "Đánh giá tuần",
+      "profile": "Hồ sơ"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "common": {
+    "viewDetails": "View details",
+    "retry": "Retry",
+    "viewAll": "View all",
+    "view": "View",
+    "handle": "Handle",
+    "details": "Details",
+    "noLimit": "No limit",
+    "priority": "Priority: {priority}",
+    "overdue": "⚠ Overdue",
+    "onTrack": "✓ On Track"
+  },
+  "header": {
+    "logout": "Logout",
+    "loggingOut": "Logging out, please wait...",
+    "dashboard": "DASHBOARD"
+  }
+}

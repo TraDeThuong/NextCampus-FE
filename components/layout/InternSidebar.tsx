@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link } from "@/i18n/navigation";
+import { usePathname } from "@/i18n/navigation";
 import {
   LayoutDashboard,
   CheckSquare,
@@ -10,7 +10,7 @@ import {
   UserRoundPen,
 } from "lucide-react";
 import { LuAlarmClock } from "react-icons/lu";
-import { useLanguage } from "@/hooks/useLanguage";
+import { useTranslations } from "next-intl";
 
 const baseClass =
   "flex items-center justify-center w-14 h-14 rounded-2xl border transition-all duration-300 shadow-shadow-soft cursor-pointer";
@@ -23,7 +23,7 @@ const inactiveClass =
 
 export default function InternSidebar() {
   const pathname = usePathname();
-  const { t } = useLanguage();
+  const t = useTranslations();
 
   const menus = [
     { name: t("intern.nav.dashboard"),        href: "/intern/dashboard",         icon: LayoutDashboard },

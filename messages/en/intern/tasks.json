@@ -1,0 +1,76 @@
+{
+  "intern": {
+    "tasks": {
+      "metaTitle": "My Tasks",
+      "title": "My Tasks",
+      "description": "View and submit your assigned tasks.",
+
+      "statsError": "Failed to load task stats.",
+      "totalTasks": "Total Tasks",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "completionRate": "Completion Rate",
+
+      "period": "Period:",
+      "all": "All",
+      "thisWeek": "This Week",
+      "thisMonth": "This Month",
+      "custom": "Custom",
+      "apply": "Apply",
+
+      "taskRegistry": "Task Registry",
+      "totalUnits": "Total: {n} UNITS",
+      "noTasksAllocated": "NO TASKS ALLOCATED",
+      "selectTask": "Select a task to view details",
+      "failedToLoad": "Failed to load task.",
+
+      "submitWork": "Submit Work",
+      "readyToStart": "Ready to start? Mark this task as In Progress.",
+      "blockedMsg": "Task is blocked. Unblock to continue working.",
+      "startWorking": "Start Working",
+      "unblock": "Unblock",
+
+      "targetDeadline": "Target Deadline",
+      "assignedAt": "Assigned At",
+      "assignedBy": "Assigned By",
+      "support": "Support",
+      "group": "Group",
+      "startDate": "Start Date",
+      "estDuration": "Est. Duration",
+      "days": "{n} days",
+      "description": "Description",
+      "acceptanceCriteria": "Acceptance Criteria",
+      "notes": "Notes",
+      "attachments": "Attachments ({n})",
+      "open": "Open",
+      "submissionHistory": "Submission History ({n})",
+      "latest": "LATEST",
+      "view": "View",
+      "edit": "Edit",
+      "reviewComment": "Review Comment",
+
+      "submissionModal": {
+        "editTitle": "Edit Submission",
+        "submitTitle": "Submit Work",
+        "editDesc": "Update your PR link, video demo, and notes.",
+        "submitDesc": "Submit your PR link, demo video, and notes.",
+        "status": "Status",
+        "prLink": "PR Link",
+        "videoDemo": "Video Demo",
+        "note": "Note",
+        "submitted": "Submitted",
+        "reviewComment": "Review Comment",
+        "prPlaceholder": "https://github.com/user/repo/pull/1",
+        "videoPlaceholder": "Paste video URL...",
+        "or": "OR",
+        "remove": "Remove",
+        "notePlaceholder": "Additional notes for the reviewer...",
+        "cancel": "Cancel",
+        "update": "Update",
+        "submit": "Submit",
+        "videoTypeError": "Video must be an MP4 or WEBM file.",
+        "videoSizeError": "Video must not exceed {limit} MB."
+      }
+    }
+  }
+}

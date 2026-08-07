@@ -1,0 +1,65 @@
+{
+  "leader": {
+    "dashboard": {
+      "metaTitle": "Dashboard (Leader)",
+      "title": "Leader Team Operations Center",
+      "description": "Directly manage interns, approve submissions & track team work progress",
+      "loadError": "Failed to load Leader statistics. Please check your network connection.",
+      "retry": "Retry",
+
+      "activeInterns": "Active Interns",
+      "activeInternsSubtitle": "Total: {total} interns",
+      "completedCount": "{count} completed",
+
+      "pendingSubmissions": "Pending Submissions",
+      "approvedSubmissions": "{count} approved submissions",
+      "needsApproval": "Needs approval now",
+      "approvalDone": "All approved",
+
+      "overdueTasks": "Overdue Team Tasks",
+      "overdueTasksSubtitle": "Tasks past deadline",
+      "remindInterns": "Remind interns",
+      "onTrack": "On track",
+
+      "avgScore": "Avg Team Score",
+      "avgScoreSubtitle": "{count} evaluations",
+      "avgScoreLabel": "Team average score",
+
+      "pendingApproval": "Approval Requests",
+      "pendingApprovalSubtitle": "Task assignments from other Leaders",
+      "needsYourApproval": "Needs approval",
+      "allApproved": "All approved",
+
+      "internProgressTitle": "Detailed Intern Progress in Team",
+      "internProgressDesc": "Monitor individual task completion progress and average scores",
+      "colIntern": "Intern",
+      "colTaskProgress": "Task Progress",
+      "colAvgScore": "Avg Score",
+      "colHealthStatus": "Health Status",
+      "taskCount": "{completed}/{total} Tasks",
+      "notGraded": "Not graded",
+      "healthy": "On Track",
+      "warning": "Needs Attention ({count} tasks overdue)",
+      "danger": "At Risk ({count} tasks overdue)",
+
+      "taskStatusTitle": "Team Task Status Breakdown",
+      "taskStatusSubtitle": "Click each row to view task list",
+      "statusPendingApproval": "Pending Approval",
+      "statusTodo": "To Do",
+      "statusInProgress": "In Progress",
+      "statusReview": "In Review",
+      "statusDone": "Done",
+      "statusBlocked": "Blocked",
+
+      "statusDetailTitle": "Team Task Details - Status: {status}",
+      "overdueListTitle": "Overdue Team Tasks ({count})",
+
+      "pendingModalTitle": "Pending Task Assignment Requests",
+      "pendingModalDesc": "{count} requests from other leaders awaiting your approval",
+      "requestedBy": "Requested by:",
+      "approve": "Approve",
+      "reject": "Reject",
+      "pendingModalEmpty": "No pending task assignment requests."
+    }
+  }
+}
