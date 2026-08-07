@@ -16,6 +16,7 @@
       "evaluationHistory": "Lịch sử đánh giá",
       "historyDesc": "Click vào từng tuần để xem chi tiết và xác nhận đã đọc",
       "noEvaluations": "Chưa có đánh giá tuần nào. Hãy chờ Leader đánh giá!",
+      "week": "Tuần {n}",
       "colWeek": "Tuần",
       "colScore": "Điểm & Xếp Loại",
       "colStatus": "Trạng thái",

@@ -16,6 +16,7 @@
       "evaluationHistory": "Evaluation History",
       "historyDesc": "Click on each week to view details and confirm review",
       "noEvaluations": "No evaluations yet. Please wait for your Leader to evaluate!",
+      "week": "Week {n}",
       "colWeek": "Week",
       "colScore": "Score & Rating",
       "colStatus": "Status",
