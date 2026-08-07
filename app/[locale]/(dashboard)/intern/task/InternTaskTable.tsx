@@ -35,7 +35,17 @@ export default function InternTaskTable() {
     if (deadlineFrom || deadlineTo) {
       filtered = filtered.filter((a) => { const d = new Date(a.task.deadline); if (deadlineFrom && d < new Date(deadlineFrom)) return false; if (deadlineTo) { const to = new Date(deadlineTo); to.setHours(23, 59, 59, 999); if (d > to) return false; } return true; });
     }
-    return filtered.sort((a, b) => new Date(a.task.deadline).getTime() - new Date(b.task.deadline).getTime());
+    return filtered.sort((a, b) => {
+      const timeA = new Date(a.assignedAt).getTime();
+      const timeB = new Date(b.assignedAt).getTime();
+      if (timeA !== timeB) return timeB - timeA;
+
+      const taskTimeA = new Date(a.task.createdAt).getTime();
+      const taskTimeB = new Date(b.task.createdAt).getTime();
+      if (taskTimeA !== taskTimeB) return taskTimeB - taskTimeA;
+
+      return (b.task.code || "").localeCompare(a.task.code || "");
+    });
   }, [assignments, deadlineFrom, deadlineTo]);
 
   const selectedAssignment = assignmentId ? sortedAssignments.find((a) => a.id === assignmentId) : undefined;

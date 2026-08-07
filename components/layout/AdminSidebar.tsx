@@ -17,10 +17,12 @@ import { MdManageAccounts } from "react-icons/md";
 import { usePathname } from "@/i18n/navigation";
 import { MdOutlineMailOutline } from "react-icons/md";
 import { useTranslations } from "next-intl";
+import { useSidebarPrefetch } from "@/hooks/useSidebarPrefetch";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
   const t = useTranslations();
+  const { getPrefetchHandler } = useSidebarPrefetch();
 
   const menus = [
     { name: t("admin.nav.dashboard"),     href: "/admin/dashboard",     icon: LayoutDashboard },
@@ -47,7 +49,7 @@ export default function AdminSidebar() {
 
           return (
             <li key={item.href} className="relative group">
-              <Link href={item.href} className="relative flex flex-col items-center">
+              <Link href={item.href} className="relative flex flex-col items-center" onMouseEnter={getPrefetchHandler(item.href)}>
                 <div className={`
                     flex items-center justify-center
                     w-14 h-14 rounded-2xl
