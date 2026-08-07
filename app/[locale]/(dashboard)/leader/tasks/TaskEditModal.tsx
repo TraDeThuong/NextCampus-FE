@@ -155,26 +155,46 @@ export default function TaskEditModal({ taskId, onClose, onCloseModal }: Props) 
       await updateTask.mutateAsync({ id: taskId, payload });
       queryClient.invalidateQueries({ queryKey: ["task", taskId] });
 
-      if (fileItems.length > 0) {
-        const fStatus: Record<number, ItemStatus> = {};
-        fileItems.forEach((f) => (fStatus[f.id] = "uploading"));
-        setFileStatuses(fStatus);
-        for (let i = 0; i < fileItems.length; i += BATCH_SIZE) {
-          const batch = fileItems.slice(i, i + BATCH_SIZE);
+      const filesToUpload = fileItems.filter((f) => fileStatuses[f.id] !== "success");
+      const linksToUpload = linkItems.filter((l) => linkStatuses[l.id] !== "success");
+
+      setFileStatuses((prev) => {
+        const next = { ...prev };
+        filesToUpload.forEach((f) => (next[f.id] = "uploading"));
+        return next;
+      });
+      setLinkStatuses((prev) => {
+        const next = { ...prev };
+        linksToUpload.forEach((l) => (next[l.id] = "uploading"));
+        return next;
+      });
+
+      let uploadFailed = false;
+
+      if (filesToUpload.length > 0) {
+        for (let i = 0; i < filesToUpload.length; i += BATCH_SIZE) {
+          const batch = filesToUpload.slice(i, i + BATCH_SIZE);
           for (const f of batch) {
-            try { await uploadAttachment.mutateAsync({ taskId, file: f.file }); setFileStatuses((prev) => ({ ...prev, [f.id]: "success" })); }
-            catch { setFileStatuses((prev) => ({ ...prev, [f.id]: "error" })); }
+            try {
+              await uploadAttachment.mutateAsync({ taskId, file: f.file });
+              setFileStatuses((prev) => ({ ...prev, [f.id]: "success" }));
+            } catch {
+              setFileStatuses((prev) => ({ ...prev, [f.id]: "error" }));
+              uploadFailed = true;
+            }
           }
         }
       }
 
-      if (linkItems.length > 0) {
-        const lStatus: Record<number, ItemStatus> = {};
-        linkItems.forEach((l) => (lStatus[l.id] = "uploading"));
-        setLinkStatuses(lStatus);
-        for (const link of linkItems) {
-          try { await taskAttachmentService.createTaskAttachmentLink(taskId, link.fileName, link.fileUrl); setLinkStatuses((prev) => ({ ...prev, [link.id]: "success" })); }
-          catch { setLinkStatuses((prev) => ({ ...prev, [link.id]: "error" })); }
+      if (linksToUpload.length > 0) {
+        for (const link of linksToUpload) {
+          try {
+            await taskAttachmentService.createTaskAttachmentLink(taskId, link.fileName, link.fileUrl);
+            setLinkStatuses((prev) => ({ ...prev, [link.id]: "success" }));
+          } catch {
+            setLinkStatuses((prev) => ({ ...prev, [link.id]: "error" }));
+            uploadFailed = true;
+          }
         }
       }
 
@@ -186,9 +206,18 @@ export default function TaskEditModal({ taskId, onClose, onCloseModal }: Props) 
 
       queryClient.invalidateQueries({ queryKey: ["tasks"], exact: false });
       queryClient.invalidateQueries({ queryKey: ["task-attachments", taskId] });
-      onClose?.();
-      onCloseModal?.();
-    } catch { } finally { setIsUploading(false); }
+      
+      if (!uploadFailed) {
+        onClose?.();
+        onCloseModal?.();
+      } else {
+        toast.error("Some attachments failed to upload. Please try again.");
+      }
+    } catch {
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   if (isLoading) return <div className="flex justify-center py-12"><Spinner size="md" /></div>;
@@ -326,7 +355,12 @@ export default function TaskEditModal({ taskId, onClose, onCloseModal }: Props) 
             )}
 
             {fileItems.length < MAX_FILES && (
-              <input type="file" multiple disabled={isPending} onChange={handleFilesChange} className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-primary-main/10 file:px-3 file:py-1 file:text-xs file:text-primary-light file:cursor-pointer focus:border-primary-light/40 focus:outline-none disabled:opacity-50" />
+              <div className="space-y-1">
+                <input type="file" multiple disabled={isPending} onChange={handleFilesChange} className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-primary-main/10 file:px-3 file:py-1 file:text-xs file:text-primary-light file:cursor-pointer focus:border-primary-light/40 focus:outline-none disabled:opacity-50" />
+                <p className="text-[11px] text-zinc-500">
+                  Up to {MAX_FILES} files, {UPLOAD_LIMITS_MB.taskAttachment} MB each.
+                </p>
+              </div>
             )}
             {fileItems.length >= MAX_FILES && (
               <p className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-2.5 text-xs text-amber-300">{tm("fileLimitReached", { max: MAX_FILES })}</p>
