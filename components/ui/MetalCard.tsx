@@ -9,6 +9,28 @@ export default function MetalCard({
     children,
     className = "",
 }: MetalCardProps) {
+    const layoutClasses = className
+        ? className
+              .split(/\s+/)
+              .filter((c) => {
+                  if (c === "flex" || c.startsWith("flex-row") || c.startsWith("flex-col") || c.startsWith("flex-wrap")) {
+                      return true;
+                  }
+                  if (c === "grid" || c.startsWith("grid-cols-") || c.startsWith("grid-rows-")) {
+                      return true;
+                  }
+                  return (
+                      c.startsWith("items-") ||
+                      c.startsWith("justify-") ||
+                      c.startsWith("gap-") ||
+                      c.startsWith("space-") ||
+                      c.startsWith("text-") ||
+                      c === "h-full"
+                  );
+              })
+              .join(" ")
+        : "";
+
     return (
         <div
             className={`
@@ -119,7 +141,7 @@ export default function MetalCard({
 
             {/* Content */}
 
-            <div className="relative z-10">
+            <div className={`relative z-10 w-full min-w-0 max-w-full ${layoutClasses}`}>
                 {children}
             </div>
         </div>

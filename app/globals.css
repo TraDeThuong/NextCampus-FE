@@ -81,7 +81,7 @@
   }
 
   body {
-    font-family: var(--font-body), var(--font-body-vi);
+    font-family: var(--font-body), sans-serif;
     font-size: 1rem;
     line-height: 1.6;
     background: var(--background);
@@ -89,8 +89,18 @@
   }
 
   h1, h2, h3 {
-    font-family: var(--font-heading), var(--font-heading-vi);
+    font-family: var(--font-heading), sans-serif;
     font-weight: 400;
+  }
+
+  html[lang="vi"] body {
+    font-family: var(--font-body-vi), sans-serif;
+  }
+
+  html[lang="vi"] h1,
+  html[lang="vi"] h2,
+  html[lang="vi"] h3 {
+    font-family: var(--font-heading-vi), sans-serif;
   }
 
   h1 {

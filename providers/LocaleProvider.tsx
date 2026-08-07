@@ -5,6 +5,7 @@ import {
   useContext,
   useState,
   useCallback,
+  useEffect,
   type ReactNode,
 } from "react";
 import { NextIntlClientProvider } from "next-intl";
@@ -38,10 +39,15 @@ export default function LocaleProvider({
 }) {
   const [locale, setLocaleState] = useState(initialLocale);
 
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
+
   const setLocale = useCallback(
     (newLocale: string) => {
       if (newLocale === locale) return;
 
+      document.documentElement.lang = newLocale;
       setLocaleState(newLocale);
 
       // Update URL without full navigation

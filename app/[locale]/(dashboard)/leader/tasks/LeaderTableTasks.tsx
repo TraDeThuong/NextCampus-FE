@@ -138,10 +138,10 @@ export default function LeaderTableTasks() {
         <button ref={taskTriggerRef} className="hidden" />
       </Modal.Open>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_1fr]">
+      <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
         {/* Left: Task Groups */}
-        <MetalCard className="min-h-[240px]">
-          <div className="p-4 pb-24">
+        <MetalCard className="min-h-[240px] min-w-0">
+          <div className="min-w-0 p-4 pb-24">
             <div className="mb-3 flex items-center gap-2">
               <Layers className="h-4 w-4 text-primary-light" />
               <h3 className="text-sm font-semibold metal-text">{t("taskGroups")}</h3>
@@ -194,8 +194,8 @@ export default function LeaderTableTasks() {
         </MetalCard>
 
         {/* Right: Task Table */}
-        <MetalCard className="min-h-[240px]">
-          <div className="p-4 pb-24">
+        <MetalCard className="min-h-[240px] min-w-0">
+          <div className="min-w-0 p-4 pb-24">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-semibold flex items-center">
                 <span className="metal-text">{t("tasks")}</span>
@@ -223,8 +223,7 @@ export default function LeaderTableTasks() {
             {tasksLoading ? (
               <div className="flex justify-center py-12"><Spinner /></div>
             ) : tasks.length > 0 ? (
-              <div className="overflow-x-auto">
-                <Table columns="100px minmax(220px,1fr) 180px 140px 90px 110px 100px 70px" className="min-w-[1050px]">
+              <Table columns="70px minmax(160px,1fr) 130px 110px 75px 95px 85px 40px">
                   <Table.Header>
                     <div>{t("colCode")}</div><div>{t("colTitle")}</div><div>{t("colOwner")}</div><div>{t("colSupport")}</div><div>{t("colPriority")}</div><div>{t("colStatus")}</div>
                     <div>{t("colDeadline")}</div><div></div>
@@ -312,7 +311,6 @@ export default function LeaderTableTasks() {
                   </Table.Footer>
                 )}
                 </Table>
-              </div>
             ) : (
               <p className="py-12 text-center text-sm text-muted">{t("noTasksFound")}</p>
             )}
