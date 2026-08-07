@@ -1,5 +1,4 @@
 import { Be_Vietnam_Pro, Black_Ops_One, Saira_Stencil_One, Ubuntu } from "next/font/google";
-import { Be_Vietnam_Pro, Black_Ops_One, Saira_Stencil_One, Ubuntu } from "next/font/google";
 import "./globals.css";
 import { ReactNode } from "react";
 import type { Metadata } from "next";
@@ -13,8 +12,7 @@ export const metadata: Metadata = {
 };
 
 const headingFont = Black_Ops_One({
-  subsets: ["latin", "vietnamese"],
-  subsets: ["latin", "vietnamese"],
+  subsets: ["latin"],
   weight: "400",
   variable: "--font-heading",
 });
@@ -37,17 +35,11 @@ const bodyFontVi = Be_Vietnam_Pro({
   variable: "--font-body-vi",
 });
 
-const bodyFontVi = Be_Vietnam_Pro({
-  subsets: ["latin", "vietnamese"],
-  weight: ["300", "400", "500", "700"],
-  variable: "--font-body-vi",
-});
-
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="vi"
-      className={`${headingFont.variable} ${headingFontVi.variable} ${bodyFont.variable}`}
+      className={`${headingFont.variable} ${headingFontVi.variable} ${bodyFont.variable} ${bodyFontVi.variable}`}
       suppressHydrationWarning
     >
       <body suppressHydrationWarning>{children}</body>
