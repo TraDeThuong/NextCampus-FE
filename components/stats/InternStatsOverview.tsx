@@ -95,7 +95,7 @@ export default function InternStatsOverview() {
             <div className="flex items-center justify-between border-b border-white/10 pb-4"><h3 className="text-lg font-semibold text-foreground flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-emerald-400" />{t("internshipProgress")}</h3></div>
             <div className="mt-6 text-center space-y-4">
               <div className="inline-flex h-32 w-32 items-center justify-center rounded-full border-4 border-primary-light/30 bg-primary-light/5 p-4 shadow-glass"><div><span className="text-3xl font-extrabold text-foreground metal-text">{stats.completionRate}%</span><span className="block text-[10px] text-muted uppercase font-semibold">{t("completed")}</span></div></div>
-              <p className="text-xs text-muted" dangerouslySetInnerHTML={{ __html: t("completedTasksMsg", { done: stats.tasksCompleted, total: stats.totalTasks }) }} />
+              <p className="text-xs text-muted" dangerouslySetInnerHTML={{ __html: t("completedTasksMsg", { done: stats.tasksCompleted, total: stats.totalTasks, strong: (chunks) => `<strong>${chunks}</strong>` }) }} />
             </div>
           </div>
           <div className="pt-6 border-t border-white/10 mt-6">
