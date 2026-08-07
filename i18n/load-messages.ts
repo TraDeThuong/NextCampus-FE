@@ -27,7 +27,14 @@ function deepMerge(
   return target;
 }
 
-const messageCache: Record<string, AbstractIntlMessages> = {};
+const globalForMessages = globalThis as unknown as {
+  messageCache?: Record<string, AbstractIntlMessages>;
+};
+
+if (!globalForMessages.messageCache) {
+  globalForMessages.messageCache = {};
+}
+const messageCache = globalForMessages.messageCache;
 
 /**
  * Load all message files for a given locale and merge them into one object.
