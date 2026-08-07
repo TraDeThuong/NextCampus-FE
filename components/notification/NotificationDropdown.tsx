@@ -1,6 +1,8 @@
 "use client";
 
-import { Check, BellOff, Info, AlertTriangle, CheckCircle2, ShieldAlert, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, Check, BellOff, Info, AlertTriangle, CheckCircle2, ShieldAlert, Trash2 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useNotifications } from "@/hooks/notification/useNotifications";
 import { useMarkAsRead } from "@/hooks/notification/useMarkAsRead";
 import { useMarkAllAsRead } from "@/hooks/notification/useMarkAllAsRead";
@@ -9,11 +11,11 @@ import { useClearReadNotifications } from "@/hooks/notification/useClearReadNoti
 import type { Notification } from "@/types/notification";
 import Spinner from "@/components/ui/Spinner";
 
-type NotificationDropdownProps = {
-  onClose?: () => void;
-};
-
-export default function NotificationDropdown({ onClose }: NotificationDropdownProps) {
+export default function NotificationDropdown() {
+  const t = useTranslations("header.notification");
+  const tCommon = useTranslations("common");
+  const locale = useLocale();
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const { data, isLoading } = useNotifications({ limit: 10, sortBy: "createdAt", order: "desc" });
   const { mutate: markAsRead } = useMarkAsRead();
   const { mutate: markAllAsRead } = useMarkAllAsRead();
@@ -37,6 +39,11 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
     deleteNotification(id);
   };
 
+  const handleOpenNotification = (item: Notification) => {
+    if (!item.isRead) markAsRead(item.id);
+    setSelectedNotification(item);
+  };
+
   const getIconForType = (type: string) => {
     switch (type.toUpperCase()) {
       case "SYSTEM":
@@ -54,7 +61,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
   const formatTime = (dateString: string) => {
     try {
       const date = new Date(dateString);
-      return date.toLocaleDateString("vi-VN", {
+      return date.toLocaleDateString(locale, {
         hour: "2-digit",
         minute: "2-digit",
         day: "2-digit",
@@ -70,23 +77,39 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
       {/* Header */}
       <div className="flex items-center justify-between border-b border-white/10 pb-3">
         <div className="flex items-center gap-2">
-          <h3 className="font-semibold metal-text tracking-wide text-sm">THÔNG BÁO</h3>
-          {unreadNotifications.length > 0 && (
-            <span className="rounded-full bg-cyan-400/20 px-2 py-0.5 text-xs font-medium text-cyan-300 border border-cyan-400/30">
-              {unreadNotifications.length} mới
-            </span>
+          {selectedNotification ? (
+            <>
+              <button
+                onClick={() => setSelectedNotification(null)}
+                className="rounded-lg p-1 text-slate-400 transition-colors hover:bg-white/10 hover:text-white cursor-pointer"
+                aria-label={t("back")}
+                title={t("back")}
+              >
+                <ArrowLeft size={16} />
+              </button>
+              <h3 className="font-semibold metal-text tracking-wide text-sm uppercase">{t("details")}</h3>
+            </>
+          ) : (
+            <>
+              <h3 className="font-semibold metal-text tracking-wide text-sm uppercase">{t("title")}</h3>
+              {unreadNotifications.length > 0 && (
+                <span className="rounded-full bg-cyan-400/20 px-2 py-0.5 text-xs font-medium text-cyan-300 border border-cyan-400/30">
+                  {t("newCount", { count: unreadNotifications.length })}
+                </span>
+              )}
+            </>
           )}
         </div>
 
-        <div className="flex items-center gap-3">
+        {!selectedNotification && <div className="flex items-center gap-3">
           {unreadNotifications.length > 0 && (
             <button
               onClick={handleMarkAllRead}
               className="flex items-center gap-1 text-xs text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer"
-              title="Đánh dấu tất cả là đã đọc"
+              title={t("markAllReadTitle")}
             >
               <Check size={14} />
-              <span>Đã đọc</span>
+              <span>{t("markAllRead")}</span>
             </button>
           )}
 
@@ -94,13 +117,13 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
             <button
               onClick={handleClearRead}
               className="flex items-center gap-1 text-xs text-slate-400 hover:text-red-400 transition-colors cursor-pointer"
-              title="Xóa các thông báo đã đọc"
+              title={t("clearReadTitle")}
             >
               <Trash2 size={13} />
-              <span>Dọn dẹp</span>
+              <span>{t("clearRead")}</span>
             </button>
           )}
-        </div>
+        </div>}
       </div>
 
       {/* Content */}
@@ -109,19 +132,42 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
           <div className="flex h-32 items-center justify-center">
             <Spinner size="sm" />
           </div>
+        ) : selectedNotification ? (
+          <div className="p-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="rounded-lg bg-white/5 p-2 border border-white/10 shrink-0">
+                {getIconForType(selectedNotification.type)}
+              </div>
+              <span className="text-[10px] text-slate-400">
+                {formatTime(selectedNotification.createdAt)}
+              </span>
+            </div>
+            <h4 className="mt-3 break-words text-sm font-semibold leading-relaxed text-white">
+              {selectedNotification.title}
+            </h4>
+            <p className="mt-2 whitespace-pre-wrap break-words text-xs leading-relaxed text-slate-300">
+              {selectedNotification.content}
+            </p>
+          </div>
         ) : notifications.length === 0 ? (
           <div className="flex h-36 flex-col items-center justify-center gap-2 text-slate-400 text-xs">
             <BellOff className="h-8 w-8 text-slate-600" />
-            <p>Không có thông báo nào</p>
+            <p>{t("empty")}</p>
           </div>
         ) : (
           notifications.map((item: Notification) => (
             <div
               key={item.id}
-              onClick={() => {
-                if (!item.isRead) markAsRead(item.id);
-                if (onClose) onClose();
+              onClick={() => handleOpenNotification(item)}
+              onKeyDown={(event) => {
+                if (event.target !== event.currentTarget) return;
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  handleOpenNotification(item);
+                }
               }}
+              role="button"
+              tabIndex={0}
               className={`group relative flex items-start gap-3 p-3 rounded-xl transition-all duration-200 cursor-pointer ${
                 item.isRead
                   ? "bg-transparent hover:bg-white/5 opacity-70"
@@ -145,6 +191,9 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
                 <p className="mt-1 text-xs text-slate-300 line-clamp-2 leading-relaxed">
                   {item.content}
                 </p>
+                <span className="mt-1.5 inline-block text-[10px] font-medium text-cyan-300/80 group-hover:text-cyan-300">
+                  {tCommon("viewDetails")}
+                </span>
               </div>
 
               {/* Action buttons on hover */}
@@ -152,7 +201,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
                 <button
                   onClick={(e) => handleDeleteItem(e, item.id)}
                   className="text-slate-400 hover:text-red-400 transition-colors p-1 cursor-pointer"
-                  title="Xóa thông báo này"
+                  title={t("deleteTitle")}
                 >
                   <Trash2 size={14} />
                 </button>
