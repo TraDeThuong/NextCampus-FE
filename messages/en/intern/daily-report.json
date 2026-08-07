@@ -39,7 +39,7 @@
         "attachmentsHint": "Up to 5 files, {limit} MB each.",
         "cancel": "Cancel",
         "submit": "Submit",
-        "videoTypeError": "Video must be an MP4 or WEBM file.",
+        "videoTypeError": "Video must be an MP4, WEBM, MOV, MKV or AVI file.",
         "videoSizeError": "Video must not exceed {limit} MB.",
         "unsupportedType": "\"{name}\" has an unsupported file type.",
         "fileSizeError": "\"{name}\" exceeds {limit} MB.",
