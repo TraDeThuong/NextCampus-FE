@@ -19,6 +19,7 @@ export default function CreateDailyReportModal({ onClose }: Props) {
   const [content, setContent] = useState(""); const [prLink, setPrLink] = useState(""); const [videoLink, setVideoLink] = useState("");
   const [videoFile, setVideoFile] = useState<File | null>(null); const [attachments, setAttachments] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [createdReportId, setCreatedReportId] = useState<string | null>(null);
 
   function handleVideoFileChange(file: File | undefined) {
     if (!file) { setVideoFile(null); return; }
@@ -39,7 +40,28 @@ export default function CreateDailyReportModal({ onClose }: Props) {
   }
 
   async function handleSubmit(e: React.FormEvent) { e.preventDefault(); if (isSubmitting) return; setIsSubmitting(true);
-    try { const result = await createDailyReport.mutateAsync({ content, prLink: prLink.trim() || undefined, videoDemo: videoLink.trim() || undefined }); if (videoFile) await uploadVideo.mutateAsync({ id: result.data.id, file: videoFile }); for (const file of attachments) await uploadAttachment.mutateAsync({ reportId: result.data.id, file }); onClose(); } catch (err) { console.error(err); } finally { setIsSubmitting(false); }
+    try {
+      let reportId = createdReportId;
+      if (!reportId) {
+        const result = await createDailyReport.mutateAsync({ content, prLink: prLink.trim() || undefined, videoDemo: videoLink.trim() || undefined });
+        reportId = result.data.id;
+        setCreatedReportId(reportId);
+      }
+      if (videoFile) {
+        await uploadVideo.mutateAsync({ id: reportId, file: videoFile });
+        setVideoFile(null);
+      }
+      const remainingAttachments = [...attachments];
+      for (const file of remainingAttachments) {
+        await uploadAttachment.mutateAsync({ reportId, file });
+        setAttachments((current) => current.filter((f) => f !== file));
+      }
+      onClose();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   const isPending = isSubmitting || createDailyReport.isPending || uploadVideo.isPending || uploadAttachment.isPending;
@@ -63,7 +85,7 @@ export default function CreateDailyReportModal({ onClose }: Props) {
                 <input type="url" value={videoLink} onChange={(e) => setVideoLink(e.target.value)} placeholder={tm("videoPlaceholder")} disabled={isPending || !!videoFile} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-cyan-400/50 disabled:opacity-50" />
                 <div className="flex items-center gap-2 text-xs text-slate-500"><span className="h-px flex-1 bg-white/5" /><span>{tm("or")}</span><span className="h-px flex-1 bg-white/5" /></div>
                 {videoFile ? <div className="flex items-center justify-between rounded-xl border border-emerald-400/20 bg-emerald-500/5 px-4 py-2.5"><span className="text-sm text-emerald-300 truncate">{videoFile.name}</span><button type="button" onClick={() => setVideoFile(null)} disabled={isPending} className="text-xs text-slate-400 hover:text-red-400">{tm("remove")}</button></div> :
-                 <input type="file" accept="video/mp4,video/webm" disabled={isPending || !!videoLink.trim()} onChange={(e) => handleVideoFileChange(e.target.files?.[0])} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-400 file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 file:cursor-pointer outline-none disabled:opacity-50" />}
+                 <input type="file" accept="video/mp4,video/webm,video/quicktime,video/x-matroska,video/x-msvideo,.mp4,.webm,.mov,.mkv,.avi" disabled={isPending || !!videoLink.trim()} onChange={(e) => handleVideoFileChange(e.target.files?.[0])} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-400 file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 file:cursor-pointer outline-none disabled:opacity-50" />}
               </div>
             </div>
             <div>

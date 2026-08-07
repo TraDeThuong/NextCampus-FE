@@ -16,7 +16,13 @@ export const IMAGE_MIME_TYPES = new Set([
   "image/gif",
 ]);
 
-export const VIDEO_MIME_TYPES = new Set(["video/mp4", "video/webm"]);
+export const VIDEO_MIME_TYPES = new Set([
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
+  "video/x-matroska",
+  "video/x-msvideo",
+]);
 
 export const ATTACHMENT_MIME_TYPES = new Set([
   ...IMAGE_MIME_TYPES,

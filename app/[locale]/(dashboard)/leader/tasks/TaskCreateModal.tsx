@@ -108,6 +108,7 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
   const [assignMode, setAssignMode] = useState<"none" | "my" | "other">("none");
   const [selectedInternId, setSelectedInternId] = useState<string>("");
   const [step, setStep] = useState(1);
+  const [createdTaskId, setCreatedTaskId] = useState<string | null>(null);
   const submittingRef = useRef(false);
 
   // fetch interns: my team + all (for other teams filter)
@@ -228,8 +229,13 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
     try {
       console.log("[TaskCreateModal] Submit — assignMode:", assignMode, "selectedInternId:", selectedInternId);
       setIsUploading(true);
-      const result = await createTask.mutateAsync(payload);
-      const taskId = result.data.id;
+      
+      let taskId = createdTaskId;
+      if (!taskId) {
+        const result = await createTask.mutateAsync(payload);
+        taskId = result.data.id;
+        setCreatedTaskId(taskId);
+      }
 
       if (linkItems.length === 0 && fileItems.length === 0) {
         // assign task to intern if selected (even without attachments)
@@ -244,25 +250,33 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
         queryClient.invalidateQueries({ queryKey: ["tasks"] });
         reset();
         setStep(1);
+        setCreatedTaskId(null);
         submittingRef.current = false;
         onCloseModal?.();
         return;
       }
 
-      // set all to uploading
-      const fStatus: Record<number, ItemStatus> = {};
-      fileItems.forEach((f) => (fStatus[f.id] = "uploading"));
-      const lStatus: Record<number, ItemStatus> = {};
-      linkItems.forEach((l) => (lStatus[l.id] = "uploading"));
-      setFileStatuses(fStatus);
-      setLinkStatuses(lStatus);
+      const filesToUpload = fileItems.filter((f) => fileStatuses[f.id] !== "success");
+      const linksToUpload = linkItems.filter((l) => linkStatuses[l.id] !== "success");
 
-      let successCount = 0;
+      // set all to uploading
+      setFileStatuses((prev) => {
+        const next = { ...prev };
+        filesToUpload.forEach((f) => (next[f.id] = "uploading"));
+        return next;
+      });
+      setLinkStatuses((prev) => {
+        const next = { ...prev };
+        linksToUpload.forEach((l) => (next[l.id] = "uploading"));
+        return next;
+      });
+
+      let successCount = fileItems.length - filesToUpload.length + linkItems.length - linksToUpload.length;
       let failCount = 0;
 
       // upload files in batches of BATCH_SIZE
-      for (let i = 0; i < fileItems.length; i += BATCH_SIZE) {
-        const batch = fileItems.slice(i, i + BATCH_SIZE);
+      for (let i = 0; i < filesToUpload.length; i += BATCH_SIZE) {
+        const batch = filesToUpload.slice(i, i + BATCH_SIZE);
         try {
           await taskAttachmentService.uploadMultiple(
             taskId,
@@ -282,7 +296,7 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
       }
 
       // upload links
-      for (const link of linkItems) {
+      for (const link of linksToUpload) {
         try {
           await taskAttachmentService.createTaskAttachmentLink(taskId, link.fileName, link.fileUrl);
           setLinkStatuses((prev) => ({ ...prev, [link.id]: "success" }));
@@ -297,12 +311,6 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
               : "Link upload failed";
           toast.error(`"${link.fileName}": ${msg}`);
         }
-      }
-
-      if (failCount > 0) {
-        toast.error(`${failCount} attachment(s) failed. ${successCount} uploaded successfully.`);
-      } else {
-        toast.success("Task created with all attachments.");
       }
 
       // refetch tasks so attachments appear without page reload
@@ -321,18 +329,26 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
       // ensure tasks refetch with assignment data
       queryClient.invalidateQueries({ queryKey: ["tasks"], exact: false });
 
-      // brief delay so user sees final status before reset
-      setTimeout(() => {
-        reset();
-        setStep(1);
-        setFileItems([]);
-        setLinkItems([]);
-        setFileStatuses({});
-        setLinkStatuses({});
+      if (failCount > 0) {
+        toast.error(`${failCount} attachment(s) failed. ${successCount} uploaded successfully.`);
         setIsUploading(false);
         submittingRef.current = false;
-        onCloseModal?.();
-      }, 800);
+      } else {
+        toast.success("Task created with all attachments.");
+        // brief delay so user sees final status before reset
+        setTimeout(() => {
+          reset();
+          setStep(1);
+          setFileItems([]);
+          setLinkItems([]);
+          setFileStatuses({});
+          setLinkStatuses({});
+          setIsUploading(false);
+          setCreatedTaskId(null);
+          submittingRef.current = false;
+          onCloseModal?.();
+        }, 800);
+      }
     } catch {
       toast.error("An unexpected error occurred. Please try again.");
       setIsUploading(false);
@@ -609,13 +625,18 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
 
               <div className="space-y-2">
                 {fileItems.length < MAX_FILES && (
-                  <input
-                    type="file"
-                    multiple
-                    disabled={isUploading}
-                    onChange={handleFilesChange}
-                    className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-primary-main/10 file:px-3 file:py-1 file:text-xs file:text-primary-light file:cursor-pointer focus:border-primary-light/40 focus:outline-none disabled:opacity-50"
-                  />
+                  <div className="space-y-1">
+                    <input
+                      type="file"
+                      multiple
+                      disabled={isUploading}
+                      onChange={handleFilesChange}
+                      className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-primary-main/10 file:px-3 file:py-1 file:text-xs file:text-primary-light file:cursor-pointer focus:border-primary-light/40 focus:outline-none disabled:opacity-50"
+                    />
+                    <p className="text-[11px] text-zinc-500">
+                      Up to {MAX_FILES} files, {UPLOAD_LIMITS_MB.taskAttachment} MB each.
+                    </p>
+                  </div>
                 )}
                 {fileItems.length >= MAX_FILES && (
                   <p className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-2.5 text-xs text-amber-300">
