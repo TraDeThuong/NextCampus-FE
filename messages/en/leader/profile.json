@@ -1,0 +1,23 @@
+{
+  "leader": {
+    "profile": {
+      "metaTitle": "My Profile",
+      "title": "My Profile",
+      "description": "Manage your personal information and account settings.",
+      "loadError": "Unable to load profile",
+      "loadErrorDesc": "Please refresh the page and try again.",
+
+      "leaderInfo": "Leader Information",
+      "leaderInfoDesc": "Update your leader information.",
+      "phone": "Phone",
+      "phonePlaceholder": "Add phone number",
+      "invalidPhone": "Invalid Vietnamese phone number",
+      "departments": "Departments",
+      "position": "Position",
+      "notSet": "Not set",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "saveChanges": "Save changes"
+    }
+  }
+}

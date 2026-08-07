@@ -1,0 +1,69 @@
+{
+  "intern": {
+    "dailyReport": {
+      "metaTitle": "Daily Report",
+      "title": "Daily Report",
+      "description": "View your internship calendar and daily reports.",
+      "createReport": "Create Daily Report",
+      "editReport": "Edit Daily Report",
+      "loadError": "Unable to load internship data.",
+
+      "workingDays": "Working Days",
+      "workingDaysDesc": "From start to today (excl. Sundays)",
+      "reported": "Reported",
+      "submissionRate": "{rate}% submission rate",
+      "missing": "Missing",
+      "missingDesc": "Days without report",
+      "submissionAnalytics": "Submission Analytics",
+      "analyticsDesc": "Visualized report attendance",
+      "rate": "Rate",
+      "days": "days",
+      "thisWeek": "This Week",
+      "monToday": "Mon – Today",
+      "daysReported": "days reported this week",
+      "completePercent": "{percent}% complete",
+      "noWorkingDays": "No working days yet",
+
+      "createModal": {
+        "title": "Create Daily Report",
+        "description": "Submit your work report for today with a PR link and a video demo.",
+        "reportContent": "Report Content",
+        "contentPlaceholder": "Describe what you worked on today...",
+        "prLink": "PR Link",
+        "prPlaceholder": "https://github.com/user/repo/pull/1",
+        "videoDemo": "Video Demo",
+        "videoPlaceholder": "Paste video URL...",
+        "or": "OR",
+        "remove": "Remove",
+        "attachments": "Attachments",
+        "attachmentsHint": "Up to 5 files, {limit} MB each.",
+        "cancel": "Cancel",
+        "submit": "Submit",
+        "videoTypeError": "Video must be an MP4 or WEBM file.",
+        "videoSizeError": "Video must not exceed {limit} MB.",
+        "unsupportedType": "\"{name}\" has an unsupported file type.",
+        "fileSizeError": "\"{name}\" exceeds {limit} MB.",
+        "maxAttachments": "A daily report can contain at most 5 attachments."
+      },
+
+      "editModal": {
+        "title": "Edit Daily Report",
+        "description": "Update your work report for today.",
+        "reportContent": "Report Content",
+        "contentPlaceholder": "Describe what you worked on today...",
+        "prLink": "PR Link",
+        "prPlaceholder": "https://github.com/user/repo/pull/1",
+        "videoDemo": "Video Demo",
+        "videoPlaceholder": "Paste video URL...",
+        "attachments": "Attachments",
+        "newLabel": "(new)",
+        "remove": "Remove",
+        "delete": "Delete",
+        "cancel": "Cancel",
+        "update": "Update",
+        "deleteConfirmTitle": "Delete Report",
+        "deleteConfirmDesc": "This action cannot be undone."
+      }
+    }
+  }
+}

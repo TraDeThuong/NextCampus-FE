@@ -1,0 +1,31 @@
+{
+  "leader": {
+    "department": {
+      "metaTitle": "Department Overview",
+      "title": "Department Overview",
+      "description": "View departments and manage their job positions.",
+
+      "searchDepartment": "Search Department",
+      "searchDepartmentPlaceholder": "Search by department name...",
+      "searchLeader": "Search Leader",
+      "searchLeaderPlaceholder": "Search by leader name or email...",
+
+      "colDepartment": "Department",
+      "colPositions": "Positions",
+      "colLeader": "Leader",
+      "colActions": "Actions",
+      "loadError": "Failed to load departments.",
+      "noDepartments": "No departments found.",
+
+      "noPositions": "No positions",
+      "noName": "No name",
+      "noLeader": "No leader",
+      "managePositions": "Manage Positions",
+      "positionsOf": "Positions of {name}",
+      "noPositionsDefined": "No positions defined yet.",
+      "positionExists": "⚠️ Warning: Already exists in this department",
+      "confirmDeletePosition": "Are you sure you want to delete position \"{name}\"?",
+      "addPositionPlaceholder": "Add position (e.g. NodeJS Intern)..."
+    }
+  }
+}

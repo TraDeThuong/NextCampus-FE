@@ -1,0 +1,23 @@
+{
+  "admin": {
+    "activityLogs": {
+      "metaTitle": "Activity Logs",
+      "title": "Activity Logs",
+      "description": "View and filter activity history, audit operations across the entire system.",
+      "time": "Time",
+      "actor": "Actor",
+      "action": "Action",
+      "target": "Target",
+      "description_col": "Description",
+      "system": "System",
+      "loadError": "Failed to load activity logs.",
+      "noLogs": "No activities found.",
+      "pagination": "Page {page} / {totalPages} · {total} records total",
+      "filterTime": "Time",
+      "filterAction": "Action",
+      "filterOrder": "Sort Order",
+      "newestFirst": "Newest first",
+      "oldestFirst": "Oldest first"
+    }
+  }
+}

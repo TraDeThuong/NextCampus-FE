@@ -1,0 +1,76 @@
+{
+  "intern": {
+    "tasks": {
+      "metaTitle": "Công việc của tôi",
+      "title": "Công Việc Của Tôi",
+      "description": "Xem và nộp bài cho các công việc được giao.",
+
+      "statsError": "Không thể tải thống kê công việc.",
+      "totalTasks": "Tổng Công Việc",
+      "inProgress": "Đang Làm",
+      "completed": "Hoàn Thành",
+      "completionRate": "Tỉ Lệ Hoàn Thành",
+
+      "period": "Thời gian:",
+      "all": "Tất cả",
+      "thisWeek": "Tuần này",
+      "thisMonth": "Tháng này",
+      "custom": "Tuỳ chỉnh",
+      "apply": "Áp dụng",
+
+      "taskRegistry": "Danh Sách Công Việc",
+      "totalUnits": "Tổng: {n} ĐƠN VỊ",
+      "noTasksAllocated": "KHÔNG CÓ CÔNG VIỆC ĐƯỢC GIAO",
+      "selectTask": "Chọn một công việc để xem chi tiết",
+      "failedToLoad": "Không thể tải công việc.",
+
+      "submitWork": "Nộp Bài",
+      "readyToStart": "Sẵn sàng bắt đầu? Đánh dấu công việc là Đang làm.",
+      "blockedMsg": "Công việc đang bị chặn. Mở chặn để tiếp tục.",
+      "startWorking": "Bắt Đầu Làm",
+      "unblock": "Mở Chặn",
+
+      "targetDeadline": "Hạn Chót",
+      "assignedAt": "Ngày Giao",
+      "assignedBy": "Người Giao",
+      "support": "Hỗ Trợ",
+      "group": "Nhóm",
+      "startDate": "Ngày Bắt Đầu",
+      "estDuration": "Thời Gian Dự Kiến",
+      "days": "{n} ngày",
+      "description": "Mô Tả",
+      "acceptanceCriteria": "Tiêu Chí Chấp Nhận",
+      "notes": "Ghi Chú",
+      "attachments": "Tệp Đính Kèm ({n})",
+      "open": "Mở",
+      "submissionHistory": "Lịch Sử Nộp Bài ({n})",
+      "latest": "MỚI NHẤT",
+      "view": "Xem",
+      "edit": "Sửa",
+      "reviewComment": "Nhận Xét",
+
+      "submissionModal": {
+        "editTitle": "Chỉnh Sửa Bài Nộp",
+        "submitTitle": "Nộp Bài",
+        "editDesc": "Cập nhật liên kết PR, video demo và ghi chú.",
+        "submitDesc": "Gửi liên kết PR, video demo và ghi chú.",
+        "status": "Trạng Thái",
+        "prLink": "Liên Kết PR",
+        "videoDemo": "Video Demo",
+        "note": "Ghi Chú",
+        "submitted": "Đã Nộp",
+        "reviewComment": "Nhận Xét",
+        "prPlaceholder": "https://github.com/user/repo/pull/1",
+        "videoPlaceholder": "Dán URL video...",
+        "or": "HOẶC",
+        "remove": "Gỡ",
+        "notePlaceholder": "Ghi chú bổ sung cho người đánh giá...",
+        "cancel": "Huỷ",
+        "update": "Cập Nhật",
+        "submit": "Nộp",
+        "videoTypeError": "Video phải là file MP4 hoặc WEBM.",
+        "videoSizeError": "Video không được vượt quá {limit} MB."
+      }
+    }
+  }
+}

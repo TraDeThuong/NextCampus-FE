@@ -1,0 +1,42 @@
+{
+  "admin": {
+    "policies": {
+      "metaTitle": "Chính sách & Quy định",
+      "title": "Quản lý Chính sách & Quy định",
+      "description": "Quản lý chính sách công ty, thoả thuận onboarding và tài liệu.",
+      "addPolicy": "Thêm Chính sách",
+      "createTitle": "Tạo Chính sách Mới",
+      "createDesc": "Điền thông tin bên dưới để xuất bản quy định mới.",
+      "policyTitle": "Tiêu đề Chính sách",
+      "titlePlaceholder": "VD: Quy định Onboarding Công ty 2026",
+      "content": "Nội dung",
+      "contentPlaceholder": "Viết nội dung chính sách với định dạng văn bản đẹp...",
+      "activateImmediately": "Kích hoạt chính sách này ngay lập tức (sẽ vô hiệu chính sách đang hoạt động trước đó)",
+      "cancel": "Huỷ",
+      "createPolicy": "Tạo Chính sách",
+      "searchTitle": "Tìm Tiêu đề",
+      "searchPlaceholder": "Tìm theo tiêu đề chính sách...",
+      "status": "Trạng thái",
+      "colTitle": "Chính sách & Mô tả",
+      "colVersion": "Phiên bản",
+      "colCreated": "Ngày tạo",
+      "colUpdated": "Cập nhật lần cuối",
+      "colStatus": "Trạng thái",
+      "loadError": "Tải danh sách chính sách thất bại.",
+      "noPolicies": "Không tìm thấy chính sách.",
+      "active": "Đang hoạt động",
+      "draftInactive": "Nháp/Không hoạt động",
+      "editContent": "Chỉnh sửa Nội dung",
+      "activating": "Đang kích hoạt...",
+      "setActive": "Đặt làm Hoạt động",
+      "deletePolicy": "Xoá Chính sách",
+      "editTitle": "Chỉnh sửa Chính sách",
+      "editDesc": "Thay đổi tiêu đề và nội dung chính sách.",
+      "editContentPlaceholder": "Chỉnh sửa nội dung chính sách với định dạng văn bản đẹp...",
+      "saveChanges": "Lưu Thay đổi",
+      "deleteTitle": "Xoá Chính sách",
+      "deleteConfirm": "Bạn có chắc muốn xoá chính sách <strong>{title}</strong>? Hành động này không thể hoàn tác.",
+      "confirmDelete": "Xác nhận Xoá"
+    }
+  }
+}

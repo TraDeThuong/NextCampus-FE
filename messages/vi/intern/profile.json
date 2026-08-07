@@ -1,0 +1,33 @@
+{
+  "intern": {
+    "profile": {
+      "metaTitle": "Hồ sơ cá nhân",
+      "title": "Hồ sơ của tôi",
+      "description": "Quản lý thông tin cá nhân và cài đặt tài khoản.",
+      "loadError": "Không thể tải hồ sơ",
+      "loadErrorDesc": "Vui lòng làm mới trang và thử lại.",
+
+      "internshipInfo": "Thông Tin Thực Tập",
+      "internshipInfoDesc": "Cập nhật thông tin thực tập của bạn.",
+      "phone": "Số điện thoại",
+      "phoneRequired": "Số điện thoại là bắt buộc",
+      "phoneMinLength": "Số điện thoại phải có ít nhất 9 chữ số",
+      "discordUsername": "Tên Discord",
+      "discordPlaceholder": "username#0000",
+      "department": "Phòng ban",
+      "position": "Vị trí",
+      "startDate": "Ngày bắt đầu",
+      "duration": "Thời gian",
+      "durationMonths": "{n} tháng",
+      "estEnd": "Dự kiến KT",
+      "status": "Trạng thái",
+      "active": "Đang hoạt động",
+      "completed": "Đã hoàn thành",
+      "dropped": "Đã nghỉ",
+      "leader": "Leader",
+      "cancel": "Huỷ",
+      "saving": "Đang lưu...",
+      "saveChanges": "Lưu thay đổi"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "admin": {
+    "activityLogs": {
+      "metaTitle": "Nhật ký hoạt động",
+      "title": "Nhật Ký Hoạt Động",
+      "description": "Xem và lọc lịch sử hoạt động, kiểm toán thao tác trong toàn bộ hệ thống.",
+      "time": "Thời gian",
+      "actor": "Người thực hiện",
+      "action": "Hành động",
+      "target": "Đối tượng",
+      "description_col": "Mô tả",
+      "system": "Hệ thống",
+      "loadError": "Không thể tải nhật ký hoạt động.",
+      "noLogs": "Không tìm thấy hoạt động nào.",
+      "pagination": "Trang {page} / {totalPages} · Tổng số {total} bản ghi",
+      "filterTime": "Thời gian",
+      "filterAction": "Hành động",
+      "filterOrder": "Sắp xếp",
+      "newestFirst": "Mới nhất trước",
+      "oldestFirst": "Cũ nhất trước"
+    }
+  }
+}

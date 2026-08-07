@@ -2,11 +2,12 @@
 
 import { createPortal } from "react-dom";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { LogOut, User, Menu } from "lucide-react";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { useLogout } from "@/hooks/auth/useLogout";
-import { useLanguage } from "@/hooks/useLanguage";
+import { useTranslations, useLocale } from "next-intl";
+import { useLocaleSwitcher } from "@/providers/LocaleProvider";
 import Spinner from "../ui/Spinner";
 import NotificationBell from "../notification/NotificationBell";
 
@@ -16,12 +17,18 @@ type HeaderProps = {
 };
 
 export default function Header({ role, onMenuClick }: HeaderProps) {
-    const { language, toggleLanguage, t } = useLanguage();
+    const t = useTranslations();
+    const locale = useLocale();
+    const { setLocale } = useLocaleSwitcher();
     const { state } = useAuth();
     const { logoutMutate, isLoading } = useLogout();
 
     const handleLogout = () => {
         logoutMutate();
+    };
+
+    const toggleLanguage = () => {
+      setLocale(locale === "vi" ? "en" : "vi");
     };
 
   return (
@@ -60,10 +67,10 @@ export default function Header({ role, onMenuClick }: HeaderProps) {
             className="flex items-center gap-2 text-sm text-white/70 hover:text-white transition cursor-pointer"
           >
             <span className="text-2xl">
-              {language === "vn" ? "🇻🇳" : "🇺🇸"}
+              {locale === "vi" ? "🇻🇳" : "🇺🇸"}
             </span>
             <span className="hidden sm:inline">
-              {language === "vn" ? "VN" : "EN"}
+              {locale === "vi" ? "VN" : "EN"}
             </span>
           </button>
 

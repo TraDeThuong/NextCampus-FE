@@ -29,7 +29,6 @@ function getBorderColor(type: string) {
 
 function formatNotificationContent(type: string, content: string) {
   if (type !== "MEETING_INVITATION") return content;
-
   return content.replace(
     /\b(\d{1,2})\/(\d{1,2})\/(\d{4})(?=,\s*\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)\b)/,
     (_, month: string, day: string, year: string) =>
@@ -39,17 +38,18 @@ function formatNotificationContent(type: string, content: string) {
 
 export default function RecentNotifications() {
   const { data, isPending } = useNotifications({ limit: 5, order: "desc", sortBy: "createdAt" });
-
   const notifications = (data?.data ?? []).filter((n) => n.type in MEETING_TYPES);
 
   return (
     <MetalCard className="h-full">
-      <div className="flex h-full flex-col p-5">
-        <div className="mb-4 flex items-center gap-2">
-          <Bell className="h-4 w-4 text-primary-light" />
-          <h3 className="text-sm font-semibold metal-text">Recent</h3>
+      <div className="flex flex-col p-4" style={{ height: "320px" }}>
+        <div className="mb-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Bell className="h-4 w-4 text-primary-light" />
+            <h3 className="text-sm font-semibold metal-text">Recent</h3>
+          </div>
           {notifications.length > 0 && (
-            <span className="ml-auto rounded-full bg-primary-main/20 px-2 py-0.5 text-xs text-primary-light">{notifications.length}</span>
+            <span className="rounded-full bg-white/5 px-2 py-0.5 text-xs text-slate-400">{notifications.length}</span>
           )}
         </div>
 
@@ -61,7 +61,7 @@ export default function RecentNotifications() {
             <p className="text-sm text-slate-500">No notifications</p>
           </div>
         ) : (
-          <div className="flex-1 space-y-2 overflow-y-auto pr-1 custom-scrollbar">
+          <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
             {notifications.map((n) => (
               <div key={n.id} className={`rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2 border-l-2 ${getBorderColor(n.type)}`}>
                 <p className="text-xs font-medium text-slate-200 line-clamp-1">{n.title}</p>

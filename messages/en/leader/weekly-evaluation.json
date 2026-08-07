@@ -1,0 +1,110 @@
+{
+  "leader": {
+    "weeklyEvaluation": {
+      "metaTitle": "Weekly Evaluation",
+      "title": "Weekly Evaluation",
+      "description": "Evaluate interns weekly, get AI-powered suggestions and export PDF reports.",
+      "createEvaluation": "Create Evaluation",
+      "exportPdf": "Export PDF",
+      "backToList": "Back to list",
+
+      "colIntern": "Intern",
+      "colWeek": "Week",
+      "colScore": "Score & Rating",
+      "colAi": "AI",
+      "colActions": "Actions",
+      "week": "Week {n}",
+      "unknown": "Unknown",
+      "aiLabel": "AI",
+      "notYet": "Not yet",
+      "view": "View",
+      "deleteConfirm": "Are you sure you want to delete this evaluation?",
+      "pagination": "Page {page} / {totalPages}",
+
+      "createModal": {
+        "title": "Create Weekly Evaluation",
+        "description": "Evaluate intern competencies across 12 criteria and 5 rating levels.",
+        "intern": "Intern",
+        "selectIntern": "-- Select intern --",
+        "loadingInterns": "Loading interns...",
+        "week": "Week",
+        "currentWeek": "Current week: {week} (Range: 1 to {max})",
+        "weekendNotice": "Current week evaluation opens from Saturday (after 11:00 AM).",
+        "weekAlreadyEvaluated": "This week has already been evaluated for this intern.",
+        "selectRatings": "Select rating levels for the 12 criteria below:",
+        "getAiSuggestion": "Get AI suggestion",
+        "communication": "Communication",
+        "attitude": "Attitude",
+        "learning": "Learning",
+        "coding": "Coding",
+        "totalScore": "Total Score",
+        "comment": "Comment",
+        "commentPlaceholder": "Enter detailed feedback about the intern for this week...",
+        "useAiComment": "Use AI suggestion",
+        "cancel": "Cancel",
+        "saveEvaluation": "Save Evaluation",
+        "selectInternFirst": "Please select an intern first.",
+        "enterValidWeek": "Please enter a valid week number.",
+        "weekRange": "Week must be between 1 and {max}.",
+        "weekendOnly": "Current week evaluation is only available from Saturday (after 11:00 AM) to Sunday.",
+        "weekAlreadyExists": "Week {week} has already been evaluated for this intern.",
+        "aiSuggestionReceived": "AI suggestion received!",
+        "criteriaCount": "({count} criteria)"
+      },
+
+      "detail": {
+        "unknownIntern": "Intern",
+        "week": "Week {n}",
+        "criteria12": "12 criteria",
+        "evaluatedOn": "Evaluated on {date}",
+        "criteriaTable": "12-Criteria Evaluation",
+        "scoreDetail": "Score Details",
+        "adjustedAfterAi": "Adjusted after AI suggestion",
+        "review": "Review & Feedback",
+        "noComment": "No comment.",
+        "originalAiComment": "Original AI comment",
+        "overallScore": "Overall Score",
+        "outOf": "out of 10.00",
+        "finalScore": "Final Score",
+        "aiSuggested": "AI Suggested",
+        "communication": "Communication",
+        "attitude": "Attitude",
+        "learning": "Learning",
+        "coding": "Coding",
+        "evaluator": "Evaluator:",
+        "createdAt": "Created:",
+        "updatedAt": "Updated:",
+        "sectionScore": "Section {id} average:",
+        "aiHint": "AI suggested:",
+        "leader": "Leader"
+      },
+
+      "sections": {
+        "I": "Discipline & Character",
+        "II": "Professional Skills",
+        "III": "Project Results"
+      },
+      "criteria": {
+        "ruleCompliance": "Compliance with regulations",
+        "workAttitude": "Work attitude",
+        "learningCapacity": "Learning capacity",
+        "resilience": "Resilience & pressure handling",
+        "communication": "Communication & behavior",
+        "knowledge": "Knowledge",
+        "practicalSkills": "Practical skills",
+        "foreignLanguage": "Foreign language proficiency",
+        "teamwork": "Teamwork skills",
+        "creativity": "Creativity",
+        "contentQuality": "Content quality delivery",
+        "progressDelivery": "Progress & deadline delivery"
+      },
+      "ratings": {
+        "TOT": "Excellent",
+        "KHA": "Good",
+        "TB": "Average",
+        "TBY": "Below Average",
+        "YEU": "Poor"
+      }
+    }
+  }
+}

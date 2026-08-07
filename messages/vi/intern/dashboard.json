@@ -1,0 +1,51 @@
+{
+  "intern": {
+    "dashboard": {
+      "metaTitle": "Tổng quan",
+      "loadError": "Lỗi khi tải dữ liệu thống kê cá nhân. Vui lòng kiểm tra lại kết nối mạng.",
+      "retry": "Thử lại",
+
+      "greeting": "Xin chào, {name}! 👋",
+      "welcome": "Chào mừng trở lại • Theo dõi tiến độ công việc và nộp báo cáo hằng ngày",
+      "submitTodayReport": "Nộp Báo Cáo Hằng Ngày",
+
+      "tasksInProgress": "Công Việc Đang Làm",
+      "totalTasks": "Tổng công việc: {n}",
+      "completionRate": "{n}% Hoàn thành",
+      "tasksCompleted": "Công Việc Hoàn Thành",
+      "completedOf": "Hoàn thành {done}/{total}",
+      "updateProgress": "Cập nhật tiến độ",
+      "todaysReport": "Báo Cáo Hôm Nay",
+      "submitted": "Đã nộp",
+      "notSubmitted": "Chưa nộp",
+      "onTime": "✓ Đúng hạn",
+      "submitByEvening": "🔴 Nộp trước 18:00",
+      "completeStatus": "Hoàn thành",
+      "submitNowStatus": "Nộp ngay",
+      "weeklyScore": "Điểm Tuần",
+      "avgScore": "Trung bình: {score}/10",
+      "scoreResults": "Kết quả điểm",
+
+      "tasksToDos": "Công Việc & Việc Cần Làm",
+      "viewAllTasks": "Xem Tất Cả",
+      "dailyReport": "Báo Cáo Hằng Ngày",
+      "reportSubmittedMsg": "Bạn đã nộp báo cáo hằng ngày cho hôm nay.",
+      "reportNotSubmittedMsg": "Vui lòng cập nhật các công việc bạn đã làm hôm nay.",
+      "submitNow": "Nộp ngay",
+      "recentlyAssigned": "Công Việc Mới Giao",
+      "colTaskName": "Tên Công Việc",
+      "colPriority": "Ưu Tiên",
+      "colStatusDeadline": "Trạng Thái / Hạn Chót",
+      "leader": "Leader:",
+      "internshipProgress": "Tiến Độ Thực Tập",
+      "completed": "Hoàn thành",
+      "completedTasksMsg": "Bạn đã hoàn thành <strong>{done}</strong> trên <strong>{total}</strong> công việc được giao.",
+      "viewTaskDetails": "Xem Chi Tiết Công Việc",
+
+      "needsRework": "Cần Làm Lại",
+      "submissionsReworked": "{n} Bài Nộp Cần Làm Lại",
+      "resubmitHint": "Leader đã yêu cầu chỉnh sửa và nộp lại các công việc sau",
+      "resubmit": "Nộp lại"
+    }
+  }
+}

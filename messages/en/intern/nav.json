@@ -1,0 +1,12 @@
+{
+  "intern": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "task": "Task",
+      "dailyReport": "Daily Report",
+      "meetings": "Meetings",
+      "weeklyEvaluation": "Weekly Evaluation",
+      "profile": "Profile"
+    }
+  }
+}

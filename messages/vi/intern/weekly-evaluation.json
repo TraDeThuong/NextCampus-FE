@@ -1,0 +1,88 @@
+{
+  "intern": {
+    "weeklyEvaluation": {
+      "metaTitle": "Đánh giá tuần",
+      "metaDescription": "Theo dõi kết quả đánh giá hàng tuần từ Leader, xem chi tiết từng tiêu chí và xác nhận đã đọc.",
+      "title": "Đánh Giá Tuần",
+      "description": "Theo dõi kết quả đánh giá hàng tuần từ Leader",
+      "backToList": "Quay lại danh sách",
+
+      "latestWeek": "Tuần gần nhất",
+      "weekOf": "Tuần {n} / 10",
+      "avgScore": "Điểm trung bình",
+      "overWeeks": "Trên {n} tuần",
+      "reviewedCount": "Đã xác nhận xem",
+      "weeks": "tuần",
+      "evaluationHistory": "Lịch sử đánh giá",
+      "historyDesc": "Click vào từng tuần để xem chi tiết và xác nhận đã đọc",
+      "noEvaluations": "Chưa có đánh giá tuần nào. Hãy chờ Leader đánh giá!",
+      "colWeek": "Tuần",
+      "colScore": "Điểm & Xếp Loại",
+      "colStatus": "Trạng thái",
+      "colDetail": "Chi tiết",
+      "reviewed": "Đã xem",
+      "notReviewed": "Chưa xem",
+      "view": "Xem",
+      "pagination": "Trang {page} / {totalPages}",
+
+      "detail": {
+        "yourEvaluation": "Đánh giá của bạn",
+        "week": "Tuần {n}",
+        "criteria12": "12 tiêu chí",
+        "evaluatedBy": "Đánh giá bởi {name}",
+        "reviewedConfirmed": "Đã xác nhận xem",
+        "markReviewed": "Đã xem đánh giá",
+        "confirming": "Đang xác nhận...",
+        "criteriaTable": "Bảng Đánh Giá 12 Tiêu Chí",
+        "scoreDetail": "Chi Tiết Điểm Năng Lực",
+        "adjustedAfterAi": "Đã điều chỉnh sau gợi ý AI",
+        "leadersReview": "Nhận Xét Của Leader",
+        "noLeaderComment": "Leader chưa để lại nhận xét.",
+        "originalAiComment": "Nhận xét gốc từ AI",
+        "progressChart": "Biểu Đồ Tiến Bộ",
+        "showingWeeks": "Hiển thị {n} tuần gần nhất",
+        "overallScore": "Điểm Đánh Giá",
+        "outOf": "trên thang điểm 10.00",
+        "communication": "Giao tiếp",
+        "attitude": "Thái độ",
+        "learning": "Tự học",
+        "coding": "Lập trình",
+        "evaluator": "Người đánh giá:",
+        "createdAt": "Ngày tạo:",
+        "status": "Trạng thái:",
+        "reviewed": "Đã xem",
+        "notReviewed": "Chưa xem",
+        "reviewedAt": "Xác nhận lúc:",
+        "sectionScore": "Điểm TB phần {id}:",
+        "leader": "Leader"
+      },
+
+      "sections": {
+        "I": "Kỷ luật và tư chất",
+        "II": "Khả năng chuyên môn",
+        "III": "Kết quả thực hiện đề tài"
+      },
+      "criteria": {
+        "ruleCompliance": "Thực hiện nội quy của cơ quan",
+        "workAttitude": "Thái độ làm việc",
+        "learningCapacity": "Năng lực tiếp thu",
+        "resilience": "Khả năng vượt khó, chịu áp lực",
+        "communication": "Giao tiếp và ứng xử",
+        "knowledge": "Kiến thức",
+        "practicalSkills": "Kỹ năng thực hành",
+        "foreignLanguage": "Năng lực ngoại ngữ",
+        "teamwork": "Kỹ năng làm việc nhóm",
+        "creativity": "Tính sáng tạo",
+        "contentQuality": "Thực hiện yêu cầu về nội dung",
+        "progressDelivery": "Thực hiện yêu cầu về tiến độ"
+      },
+      "ratings": {
+        "TOT": "Tốt",
+        "KHA": "Khá",
+        "TB": "Trung bình",
+        "TBY": "Trung bình yếu",
+        "YEU": "Yếu"
+      }
+    }
+  }
+}

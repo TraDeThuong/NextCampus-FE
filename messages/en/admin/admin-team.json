@@ -1,0 +1,39 @@
+{
+  "admin": {
+    "adminTeam": {
+      "title": "Admin Team",
+      "description": "Manage administrators in your organization.",
+      "inviteAdmin": "Invite Admin",
+      "inviteModalTitle": "Invite Admin",
+      "inviteModalDescription": "Enter the email to create an admin account. A password will be sent automatically.",
+      "emailPlaceholder": "admin@example.com",
+      "emailRequired": "Email is required",
+      "invalidEmail": "Invalid email",
+      "cancel": "Cancel",
+      "createAdmin": "Create Admin",
+      "createSuccess": "Admin account created. Password sent via email.",
+      "createError": "Failed to create admin account.",
+      "totalAdmins": "Total Admins",
+      "active": "Active",
+      "inactive": "Inactive",
+      "loadStatsError": "Failed to load admin stats.",
+      "search": "Search",
+      "searchPlaceholder": "Search name or email...",
+      "filterStatus": "Status",
+      "colAdmin": "Admin",
+      "colRole": "Role",
+      "colStatus": "Status",
+      "colJoined": "Joined",
+      "noAdmins": "No admins found.",
+      "loadError": "Failed to load admins.",
+      "pagination": "Page {page} of {totalPages} · {total} total",
+      "delete": "Delete",
+      "deleteTitle": "Delete Admin",
+      "deleteConfirm": "Delete admin account for {name}? This action cannot be undone.",
+      "statusUpdated": "Admin status updated.",
+      "statusUpdateError": "Failed to update status.",
+      "deleted": "Admin deleted.",
+      "deleteError": "Failed to delete admin."
+    }
+  }
+}

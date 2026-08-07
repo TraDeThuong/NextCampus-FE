@@ -1,0 +1,14 @@
+{
+  "leader": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "interns": "Interns",
+      "department": "Department",
+      "tasks": "Tasks",
+      "dailyReports": "Daily Reports",
+      "meetings": "Meetings",
+      "weeklyEvaluation": "Weekly Evaluation",
+      "profile": "Profile"
+    }
+  }
+}

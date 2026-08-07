@@ -1,0 +1,88 @@
+{
+  "intern": {
+    "weeklyEvaluation": {
+      "metaTitle": "Weekly Evaluation",
+      "metaDescription": "View your weekly evaluation results from your Leader, check detailed criteria, and confirm review.",
+      "title": "Weekly Evaluation",
+      "description": "View your weekly evaluation results from your Leader",
+      "backToList": "Back to list",
+
+      "latestWeek": "Latest Week",
+      "weekOf": "Week {n} / 10",
+      "avgScore": "Average Score",
+      "overWeeks": "Over {n} weeks",
+      "reviewedCount": "Reviewed",
+      "weeks": "weeks",
+      "evaluationHistory": "Evaluation History",
+      "historyDesc": "Click on each week to view details and confirm review",
+      "noEvaluations": "No evaluations yet. Please wait for your Leader to evaluate!",
+      "colWeek": "Week",
+      "colScore": "Score & Rating",
+      "colStatus": "Status",
+      "colDetail": "Detail",
+      "reviewed": "Reviewed",
+      "notReviewed": "Not Reviewed",
+      "view": "View",
+      "pagination": "Page {page} / {totalPages}",
+
+      "detail": {
+        "yourEvaluation": "Your Evaluation",
+        "week": "Week {n}",
+        "criteria12": "12 criteria",
+        "evaluatedBy": "Evaluated by {name}",
+        "reviewedConfirmed": "Reviewed & Confirmed",
+        "markReviewed": "Confirm Reviewed",
+        "confirming": "Confirming...",
+        "criteriaTable": "12-Criteria Evaluation",
+        "scoreDetail": "Score Details",
+        "adjustedAfterAi": "Adjusted after AI suggestion",
+        "leadersReview": "Leader's Review",
+        "noLeaderComment": "Leader has not left any comments.",
+        "originalAiComment": "Original AI comment",
+        "progressChart": "Progress Chart",
+        "showingWeeks": "Showing {n} recent weeks",
+        "overallScore": "Overall Score",
+        "outOf": "out of 10.00",
+        "communication": "Communication",
+        "attitude": "Attitude",
+        "learning": "Learning",
+        "coding": "Coding",
+        "evaluator": "Evaluator:",
+        "createdAt": "Created:",
+        "status": "Status:",
+        "reviewed": "Reviewed",
+        "notReviewed": "Not Reviewed",
+        "reviewedAt": "Reviewed at:",
+        "sectionScore": "Section {id} average:",
+        "leader": "Leader"
+      },
+
+      "sections": {
+        "I": "Discipline & Character",
+        "II": "Professional Skills",
+        "III": "Project Results"
+      },
+      "criteria": {
+        "ruleCompliance": "Compliance with regulations",
+        "workAttitude": "Work attitude",
+        "learningCapacity": "Learning capacity",
+        "resilience": "Resilience & pressure handling",
+        "communication": "Communication & behavior",
+        "knowledge": "Knowledge",
+        "practicalSkills": "Practical skills",
+        "foreignLanguage": "Foreign language proficiency",
+        "teamwork": "Teamwork skills",
+        "creativity": "Creativity",
+        "contentQuality": "Content quality delivery",
+        "progressDelivery": "Progress & deadline delivery"
+      },
+      "ratings": {
+        "TOT": "Excellent",
+        "KHA": "Good",
+        "TB": "Average",
+        "TBY": "Below Average",
+        "YEU": "Poor"
+      }
+    }
+  }
+}

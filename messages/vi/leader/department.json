@@ -1,0 +1,31 @@
+{
+  "leader": {
+    "department": {
+      "metaTitle": "Phòng ban",
+      "title": "Tổng Quan Phòng Ban",
+      "description": "Xem danh sách phòng ban và quản lý vị trí công việc.",
+
+      "searchDepartment": "Tìm phòng ban",
+      "searchDepartmentPlaceholder": "Tìm theo tên phòng ban...",
+      "searchLeader": "Tìm người hướng dẫn",
+      "searchLeaderPlaceholder": "Tìm theo tên hoặc email...",
+
+      "colDepartment": "Phòng ban",
+      "colPositions": "Vị trí",
+      "colLeader": "Người hướng dẫn",
+      "colActions": "Thao tác",
+      "loadError": "Không thể tải danh sách phòng ban.",
+      "noDepartments": "Không tìm thấy phòng ban nào.",
+
+      "noPositions": "Không có vị trí",
+      "noName": "Không có tên",
+      "noLeader": "Không có người hướng dẫn",
+      "managePositions": "Quản lý vị trí",
+      "positionsOf": "Vị trí của {name}",
+      "noPositionsDefined": "Chưa có vị trí nào được định nghĩa.",
+      "positionExists": "⚠️ Cảnh báo: Vị trí này đã tồn tại trong phòng ban",
+      "confirmDeletePosition": "Bạn có chắc muốn xoá vị trí \"{name}\"?",
+      "addPositionPlaceholder": "Thêm vị trí (VD: NodeJS Intern)..."
+    }
+  }
+}

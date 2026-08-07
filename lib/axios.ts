@@ -1,6 +1,29 @@
 import axios from "axios";
 import { getAccessToken, setAccessToken, clearAccessToken } from "./token";
 
+function getLocalePath(path: string): string {
+    if (typeof window === "undefined") return path;
+    const segments = window.location.pathname.split("/").filter(Boolean);
+    const locale = segments[0];
+    if (locale && ["vi", "en"].includes(locale)) {
+        return `/${locale}${path}`;
+    }
+    return path;
+}
+
+function isPublicRoute(pathname: string): boolean {
+    const localePrefix = pathname.split("/")[1];
+    const cleanPath = localePrefix && ["vi", "en"].includes(localePrefix)
+        ? "/" + pathname.split("/").slice(2).join("/")
+        : pathname;
+    return (
+        cleanPath === "/login" ||
+        cleanPath === "/forgot-password" ||
+        cleanPath === "/reset-password" ||
+        cleanPath.startsWith("/onboarding")
+    );
+}
+
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
     headers: {
@@ -73,14 +96,9 @@ api.interceptors.response.use(
                 clearAccessToken();
                 if (typeof window !== "undefined") {
                     const pathname = window.location.pathname;
-                    const isPublicRoute =
-                        pathname === "/login" ||
-                        pathname === "/forgot-password" ||
-                        pathname === "/reset-password" ||
-                        pathname.startsWith("/onboarding");
 
-                    if (!isPublicRoute) {
-                        window.location.href = "/login";
+                    if (!isPublicRoute(pathname)) {
+                        window.location.href = getLocalePath("/login");
                     }
                 }
                 return Promise.reject(refreshError);
@@ -96,7 +114,7 @@ api.interceptors.response.use(
             ) {
                 clearAccessToken();
                 if (typeof window !== "undefined") {
-                    window.location.href = "/login?reason=inactive";
+                    window.location.href = getLocalePath("/login?reason=inactive");
                 }
             }
         }

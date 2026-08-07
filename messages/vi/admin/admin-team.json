@@ -1,0 +1,39 @@
+{
+  "admin": {
+    "adminTeam": {
+      "title": "Nhóm Admin",
+      "description": "Quản lý quản trị viên trong tổ chức của bạn.",
+      "inviteAdmin": "Mời Admin",
+      "inviteModalTitle": "Mời Admin",
+      "inviteModalDescription": "Nhập email để tạo tài khoản admin. Mật khẩu sẽ được gửi tự động.",
+      "emailPlaceholder": "admin@example.com",
+      "emailRequired": "Vui lòng nhập email",
+      "invalidEmail": "Email không hợp lệ",
+      "cancel": "Huỷ",
+      "createAdmin": "Tạo Admin",
+      "createSuccess": "Tài khoản Admin đã được tạo. Mật khẩu đã gửi qua email.",
+      "createError": "Tạo tài khoản admin thất bại.",
+      "totalAdmins": "Tổng Admin",
+      "active": "Đang hoạt động",
+      "inactive": "Ngừng hoạt động",
+      "loadStatsError": "Tải thống kê admin thất bại.",
+      "search": "Tìm kiếm",
+      "searchPlaceholder": "Tìm theo tên hoặc email...",
+      "filterStatus": "Trạng thái",
+      "colAdmin": "Admin",
+      "colRole": "Vai trò",
+      "colStatus": "Trạng thái",
+      "colJoined": "Ngày tham gia",
+      "noAdmins": "Không tìm thấy admin.",
+      "loadError": "Tải danh sách admin thất bại.",
+      "pagination": "Trang {page} / {totalPages} · {total} tổng",
+      "delete": "Xoá",
+      "deleteTitle": "Xoá Admin",
+      "deleteConfirm": "Xoá tài khoản admin của {name}? Hành động này không thể hoàn tác.",
+      "statusUpdated": "Đã cập nhật trạng thái admin.",
+      "statusUpdateError": "Cập nhật trạng thái thất bại.",
+      "deleted": "Đã xoá admin.",
+      "deleteError": "Xoá admin thất bại."
+    }
+  }
+}

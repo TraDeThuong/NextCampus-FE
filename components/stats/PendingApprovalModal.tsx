@@ -4,6 +4,7 @@ import { useContext } from "react";
 import { createPortal } from "react-dom";
 import { HiXMark } from "react-icons/hi2";
 import { CheckCircle, XCircle, Loader2, Calendar, User } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { AuthContext } from "@/contexts/AuthContext";
 import { useTaskAssignments } from "@/hooks/task-assignment/useTaskAssignments";
 import { useApproveTaskAssignment } from "@/hooks/task-assignment/useApproveTaskAssignment";
@@ -17,8 +18,7 @@ type Props = {
 };
 
 const statusBadge: Record<string, string> = {
-  PENDING_APPROVAL:
-    "border-amber-400/20 bg-amber-500/10 text-amber-300",
+  PENDING_APPROVAL: "border-amber-400/20 bg-amber-500/10 text-amber-300",
 };
 
 const priorityBadge: Record<string, string> = {
@@ -28,27 +28,18 @@ const priorityBadge: Record<string, string> = {
 };
 
 function PendingRow({ assignment }: { assignment: TaskAssignment }) {
+  const t = useTranslations("leader.dashboard");
   const approveMutation = useApproveTaskAssignment();
   const rejectMutation = useRejectTaskAssignment();
 
   const task = assignment.task;
   const isProcessing = approveMutation.isPending || rejectMutation.isPending;
 
-  const handleApprove = () => {
-    approveMutation.mutate(assignment.id);
-  };
-
-  const handleReject = () => {
-    rejectMutation.mutate(assignment.id);
-  };
-
   return (
     <div className="flex items-center gap-4 rounded-xl border border-white/10 bg-white/[0.03] p-4">
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 mb-1">
-          <span className="text-xs font-mono text-slate-500">
-            {task.code || "—"}
-          </span>
+          <span className="text-xs font-mono text-slate-500">{task.code || "—"}</span>
           <span
             className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${statusBadge[assignment.status] ?? ""}`}
           >
@@ -75,7 +66,7 @@ function PendingRow({ assignment }: { assignment: TaskAssignment }) {
             {assignment.intern.fullName}
           </span>
           <span>
-            Yêu cầu bởi:{" "}
+            {t("requestedBy")}{" "}
             <span className="text-foreground">{assignment.assigner.fullName}</span>
           </span>
         </div>
@@ -87,20 +78,20 @@ function PendingRow({ assignment }: { assignment: TaskAssignment }) {
         ) : (
           <>
             <button
-              onClick={handleApprove}
+              onClick={() => approveMutation.mutate(assignment.id)}
               disabled={isProcessing}
               className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-emerald-500 disabled:opacity-50"
             >
               <CheckCircle className="h-3.5 w-3.5" />
-              Approve
+              {t("approve")}
             </button>
             <button
-              onClick={handleReject}
+              onClick={() => rejectMutation.mutate(assignment.id)}
               disabled={isProcessing}
               className="flex items-center gap-1.5 rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-400 transition hover:bg-red-500/20 disabled:opacity-50"
             >
               <XCircle className="h-3.5 w-3.5" />
-              Reject
+              {t("reject")}
             </button>
           </>
         )}
@@ -110,6 +101,7 @@ function PendingRow({ assignment }: { assignment: TaskAssignment }) {
 }
 
 export default function PendingApprovalModal({ isOpen, onClose }: Props) {
+  const t = useTranslations("leader.dashboard");
   const auth = useContext(AuthContext);
   const currentUserId = auth?.state.user?.id;
 
@@ -136,12 +128,9 @@ export default function PendingApprovalModal({ isOpen, onClose }: Props) {
 
         <div className="p-6 sm:p-8 overflow-y-auto max-h-[85vh]">
           <div className="mb-6">
-            <h2 className="text-xl font-bold metal-text">
-              Yêu Cầu Giao Việc Chờ Phê Duyệt
-            </h2>
+            <h2 className="text-xl font-bold metal-text">{t("pendingModalTitle")}</h2>
             <p className="text-xs text-muted mt-1">
-              {crossTeam.length} yêu cầu từ các leader khác đang chờ bạn phê
-              duyệt
+              {t("pendingModalDesc", { count: crossTeam.length })}
             </p>
           </div>
 
@@ -151,9 +140,7 @@ export default function PendingApprovalModal({ isOpen, onClose }: Props) {
             </div>
           ) : crossTeam.length === 0 ? (
             <div className="py-12 text-center rounded-2xl border border-white/5 bg-white/[0.02]">
-              <p className="text-sm text-muted">
-                Không có yêu cầu giao việc nào đang chờ.
-              </p>
+              <p className="text-sm text-muted">{t("pendingModalEmpty")}</p>
             </div>
           ) : (
             <div className="space-y-3">

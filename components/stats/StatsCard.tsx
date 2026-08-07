@@ -2,6 +2,7 @@
 
 import { ReactNode } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import MetalCard from "../ui/MetalCard";
 
 interface StatsCardProps {
@@ -29,32 +30,35 @@ export default function StatsCard({
   className = "",
   onCardClick,
 }: StatsCardProps) {
+  const t = useTranslations();
   const content = (
-    <MetalCard className={`p-6 ${href ? "cursor-pointer group/card" : ""} ${className}`}>
-      <div className="flex items-start justify-between">
-        <div className="space-y-1">
-          <div className="flex items-center gap-1.5">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted group-hover/card:text-primary-light transition-colors">
-              {title}
-            </p>
-            {href && (
-              <span className="text-xs text-muted/40 group-hover/card:text-primary-light transition-all transform group-hover/card:translate-x-0.5">
-                ↗
-              </span>
+    <MetalCard className={`p-6 h-full flex flex-col ${href ? "cursor-pointer group/card" : ""} ${className}`}>
+      <div className="flex-1">
+        <div className="flex items-start justify-between">
+          <div className="space-y-1">
+            <div className="flex items-center gap-1.5">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted group-hover/card:text-primary-light transition-colors">
+                {title}
+              </p>
+              {href && (
+                <span className="text-xs text-muted/40 group-hover/card:text-primary-light transition-all transform group-hover/card:translate-x-0.5">
+                  ↗
+                </span>
+              )}
+            </div>
+            <h3 className="text-3xl font-extrabold text-foreground metal-text tracking-tight">
+              {value}
+            </h3>
+            {subtitle && (
+              <p className="text-xs text-muted/80 pt-0.5">{subtitle}</p>
             )}
           </div>
-          <h3 className="text-3xl font-extrabold text-foreground metal-text tracking-tight">
-            {value}
-          </h3>
-          {subtitle && (
-            <p className="text-xs text-muted/80 pt-0.5">{subtitle}</p>
+          {icon && (
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-primary-light backdrop-blur-md shadow-inner group-hover/card:border-primary-light/40 group-hover/card:bg-primary-light/10 transition-all">
+              {icon}
+            </div>
           )}
         </div>
-        {icon && (
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-primary-light backdrop-blur-md shadow-inner group-hover/card:border-primary-light/40 group-hover/card:bg-primary-light/10 transition-all">
-            {icon}
-          </div>
-        )}
       </div>
 
       {trend && (
@@ -70,7 +74,7 @@ export default function StatsCard({
           </span>
           {href && (
             <span className="text-[11px] text-muted opacity-0 group-hover/card:opacity-100 transition-opacity font-normal">
-              View details
+              {t("common.viewDetails")}
             </span>
           )}
         </div>
@@ -79,11 +83,11 @@ export default function StatsCard({
   );
 
   if (href) {
-    return <Link href={href} className="block">{content}</Link>;
+    return <Link href={href} className="block h-full">{content}</Link>;
   }
 
   if (onCardClick) {
-    return <button type="button" onClick={onCardClick} className="block w-full text-left">{content}</button>;
+    return <button type="button" onClick={onCardClick} className="block w-full h-full text-left">{content}</button>;
   }
 
   return content;
