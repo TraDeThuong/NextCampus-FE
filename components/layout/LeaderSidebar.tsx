@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { LuAlarmClock } from "react-icons/lu";
 import { useTranslations } from "next-intl";
+import { useLeaderSidebarPrefetch } from "@/hooks/useLeaderSidebarPrefetch";
 
 const baseClass =
   "flex items-center justify-center w-14 h-14 rounded-2xl border transition-all duration-300 shadow-shadow-soft cursor-pointer";
@@ -26,6 +27,7 @@ const inactiveClass =
 export default function LeaderSidebar() {
   const pathname = usePathname();
   const t = useTranslations();
+  const { getPrefetchHandler } = useLeaderSidebarPrefetch();
 
   const menus = [
     { name: t("leader.nav.dashboard"),        href: "/leader/dashboard",         icon: LayoutDashboard },
@@ -50,6 +52,7 @@ export default function LeaderSidebar() {
                 href={href}
                 aria-label={name}
                 className="relative flex flex-col items-center"
+                onMouseEnter={getPrefetchHandler(href)}
               >
                 <div
                   className={`${baseClass} ${

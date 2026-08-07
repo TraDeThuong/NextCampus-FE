@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { LuAlarmClock } from "react-icons/lu";
 import { useTranslations } from "next-intl";
+import { useInternSidebarPrefetch } from "@/hooks/useInternSidebarPrefetch";
 
 const baseClass =
   "flex items-center justify-center w-14 h-14 rounded-2xl border transition-all duration-300 shadow-shadow-soft cursor-pointer";
@@ -24,6 +25,7 @@ const inactiveClass =
 export default function InternSidebar() {
   const pathname = usePathname();
   const t = useTranslations();
+  const { getPrefetchHandler } = useInternSidebarPrefetch();
 
   const menus = [
     { name: t("intern.nav.dashboard"),        href: "/intern/dashboard",         icon: LayoutDashboard },
@@ -46,6 +48,7 @@ export default function InternSidebar() {
                 href={href}
                 aria-label={name}
                 className="relative flex flex-col items-center"
+                onMouseEnter={getPrefetchHandler(href)}
               >
                 <div
                   className={`${baseClass} ${

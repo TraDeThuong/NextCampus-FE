@@ -4,11 +4,28 @@ import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { statsService } from "@/services/stats.service";
 import { internService } from "@/services/intern.service";
-import { taskService } from "@/services/task.service";
 import { departmentService } from "@/services/department.service";
+import { useAdminPrefetchQueries } from "@/hooks/useAdminPrefetchQueries";
+import { useLeaderPrefetchQueries } from "@/hooks/useLeaderPrefetchQueries";
+import { useInternPrefetchQueries } from "@/hooks/useInternPrefetchQueries";
 
 interface PrefetchProviderProps {
   role: "ADMIN" | "LEADER" | "INTERN";
+}
+
+function LeaderBackgroundPrefetch() {
+  const { prefetchAllStaggered } = useLeaderPrefetchQueries();
+  const ran = useRef(false);
+
+  useEffect(() => {
+    if (ran.current) return;
+    ran.current = true;
+
+    const cleanup = prefetchAllStaggered();
+    return cleanup;
+  }, [prefetchAllStaggered]);
+
+  return null;
 }
 
 function LeaderPrefetch() {
@@ -19,27 +36,28 @@ function LeaderPrefetch() {
     if (ran.current) return;
     ran.current = true;
 
+    // Immediate prefetch: dashboard stats
     queryClient.prefetchQuery({
       queryKey: ["stats", "leader"],
       queryFn: () => statsService.getLeaderStats(),
       staleTime: 1000 * 60 * 5,
     });
-    queryClient.prefetchQuery({
-      queryKey: ["interns", {}],
-      queryFn: () => internService.getInterns({}),
-      staleTime: 1000 * 60 * 2,
-    });
-    queryClient.prefetchQuery({
-      queryKey: ["tasks", { limit: 20 }],
-      queryFn: () => taskService.getTasks({ limit: 20 }),
-      staleTime: 1000 * 60 * 5,
-    });
-    queryClient.prefetchQuery({
-      queryKey: ["departments"],
-      queryFn: () => departmentService.getDepartments(),
-      staleTime: 1000 * 60 * 10,
-    });
   }, [queryClient]);
+
+  return <LeaderBackgroundPrefetch />;
+}
+
+function AdminBackgroundPrefetch() {
+  const { prefetchAllStaggered } = useAdminPrefetchQueries();
+  const ran = useRef(false);
+
+  useEffect(() => {
+    if (ran.current) return;
+    ran.current = true;
+
+    const cleanup = prefetchAllStaggered();
+    return cleanup;
+  }, [prefetchAllStaggered]);
 
   return null;
 }
@@ -69,6 +87,21 @@ function AdminPrefetch() {
     });
   }, [queryClient]);
 
+  return <AdminBackgroundPrefetch />;
+}
+
+function InternBackgroundPrefetch() {
+  const { prefetchAllStaggered } = useInternPrefetchQueries();
+  const ran = useRef(false);
+
+  useEffect(() => {
+    if (ran.current) return;
+    ran.current = true;
+
+    const cleanup = prefetchAllStaggered();
+    return cleanup;
+  }, [prefetchAllStaggered]);
+
   return null;
 }
 
@@ -80,24 +113,15 @@ function InternPrefetch() {
     if (ran.current) return;
     ran.current = true;
 
+    // Immediate prefetch: dashboard stats
     queryClient.prefetchQuery({
       queryKey: ["stats", "intern"],
       queryFn: () => statsService.getInternStats(),
       staleTime: 1000 * 60 * 5,
     });
-    queryClient.prefetchQuery({
-      queryKey: ["tasks", {}],
-      queryFn: () => taskService.getTasks({}),
-      staleTime: 1000 * 60 * 5,
-    });
-    queryClient.prefetchQuery({
-      queryKey: ["departments"],
-      queryFn: () => departmentService.getDepartments(),
-      staleTime: 1000 * 60 * 10,
-    });
   }, [queryClient]);
 
-  return null;
+  return <InternBackgroundPrefetch />;
 }
 
 export default function PrefetchProvider({ role }: PrefetchProviderProps) {
