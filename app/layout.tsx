@@ -9,6 +9,11 @@ export const metadata: Metadata = {
     template: "%s | NexCampus",
   },
   description: "Hệ thống quản lý thực tập sinh và theo dõi tiến độ công việc NexCampus.",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 const headingFont = Black_Ops_One({
