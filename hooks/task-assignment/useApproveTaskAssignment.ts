@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import axios from "axios";
 import { taskAssignmentService } from "@/services/task-assignment.service";
 
 export function useApproveTaskAssignment() {
@@ -17,8 +18,12 @@ export function useApproveTaskAssignment() {
       queryClient.invalidateQueries({ queryKey: ["task-assignment", id] });
     },
 
-    onError: () => {
-      toast.error("Failed to approve assignment.");
+    onError: (error) => {
+      const message =
+        axios.isAxiosError(error) && error.response?.data?.message
+          ? error.response.data.message
+          : "Failed to approve assignment.";
+      toast.error(message);
     },
   });
 }

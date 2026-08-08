@@ -17,8 +17,9 @@ export function useCreateMeeting() {
       queryClient.invalidateQueries({ queryKey: ["meetings"] }, { exact: false });
     },
 
-    onError: () => {
-      toast.error("Failed to create meeting.");
+    onError: (error: any) => {
+      const errorMsg = error.response?.data?.message || "Failed to create meeting.";
+      toast.error(errorMsg);
     },
   });
 }

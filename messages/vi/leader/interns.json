@@ -68,6 +68,8 @@
       "overdueModalCurrent": "(hiện tại)",
       "overdueModalDeadlineLabel": "Hạn chót:",
       "overdueModalDeadlinePast": "Hạn chót không thể ở quá khứ",
+      "overdueModalEstDaysLabel": "Số ngày ước tính:",
+      "overdueModalEstDaysInvalid": "Số ngày ước tính phải từ 0,1 đến 365",
       "overdueModalRecreatedToast": "Đã tạo lại công việc \"{title}\" cho {name}",
       "overdueModalRecreateError": "Không thể tạo lại công việc.",
       "overdueModalRecreatedFor": "Đã tạo lại → {code} cho {name}",

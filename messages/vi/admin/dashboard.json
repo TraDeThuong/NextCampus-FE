@@ -2,7 +2,7 @@
   "admin": {
     "dashboard": {
       "metaTitle": "Tổng quan (Admin)",
-      "title": "Admin Executive Control Center",
+      "title": "Trung Tâm Điều Hành Ban Quản Trị",
       "badge": "System Admin",
       "subtitle": "Quản trị cấp cao toàn hệ thống • Giám sát sức khỏe tổng thể, nhóm Leader & xử lý tác vụ nhanh",
       "errorLoad": "Lỗi khi tải dữ liệu thống kê Admin. Vui lòng kiểm tra lại kết nối mạng.",

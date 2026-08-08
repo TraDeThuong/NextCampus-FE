@@ -42,6 +42,7 @@
 
       "createModal": {
         "title": "Schedule Meeting",
+        "busy": "Busy",
         "participantsInvited": "{n} participant{plural} invited",
         "inviteHint": "Invite your interns and other leaders",
         "titleLabel": "Title",
