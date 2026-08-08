@@ -73,7 +73,7 @@ jobs:
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u tradethuong --password-stdin
 
             echo "Pulling frontend image from GHCR..."
-            docker-compose pull frontend
+            docker-compose pull -q frontend
 
             echo "Stopping and removing old container..."
             docker-compose stop frontend || true
