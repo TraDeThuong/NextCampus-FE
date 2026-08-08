@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import axios from "axios";
 import { taskSubmissionService } from "@/services/task-submission.service";
 
 export function useUploadSubmissionVideo() {
@@ -12,12 +13,17 @@ export function useUploadSubmissionVideo() {
       taskSubmissionService.uploadVideo(id, file),
 
     onSuccess: (_data, variables) => {
-      toast.success("Video uploaded successfully.");
+      queryClient.invalidateQueries({ queryKey: ["task-submissions"] });
       queryClient.invalidateQueries({ queryKey: ["task-submission", variables.id] });
     },
 
-    onError: () => {
-      toast.error("Failed to upload video.");
+    onError: (error) => {
+      const message =
+        axios.isAxiosError<{ message?: string }>(error) &&
+        error.response?.data?.message
+          ? error.response.data.message
+          : "Failed to upload video.";
+      toast.error(message);
     },
   });
 }

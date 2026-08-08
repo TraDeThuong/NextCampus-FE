@@ -36,14 +36,16 @@
         "or": "OR",
         "remove": "Remove",
         "attachments": "Attachments",
-        "attachmentsHint": "Up to 5 files, {limit} MB each.",
+        "videoFileHint": "One video file, separate from attachments. MP4, WEBM, MOV, MKV or AVI; maximum {limit} MB.",
+        "attachmentsHint": "Up to {max} attachment files, not counting the video; {limit} MB each. Images, PDF, DOC/DOCX, ZIP, RAR and 7z are supported.",
         "cancel": "Cancel",
         "submit": "Submit",
+        "submitSuccess": "Daily report and all selected files uploaded successfully.",
         "videoTypeError": "Video must be an MP4, WEBM, MOV, MKV or AVI file.",
         "videoSizeError": "Video must not exceed {limit} MB.",
         "unsupportedType": "\"{name}\" has an unsupported file type.",
         "fileSizeError": "\"{name}\" exceeds {limit} MB.",
-        "maxAttachments": "A daily report can contain at most 5 attachments."
+        "maxAttachments": "A daily report can contain at most {max} attachments."
       },
 
       "editModal": {
@@ -61,6 +63,7 @@
         "delete": "Delete",
         "cancel": "Cancel",
         "update": "Update",
+        "updateSuccess": "Daily report updated and all selected files uploaded successfully.",
         "deleteConfirmTitle": "Delete Report",
         "deleteConfirmDesc": "This action cannot be undone."
       }

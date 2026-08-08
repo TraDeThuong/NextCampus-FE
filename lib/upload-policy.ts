@@ -9,6 +9,13 @@ export const UPLOAD_LIMITS_MB = {
   taskImport: 10,
 } as const;
 
+export const UPLOAD_MAX_FILES = {
+  reportAttachment: 5,
+  submissionAttachment: 5,
+} as const;
+
+export const UPLOAD_REQUEST_TIMEOUT_MS = 120_000;
+
 export const IMAGE_MIME_TYPES = new Set([
   "image/jpeg",
   "image/png",

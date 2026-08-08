@@ -1,4 +1,5 @@
 import api from "@/lib/axios";
+import { UPLOAD_REQUEST_TIMEOUT_MS } from "@/lib/upload-policy";
 import type {
   ReportAttachmentListResponse,
   ReportAttachmentSuccessResponse,
@@ -26,7 +27,7 @@ export const reportAttachmentService = {
     const response = await api.post<ReportAttachmentSuccessResponse>(
       `/daily-reports/${reportId}/attachments`,
       formData,
-      { headers: { "Content-Type": "multipart/form-data" } },
+      { timeout: UPLOAD_REQUEST_TIMEOUT_MS },
     );
     return response.data;
   },

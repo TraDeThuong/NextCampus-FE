@@ -1,4 +1,5 @@
 import api from "@/lib/axios";
+import { UPLOAD_REQUEST_TIMEOUT_MS } from "@/lib/upload-policy";
 import type {
   TaskSubmissionListResponse,
   TaskSubmissionSuccessResponse,
@@ -70,11 +71,11 @@ export const taskSubmissionService = {
     file: File,
   ): Promise<TaskSubmissionSuccessResponse> => {
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("video", file);
     const response = await api.post<TaskSubmissionSuccessResponse>(
       `/task-submissions/${id}/video`,
       formData,
-      { headers: { "Content-Type": "multipart/form-data" } },
+      { timeout: UPLOAD_REQUEST_TIMEOUT_MS },
     );
     return response.data;
   },

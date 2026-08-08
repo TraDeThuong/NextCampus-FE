@@ -1,4 +1,5 @@
 import api from "@/lib/axios";
+import { UPLOAD_REQUEST_TIMEOUT_MS } from "@/lib/upload-policy";
 import type {
   DailyReportListResponse,
   DailyReportSuccessResponse,
@@ -62,7 +63,7 @@ export const dailyReportService = {
     const response = await api.post<DailyReportSuccessResponse>(
       `/daily-reports/${id}/video`,
       formData,
-      { headers: { "Content-Type": "multipart/form-data" } },
+      { timeout: UPLOAD_REQUEST_TIMEOUT_MS },
     );
     return response.data;
   },
