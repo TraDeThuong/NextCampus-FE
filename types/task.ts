@@ -22,6 +22,7 @@ export interface TaskAssignmentSummary {
   internId: string;
   assignedBy: string;
   status: string;
+  blockedReason: string | null;
   assignedAt: string;
   updatedAt: string;
   intern?: { id: string; fullName: string };

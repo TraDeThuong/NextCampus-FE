@@ -2,7 +2,7 @@
   "leader": {
     "weeklyEvaluation": {
       "metaTitle": "Đánh giá tuần",
-      "title": "Đánh Giá Tuần (Weekly Evaluation)",
+      "title": "Đánh Giá Tuần",
       "description": "Đánh giá thực tập sinh hàng tuần, nhận gợi ý thông minh từ AI và xuất báo cáo PDF.",
       "createEvaluation": "Tạo Đánh Giá",
       "exportPdf": "Xuất PDF",

@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { AssignmentDetail } from "@/types/stats";
 import Table from "../ui/Table";
+import Spinner from "../ui/Spinner";
 import { HiXMark } from "react-icons/hi2";
 import { createPortal } from "react-dom";
 import useOutsideClick from "@/hooks/useOutsideClick";
@@ -12,6 +13,13 @@ interface TaskAssignmentModalProps {
   onClose: () => void;
   title: string;
   assignments: AssignmentDetail[];
+  isLoading?: boolean;
+  isError?: boolean;
+  onRetry?: () => void;
+  page?: number;
+  totalPages?: number;
+  totalItems?: number;
+  onPageChange?: (page: number) => void;
 }
 
 export default function TaskAssignmentModal({
@@ -19,9 +27,24 @@ export default function TaskAssignmentModal({
   onClose,
   title,
   assignments,
+  isLoading = false,
+  isError = false,
+  onRetry,
+  page = 1,
+  totalPages = 1,
+  totalItems = assignments.length,
+  onPageChange,
 }: TaskAssignmentModalProps) {
   const t = useTranslations();
   const ref = useOutsideClick<HTMLDivElement>(onClose);
+  const statusLabels: Record<string, string> = {
+    PENDING_APPROVAL: t("admin.taskModal.statusPendingApproval"),
+    TODO: t("admin.taskModal.statusTodo"),
+    IN_PROGRESS: t("admin.taskModal.statusInProgress"),
+    REVIEW: t("admin.taskModal.statusReview"),
+    DONE: t("admin.taskModal.statusDone"),
+    BLOCKED: t("admin.taskModal.statusBlocked"),
+  };
 
   if (!isOpen) return null;
 
@@ -45,12 +68,31 @@ export default function TaskAssignmentModal({
             {title}
           </h2>
           <p className="text-xs text-muted mt-1">
-            {t("admin.taskModal.showingItems", { n: assignments.length })}
+            {t("admin.taskModal.showingItems", { n: totalItems })}
           </p>
         </div>
 
-        {/* Empty State vs Table */}
-        {assignments.length === 0 ? (
+        {isLoading ? (
+          <div className="flex min-h-48 items-center justify-center rounded-2xl border border-white/5 bg-white/[0.02]">
+            <div className="flex flex-col items-center gap-3">
+              <Spinner />
+              <p className="text-sm text-muted">{t("admin.taskModal.loading")}</p>
+            </div>
+          </div>
+        ) : isError ? (
+          <div className="space-y-3 rounded-2xl border border-danger/20 bg-danger/5 py-12 text-center">
+            <p className="text-sm text-danger">{t("admin.taskModal.loadError")}</p>
+            {onRetry && (
+              <button
+                type="button"
+                onClick={onRetry}
+                className="rounded-xl bg-danger px-4 py-2 text-xs font-bold text-white transition-opacity hover:opacity-90 cursor-pointer"
+              >
+                {t("common.retry")}
+              </button>
+            )}
+          </div>
+        ) : assignments.length === 0 ? (
           <div className="py-12 text-center rounded-2xl border border-white/5 bg-white/[0.02]">
             <p className="text-sm text-muted">{t("admin.taskModal.noTasks")}</p>
           </div>
@@ -117,7 +159,7 @@ export default function TaskAssignmentModal({
 
                   <div>
                     <span
-                      className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-lg ${
+                      className={`inline-block max-w-full whitespace-normal break-words text-center text-xs font-semibold leading-tight px-2.5 py-1 rounded-lg ${
                         item.status === "PENDING_APPROVAL"
                           ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
                           : item.status === "IN_PROGRESS"
@@ -131,13 +173,43 @@ export default function TaskAssignmentModal({
                           : "bg-slate-500/10 text-slate-300 border border-slate-500/20"
                       }`}
                     >
-                      {item.status}
+                      {statusLabels[item.status] ?? item.status}
                     </span>
                   </div>
                 </Table.Row>
               )}
             />
           </Table>
+        )}
+
+        {!isLoading && !isError && totalPages > 1 && onPageChange && (
+          <div className="mt-5 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-4 sm:flex-row">
+            <p className="text-xs text-muted">
+              {t("admin.taskModal.pagination", {
+                page,
+                totalPages,
+                total: totalItems,
+              })}
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => onPageChange(page - 1)}
+                disabled={page <= 1}
+                className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
+              >
+                {t("admin.taskModal.previous")}
+              </button>
+              <button
+                type="button"
+                onClick={() => onPageChange(page + 1)}
+                disabled={page >= totalPages}
+                className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
+              >
+                {t("admin.taskModal.next")}
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </div>,

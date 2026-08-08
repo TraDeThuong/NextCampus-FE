@@ -17,7 +17,9 @@ export function useGroupAiRecommendation(groupId: string, enabled = true) {
       return res.data;
     },
     enabled: !!groupId && enabled,
-    gcTime: 0,
+    staleTime: 30_000,
+    gcTime: 60_000,
+    retry: false,
   });
 }
 
@@ -32,11 +34,14 @@ export function useConfirmGroupAiAllocation() {
     mutationFn: async ({ groupId, payload }) => {
       return await taskGroupService.confirmGroupAiAllocation(groupId, payload);
     },
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       toast.success(data.message || "Đã phân công task thành công.");
       queryClient.invalidateQueries({ queryKey: ["tasks"], exact: false });
       queryClient.invalidateQueries({ queryKey: ["task-groups"], exact: false });
       queryClient.invalidateQueries({ queryKey: ["stats"], exact: false });
+      queryClient.removeQueries({
+        queryKey: ["group-ai-recommendation", variables.groupId],
+      });
     },
     onError: (error) => {
       const message =
