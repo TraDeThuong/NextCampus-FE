@@ -42,6 +42,7 @@
 
       "createModal": {
         "title": "Lên Lịch Họp",
+        "busy": "Trùng lịch",
         "participantsInvited": "Đã mời {n} người",
         "inviteHint": "Mời thực tập sinh và leader khác",
         "titleLabel": "Tiêu đề",

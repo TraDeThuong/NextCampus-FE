@@ -12,6 +12,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import Table from "@/components/ui/Table";
 import Modal from "@/components/ui/Modal";
+import { useAuth } from "@/hooks/auth/useAuth";
 
 type AdminTeamRowProps = {
     admin: User;
@@ -19,6 +20,8 @@ type AdminTeamRowProps = {
 
 export default function AdminTeamRow({ admin }: AdminTeamRowProps) {
     const t = useTranslations();
+    const { state } = useAuth();
+    const currentUser = state.user;
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -122,29 +125,33 @@ export default function AdminTeamRow({ admin }: AdminTeamRowProps) {
 
                 {/* Actions */}
                 <div className="relative" ref={menuRef}>
-                    <button
-                        type="button"
-                        onClick={() => setMenuOpen((prev) => !prev)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-slate-400 transition hover:border-white/10 hover:bg-white/5 hover:text-white"
-                    >
-                        <MoreVertical className="h-4 w-4" />
-                    </button>
-
-                    {menuOpen && (
-                        <div className="absolute right-0 bottom-full z-50 mb-2 w-40 rounded-2xl border border-white/10 bg-[#0f172a] p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl">
-                            <Modal.Open
-                                opens={`delete-admin-${admin.id}`}
+                    {currentUser?.id !== admin.id && (
+                        <>
+                            <button
+                                type="button"
+                                onClick={() => setMenuOpen((prev) => !prev)}
+                                className="flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-slate-400 transition hover:border-white/10 hover:bg-white/5 hover:text-white"
                             >
-                                <button
-                                    type="button"
-                                    onClick={() => setMenuOpen(false)}
-                                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-red-400 transition hover:bg-red-500/10"
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                    {t("admin.adminTeam.delete")}
-                                </button>
-                            </Modal.Open>
-                        </div>
+                                <MoreVertical className="h-4 w-4" />
+                            </button>
+
+                            {menuOpen && (
+                                <div className="absolute right-0 bottom-full z-50 mb-2 w-40 rounded-2xl border border-white/10 bg-[#0f172a] p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl">
+                                    <Modal.Open
+                                        opens={`delete-admin-${admin.id}`}
+                                    >
+                                        <button
+                                            type="button"
+                                            onClick={() => setMenuOpen(false)}
+                                            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-red-400 transition hover:bg-red-500/10"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                            {t("admin.adminTeam.delete")}
+                                        </button>
+                                    </Modal.Open>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             </Table.Row>

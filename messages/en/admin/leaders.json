@@ -43,7 +43,26 @@
       "selectDepartments": "Select up to {n} departments",
       "noDepartments": "No departments available.",
       "maxDepartments": "A leader can manage at most {n} departments.",
-      "multiDepartments": "{n} departments"
+      "multiDepartments": "{n} departments",
+      "details": {
+        "metaTitle": "Leader Details",
+        "back": "Back to Leaders",
+        "contactInfo": "Contact Information",
+        "email": "Email",
+        "phone": "Phone",
+        "position": "Position",
+        "departments": "Departments",
+        "internsManaged": "Interns Managed",
+        "managedInternsTitle": "Managed Interns ({count})",
+        "noInterns": "No interns assigned to this leader.",
+        "colName": "Name",
+        "colEmail": "Email",
+        "colDept": "Dept",
+        "colPosition": "Position",
+        "colLeader": "Leader",
+        "colStatus": "Status",
+        "unassigned": "Unassigned"
+      }
     }
   }
 }

@@ -23,8 +23,9 @@ export function useInviteParticipants() {
       queryClient.invalidateQueries({ queryKey: ["meeting", variables.id] });
     },
 
-    onError: () => {
-      toast.error("Failed to invite participants.");
+    onError: (error: any) => {
+      const errorMsg = error.response?.data?.message || "Failed to invite participants.";
+      toast.error(errorMsg);
     },
   });
 }

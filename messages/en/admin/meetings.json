@@ -2,6 +2,7 @@
   "admin": {
     "meetings": {
       "metaTitle": "Meetings",
+      "busy": "Busy",
       "title": "Meetings",
       "description": "Manage all meetings across the organization.",
       "scheduleMeeting": "Schedule Meeting",

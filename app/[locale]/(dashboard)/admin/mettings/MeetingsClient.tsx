@@ -8,6 +8,7 @@ import WeekMeetingsCard from "./WeekMeetingsCard";
 import LeaveRequestsCard from "./LeaveRequestsCard";
 import UpcomingMeetingsCard from "./UpcomingMeetingsCard";
 import MeetingDetailModal from "./MeetingDetailModal";
+import RecentNotifications from "@/components/meetings/RecentNotifications";
 import Modal from "@/components/ui/Modal";
 import { useAuth } from "@/hooks/auth/useAuth";
 
@@ -26,9 +27,10 @@ export default function MeetingsClient() {
     <Modal>
       <div className="space-y-6">
         <MeetingHeader />
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
           <MeetingStats />
           <UpcomingMeetingsCard onMeetingClick={handleMeetingClick} />
+          <RecentNotifications />
         </div>
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
           <div className="xl:col-span-2">

@@ -23,8 +23,9 @@ export function useUpdateMeeting() {
       queryClient.invalidateQueries({ queryKey: ["meeting", variables.id] });
     },
 
-    onError: () => {
-      toast.error("Failed to update meeting.");
+    onError: (error: any) => {
+      const errorMsg = error.response?.data?.message || "Failed to update meeting.";
+      toast.error(errorMsg);
     },
   });
 }

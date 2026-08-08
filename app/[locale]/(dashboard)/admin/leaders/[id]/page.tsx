@@ -19,6 +19,7 @@ import { useInterns } from "@/hooks/intern/useInterns";
 import { useUpdateIntern } from "@/hooks/intern/useUpdateIntern";
 import { useLeaders } from "@/hooks/leader/useLeaders";
 import { updateUserService } from "@/services/user.service";
+import { useTranslations } from "next-intl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import type { Leader } from "@/types/leader";
@@ -27,6 +28,7 @@ import Spinner from "@/components/ui/Spinner";
 import LeaderDepartmentSelect from "../LeaderDepartmentSelect";
 
 export default function LeaderDetailPage() {
+    const t = useTranslations();
     const params = useParams<{ id: string }>();
     const router = useRouter();
     const { data, isLoading, isError } = useLeaderDetail(params.id);
@@ -51,7 +53,7 @@ export default function LeaderDetailPage() {
                 className="flex items-center gap-2 text-sm text-slate-400 transition hover:text-white"
             >
                 <ArrowLeft className="h-4 w-4" />
-                Back to Leaders
+                {t("admin.leaders.details.back")}
             </button>
 
             <LeaderHeader leader={leader} />
@@ -67,16 +69,17 @@ export default function LeaderDetailPage() {
 }
 
 function LeaderHeader({ leader }: { leader: Leader }) {
+    const t = useTranslations();
     const queryClient = useQueryClient();
     const { mutate: toggleActive } = useMutation({
         mutationFn: (isActive: boolean) =>
             updateUserService(leader.userId, { isActive }),
         onSuccess: () => {
-            toast.success("Leader status updated.");
+            toast.success(t("admin.leaders.statusUpdated"));
             queryClient.invalidateQueries({ queryKey: ["leader"] });
             queryClient.invalidateQueries({ queryKey: ["leaders"] });
         },
-        onError: () => toast.error("Failed to update status."),
+        onError: () => toast.error(t("admin.leaders.statusUpdateError")),
     });
 
     return (
@@ -123,10 +126,10 @@ function LeaderHeader({ leader }: { leader: Leader }) {
                             }`}
                         >
                             <option value="true" className="bg-[#0b1020] text-emerald-400 font-medium">
-                                Active
+                                {t("admin.leaders.active")}
                             </option>
                             <option value="false" className="bg-[#0b1020] text-red-400 font-medium">
-                                Inactive
+                                {t("admin.leaders.inactive")}
                             </option>
                         </select>
                     </div>
@@ -137,6 +140,7 @@ function LeaderHeader({ leader }: { leader: Leader }) {
 }
 
 function LeaderInfo({ leader }: { leader: Leader }) {
+    const t = useTranslations();
     const { mutate: updateLeader } = useUpdateLeader();
     const { data: deptData } = useDepartments();
     const departments = deptData?.data ?? [];
@@ -155,15 +159,15 @@ function LeaderInfo({ leader }: { leader: Leader }) {
         <MetalCard>
             <div className="rounded-3xl p-6">
                 <h2 className="text-lg font-semibold metal-text">
-                    Contact Information
+                    {t("admin.leaders.details.contactInfo")}
                 </h2>
                 <div className="mt-5 space-y-4">
-                    <InfoRow icon={Mail} label="Email" value={leader.user.email} />
+                    <InfoRow icon={Mail} label={t("admin.leaders.details.email")} value={leader.user.email} />
 
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3 text-sm text-slate-400">
                             <Phone className="h-4 w-4" />
-                            <span>Phone</span>
+                            <span>{t("admin.leaders.details.phone")}</span>
                         </div>
                         <span className="text-sm text-white">
                             {leader.phone ?? "—"}
@@ -172,8 +176,8 @@ function LeaderInfo({ leader }: { leader: Leader }) {
 
                     <InlineSelectRow
                         icon={User}
-                        label="Position"
-                        value={leader.position ?? "Not set"}
+                        label={t("admin.leaders.details.position")}
+                        value={leader.position ?? t("admin.leaders.notSet")}
                         options={availablePositions.map((pos) => ({
                             value: pos.name,
                             label: pos.name,
@@ -181,7 +185,7 @@ function LeaderInfo({ leader }: { leader: Leader }) {
                         currentId={leader.position ?? ""}
                         onChange={(posName) => {
                             if (leader.departments.length === 0) {
-                                toast.error("Please select a department first.");
+                                toast.error(t("admin.leaders.selectDepartmentFirst"));
                                 return;
                             }
                             updateLeader({
@@ -197,18 +201,19 @@ function LeaderInfo({ leader }: { leader: Leader }) {
 }
 
 function DepartmentCard({ leader }: { leader: Leader }) {
+    const t = useTranslations();
     const { data: deptData } = useDepartments();
     const departments = deptData?.data ?? [];
 
     return (
         <MetalCard>
             <div className="rounded-3xl p-6">
-                <h2 className="text-lg font-semibold metal-text">Department</h2>
+                <h2 className="text-lg font-semibold metal-text">{t("admin.leaders.details.colDept")}</h2>
                 <div className="mt-5 space-y-4">
                     <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-3 text-sm text-slate-400">
                             <Building2 className="h-4 w-4" />
-                            <span>Departments</span>
+                            <span>{t("admin.leaders.details.departments")}</span>
                         </div>
                         <div className="min-w-0 max-w-[240px] text-sm text-slate-400">
                             <LeaderDepartmentSelect
@@ -219,7 +224,7 @@ function DepartmentCard({ leader }: { leader: Leader }) {
                     </div>
                     <InfoRow
                         icon={Circle}
-                        label="Interns Managed"
+                        label={t("admin.leaders.details.internsManaged")}
                         value={String(leader.internCount ?? 0)}
                     />
                 </div>
@@ -229,6 +234,7 @@ function DepartmentCard({ leader }: { leader: Leader }) {
 }
 
 function InternsCard({ leader }: { leader: Leader }) {
+    const t = useTranslations();
     const queryClient = useQueryClient();
     const { data, isLoading } = useInterns({ leaderId: leader.userId });
     const { data: leadersData } = useLeaders();
@@ -241,7 +247,7 @@ function InternsCard({ leader }: { leader: Leader }) {
         <MetalCard>
             <div className="rounded-3xl p-6">
                 <h2 className="text-lg font-semibold metal-text">
-                    Managed Interns ({interns.length})
+                    {t("admin.leaders.details.managedInternsTitle", { count: interns.length })}
                 </h2>
 
                 {isLoading ? (
@@ -250,19 +256,19 @@ function InternsCard({ leader }: { leader: Leader }) {
                     </div>
                 ) : interns.length === 0 ? (
                     <p className="mt-4 text-sm text-slate-500">
-                        No interns assigned to this leader.
+                        {t("admin.leaders.details.noInterns")}
                     </p>
                 ) : (
                     <div className="mt-4 overflow-x-auto">
                         <table className="w-full text-left text-sm">
                             <thead>
                                 <tr className="border-b border-white/10 text-xs uppercase text-slate-400">
-                                    <th className="py-3 pr-4 font-medium">Name</th>
-                                    <th className="py-3 pr-4 font-medium">Email</th>
-                                    <th className="py-3 pr-4 font-medium">Dept</th>
-                                    <th className="py-3 pr-4 font-medium">Position</th>
-                                    <th className="py-3 pr-4 font-medium">Leader</th>
-                                    <th className="py-3 font-medium">Status</th>
+                                    <th className="py-3 pr-4 font-medium">{t("admin.leaders.details.colName")}</th>
+                                    <th className="py-3 pr-4 font-medium">{t("admin.leaders.details.colEmail")}</th>
+                                    <th className="py-3 pr-4 font-medium">{t("admin.leaders.details.colDept")}</th>
+                                    <th className="py-3 pr-4 font-medium">{t("admin.leaders.details.colPosition")}</th>
+                                    <th className="py-3 pr-4 font-medium">{t("admin.leaders.details.colLeader")}</th>
+                                    <th className="py-3 font-medium">{t("admin.leaders.details.colStatus")}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
@@ -306,7 +312,7 @@ function InternsCard({ leader }: { leader: Leader }) {
                                                 className="rounded-lg border border-cyan-400/30 bg-[#0f172a] px-2 py-1 text-xs text-white outline-none"
                                             >
                                                 <option value="">
-                                                    Unassigned
+                                                    {t("admin.leaders.details.unassigned")}
                                                 </option>
                                                 {allLeaders.map((l) => (
                                                     <option
@@ -331,7 +337,11 @@ function InternsCard({ leader }: { leader: Leader }) {
                                                           : "border-red-400/20 bg-red-500/10 text-red-300"
                                                 }`}
                                             >
-                                                {intern.status}
+                                                {intern.status === "ACTIVE"
+                                                    ? t("admin.interns.active")
+                                                    : intern.status === "COMPLETED"
+                                                      ? t("admin.interns.completed")
+                                                      : t("admin.interns.dropped")}
                                             </span>
                                         </td>
                                     </tr>
@@ -380,6 +390,7 @@ function InlineSelectRow({
     currentId: string;
     onChange: (id: string) => void;
 }) {
+    const t = useTranslations();
     const [editing, setEditing] = useState(false);
 
     return (
@@ -399,7 +410,7 @@ function InlineSelectRow({
                     autoFocus
                     className="rounded-lg border border-cyan-400/30 bg-[#0f172a] px-2 py-1 text-sm text-white outline-none"
                 >
-                    <option value="">Not set</option>
+                    <option value="">{t("admin.leaders.notSet")}</option>
                     {options.map((o) => (
                         <option key={o.value} value={o.value}>
                             {o.label}

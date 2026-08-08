@@ -20,6 +20,7 @@ import {
     ChevronDown,
 } from "lucide-react";
 
+import { useTranslations, useLocale } from "next-intl";
 import { useInternDetail } from "@/hooks/intern/useInternDetail";
 import { useUpdateIntern } from "@/hooks/intern/useUpdateIntern";
 import { useDepartments } from "@/hooks/department/useDepartments";
@@ -31,6 +32,7 @@ import Modal from "@/components/ui/Modal";
 import Spinner from "@/components/ui/Spinner";
 
 export default function InternDetailPage() {
+    const t = useTranslations();
     const params = useParams<{ id: string }>();
     const router = useRouter();
     const { data, error, isLoading, isError, refetch } = useInternDetail(params.id);
@@ -55,8 +57,8 @@ export default function InternDetailPage() {
                 </div>
                 <p className="text-slate-400 font-medium">
                     {isNotFound
-                        ? "Intern profile not found."
-                        : "Unable to load the intern profile."}
+                        ? t("admin.interns.details.notFound")
+                        : t("admin.interns.details.loadError")}
                 </p>
                 <div className="flex items-center gap-3">
                     {!isNotFound && (
@@ -65,7 +67,7 @@ export default function InternDetailPage() {
                             onClick={() => void refetch()}
                             className="rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-300 transition hover:bg-cyan-500/20"
                         >
-                            Try again
+                            {t("admin.interns.details.tryAgain")}
                         </button>
                     )}
                     <button
@@ -74,7 +76,7 @@ export default function InternDetailPage() {
                         className="group flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800/40 px-4 py-2 text-sm font-medium text-slate-300 transition-all duration-300 hover:bg-slate-800 hover:text-cyan-400 hover:border-cyan-500/50 shadow-lg shadow-cyan-950/20"
                     >
                         <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-                        Go back
+                        {t("admin.interns.details.goBack")}
                     </button>
                 </div>
             </div>
@@ -89,7 +91,7 @@ export default function InternDetailPage() {
                 className="group inline-flex items-center gap-2 text-sm font-medium text-slate-400 transition-colors duration-200 hover:text-cyan-400"
             >
                 <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-                Back to Dashboard
+                {t("admin.interns.details.back")}
             </button>
 
             {/* Header section */}
@@ -108,6 +110,8 @@ export default function InternDetailPage() {
 }
 
 function InternHeader({ intern }: { intern: Intern }) {
+    const t = useTranslations();
+    const locale = useLocale();
     const { mutate: updateIntern } = useUpdateIntern();
     const [status, setStatus] = useState(intern.status);
 
@@ -117,10 +121,14 @@ function InternHeader({ intern }: { intern: Intern }) {
         DROPPED: "border-rose-500/30 bg-rose-500/10 text-rose-400 ring-rose-500/20",
     };
 
-    const joined = new Date(intern.createdAt).toLocaleDateString("en-US", {
-        month: "long",
-        year: "numeric",
-    });
+    const joinedDateStr = new Date(intern.createdAt).toLocaleDateString(
+        locale === "vi" ? "vi-VN" : "en-US",
+        {
+            month: "long",
+            year: "numeric",
+        }
+    );
+    const joined = t("admin.interns.details.joined", { date: joinedDateStr });
 
     return (
         <Modal>
@@ -146,7 +154,7 @@ function InternHeader({ intern }: { intern: Intern }) {
                                         {intern.user.email}
                                     </span>
                                     <span className="text-slate-600">•</span>
-                                    <span className="text-slate-500 font-medium">Joined {joined}</span>
+                                    <span className="text-slate-500 font-medium">{joined}</span>
                                 </div>
                             </div>
                         </div>
@@ -167,9 +175,15 @@ function InternHeader({ intern }: { intern: Intern }) {
                                     }}
                                     className={`appearance-none rounded-xl border px-4 py-2 pr-9 text-xs font-semibold tracking-wide uppercase outline-none transition-all duration-300 cursor-pointer ring-1 ${statusBadge[status]}`}
                                 >
-                                    <option value="ACTIVE" className="bg-slate-950 text-emerald-400">Active</option>
-                                    <option value="COMPLETED" className="bg-slate-950 text-cyan-400">Completed</option>
-                                    <option value="DROPPED" className="bg-slate-950 text-rose-400">Dropped</option>
+                                    <option value="ACTIVE" className="bg-slate-950 text-emerald-400">
+                                        {t("admin.interns.details.active")}
+                                    </option>
+                                    <option value="COMPLETED" className="bg-slate-950 text-cyan-400">
+                                        {t("admin.interns.details.completed")}
+                                    </option>
+                                    <option value="DROPPED" className="bg-slate-950 text-rose-400">
+                                        {t("admin.interns.details.dropped")}
+                                    </option>
                                 </select>
                                 <ChevronDown className="absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 opacity-60 pointer-events-none" />
                             </div>
@@ -178,7 +192,7 @@ function InternHeader({ intern }: { intern: Intern }) {
                                 <Modal.Open opens="drop-intern">
                                     <button className="flex items-center gap-2 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-2 text-xs font-semibold tracking-wide uppercase text-rose-400 transition-all duration-300 hover:bg-rose-500/20 hover:border-rose-500/40 active:scale-95">
                                         <Trash2 className="h-3.5 w-3.5" />
-                                        Drop Intern
+                                        {t("admin.interns.details.dropIntern")}
                                     </button>
                                 </Modal.Open>
                             )}
@@ -207,30 +221,35 @@ function InternHeader({ intern }: { intern: Intern }) {
 }
 
 function PersonalInfo({ intern }: { intern: Intern }) {
+    const t = useTranslations();
+    const locale = useLocale();
     const { mutate: updateIntern } = useUpdateIntern();
     const [editingPhone, setEditingPhone] = useState(false);
     const [phone, setPhone] = useState(intern.phone);
 
-    const created = new Date(intern.createdAt).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-    });
+    const created = new Date(intern.createdAt).toLocaleDateString(
+        locale === "vi" ? "vi-VN" : "en-GB",
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+        }
+    );
 
     return (
         <MetalCard>
             <div className="rounded-3xl bg-slate-900/40 p-6 border border-slate-800/60 shadow-xl backdrop-blur-md h-full">
                 <h2 className="text-lg font-bold tracking-wide bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent border-b border-slate-800/80 pb-3">
-                    Personal Details
+                    {t("admin.interns.details.personalDetails")}
                 </h2>
                 <div className="mt-5 space-y-4">
-                    <InfoRow icon={Mail} label="Email Address" value={intern.user.email} />
-                    <InfoRow icon={Hash} label="User System ID" value={intern.userId} className="font-mono text-xs bg-slate-950/40 px-2 py-0.5 rounded border border-slate-800/30" />
+                    <InfoRow icon={Mail} label={t("admin.interns.details.email")} value={intern.user.email} />
+                    <InfoRow icon={Hash} label={t("admin.interns.details.userId")} value={intern.userId} className="font-mono text-xs bg-slate-950/40 px-2 py-0.5 rounded border border-slate-800/30" />
 
                     <div className="flex items-center justify-between group py-1">
                         <div className="flex items-center gap-3 text-sm font-medium text-slate-400">
                             <Phone className="h-4 w-4 text-slate-500 group-hover:text-cyan-400 transition-colors" />
-                            <span>Phone Contact</span>
+                            <span>{t("admin.interns.details.phone")}</span>
                         </div>
                         {editingPhone ? (
                             <input
@@ -258,18 +277,18 @@ function PersonalInfo({ intern }: { intern: Intern }) {
                                 onClick={() => setEditingPhone(true)}
                                 className="rounded-md px-2 py-0.5 text-sm font-medium text-slate-200 transition-all duration-200 hover:bg-slate-800 hover:text-cyan-400 border border-transparent hover:border-slate-700"
                             >
-                                {phone || "Add phone number"}
+                                {phone || t("admin.interns.details.addPhone")}
                             </button>
                         )}
                     </div>
 
                     <InfoRow
                         icon={intern.user.isActive ? CheckCircle2 : XCircle}
-                        label="Account Status"
-                        value={intern.user.isActive ? "Authorized" : "Deactivated"}
+                        label={t("admin.interns.details.accountStatus")}
+                        value={intern.user.isActive ? t("admin.interns.details.authorized") : t("admin.interns.details.deactivated")}
                         valueClass={intern.user.isActive ? "text-emerald-400" : "text-rose-400"}
                     />
-                    <InfoRow icon={Calendar} label="Profile Created" value={created} />
+                    <InfoRow icon={Calendar} label={t("admin.interns.details.profileCreated")} value={created} />
                 </div>
             </div>
         </MetalCard>
@@ -277,6 +296,8 @@ function PersonalInfo({ intern }: { intern: Intern }) {
 }
 
 function InternshipInfo({ intern }: { intern: Intern }) {
+    const t = useTranslations();
+    const locale = useLocale();
     const { mutate: updateIntern } = useUpdateIntern();
     const { data: deptData } = useDepartments();
     const { data: leadersData } = useLeaders();
@@ -285,30 +306,36 @@ function InternshipInfo({ intern }: { intern: Intern }) {
     const { data: posData } = usePositions(intern.department?.id ?? undefined);
     const positions = posData?.data ?? [];
 
-    const startDate = new Date(intern.startDate).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-    });
+    const startDate = new Date(intern.startDate).toLocaleDateString(
+        locale === "vi" ? "vi-VN" : "en-GB",
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+        }
+    );
     const endDate = new Date(intern.startDate);
     endDate.setMonth(endDate.getMonth() + intern.duration);
-    const endDateStr = endDate.toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-    });
+    const endDateStr = endDate.toLocaleDateString(
+        locale === "vi" ? "vi-VN" : "en-GB",
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+        }
+    );
 
     return (
         <MetalCard>
             <div className="rounded-3xl bg-slate-900/40 p-6 border border-slate-800/60 shadow-xl backdrop-blur-md h-full">
                 <h2 className="text-lg font-bold tracking-wide bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent border-b border-slate-800/80 pb-3">
-                    Program Placement
+                    {t("admin.interns.details.programPlacement")}
                 </h2>
                 <div className="mt-5 space-y-4">
                     <InlineSelectRow
                         icon={Building2}
-                        label="Department"
-                        value={intern.department?.name ?? "Not assigned"}
+                        label={t("admin.interns.details.department")}
+                        value={intern.department?.name ?? t("admin.interns.details.notAssigned")}
                         options={departments.map((d) => ({
                             value: d.id,
                             label: d.name,
@@ -324,8 +351,8 @@ function InternshipInfo({ intern }: { intern: Intern }) {
 
                     <InlineSelectRow
                         icon={Briefcase}
-                        label="Job Role"
-                        value={intern.position?.name ?? "Not assigned"}
+                        label={t("admin.interns.details.jobRole")}
+                        value={intern.position?.name ?? t("admin.interns.details.notAssigned")}
                         options={positions.map((p) => ({
                             value: p.id,
                             label: p.name,
@@ -341,8 +368,8 @@ function InternshipInfo({ intern }: { intern: Intern }) {
 
                     <InlineSelectRow
                         icon={User}
-                        label="Mentor / Leader"
-                        value={intern.leader?.fullName ?? "Not assigned"}
+                        label={t("admin.interns.details.mentor")}
+                        value={intern.leader?.fullName ?? t("admin.interns.details.notAssigned")}
                         options={leaders.map((l) => ({
                             value: l.userId,
                             label: l.user.fullName ? `${l.user.fullName} (${l.user.email})` : l.user.email,
@@ -371,14 +398,14 @@ function InternshipInfo({ intern }: { intern: Intern }) {
 
                     <InfoRow
                         icon={Calendar}
-                        label="Active Timeline"
+                        label={t("admin.interns.details.activeTimeline")}
                         value={`${startDate} — ${endDateStr}`}
                         valueClass="text-slate-300 font-medium"
                     />
                     <InfoRow
                         icon={Clock}
-                        label="Total Duration"
-                        value={`${intern.duration} Month${intern.duration > 1 ? "s" : ""}`}
+                        label={t("admin.interns.details.totalDuration")}
+                        value={t("admin.interns.details.durationMonths", { n: intern.duration, plural: intern.duration > 1 ? "s" : "" })}
                         valueClass="bg-indigo-500/10 text-indigo-400 px-2.5 py-0.5 rounded-full border border-indigo-500/20 text-xs font-semibold"
                     />
                 </div>
@@ -388,6 +415,7 @@ function InternshipInfo({ intern }: { intern: Intern }) {
 }
 
 function DiscordCard({ intern }: { intern: Intern }) {
+    const t = useTranslations();
     return (
         <MetalCard>
             <div className="relative overflow-hidden rounded-3xl bg-slate-900/40 p-6 border border-slate-800/60 shadow-xl backdrop-blur-md">
@@ -395,22 +423,22 @@ function DiscordCard({ intern }: { intern: Intern }) {
                 <div className="absolute -right-10 top-1/2 h-20 w-20 -translate-y-1/2 rounded-full bg-indigo-600/10 blur-2xl pointer-events-none" />
 
                 <h2 className="text-lg font-bold tracking-wide bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent border-b border-slate-800/80 pb-3">
-                    Community Integrations
+                    {t("admin.interns.details.communityIntegrations")}
                 </h2>
                 <div className="mt-5 grid gap-6 sm:grid-cols-2">
                     <div className="rounded-2xl bg-slate-950/40 border border-slate-800/60 p-4 transition-all duration-300 hover:border-indigo-500/30">
                         <InfoRow
                             icon={User}
-                            label="Discord Handle"
-                            value={intern.discordUsername ?? "Not linked"}
+                            label={t("admin.interns.details.discordHandle")}
+                            value={intern.discordUsername ?? t("admin.interns.details.notLinked")}
                             valueClass={intern.discordUsername ? "text-indigo-400 font-semibold" : "text-slate-500 italic"}
                         />
                     </div>
                     <div className="rounded-2xl bg-slate-950/40 border border-slate-800/60 p-4 transition-all duration-300 hover:border-indigo-500/30">
                         <InfoRow
                             icon={Circle}
-                            label="Server Role Sync"
-                            value={intern.discordRoleGranted ? "Synchronized" : "Pending Sync"}
+                            label={t("admin.interns.details.serverRoleSync")}
+                            value={intern.discordRoleGranted ? t("admin.interns.details.synchronized") : t("admin.interns.details.pendingSync")}
                             valueClass={intern.discordRoleGranted ? "text-emerald-400 font-semibold" : "text-amber-400/80 font-medium"}
                         />
                     </div>
@@ -459,6 +487,7 @@ function InlineSelectRow({
     currentId: string;
     onChange: (id: string) => void;
 }) {
+    const t = useTranslations();
     const [editing, setEditing] = useState(false);
 
     return (
@@ -479,7 +508,7 @@ function InlineSelectRow({
                         autoFocus
                         className="appearance-none rounded-lg border border-cyan-500/50 bg-slate-950 pl-3 pr-8 py-1 text-sm text-white outline-none ring-2 ring-cyan-500/20 shadow-inner max-w-48 transition-all cursor-pointer"
                     >
-                        <option value="">Not assigned</option>
+                        <option value="">{t("admin.interns.details.notAssigned")}</option>
                         {options.map((o) => (
                             <option key={o.value} value={o.value} className="bg-slate-950">
                                 {o.label}
@@ -509,29 +538,30 @@ function DropConfirm({
     onConfirm: (close?: () => void) => void;
     onCloseModal?: () => void;
 }) {
+    const t = useTranslations();
     return (
         <div className="relative overflow-hidden rounded-2xl p-6 shadow-2xl text-center">
             <div className="relative mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-b from-rose-500/20 to-rose-500/5 border border-rose-500/30 text-rose-400 shadow-inner">
                 <Trash2 className="h-6 w-6" />
             </div>
             <h3 className="mt-5 text-xl font-bold tracking-tight text-white">
-                Terminate Internship
+                {t("admin.interns.details.dropConfirmTitle")}
             </h3>
             <p className="mt-3 text-sm leading-relaxed text-slate-400 max-w-xs mx-auto">
-                Are you sure you want to drop <span className="font-semibold text-white">{name}</span>? This action revokes network permissions instantly.
+                {t("admin.interns.details.dropConfirmDesc", { name })}
             </p>
             <div className="mt-8 flex justify-center gap-3">
                 <button
                     onClick={onCloseModal}
                     className="flex-1 rounded-xl border border-slate-800 bg-slate-900/50 px-5 py-2.5 text-sm font-semibold text-slate-300 transition-all hover:bg-slate-800 hover:text-white"
                 >
-                    Cancel
+                    {t("admin.interns.details.cancel")}
                 </button>
                 <button
                     onClick={() => onConfirm(onCloseModal)}
                     className="flex-1 rounded-xl bg-gradient-to-r from-rose-600 to-rose-700 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:from-rose-500 hover:to-rose-600 shadow-lg shadow-rose-950/40 active:scale-[0.98] "
                 >
-                    Drop Now
+                    {t("admin.interns.details.dropNow")}
                 </button>
             </div>
         </div>
