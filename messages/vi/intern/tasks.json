@@ -26,9 +26,16 @@
 
       "submitWork": "Nộp Bài",
       "readyToStart": "Sẵn sàng bắt đầu? Đánh dấu công việc là Đang làm.",
-      "blockedMsg": "Công việc đang bị chặn. Mở chặn để tiếp tục.",
+      "blockedMsg": "Công việc đang bị chặn và chờ Leader mở lại.",
       "startWorking": "Bắt Đầu Làm",
       "unblock": "Mở Chặn",
+      "blockedReasonMissing": "Chưa ghi nhận lý do bị chặn.",
+      "blockTaskHint": "Không thể tiếp tục do phụ thuộc hoặc vướng mắc bên ngoài? Hãy báo cho Leader.",
+      "blockTask": "Báo Bị Chặn",
+      "blockReason": "Lý do bị chặn",
+      "blockReasonPlaceholder": "Mô tả điều đang cản trở công việc và hỗ trợ bạn cần...",
+      "cancelBlock": "Huỷ",
+      "confirmBlock": "Chặn Công Việc",
 
       "targetDeadline": "Hạn Chót",
       "assignedAt": "Ngày Giao",
