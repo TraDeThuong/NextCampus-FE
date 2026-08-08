@@ -36,6 +36,32 @@ export const taskAttachmentService = {
     return response.data;
   },
 
+  getTaskAttachmentPutUrl: async (
+    taskId: string,
+    fileName: string,
+    mimeType: string,
+    fileSize: number,
+  ): Promise<{ success: boolean; data: { uploadUrl: string; filePath: string; publicUrl: string } }> => {
+    const response = await api.get(`/tasks/${taskId}/attachments/upload-url`, {
+      params: { fileName, mimeType, fileSize },
+    });
+    return response.data;
+  },
+
+  confirmTaskAttachmentUpload: async (
+    taskId: string,
+    filePath: string,
+    fileName: string,
+    mimeType: string,
+    fileSize: number,
+  ): Promise<TaskAttachmentSuccessResponse> => {
+    const response = await api.post<TaskAttachmentSuccessResponse>(
+      `/tasks/${taskId}/attachments/confirm`,
+      { filePath, fileName, mimeType, fileSize },
+    );
+    return response.data;
+  },
+
   // POST /tasks/:taskId/attachments (batch — uploads up to 3 files)
   uploadMultiple: async (
     taskId: string,

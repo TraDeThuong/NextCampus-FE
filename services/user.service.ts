@@ -38,6 +38,25 @@ export const uploadAvatarService = async (file: File): Promise<UserSuccessRespon
   return response.data;
 };
 
+export const getAvatarPutUrlService = async (
+  mimeType: string,
+): Promise<{ success: boolean; data: { uploadUrl: string; filePath: string; publicUrl: string } }> => {
+  const response = await api.get("/users/avatar/upload-url", {
+    params: { mimeType },
+  });
+  return response.data;
+};
+
+export const confirmAvatarUploadService = async (
+  filePath: string,
+): Promise<UserSuccessResponse> => {
+  const response = await api.post<UserSuccessResponse>(
+    "/users/avatar/confirm",
+    { filePath },
+  );
+  return response.data;
+};
+
 // 5. PUT /users/:id — Cập nhật user
 export const updateUserService = async (
   id: string,

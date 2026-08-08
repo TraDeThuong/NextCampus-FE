@@ -113,6 +113,12 @@ export interface CreateApplicationPayload {
   regulationId: string;
   acceptedRegulations: boolean;
   files?: File[];
+  uploadedFiles?: Array<{
+    fileName: string;
+    filePath: string;
+    mimeType: string;
+    fileSize: number;
+  }>;
 }
 
 export interface CreateInvitePayload {

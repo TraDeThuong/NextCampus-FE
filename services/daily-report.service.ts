@@ -68,6 +68,27 @@ export const dailyReportService = {
     return response.data;
   },
 
+  getVideoPutUrl: async (
+    id: string,
+    mimeType: string,
+  ): Promise<{ success: boolean; data: { uploadUrl: string; filePath: string; publicUrl: string } }> => {
+    const response = await api.get(`/daily-reports/${id}/video/upload-url`, {
+      params: { mimeType },
+    });
+    return response.data;
+  },
+
+  confirmVideoUpload: async (
+    id: string,
+    filePath: string,
+  ): Promise<DailyReportSuccessResponse> => {
+    const response = await api.post<DailyReportSuccessResponse>(
+      `/daily-reports/${id}/video/confirm`,
+      { filePath },
+    );
+    return response.data;
+  },
+
   // DELETE /daily-reports/:id
   deleteDailyReport: async (
     id: string,

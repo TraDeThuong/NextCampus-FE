@@ -2,7 +2,16 @@
 
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { X, ExternalLink, Loader2, CheckCircle, RotateCcw, Calendar, User } from "lucide-react";
+import {
+  X,
+  ExternalLink,
+  Loader2,
+  CheckCircle,
+  RotateCcw,
+  Calendar,
+  User,
+  Paperclip,
+} from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTaskAssignment } from "@/hooks/task-assignment/useTaskAssignment";
 import { useTaskSubmissions } from "@/hooks/task-submission/useTaskSubmissions";
@@ -26,6 +35,12 @@ const reviewStatusBadge: Record<string, string> = {
   APPROVED: "border-emerald-400/20 bg-emerald-500/10 text-emerald-300",
   REJECTED: "border-red-400/20 bg-red-500/10 text-red-300",
 };
+
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 export default function TaskReviewModal({ assignmentId, onClose }: Props) {
   const queryClient = useQueryClient();
@@ -167,6 +182,37 @@ export default function TaskReviewModal({ assignmentId, onClose }: Props) {
                         <ExternalLink className="h-3 w-3" />
                         Video Demo
                       </a>
+                    </div>
+                  )}
+
+                  {latestSubmission.attachments.length > 0 && (
+                    <div className="mt-3">
+                      <div className="mb-2 flex items-center gap-1.5 text-xs font-medium text-muted">
+                        <Paperclip className="h-3.5 w-3.5 shrink-0" />
+                        Tài liệu đính kèm ({latestSubmission.attachments.length})
+                      </div>
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        {latestSubmission.attachments.map((attachment) => (
+                          <a
+                            key={attachment.id}
+                            href={attachment.fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group flex min-w-0 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 transition hover:border-cyan-400/30 hover:bg-white/[0.06]"
+                          >
+                            <Paperclip className="h-4 w-4 shrink-0 text-cyan-400" />
+                            <span className="min-w-0 flex-1">
+                              <span className="block truncate text-xs font-medium text-foreground group-hover:text-cyan-300">
+                                {attachment.fileName}
+                              </span>
+                              <span className="block truncate text-[10px] text-muted">
+                                {formatFileSize(attachment.fileSize)} · {attachment.mimeType}
+                              </span>
+                            </span>
+                            <ExternalLink className="h-3.5 w-3.5 shrink-0 text-muted group-hover:text-cyan-400" />
+                          </a>
+                        ))}
+                      </div>
                     </div>
                   )}
 

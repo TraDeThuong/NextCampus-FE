@@ -32,6 +32,33 @@ export const reportAttachmentService = {
     return response.data;
   },
 
+  getReportAttachmentPutUrl: async (
+    reportId: string,
+    fileName: string,
+    mimeType: string,
+    fileSize: number,
+  ): Promise<{ success: boolean; data: { uploadUrl: string; filePath: string; publicUrl: string } }> => {
+    const response = await api.get(
+      `/daily-reports/${reportId}/attachments/upload-url`,
+      { params: { fileName, mimeType, fileSize } },
+    );
+    return response.data;
+  },
+
+  confirmReportAttachmentUpload: async (
+    reportId: string,
+    filePath: string,
+    fileName: string,
+    mimeType: string,
+    fileSize: number,
+  ): Promise<ReportAttachmentSuccessResponse> => {
+    const response = await api.post<ReportAttachmentSuccessResponse>(
+      `/daily-reports/${reportId}/attachments/confirm`,
+      { filePath, fileName, mimeType, fileSize },
+    );
+    return response.data;
+  },
+
   // DELETE /daily-reports/:reportId/attachments/:attachmentId
   deleteReportAttachment: async (
     reportId: string,
