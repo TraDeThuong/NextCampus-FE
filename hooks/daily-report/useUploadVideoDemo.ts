@@ -13,7 +13,6 @@ export function useUploadVideoDemo() {
       dailyReportService.uploadVideoDemo(id, file),
 
     onSuccess: (_data, variables) => {
-      toast.success("Video demo uploaded successfully.");
       queryClient.invalidateQueries({
         queryKey: ["dailyReport", variables.id],
       });

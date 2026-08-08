@@ -14,7 +14,6 @@ export function useCreateDailyReport() {
       dailyReportService.createDailyReport(payload),
 
     onSuccess: () => {
-      toast.success("Daily report submitted successfully.");
       queryClient.invalidateQueries({ queryKey: ["dailyReports"], exact: false });
     },
 

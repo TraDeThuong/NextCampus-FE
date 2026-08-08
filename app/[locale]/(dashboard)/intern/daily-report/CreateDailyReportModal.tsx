@@ -8,7 +8,9 @@ import { useCreateDailyReport } from "@/hooks/daily-report/useCreateDailyReport"
 import { useUploadVideoDemo } from "@/hooks/daily-report/useUploadVideoDemo";
 import { useUploadReportAttachment } from "@/hooks/report-attachment/useUploadReportAttachment";
 import { toast } from "react-hot-toast";
-import { ATTACHMENT_MIME_TYPES, exceedsUploadLimit, UPLOAD_LIMITS_MB, VIDEO_MIME_TYPES } from "@/lib/upload-policy";
+import { ATTACHMENT_MIME_TYPES, exceedsUploadLimit, UPLOAD_LIMITS_MB, UPLOAD_MAX_FILES, VIDEO_MIME_TYPES } from "@/lib/upload-policy";
+
+const MAX_REPORT_ATTACHMENTS = UPLOAD_MAX_FILES.reportAttachment;
 
 type Props = { onClose: () => void };
 
@@ -29,13 +31,13 @@ export default function CreateDailyReportModal({ onClose }: Props) {
   }
 
   function handleAttachmentFilesChange(files: File[]) {
-    const remainingSlots = Math.max(0, 5 - attachments.length); const accepted: File[] = [];
+    const remainingSlots = Math.max(0, MAX_REPORT_ATTACHMENTS - attachments.length); const accepted: File[] = [];
     for (const file of files.slice(0, remainingSlots)) {
       if (!ATTACHMENT_MIME_TYPES.has(file.type)) { toast.error(tm("unsupportedType", { name: file.name })); continue; }
       if (exceedsUploadLimit(file, UPLOAD_LIMITS_MB.reportAttachment)) { toast.error(tm("fileSizeError", { name: file.name, limit: UPLOAD_LIMITS_MB.reportAttachment })); continue; }
       accepted.push(file);
     }
-    if (files.length > remainingSlots) toast.error(tm("maxAttachments"));
+    if (files.length > remainingSlots) toast.error(tm("maxAttachments", { max: MAX_REPORT_ATTACHMENTS }));
     if (accepted.length > 0) setAttachments((current) => [...current, ...accepted]);
   }
 
@@ -56,6 +58,7 @@ export default function CreateDailyReportModal({ onClose }: Props) {
         await uploadAttachment.mutateAsync({ reportId, file });
         setAttachments((current) => current.filter((f) => f !== file));
       }
+      toast.success(tm("submitSuccess"));
       onClose();
     } catch (err) {
       console.error(err);
@@ -86,6 +89,7 @@ export default function CreateDailyReportModal({ onClose }: Props) {
                 <div className="flex items-center gap-2 text-xs text-slate-500"><span className="h-px flex-1 bg-white/5" /><span>{tm("or")}</span><span className="h-px flex-1 bg-white/5" /></div>
                 {videoFile ? <div className="flex items-center justify-between rounded-xl border border-emerald-400/20 bg-emerald-500/5 px-4 py-2.5"><span className="text-sm text-emerald-300 truncate">{videoFile.name}</span><button type="button" onClick={() => setVideoFile(null)} disabled={isPending} className="text-xs text-slate-400 hover:text-red-400">{tm("remove")}</button></div> :
                  <input type="file" accept="video/mp4,video/webm,video/quicktime,video/x-matroska,video/x-msvideo,.mp4,.webm,.mov,.mkv,.avi" disabled={isPending || !!videoLink.trim()} onChange={(e) => handleVideoFileChange(e.target.files?.[0])} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-400 file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 file:cursor-pointer outline-none disabled:opacity-50" />}
+                <p className="text-xs text-slate-500">{tm("videoFileHint", { limit: UPLOAD_LIMITS_MB.reportVideo })}</p>
               </div>
             </div>
             <div>
@@ -93,7 +97,7 @@ export default function CreateDailyReportModal({ onClose }: Props) {
               <div className="space-y-2">
                 {attachments.length > 0 && <div className="space-y-1.5">{attachments.map((file, i) => <div key={`${file.name}-${i}`} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-2"><span className="text-sm text-slate-300 truncate">{file.name}</span><button type="button" onClick={() => setAttachments((prev) => prev.filter((_, idx) => idx !== i))} disabled={isPending} className="text-xs text-slate-400 hover:text-red-400 ml-2 shrink-0">{tm("remove")}</button></div>)}</div>}
                 <input type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,.pdf,.doc,.docx,.zip,.rar,.7z" disabled={isPending} onChange={(e) => { const files = Array.from(e.target.files ?? []); handleAttachmentFilesChange(files); e.target.value = ""; }} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-400 file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 file:cursor-pointer outline-none disabled:opacity-50" />
-                <p className="text-xs text-slate-500">{tm("attachmentsHint", { limit: UPLOAD_LIMITS_MB.reportAttachment })}</p>
+                <p className="text-xs text-slate-500">{tm("attachmentsHint", { max: MAX_REPORT_ATTACHMENTS, limit: UPLOAD_LIMITS_MB.reportAttachment })}</p>
               </div>
             </div>
             <div className="flex justify-end gap-3 pt-2">

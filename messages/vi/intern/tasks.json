@@ -8,6 +8,7 @@
       "statsError": "Không thể tải thống kê công việc.",
       "totalTasks": "Tổng Công Việc",
       "inProgress": "Đang Làm",
+      "overdue": "Quá Hạn",
       "completed": "Hoàn Thành",
       "completionRate": "Tỉ Lệ Hoàn Thành",
 
@@ -57,10 +58,12 @@
       "reviewComment": "Nhận Xét",
 
       "submissionModal": {
+        "viewTitle": "Chi Tiết Bài Nộp",
         "editTitle": "Chỉnh Sửa Bài Nộp",
         "submitTitle": "Nộp Bài",
-        "editDesc": "Cập nhật liên kết PR, video demo và ghi chú.",
-        "submitDesc": "Gửi liên kết PR, video demo và ghi chú.",
+        "viewDesc": "Xem nội dung, tệp đính kèm và kết quả đánh giá của bài nộp.",
+        "editDesc": "Cập nhật liên kết PR, video demo, tài liệu đính kèm và ghi chú.",
+        "submitDesc": "Gửi liên kết PR, video demo, tài liệu đính kèm và ghi chú.",
         "status": "Trạng Thái",
         "prLink": "Liên Kết PR",
         "videoDemo": "Video Demo",
@@ -75,8 +78,18 @@
         "cancel": "Huỷ",
         "update": "Cập Nhật",
         "submit": "Nộp",
+        "updateSuccess": "Đã cập nhật bài nộp và tải lên toàn bộ tệp đã chọn.",
+        "submitSuccess": "Đã nộp bài và tải lên toàn bộ tệp đã chọn.",
         "videoTypeError": "Video phải là file MP4, WEBM, MOV, MKV hoặc AVI.",
-        "videoSizeError": "Video không được vượt quá {limit} MB."
+        "videoSizeError": "Video không được vượt quá {limit} MB.",
+        "videoFileHint": "Một tệp video, tính riêng với tài liệu đính kèm. Hỗ trợ MP4, WEBM, MOV, MKV hoặc AVI; tối đa {limit} MB.",
+        "attachments": "Tài Liệu Đính Kèm",
+        "attachmentsHint": "Tối đa {max} tài liệu đính kèm, không tính video; mỗi tệp {limit} MB. Hỗ trợ ảnh, PDF, DOC/DOCX, ZIP, RAR và 7z.",
+        "unsupportedAttachmentType": "Không hỗ trợ định dạng tệp: {name}.",
+        "attachmentSizeError": "{name} không được vượt quá {limit} MB.",
+        "maxAttachments": "Mỗi bài nộp được đính kèm tối đa {max} tệp.",
+        "attachmentLimitReached": "Đã đạt giới hạn {max} tệp. Hãy xoá một tệp để thêm tệp khác.",
+        "deleteAttachment": "Xoá tệp đính kèm {name}"
       }
     }
   }
