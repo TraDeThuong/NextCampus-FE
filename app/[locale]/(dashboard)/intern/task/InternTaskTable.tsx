@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import { FileText, Calendar, User, Layers, Link, ChevronRight, Clock, Send, Pencil, Video, Play, Loader2 } from "lucide-react";
+import { FileText, Calendar, User, Layers, Link, ChevronRight, Clock, Send, Pencil, Video, Play, Loader2, AlertTriangle, Paperclip } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useTaskAssignments } from "@/hooks/task-assignment/useTaskAssignments";
@@ -23,6 +23,7 @@ export default function InternTaskTable() {
   const assignmentId = searchParams.get("assignmentId");
   const [showSubmissionModal, setShowSubmissionModal] = useState(false);
   const [editingSubmission, setEditingSubmission] = useState<TaskSubmission | undefined>(undefined);
+  const [isSubmissionReadOnly, setIsSubmissionReadOnly] = useState(false);
 
   const updateParams = useCallback((key: string, value: string | null) => {
     const p = new URLSearchParams(searchParams.toString()); if (value) p.set(key, value); else p.delete(key); return p.toString();
@@ -78,8 +79,8 @@ export default function InternTaskTable() {
            <div className="w-3/4 overflow-y-auto p-6 bg-slate-900/20 relative custom-scrollbar">
              {assignmentId ? (
                taskLoading ? <div className="flex h-full items-center justify-center"><Spinner size="md" /></div> :
-               task ? <TaskDetailPanel task={task} assignment={selectedAssignment} onOpenSubmission={() => { setEditingSubmission(undefined); setShowSubmissionModal(true); }} onEditSubmission={(sub) => { setEditingSubmission(sub); setShowSubmissionModal(true); }} /> :
-               selectedAssignment ? <TaskDetailPanel task={null} assignment={selectedAssignment} onOpenSubmission={() => { setEditingSubmission(undefined); setShowSubmissionModal(true); }} onEditSubmission={(sub) => { setEditingSubmission(sub); setShowSubmissionModal(true); }} /> :
+               task ? <TaskDetailPanel task={task} assignment={selectedAssignment} onOpenSubmission={() => { setEditingSubmission(undefined); setIsSubmissionReadOnly(false); setShowSubmissionModal(true); }} onViewSubmission={(sub) => { setEditingSubmission(sub); setIsSubmissionReadOnly(true); setShowSubmissionModal(true); }} onEditSubmission={(sub) => { setEditingSubmission(sub); setIsSubmissionReadOnly(false); setShowSubmissionModal(true); }} /> :
+               selectedAssignment ? <TaskDetailPanel task={null} assignment={selectedAssignment} onOpenSubmission={() => { setEditingSubmission(undefined); setIsSubmissionReadOnly(false); setShowSubmissionModal(true); }} onViewSubmission={(sub) => { setEditingSubmission(sub); setIsSubmissionReadOnly(true); setShowSubmissionModal(true); }} onEditSubmission={(sub) => { setEditingSubmission(sub); setIsSubmissionReadOnly(false); setShowSubmissionModal(true); }} /> :
                <p className="text-center text-sm font-mono text-red-400/80 py-12">{t("failedToLoad")}</p>
              ) : (
                <div className="flex h-full flex-col items-center justify-center text-slate-600"><Layers className="h-12 w-12 stroke-[1] mb-2 opacity-20" /><p className="text-xs font-mono tracking-wider uppercase">{t("selectTask")}</p></div>
@@ -89,7 +90,7 @@ export default function InternTaskTable() {
       </div>
     </div>
 
-    {showSubmissionModal && selectedAssignment && <TaskSubmissionModal assignmentId={selectedAssignment.id} submission={editingSubmission} onClose={() => { setShowSubmissionModal(false); setEditingSubmission(undefined); }} />}
+    {showSubmissionModal && selectedAssignment && <TaskSubmissionModal assignmentId={selectedAssignment.id} submission={editingSubmission} readOnly={isSubmissionReadOnly} onClose={() => { setShowSubmissionModal(false); setEditingSubmission(undefined); setIsSubmissionReadOnly(false); }} />}
     </>);
 }
 
@@ -108,10 +109,12 @@ function TaskRowButton({ assignment, isSelected, onClick }: { assignment: TaskAs
   );
 }
 
-function TaskDetailPanel({ task, assignment, onOpenSubmission, onEditSubmission }: { task: NonNullable<ReturnType<typeof useTask>["data"]>["data"] | null; assignment: TaskAssignment | undefined; onOpenSubmission: () => void; onEditSubmission: (sub: TaskSubmission) => void }) {
+function TaskDetailPanel({ task, assignment, onOpenSubmission, onViewSubmission, onEditSubmission }: { task: NonNullable<ReturnType<typeof useTask>["data"]>["data"] | null; assignment: TaskAssignment | undefined; onOpenSubmission: () => void; onViewSubmission: (sub: TaskSubmission) => void; onEditSubmission: (sub: TaskSubmission) => void }) {
   const t = useTranslations("intern.tasks");
   const basicTask = task ?? assignment?.task;
   const updateAssignment = useUpdateTaskAssignment();
+  const [showBlockForm, setShowBlockForm] = useState(false);
+  const [blockedReason, setBlockedReason] = useState("");
   const { data: submissionsData } = useTaskSubmissions(assignment ? { assignmentId: assignment.id, limit: 20, sortBy: "attempt", order: "desc" } : undefined);
   const submissions = submissionsData?.data ?? []; const latestSubmission = submissions[0] ?? null;
   if (!basicTask) return null;
@@ -125,20 +128,93 @@ function TaskDetailPanel({ task, assignment, onOpenSubmission, onEditSubmission 
             {assignment && <span className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-mono uppercase font-bold tracking-wider ${statusBadge[assignment.status] ?? ""}`}><span className="h-1.5 w-1.5 rounded-full bg-current animate-pulse" />{assignment.status.replace("_", " ")}</span>}
             <span className={`inline-flex rounded-md border px-2 py-0.5 text-xs font-mono uppercase font-bold tracking-wider ${priorityBadge[basicTask.priority] ?? ""}`}>{basicTask.priority}</span>
           </div>
-          {assignment && (assignment.status === "TODO" || assignment.status === "IN_PROGRESS" || latestSubmission?.reviewStatus === "REJECTED") && latestSubmission?.reviewStatus !== "PENDING" && assignment.status !== "DONE" && (
+          {assignment?.status === "IN_PROGRESS" && latestSubmission?.reviewStatus !== "PENDING" && (
             <button onClick={onOpenSubmission} className="flex shrink-0 items-center gap-1.5 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-3 py-1.5 text-xs font-medium text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20"><Send className="h-3.5 w-3.5" />{t("submitWork")}</button>
           )}
         </div>
         <h3 className="text-xl font-bold tracking-tight text-white">{basicTask.title}</h3>
       </div>
 
-      {assignment && (assignment.status === "TODO" || assignment.status === "BLOCKED") && (
+      {assignment?.status === "TODO" && (
         <div className="flex items-center gap-3 rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-3">
           <Play className="h-4 w-4 text-cyan-400" />
-          <span className="text-xs text-cyan-300 flex-1">{assignment.status === "TODO" ? t("readyToStart") : t("blockedMsg")}</span>
+          <span className="text-xs text-cyan-300 flex-1">{t("readyToStart")}</span>
           <button onClick={() => updateAssignment.mutate({ id: assignment.id, payload: { status: "IN_PROGRESS" } })} disabled={updateAssignment.isPending} className="flex items-center gap-1.5 rounded-lg bg-cyan-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-cyan-500 disabled:opacity-50">
-            {updateAssignment.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}{assignment.status === "TODO" ? t("startWorking") : t("unblock")}
+            {updateAssignment.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}{t("startWorking")}
           </button>
+        </div>
+      )}
+
+      {assignment?.status === "BLOCKED" && (
+        <div className="rounded-xl border border-rose-500/30 bg-rose-500/5 px-4 py-3">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-400" />
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-rose-300">{t("blockedMsg")}</p>
+              <p className="mt-1 whitespace-pre-wrap text-sm text-slate-300">
+                {assignment.blockedReason || t("blockedReasonMissing")}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {assignment?.status === "IN_PROGRESS" && (
+        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
+          {!showBlockForm ? (
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-4 w-4 text-amber-400" />
+              <span className="flex-1 text-xs text-amber-200">{t("blockTaskHint")}</span>
+              <button
+                type="button"
+                onClick={() => setShowBlockForm(true)}
+                className="rounded-lg border border-amber-400/30 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-200 transition hover:bg-amber-500/20"
+              >
+                {t("blockTask")}
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div>
+                <label htmlFor={`blocked-reason-${assignment.id}`} className="text-xs font-semibold text-amber-200">
+                  {t("blockReason")}
+                </label>
+                <textarea
+                  id={`blocked-reason-${assignment.id}`}
+                  value={blockedReason}
+                  onChange={(event) => setBlockedReason(event.target.value)}
+                  maxLength={2000}
+                  rows={3}
+                  autoFocus
+                  placeholder={t("blockReasonPlaceholder")}
+                  className="mt-2 w-full resize-y rounded-lg border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm text-slate-200 outline-none transition placeholder:text-slate-600 focus:border-amber-400/50"
+                />
+                <p className="mt-1 text-right text-[10px] text-slate-500">{blockedReason.length}/2000</p>
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => { setShowBlockForm(false); setBlockedReason(""); }}
+                  disabled={updateAssignment.isPending}
+                  className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-slate-800 disabled:opacity-50"
+                >
+                  {t("cancelBlock")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => updateAssignment.mutate(
+                    { id: assignment.id, payload: { status: "BLOCKED", blockedReason: blockedReason.trim() } },
+                    { onSuccess: () => { setShowBlockForm(false); setBlockedReason(""); } },
+                  )}
+                  disabled={updateAssignment.isPending || blockedReason.trim().length === 0}
+                  className="flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {updateAssignment.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  {t("confirmBlock")}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -179,13 +255,14 @@ function TaskDetailPanel({ task, assignment, onOpenSubmission, onEditSubmission 
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-[11px] text-slate-500">{new Date(sub.submittedAt).toLocaleString("en-GB")}</span>
-                      <button onClick={() => onEditSubmission(sub)} className="text-[11px] text-cyan-400 hover:text-cyan-300 transition">{t("view")}</button>
+                      <button onClick={() => onViewSubmission(sub)} className="text-[11px] text-cyan-400 hover:text-cyan-300 transition">{t("view")}</button>
                       {sub.reviewStatus === "PENDING" && isLatest && <button onClick={() => onEditSubmission(sub)} className="flex items-center gap-1 rounded-lg border border-amber-400/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-300 transition hover:border-amber-400/50 hover:bg-amber-500/20"><Pencil className="h-3 w-3" />{t("edit")}</button>}
                     </div>
                   </div>
                   <div className="space-y-1.5">
                     {sub.prLink && <a href={sub.prLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 transition"><Link className="h-3 w-3 shrink-0" /><span className="truncate">{sub.prLink}</span></a>}
                     {sub.videoDemo && <a href={sub.videoDemo} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 transition"><Video className="h-3 w-3 shrink-0" /><span className="truncate">Video Demo</span></a>}
+                    {sub.attachments.length > 0 && <div className="space-y-1.5"><div className="flex items-center gap-1.5 text-xs text-slate-400"><Paperclip className="h-3 w-3 shrink-0" /><span>{t("attachments", { n: sub.attachments.length })}</span></div><div className="flex flex-wrap gap-1.5 pl-4.5">{sub.attachments.map((attachment) => <a key={attachment.id} href={attachment.fileUrl} target="_blank" rel="noopener noreferrer" title={attachment.fileName} className="max-w-full truncate rounded-md border border-slate-700 bg-slate-950/60 px-2 py-1 text-[11px] text-slate-300 transition hover:border-cyan-500/40 hover:text-cyan-300">{attachment.fileName}</a>)}</div></div>}
                     {sub.note && <p className="text-xs text-slate-400 leading-relaxed">{sub.note}</p>}
                     {sub.reviewComment && <div className="mt-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2"><p className="text-[10px] text-amber-400/70 uppercase tracking-wider mb-0.5">{t("reviewComment")}</p><p className="text-xs text-amber-300 italic">{sub.reviewComment}</p></div>}
                   </div>

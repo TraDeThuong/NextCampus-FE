@@ -26,9 +26,6 @@ function isPublicRoute(pathname: string): boolean {
 
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
-    headers: {
-        "Content-Type": "application/json",
-    },
     // Required for the HTTP-only refreshToken cookie to be sent on cross-origin requests.
     withCredentials: true,
     timeout: 30000,

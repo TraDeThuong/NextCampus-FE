@@ -1,28 +1,35 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "react-hot-toast";
 import axios from "axios";
+import { toast } from "react-hot-toast";
 import { taskAssignmentService } from "@/services/task-assignment.service";
+import type { AssignTaskPayload } from "@/types/task-assignment";
 
-export function useApproveTaskAssignment() {
+export function useAssignTask() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => taskAssignmentService.approveAssignment(id),
+    mutationFn: ({
+      taskId,
+      payload,
+    }: {
+      taskId: string;
+      payload: AssignTaskPayload;
+    }) => taskAssignmentService.assignTask(taskId, payload),
 
-    onSuccess: (_data, id) => {
-      toast.success("Assignment approved successfully.");
+    onSuccess: () => {
+      toast.success("Assignment updated successfully.");
       queryClient.invalidateQueries({ queryKey: ["task-assignments"], exact: false });
+      queryClient.invalidateQueries({ queryKey: ["tasks"], exact: false });
       queryClient.invalidateQueries({ queryKey: ["stats"], exact: false });
-      queryClient.invalidateQueries({ queryKey: ["task-assignment", id] });
     },
 
     onError: (error) => {
       const message =
         axios.isAxiosError(error) && error.response?.data?.message
           ? error.response.data.message
-          : "Failed to approve assignment.";
+          : "Failed to update assignment.";
       toast.error(message);
     },
   });

@@ -22,6 +22,7 @@ export interface TaskAssignmentSummary {
   internId: string;
   assignedBy: string;
   status: string;
+  blockedReason: string | null;
   assignedAt: string;
   updatedAt: string;
   intern?: { id: string; fullName: string };
@@ -126,10 +127,10 @@ export interface CreateTaskPayload {
   title: string;
   description?: string;
   deadline: string;
+  estDays: number;
   priority?: TaskPriority;
   code?: string;
   startDate?: string;
-  estDays?: number;
   phase?: string;
   module?: string;
   acceptanceCriteria?: string;

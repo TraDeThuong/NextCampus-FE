@@ -2,7 +2,7 @@
   "admin": {
     "dashboard": {
       "metaTitle": "Tổng quan (Admin)",
-      "title": "Admin Executive Control Center",
+      "title": "Trung Tâm Điều Hành Ban Quản Trị",
       "badge": "System Admin",
       "subtitle": "Quản trị cấp cao toàn hệ thống • Giám sát sức khỏe tổng thể, nhóm Leader & xử lý tác vụ nhanh",
       "errorLoad": "Lỗi khi tải dữ liệu thống kê Admin. Vui lòng kiểm tra lại kết nối mạng.",
@@ -43,6 +43,17 @@
     "taskModal": {
       "showingItems": "Hiển thị danh sách chi tiết công việc, thực tập sinh phụ trách và hạn chót ({n} mục)",
       "noTasks": "Không có nhiệm vụ nào thuộc danh mục này.",
+      "loading": "Đang tải danh sách nhiệm vụ...",
+      "loadError": "Không thể tải danh sách nhiệm vụ.",
+      "pagination": "Trang {page} / {totalPages} · Tổng {total}",
+      "previous": "Trước",
+      "next": "Sau",
+      "statusPendingApproval": "Chờ phê duyệt",
+      "statusTodo": "Cần làm",
+      "statusInProgress": "Đang làm",
+      "statusReview": "Đánh giá",
+      "statusDone": "Hoàn thành",
+      "statusBlocked": "Bị hoãn",
       "colTask": "Nhiệm vụ / Task",
       "colIntern": "Thực Tập Sinh",
       "colLeader": "Leader Giao Việc",

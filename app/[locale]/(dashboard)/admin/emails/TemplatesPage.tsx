@@ -84,13 +84,15 @@ export default function TemplatesPage() {
           </p>
         </MetalCard>
       ) : (
-        <div className="flex gap-6 items-start">
-          <div className="w-72 shrink-0">
-            <TemplateSidebar
-              dbTemplates={templates}
-              selectedType={selectedType}
-              onSelect={setSelectedType}
-            />
+        <div className="flex gap-6 items-stretch">
+          <div className="w-72 shrink-0 relative">
+            <div className="absolute inset-0">
+              <TemplateSidebar
+                dbTemplates={templates}
+                selectedType={selectedType}
+                onSelect={setSelectedType}
+              />
+            </div>
           </div>
           <div className="flex-1 min-w-0">
             <TemplateEditor

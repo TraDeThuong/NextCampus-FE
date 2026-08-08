@@ -34,6 +34,7 @@ export interface AssignmentTask {
   title: string;
   description: string | null;
   deadline: string;
+  estDays: number | null;
   priority: string;
   createdBy: string;
   createdAt: string;
@@ -63,6 +64,7 @@ export interface TaskAssignment {
   supportId: string | null;
   assignedBy: string;
   status: AssignmentStatus;
+  blockedReason: string | null;
   assignedAt: string;
   updatedAt: string;
   task: AssignmentTask;
@@ -113,9 +115,14 @@ export interface TaskAssignmentQueryParams {
 export interface CreateTaskAssignmentPayload {
   taskId: string;
   internId: string;
+  internEmail?: string;
 }
+
+export type AssignTaskPayload = Omit<CreateTaskAssignmentPayload, "taskId">;
 
 export interface UpdateTaskAssignmentPayload {
   status?: AssignmentStatus;
+  blockedReason?: string;
   internId?: string;
+  internEmail?: string;
 }

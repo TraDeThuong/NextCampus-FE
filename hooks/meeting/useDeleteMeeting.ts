@@ -15,8 +15,9 @@ export function useDeleteMeeting() {
       queryClient.invalidateQueries({ queryKey: ["meetings"] }, { exact: false });
     },
 
-    onError: () => {
-      toast.error("Failed to delete meeting.");
+    onError: (error: any) => {
+      const errorMsg = error.response?.data?.message || "Failed to delete meeting.";
+      toast.error(errorMsg);
     },
   });
 }

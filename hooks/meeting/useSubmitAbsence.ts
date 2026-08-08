@@ -25,8 +25,9 @@ export function useSubmitAbsence() {
       queryClient.invalidateQueries({ queryKey: ["meeting", variables.meetingId] });
     },
 
-    onError: () => {
-      toast.error("Failed to submit absence request.");
+    onError: (error: any) => {
+      const errorMsg = error.response?.data?.message || "Failed to submit absence request.";
+      toast.error(errorMsg);
     },
   });
 }

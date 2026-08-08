@@ -8,6 +8,7 @@
       "statsError": "Failed to load task stats.",
       "totalTasks": "Total Tasks",
       "inProgress": "In Progress",
+      "overdue": "Overdue",
       "completed": "Completed",
       "completionRate": "Completion Rate",
 
@@ -26,9 +27,16 @@
 
       "submitWork": "Submit Work",
       "readyToStart": "Ready to start? Mark this task as In Progress.",
-      "blockedMsg": "Task is blocked. Unblock to continue working.",
+      "blockedMsg": "This task is blocked and waiting for the leader to reopen it.",
       "startWorking": "Start Working",
       "unblock": "Unblock",
+      "blockedReasonMissing": "No blocking reason was recorded.",
+      "blockTaskHint": "Cannot continue because of an external dependency or issue? Report the blocker to your leader.",
+      "blockTask": "Report Blocker",
+      "blockReason": "Blocking reason",
+      "blockReasonPlaceholder": "Describe what is preventing you from continuing and what you need...",
+      "cancelBlock": "Cancel",
+      "confirmBlock": "Block Task",
 
       "targetDeadline": "Target Deadline",
       "assignedAt": "Assigned At",
@@ -50,10 +58,12 @@
       "reviewComment": "Review Comment",
 
       "submissionModal": {
+        "viewTitle": "Submission Details",
         "editTitle": "Edit Submission",
         "submitTitle": "Submit Work",
-        "editDesc": "Update your PR link, video demo, and notes.",
-        "submitDesc": "Submit your PR link, demo video, and notes.",
+        "viewDesc": "View the submission content, attachments, and review result.",
+        "editDesc": "Update your PR link, demo video, attachments, and notes.",
+        "submitDesc": "Submit your PR link, demo video, attachments, and notes.",
         "status": "Status",
         "prLink": "PR Link",
         "videoDemo": "Video Demo",
@@ -68,8 +78,18 @@
         "cancel": "Cancel",
         "update": "Update",
         "submit": "Submit",
+        "updateSuccess": "Submission updated successfully.",
+        "submitSuccess": "Submission and all selected files uploaded successfully.",
         "videoTypeError": "Video must be an MP4, WEBM, MOV, MKV or AVI file.",
-        "videoSizeError": "Video must not exceed {limit} MB."
+        "videoSizeError": "Video must not exceed {limit} MB.",
+        "videoFileHint": "One video file, separate from attachments. MP4, WEBM, MOV, MKV or AVI; maximum {limit} MB.",
+        "attachments": "Attachments",
+        "attachmentsHint": "Up to {max} attachment files, not counting the video; {limit} MB each. Images, PDF, DOC/DOCX, ZIP, RAR and 7z are supported.",
+        "unsupportedAttachmentType": "Unsupported attachment type: {name}.",
+        "attachmentSizeError": "{name} must not exceed {limit} MB.",
+        "maxAttachments": "A submission can contain up to {max} attachments.",
+        "attachmentLimitReached": "Attachment limit reached ({max} maximum). Remove a file to add another.",
+        "deleteAttachment": "Delete attachment {name}"
       }
     }
   }

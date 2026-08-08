@@ -16,8 +16,9 @@ export function useJoinMeeting() {
       queryClient.invalidateQueries({ queryKey: ["meeting", id] });
     },
 
-    onError: () => {
-      toast.error("Failed to join meeting.");
+    onError: (error: any) => {
+      const errorMsg = error.response?.data?.message || "Failed to join meeting.";
+      toast.error(errorMsg);
     },
   });
 }

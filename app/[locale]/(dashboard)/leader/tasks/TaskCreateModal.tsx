@@ -25,6 +25,7 @@ import { useCreateTask } from "@/hooks/task/useCreateTask";
 import { useTaskGroups } from "@/hooks/task-group/useTaskGroups";
 import { useInterns } from "@/hooks/intern/useInterns";
 import { useCreateTaskAssignment } from "@/hooks/task-assignment/useCreateTaskAssignment";
+import { useLookupAssignmentIntern } from "@/hooks/intern/useLookupAssignmentIntern";
 import { taskAttachmentService } from "@/services/task-attachment.service";
 import { AuthContext } from "@/contexts/AuthContext";
 import type { CreateTaskPayload } from "@/types/task";
@@ -35,6 +36,24 @@ const MAX_FILES = 10;
 const MAX_LINKS = 10;
 const MAX_FILE_SIZE = UPLOAD_LIMITS_MB.taskAttachment * 1024 * 1024;
 const BATCH_SIZE = 3;
+
+function countWorkingDaysInclusive(startDate: string, endDate: string) {
+  const parseDate = (value: string) => {
+    const [year, month, day] = value.split("-").map(Number);
+    return new Date(Date.UTC(year, month - 1, day));
+  };
+
+  const start = parseDate(startDate);
+  const end = parseDate(endDate);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || start > end) return 0;
+
+  let count = 0;
+  for (const date = new Date(start); date <= end; date.setUTCDate(date.getUTCDate() + 1)) {
+    const day = date.getUTCDay();
+    if (day !== 0 && day !== 6) count += 1;
+  }
+  return count;
+}
 
 const ALLOWED_TYPES = new Set([
   "image/jpeg","image/png","image/webp","image/gif",
@@ -94,6 +113,7 @@ let nextId = 0;
 export default function TaskCreateModal({ onCloseModal }: Props) {
   const createTask = useCreateTask();
   const createAssignment = useCreateTaskAssignment();
+  const lookupAssignmentIntern = useLookupAssignmentIntern();
   const queryClient = useQueryClient();
   const auth = useContext(AuthContext);
   const currentUserId = auth?.state.user?.id;
@@ -107,17 +127,38 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
   const [isUploading, setIsUploading] = useState(false);
   const [assignMode, setAssignMode] = useState<"none" | "my" | "other">("none");
   const [selectedInternId, setSelectedInternId] = useState<string>("");
+  const [otherInternEmail, setOtherInternEmail] = useState("");
+  const [otherInternEmailError, setOtherInternEmailError] = useState("");
   const [step, setStep] = useState(1);
   const [createdTaskId, setCreatedTaskId] = useState<string | null>(null);
   const submittingRef = useRef(false);
 
-  // fetch interns: my team + all (for other teams filter)
+  // Only list the current leader's interns. Other teams require an exact email lookup.
   const { data: myInternsData } = useInterns({ leaderId: currentUserId });
-  const { data: allInternsData } = useInterns();
   const myInterns = myInternsData?.data ?? [];
-  const otherInterns = (allInternsData?.data ?? []).filter(
-    (i) => i.leaderId !== currentUserId
-  );
+
+  const handleOtherInternLookup = async () => {
+    const normalizedEmail = otherInternEmail.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      setSelectedInternId("");
+      setOtherInternEmailError("Enter a valid intern email.");
+      lookupAssignmentIntern.reset();
+      return;
+    }
+
+    setOtherInternEmailError("");
+    setSelectedInternId("");
+    lookupAssignmentIntern.reset();
+    try {
+      const result = await lookupAssignmentIntern.mutateAsync(normalizedEmail);
+      setOtherInternEmail(result.data.email);
+      setSelectedInternId(result.data.id);
+    } catch {
+      setOtherInternEmailError(
+        "No active intern from another team matches this email.",
+      );
+    }
+  };
 
   const addLink = () => {
     const trimmed = linkUrl.trim();
@@ -204,12 +245,20 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
   });
 
   const deadlineVal = watch("deadline");
+  const startDateVal = watch("startDate");
+  const estDaysVal = watch("estDays");
+  const availableWorkingDays = startDateVal && deadlineVal
+    ? countWorkingDaysInclusive(startDateVal, deadlineVal)
+    : null;
+  const hasScheduleRisk = availableWorkingDays !== null
+    && Number.isFinite(estDaysVal)
+    && estDaysVal > availableWorkingDays;
 
   const handleNext = async (e: React.MouseEvent) => {
     e.preventDefault();
     let valid = false;
-    if (step === 1) valid = await trigger(["title", "deadline", "code", "priority", "taskGroupId"]);
-    if (step === 2) valid = await trigger(["startDate", "estDays", "phase", "module", "description", "acceptanceCriteria", "taskNotes"]);
+    if (step === 1) valid = await trigger(["title", "code", "priority", "taskGroupId"]);
+    if (step === 2) valid = await trigger(["startDate", "estDays", "deadline", "phase", "module", "description", "acceptanceCriteria", "taskNotes"]);
     if (valid) setStep((s) => s + 1);
   };
 
@@ -219,7 +268,7 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
     // strip empty optional fields so Zod doesn't reject ""
     const payload: CreateTaskPayload = {
       ...data,
-      estDays: data.estDays || undefined,
+      estDays: data.estDays,
       startDate: data.startDate || undefined,
       taskGroupId: data.taskGroupId || undefined,
       priority: data.priority || undefined,
@@ -241,7 +290,13 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
         // assign task to intern if selected (even without attachments)
         if (selectedInternId) {
           try {
-            await createAssignment.mutateAsync({ taskId, internId: selectedInternId });
+            await createAssignment.mutateAsync({
+              taskId,
+              internId: selectedInternId,
+              ...(assignMode === "other"
+                ? { internEmail: otherInternEmail.trim().toLowerCase() }
+                : {}),
+            });
           } catch (err) {
             console.error("[TaskCreateModal] Failed to create assignment:", err);
             // error toast handled by useCreateTaskAssignment
@@ -320,7 +375,13 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
       console.log("[TaskCreateModal] Assign:", { assignMode, selectedInternId });
       if (selectedInternId) {
         try {
-          await createAssignment.mutateAsync({ taskId, internId: selectedInternId });
+          await createAssignment.mutateAsync({
+            taskId,
+            internId: selectedInternId,
+            ...(assignMode === "other"
+              ? { internEmail: otherInternEmail.trim().toLowerCase() }
+              : {}),
+          });
         } catch {
           // error toast handled by useCreateTaskAssignment
         }
@@ -379,7 +440,7 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
         <div>
           <h3 className="text-lg font-semibold metal-text">Create Task</h3>
           <p className="text-sm text-muted">
-            Step {step} of 3 — {step === 1 ? "Basic Info" : step === 2 ? "Details" : "Finish"}
+            Step {step} of 3 — {step === 1 ? "Basic Info" : step === 2 ? "Planning" : "Finish"}
           </p>
         </div>
       </div>
@@ -387,8 +448,8 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
       {/* Stepper indicator */}
       <div className="flex items-center justify-center gap-0">
         {[
-          { num: 1, label: "Basic Info", desc: "Task name, deadline & category" },
-          { num: 2, label: "Details", desc: "Planning details & description" },
+          { num: 1, label: "Basic Info", desc: "Task name & category" },
+          { num: 2, label: "Planning", desc: "Schedule & description" },
           { num: 3, label: "Finish", desc: "Upload files & assign intern" },
         ].map((s, i, arr) => (
           <div key={s.num} className="flex items-center">
@@ -426,7 +487,7 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
         {/* ─── Step 1: Basic Info ─── */}
         {step === 1 && (
           <>
-            <div className="grid grid-cols-2 gap-4">
+            <div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">
                   Title <span className="text-red-400">*</span>
@@ -443,20 +504,6 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
                 <ErrorMsg name="title" />
               </div>
 
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">
-                  Deadline <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="date"
-                  {...register("deadline", {
-                    required: "Deadline is required",
-                    validate: (v) => !v || v >= TODAY || "Deadline cannot be in the past",
-                  })}
-                  className={inputClass("deadline")}
-                />
-                <ErrorMsg name="deadline" />
-              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -508,28 +555,33 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
           </>
         )}
 
-        {/* ─── Step 2: Details ─── */}
+        {/* ─── Step 2: Planning ─── */}
         {step === 2 && (
           <>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">Start Date</label>
                 <input
                   type="date"
+                  min={TODAY}
                   {...register("startDate", {
                     validate: (v) => {
                       if (!v) return true;
-                      if (deadlineVal && v > deadlineVal) return "Start date must be before deadline";
+                      if (v < TODAY) return "Start date cannot be in the past";
+                      if (deadlineVal && v > deadlineVal) return "Start date must be on or before deadline";
                       return true;
                     },
                   })}
                   className={inputClass("startDate")}
                 />
                 <ErrorMsg name="startDate" />
+                <p className="mt-1 text-[11px] text-muted">Optional planned start date.</p>
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Est. Days</label>
+                <label className="mb-1 block text-sm font-medium text-foreground">
+                  Est. Days <span className="text-red-400">*</span>
+                </label>
                 <input
                   type="number"
                   step="any"
@@ -537,14 +589,48 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
                   placeholder="Number of days"
                   {...register("estDays", {
                     valueAsNumber: true,
+                    required: "Estimated days is required",
                     min: { value: 0.1, message: "Must be at least 0.1 days" },
-                    max: { value: 365, message: "Must be under 365 days" },
+                    max: { value: 365, message: "Must be at most 365 days" },
                   })}
                   className={inputClass("estDays")}
                 />
                 <ErrorMsg name="estDays" />
+                <p className="mt-1 text-[11px] text-muted">Used to calculate assignment workload.</p>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-foreground">
+                  Deadline <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="date"
+                  min={startDateVal || TODAY}
+                  {...register("deadline", {
+                    required: "Deadline is required",
+                    validate: (v) => {
+                      if (!v) return true;
+                      if (v < TODAY) return "Deadline cannot be in the past";
+                      if (startDateVal && v < startDateVal) return "Deadline must be on or after start date";
+                      return true;
+                    },
+                  })}
+                  className={inputClass("deadline")}
+                />
+                <ErrorMsg name="deadline" />
+                <p className="mt-1 text-[11px] text-muted">The committed completion date.</p>
               </div>
             </div>
+
+            {hasScheduleRisk && (
+              <div className="flex items-start gap-2 rounded-xl border border-amber-400/25 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                <p>
+                  The schedule has {availableWorkingDays} working day{availableWorkingDays === 1 ? "" : "s"},
+                  but the task is estimated at {estDaysVal} days. Consider extending the deadline.
+                </p>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -741,7 +827,13 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
                   <button
                     key={mode}
                     type="button"
-                    onClick={() => { setAssignMode(mode); setSelectedInternId(""); }}
+                    onClick={() => {
+                      setAssignMode(mode);
+                      setSelectedInternId("");
+                      setOtherInternEmail("");
+                      setOtherInternEmailError("");
+                      lookupAssignmentIntern.reset();
+                    }}
                     disabled={isUploading}
                     className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
                       assignMode === mode
@@ -777,22 +869,66 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
               )}
 
               {assignMode === "other" && (
-                <select
-                  value={selectedInternId}
-                  onChange={(e) => setSelectedInternId(e.target.value)}
-                  disabled={isUploading}
-                  className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground focus:border-primary-light/40 focus:outline-none disabled:opacity-50"
-                >
-                  <option value="">Select intern from other team...</option>
-                  {otherInterns.map((intern) => (
-                    <option key={intern.id} value={intern.id}>
-                      {intern.fullName}{intern.leader?.fullName ? ` (${intern.leader.fullName})` : ""}
-                    </option>
-                  ))}
-                </select>
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="email"
+                      value={otherInternEmail}
+                      onChange={(event) => {
+                        setOtherInternEmail(event.target.value);
+                        setSelectedInternId("");
+                        setOtherInternEmailError("");
+                        lookupAssignmentIntern.reset();
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                          event.preventDefault();
+                          void handleOtherInternLookup();
+                        }
+                      }}
+                      placeholder="Enter the intern's exact email..."
+                      disabled={isUploading || lookupAssignmentIntern.isPending}
+                      className="min-w-0 flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-primary-light/40 focus:outline-none disabled:opacity-50"
+                    />
+                    <Button
+                      type="button"
+                      variant="glass"
+                      size="md"
+                      onClick={() => void handleOtherInternLookup()}
+                      disabled={isUploading || lookupAssignmentIntern.isPending}
+                    >
+                      {lookupAssignmentIntern.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Check"
+                      )}
+                    </Button>
+                  </div>
+
+                  {otherInternEmailError && (
+                    <p className="text-xs text-red-400">{otherInternEmailError}</p>
+                  )}
+
+                  {selectedInternId && lookupAssignmentIntern.data?.data && (
+                    <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3">
+                      <p className="text-sm font-medium text-emerald-300">
+                        {lookupAssignmentIntern.data.data.fullName}
+                      </p>
+                      <p className="mt-0.5 text-xs text-slate-400">
+                        Leader: {lookupAssignmentIntern.data.data.leader.fullName || lookupAssignmentIntern.data.data.leader.email}
+                      </p>
+                    </div>
+                  )}
+
+                  {!selectedInternId && !otherInternEmailError && (
+                    <p className="text-xs text-muted">
+                      Enter the exact email to verify the intern and their leader.
+                    </p>
+                  )}
+                </div>
               )}
 
-              {assignMode !== "none" && (assignMode === "my" ? myInterns.length : otherInterns.length) === 0 && (
+              {assignMode === "my" && myInterns.length === 0 && (
                 <p className="text-xs text-muted italic">No interns available.</p>
               )}
             </div>
@@ -818,7 +954,13 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
                 Next →
               </Button>
             ) : (
-              <Button type="submit" variant="primary" size="md" isLoading={isPending}>
+              <Button
+                type="submit"
+                variant="primary"
+                size="md"
+                isLoading={isPending}
+                disabled={isPending || (assignMode === "other" && !selectedInternId)}
+              >
                 {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
                 Create Task
               </Button>

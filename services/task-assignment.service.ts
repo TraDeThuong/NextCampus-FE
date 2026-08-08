@@ -5,6 +5,7 @@ import type {
   TaskAssignmentDeleteResponse,
   TaskAssignmentQueryParams,
   CreateTaskAssignmentPayload,
+  AssignTaskPayload,
   UpdateTaskAssignmentPayload,
 } from "@/types/task-assignment";
 
@@ -37,6 +38,26 @@ export const taskAssignmentService = {
     const response = await api.post<TaskAssignmentSuccessResponse>(
       "/task-assignments",
       payload,
+    );
+    return response.data;
+  },
+
+  // PUT /task-assignments/task/:taskId
+  assignTask: async (
+    taskId: string,
+    payload: AssignTaskPayload,
+  ): Promise<TaskAssignmentSuccessResponse> => {
+    const response = await api.put<TaskAssignmentSuccessResponse>(
+      `/task-assignments/task/${taskId}`,
+      payload,
+    );
+    return response.data;
+  },
+
+  // DELETE /task-assignments/task/:taskId
+  unassignTask: async (taskId: string): Promise<TaskAssignmentDeleteResponse> => {
+    const response = await api.delete<TaskAssignmentDeleteResponse>(
+      `/task-assignments/task/${taskId}`,
     );
     return response.data;
   },

@@ -19,7 +19,8 @@ export function useAiRecommendation(taskId: string, enabled = true) {
       return data;
     },
     enabled: !!taskId && enabled,
-    gcTime: 0,
+    staleTime: 30_000,
+    gcTime: 60_000,
     retry: false,
   });
 }

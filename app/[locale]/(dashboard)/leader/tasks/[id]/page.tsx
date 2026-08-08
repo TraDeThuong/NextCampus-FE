@@ -2,10 +2,11 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowLeft, Layers, GitBranch, Paperclip, FileText, Film, FileArchive, ImageIcon, User, Clock, ExternalLink, Send, MessageSquare, CheckCircle2, XCircle, Video, Sparkles } from "lucide-react";
+import { ArrowLeft, Layers, GitBranch, Paperclip, FileText, Film, FileArchive, ImageIcon, User, Clock, ExternalLink, Send, MessageSquare, CheckCircle2, XCircle, Video, Sparkles, AlertTriangle, RotateCcw, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useTask } from "@/hooks/task/useTask";
 import { useTaskSubmissions } from "@/hooks/task-submission/useTaskSubmissions";
+import { useUpdateTaskAssignment } from "@/hooks/task-assignment/useUpdateTaskAssignment";
 import Spinner from "@/components/ui/Spinner";
 import MetalCard from "@/components/ui/MetalCard";
 import TaskAiRecommendationModal from "../TaskAiRecommendationModal";
@@ -48,6 +49,7 @@ export default function TaskDetailPage() {
   const { data, isLoading } = useTask(id);
   const task = data?.data;
   const [showAi, setShowAi] = useState(false);
+  const updateAssignment = useUpdateTaskAssignment();
 
   const { data: submissionsData } = useTaskSubmissions(
     task?.assignment?.id ? { assignmentId: task.assignment.id, sortBy: "attempt", order: "asc", limit: 50 } : undefined,
@@ -206,6 +208,32 @@ export default function TaskDetailPage() {
                   <Field label={td("assignedAt")} value={fmtDate(task.assignment.assignedAt)} />
                   <Field label={td("lastUpdate")} value={fmtDate(task.assignment.updatedAt)} />
                 </div>
+                {task.assignment.status === "BLOCKED" && (
+                  <div className="space-y-3 rounded-xl border border-rose-500/30 bg-rose-500/5 p-3">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-400" />
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-rose-400">{td("blockedReason")}</p>
+                        <p className="mt-1 whitespace-pre-wrap text-sm text-slate-200">
+                          {task.assignment.blockedReason || td("blockedReasonMissing")}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const assignment = task.assignment;
+                        if (!assignment) return;
+                        updateAssignment.mutate({ id: assignment.id, payload: { status: "IN_PROGRESS" } });
+                      }}
+                      disabled={updateAssignment.isPending}
+                      className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-sky-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {updateAssignment.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
+                      {td("resumeBlockedTask")}
+                    </button>
+                  </div>
+                )}
               </div>
             </Card>
           )}

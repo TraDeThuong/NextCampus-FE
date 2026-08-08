@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/auth/useAuth";
 import { useCreateMeeting } from "@/hooks/meeting/useCreateMeeting";
 import { internService } from "@/services/intern.service";
 import { leaderService } from "@/services/leader.service";
+import { meetingService } from "@/services/meeting.service";
 import type { CreateMeetingPayload, MeetingType } from "@/types/meeting";
 
 interface Props { onCloseModal?: () => void; defaultDate?: Date; }
@@ -56,6 +57,27 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
   });
 
   const watchMeetingType = watch("meetingType");
+  const watchStartTime = watch("startTime");
+  const watchEndTime = watch("endTime");
+
+  const allUserIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const intern of interns) {
+      if (intern.userId) ids.add(intern.userId);
+    }
+    for (const leader of leaders) {
+      if (leader.id) ids.add(leader.id);
+    }
+    return Array.from(ids);
+  }, [interns, leaders]);
+
+  const { data: busyUsersRes } = useQuery({
+    queryKey: ["meetings", "busy-users", watchStartTime, watchEndTime, allUserIds.join(",")],
+    queryFn: () => meetingService.getBusyUsers(watchStartTime, watchEndTime, allUserIds.join(",")),
+    enabled: !!watchStartTime && !!watchEndTime && new Date(watchStartTime) < new Date(watchEndTime) && allUserIds.length > 0,
+    staleTime: 1000 * 30,
+  });
+  const busyUserIds = useMemo(() => new Set(busyUsersRes?.data ?? []), [busyUsersRes]);
 
   function toggleParticipant(id: string) { setSelectedParticipantIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]); }
 
@@ -113,11 +135,20 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
               <div className="min-w-0">
                 <label className={labelClass}><Users className="mr-1 inline h-3.5 w-3.5" />{t("yourInterns")}</label>
                 <div className="mt-1.5 h-[200px] space-y-0.5 overflow-y-auto custom-scrollbar rounded-xl border border-white/10 bg-white/[0.02] p-2">
-                  {interns.map((intern) => (
-                    <label key={intern.userId} className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition ${selectedParticipantIds.includes(intern.userId) ? "bg-primary-main/10" : "hover:bg-white/5"}`}>
-                      <input type="checkbox" checked={selectedParticipantIds.includes(intern.userId)} onChange={() => toggleParticipant(intern.userId)} className="accent-primary-main" /><span className="text-sm text-slate-300">{intern.fullName}</span>
-                    </label>
-                  ))}
+                  {interns.map((intern) => {
+                    const isBusy = busyUserIds.has(intern.userId);
+                    return (
+                      <label key={intern.userId} className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition ${selectedParticipantIds.includes(intern.userId) ? "bg-primary-main/10" : "hover:bg-white/5"}`}>
+                        <input type="checkbox" checked={selectedParticipantIds.includes(intern.userId)} onChange={() => toggleParticipant(intern.userId)} className="accent-primary-main" />
+                        <span className="text-sm text-slate-300">{intern.fullName}</span>
+                        {isBusy && (
+                          <span className="ml-auto rounded bg-red-500/10 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
+                            {t("busy")}
+                          </span>
+                        )}
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -125,11 +156,20 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
               <div className="min-w-0">
                 <label className={labelClass}>{t("otherLeaders")}</label>
                 <div className="mt-1.5 h-[200px] space-y-0.5 overflow-y-auto custom-scrollbar rounded-xl border border-white/10 bg-white/[0.02] p-2">
-                  {leaders.map((leader) => (
-                    <label key={leader.id} className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition ${selectedParticipantIds.includes(leader.id) ? "bg-primary-main/10" : "hover:bg-white/5"}`}>
-                      <input type="checkbox" checked={selectedParticipantIds.includes(leader.id)} onChange={() => toggleParticipant(leader.id)} className="accent-primary-main" /><span className="text-sm text-slate-300">{leader.fullName}</span>
-                    </label>
-                  ))}
+                  {leaders.map((leader) => {
+                    const isBusy = busyUserIds.has(leader.id);
+                    return (
+                      <label key={leader.id} className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition ${selectedParticipantIds.includes(leader.id) ? "bg-primary-main/10" : "hover:bg-white/5"}`}>
+                        <input type="checkbox" checked={selectedParticipantIds.includes(leader.id)} onChange={() => toggleParticipant(leader.id)} className="accent-primary-main" />
+                        <span className="text-sm text-slate-300">{leader.fullName}</span>
+                        {isBusy && (
+                          <span className="ml-auto rounded bg-red-500/10 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
+                            {t("busy")}
+                          </span>
+                        )}
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
             )}

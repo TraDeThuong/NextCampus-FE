@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import axios from "axios";
 import { taskAssignmentService } from "@/services/task-assignment.service";
 import type { UpdateTaskAssignmentPayload } from "@/types/task-assignment";
 
@@ -20,14 +21,20 @@ export function useUpdateTaskAssignment() {
     onSuccess: (_data, variables) => {
       toast.success("Assignment updated successfully.");
       queryClient.invalidateQueries({ queryKey: ["task-assignments"], exact: false });
+      queryClient.invalidateQueries({ queryKey: ["task"], exact: false });
+      queryClient.invalidateQueries({ queryKey: ["tasks"], exact: false });
       queryClient.invalidateQueries({ queryKey: ["stats"], exact: false });
       queryClient.invalidateQueries({
         queryKey: ["task-assignment", variables.id],
       });
     },
 
-    onError: () => {
-      toast.error("Failed to update assignment.");
+    onError: (error) => {
+      const message =
+        axios.isAxiosError(error) && error.response?.data?.message
+          ? error.response.data.message
+          : "Failed to update assignment.";
+      toast.error(message);
     },
   });
 }
