@@ -10,13 +10,38 @@ export function useUploadSubmissionAttachment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       submissionId,
       file,
     }: {
       submissionId: string;
       file: File;
-    }) => taskAttachmentService.uploadSubmissionAttachment(submissionId, file),
+    }) => {
+      // 1. Xin Presigned PUT URL từ server
+      const { data: presigned } =
+        await taskAttachmentService.getSubmissionAttachmentPutUrl(
+          submissionId,
+          file.name,
+          file.type,
+          file.size,
+        );
+
+      // 2. Upload thẳng lên Cloudflare R2 (không qua server VPS)
+      await axios.put(presigned.uploadUrl, file, {
+        headers: { "Content-Type": file.type },
+        // Không dùng axios instance của app (tránh đính kèm Authorization header vào R2)
+        withCredentials: false,
+      });
+
+      // 3. Báo server lưu metadata vào database
+      return taskAttachmentService.confirmSubmissionAttachmentUpload(
+        submissionId,
+        presigned.filePath,
+        file.name,
+        file.type,
+        file.size,
+      );
+    },
 
     onSuccess: (data, variables) => {
       queryClient.setQueryData<SubmissionAttachmentListResponse>(
