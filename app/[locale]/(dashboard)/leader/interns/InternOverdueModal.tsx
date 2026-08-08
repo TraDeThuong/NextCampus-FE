@@ -99,11 +99,19 @@ function OverdueTaskCard({ assignment, myInterns, currentIntern }: { assignment:
   const [recreateDeadline, setRecreateDeadline] = useState(() => {
     const d = new Date(); d.setDate(d.getDate() + 7); return d.toISOString().split("T")[0];
   });
+  const [recreateEstDays, setRecreateEstDays] = useState(assignment.task.estDays ?? 3);
 
   const recreateMutation = useMutation({
     mutationFn: async (internId: string) => {
       const task = assignment.task;
-      const payload: CreateTaskPayload = { title: task.title, description: task.description ?? undefined, deadline: recreateDeadline, priority: task.priority as CreateTaskPayload["priority"] };
+      const payload: CreateTaskPayload = {
+        title: task.title,
+        description: task.description ?? undefined,
+        deadline: recreateDeadline,
+        startDate: TODAY,
+        estDays: recreateEstDays,
+        priority: task.priority as CreateTaskPayload["priority"],
+      };
       const taskResult = await taskService.createTask(payload);
       await taskAssignmentService.createAssignment({ taskId: taskResult.data.id, internId });
       await taskService.updateTask(assignment.taskId, { recreatedTaskId: taskResult.data.id });
@@ -133,6 +141,10 @@ function OverdueTaskCard({ assignment, myInterns, currentIntern }: { assignment:
     if (recreateMutation.isPending) return;
     if (!recreateDeadline || recreateDeadline < TODAY) {
       toast.error(t("overdueModalDeadlinePast"));
+      return;
+    }
+    if (!Number.isFinite(recreateEstDays) || recreateEstDays < 0.1 || recreateEstDays > 365) {
+      toast.error(t("overdueModalEstDaysInvalid"));
       return;
     }
     setPhase("creating");
@@ -165,7 +177,7 @@ function OverdueTaskCard({ assignment, myInterns, currentIntern }: { assignment:
           ) : (
             <>
               {phase === "idle" && (
-                <button onClick={() => { setRecreateInternId(currentIntern.id); setRecreateDeadline(() => { const d = new Date(); d.setDate(d.getDate() + 7); return d.toISOString().split("T")[0]; }); setPhase("choosing"); }}
+                <button onClick={() => { setRecreateInternId(currentIntern.id); setRecreateDeadline(() => { const d = new Date(); d.setDate(d.getDate() + 7); return d.toISOString().split("T")[0]; }); setRecreateEstDays(assignment.task.estDays ?? 3); setPhase("choosing"); }}
                   className="flex items-center gap-1.5 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-3 py-1.5 text-xs font-medium text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20">
                   <RefreshCw className="h-3.5 w-3.5" />{t("overdueModalRecreate")}
                 </button>
@@ -197,6 +209,18 @@ function OverdueTaskCard({ assignment, myInterns, currentIntern }: { assignment:
           <div className="flex items-center gap-3">
             <span className="text-xs text-muted shrink-0">{t("overdueModalDeadlineLabel")}</span>
             <input type="date" value={recreateDeadline} min={TODAY} onChange={(e) => setRecreateDeadline(e.target.value)} className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white outline-none" />
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="shrink-0 text-xs text-muted">{t("overdueModalEstDaysLabel")}</span>
+            <input
+              type="number"
+              min={0.1}
+              max={365}
+              step="any"
+              value={recreateEstDays}
+              onChange={(e) => setRecreateEstDays(e.target.valueAsNumber)}
+              className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white outline-none"
+            />
           </div>
         </div>
       )}

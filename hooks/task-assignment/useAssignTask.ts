@@ -1,30 +1,28 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "react-hot-toast";
 import axios from "axios";
+import { toast } from "react-hot-toast";
 import { taskAssignmentService } from "@/services/task-assignment.service";
-import type { UpdateTaskAssignmentPayload } from "@/types/task-assignment";
+import type { AssignTaskPayload } from "@/types/task-assignment";
 
-export function useUpdateTaskAssignment() {
+export function useAssignTask() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({
-      id,
+      taskId,
       payload,
     }: {
-      id: string;
-      payload: UpdateTaskAssignmentPayload;
-    }) => taskAssignmentService.updateAssignment(id, payload),
+      taskId: string;
+      payload: AssignTaskPayload;
+    }) => taskAssignmentService.assignTask(taskId, payload),
 
-    onSuccess: (_data, variables) => {
+    onSuccess: () => {
       toast.success("Assignment updated successfully.");
       queryClient.invalidateQueries({ queryKey: ["task-assignments"], exact: false });
+      queryClient.invalidateQueries({ queryKey: ["tasks"], exact: false });
       queryClient.invalidateQueries({ queryKey: ["stats"], exact: false });
-      queryClient.invalidateQueries({
-        queryKey: ["task-assignment", variables.id],
-      });
     },
 
     onError: (error) => {

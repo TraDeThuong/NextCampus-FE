@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import axios from "axios";
 import { taskAssignmentService } from "@/services/task-assignment.service";
 
 export function useDeleteTaskAssignment() {
@@ -16,8 +17,12 @@ export function useDeleteTaskAssignment() {
       queryClient.invalidateQueries({ queryKey: ["stats"], exact: false });
     },
 
-    onError: () => {
-      toast.error("Failed to delete assignment.");
+    onError: (error) => {
+      const message =
+        axios.isAxiosError(error) && error.response?.data?.message
+          ? error.response.data.message
+          : "Failed to delete assignment.";
+      toast.error(message);
     },
   });
 }

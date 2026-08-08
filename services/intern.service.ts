@@ -3,6 +3,7 @@ import type {
     InternSuccessResponse,
     InternListResponse,
     InternQueryParams,
+    AssignmentInternLookupResponse,
     CreateInternPayload,
     DirectCreateInternPayload,
     UpdateInternPayload,
@@ -43,6 +44,15 @@ export const internService = {
     getIntern: async (id: string): Promise<InternSuccessResponse> => {
         const response = await api.get<InternSuccessResponse>(
             `/interns/${id}`,
+        );
+        return response.data;
+    },
+    lookupAssignmentIntern: async (
+        email: string,
+    ): Promise<AssignmentInternLookupResponse> => {
+        const response = await api.get<AssignmentInternLookupResponse>(
+            "/interns/assignment-lookup",
+            { params: { email } },
         );
         return response.data;
     },
