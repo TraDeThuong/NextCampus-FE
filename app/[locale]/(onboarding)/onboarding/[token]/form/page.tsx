@@ -2,6 +2,9 @@
 
 import { useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import axios from "axios";
+import { getApplicationAttachmentPutUrl } from "@/services/application.service";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -182,6 +185,50 @@ export default function FormPage() {
     const reg = await getActiveRegulationService().catch(() => null);
     if (!reg) return;
 
+    let uploadedFiles: Array<{
+      fileName: string;
+      filePath: string;
+      mimeType: string;
+      fileSize: number;
+    }> = [];
+
+    // 1. Nếu có file đính kèm, thực hiện upload trực tiếp lên R2 thông qua presigned URL
+    if (attachedFiles.length > 0) {
+      const uploadToastId = toast.loading("Đang tải lên các tệp đính kèm...");
+      try {
+        const uploadPromises = attachedFiles.map(async (file) => {
+          // Xin presigned URL cho từng file
+          const { data: presigned } = await getApplicationAttachmentPutUrl(
+            token as string,
+            file.name,
+            file.type,
+            file.size,
+          );
+
+          // Upload trực tiếp từ trình duyệt lên Cloudflare R2
+          await axios.put(presigned.uploadUrl, file, {
+            headers: { "Content-Type": file.type },
+            withCredentials: false,
+          });
+
+          return {
+            fileName: file.name,
+            filePath: presigned.filePath,
+            mimeType: file.type,
+            fileSize: file.size,
+          };
+        });
+
+        uploadedFiles = await Promise.all(uploadPromises);
+        toast.dismiss(uploadToastId);
+      } catch (error) {
+        toast.dismiss(uploadToastId);
+        console.error("Failed to upload files to R2:", error);
+        toast.error("Không thể tải lên tệp đính kèm. Vui lòng thử lại.");
+        return;
+      }
+    }
+
     submitApp(
       {
         fullName: data.fullName,
@@ -194,7 +241,7 @@ export default function FormPage() {
         token,
         regulationId: reg.data.id,
         acceptedRegulations: true,
-        files: attachedFiles.length > 0 ? attachedFiles : undefined,
+        uploadedFiles: uploadedFiles.length > 0 ? uploadedFiles : undefined,
       },
       {
         onSuccess: () => router.push(`/onboarding/${token}/success`),

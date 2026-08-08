@@ -56,29 +56,25 @@ export const revokeInviteService = async (
 export const createApplicationService = async (
   payload: CreateApplicationPayload,
 ): Promise<ApplicationSuccessResponse> => {
-  const formData = new FormData();
-  formData.append("fullName", payload.fullName);
-  formData.append("email", payload.email);
-  formData.append("phone", payload.phone);
-  formData.append("preferredDepartment", payload.preferredDepartment);
-  formData.append("preferredPosition", payload.preferredPosition);
-  formData.append("startDate", payload.startDate);
-  formData.append("duration", String(payload.duration));
-  formData.append("token", payload.token);
-  formData.append("regulationId", payload.regulationId);
-  formData.append("acceptedRegulations", String(payload.acceptedRegulations));
-
-  if (payload.files && payload.files.length > 0) {
-    payload.files.forEach((file) => {
-      formData.append("files", file);
-    });
-  }
-
+  // Gửi trực tiếp payload JSON (chứa thông tin metadata của files đã upload trực tiếp)
+  const { files, ...data } = payload;
   const response = await api.post<ApplicationSuccessResponse>(
     "/applications",
-    formData,
-    { headers: { "Content-Type": "multipart/form-data" } },
+    data,
   );
+  return response.data;
+};
+
+// GET /applications/attachments/upload-url (Public, dùng token để xác thực)
+export const getApplicationAttachmentPutUrl = async (
+  token: string,
+  fileName: string,
+  mimeType: string,
+  fileSize: number,
+): Promise<{ success: boolean; data: { uploadUrl: string; filePath: string; publicUrl: string } }> => {
+  const response = await api.get("/applications/attachments/upload-url", {
+    params: { token, fileName, mimeType, fileSize },
+  });
   return response.data;
 };
 

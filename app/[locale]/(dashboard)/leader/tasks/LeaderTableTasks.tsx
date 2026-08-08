@@ -223,7 +223,7 @@ export default function LeaderTableTasks() {
             {tasksLoading ? (
               <div className="flex justify-center py-12"><Spinner /></div>
             ) : tasks.length > 0 ? (
-              <Table columns="70px minmax(160px,1fr) 130px 110px 75px 95px 85px 40px">
+              <Table columns="60px minmax(180px,260px) minmax(145px,1fr) minmax(125px,0.8fr) minmax(75px,0.25fr) minmax(95px,0.35fr) minmax(85px,0.3fr) 40px">
                   <Table.Header>
                     <div>{t("colCode")}</div><div>{t("colTitle")}</div><div>{t("colOwner")}</div><div>{t("colSupport")}</div><div>{t("colPriority")}</div><div>{t("colStatus")}</div>
                     <div>{t("colDeadline")}</div><div></div>
@@ -238,7 +238,7 @@ export default function LeaderTableTasks() {
                         {task.title}
                       </button>
                       <InlineAssignCell taskId={task.id} assignment={task.assignment} deadline={task.deadline} taskGroupDepartmentId={task.taskGroup?.departmentId} />
-                      <div className="text-sm text-muted">{task.assignment?.support?.fullName ?? "—"}</div>
+                      <div className="truncate text-sm text-muted">{task.assignment?.support?.fullName ?? "—"}</div>
                       <div><PriorityBadge priority={task.priority} /></div>
                       <div><StatusBadge status={task.assignment?.status ?? "UNASSIGNED"} assignmentId={task.assignment?.id} taskId={task.id} onReviewClick={handleOpenReview} /></div>
                       <div className="text-sm text-muted">{new Date(task.deadline).toLocaleDateString("vi-VN")}</div>
