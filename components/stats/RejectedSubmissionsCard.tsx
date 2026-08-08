@@ -7,8 +7,15 @@ import { useTaskSubmissions } from "@/hooks/task-submission/useTaskSubmissions";
 
 export default function RejectedSubmissionsCard() {
   const t = useTranslations("intern.dashboard");
-  const { data, isLoading } = useTaskSubmissions({ reviewStatus: "REJECTED", sortBy: "submittedAt", order: "desc", limit: 10 });
-  const rejected = data?.data ?? [];
+  const { data, isLoading } = useTaskSubmissions({ reviewStatus: "REJECTED", sortBy: "submittedAt", order: "desc", limit: 100 });
+  const rejected = (data?.data ?? []).filter(
+    (submission, index, submissions) =>
+      submission.assignment.status !== "REVIEW" &&
+      submission.assignment.status !== "DONE" &&
+      submissions.findIndex(
+        (candidate) => candidate.assignmentId === submission.assignmentId,
+      ) === index,
+  );
   if (isLoading || rejected.length === 0) return null;
 
   return (

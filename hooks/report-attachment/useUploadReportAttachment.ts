@@ -13,7 +13,6 @@ export function useUploadReportAttachment() {
       reportAttachmentService.uploadReportAttachment(reportId, file),
 
     onSuccess: (_data, variables) => {
-      toast.success("Attachment uploaded successfully.");
       queryClient.invalidateQueries({
         queryKey: ["reportAttachments", variables.reportId],
       });

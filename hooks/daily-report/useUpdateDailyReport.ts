@@ -19,7 +19,6 @@ export function useUpdateDailyReport() {
     }) => dailyReportService.updateDailyReport(id, payload),
 
     onSuccess: (_data, variables) => {
-      toast.success("Daily report updated.");
       queryClient.invalidateQueries({ queryKey: ["dailyReports"], exact: false });
       queryClient.invalidateQueries({ queryKey: ["dailyReport", variables.id] });
     },

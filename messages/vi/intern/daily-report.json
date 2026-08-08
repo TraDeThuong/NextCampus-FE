@@ -36,14 +36,16 @@
         "or": "HOẶC",
         "remove": "Gỡ",
         "attachments": "Tệp Đính Kèm",
-        "attachmentsHint": "Tối đa 5 tệp, mỗi tệp {limit} MB.",
+        "videoFileHint": "Một tệp video, tính riêng với tài liệu đính kèm. Hỗ trợ MP4, WEBM, MOV, MKV hoặc AVI; tối đa {limit} MB.",
+        "attachmentsHint": "Tối đa {max} tài liệu đính kèm, không tính video; mỗi tệp {limit} MB. Hỗ trợ ảnh, PDF, DOC/DOCX, ZIP, RAR và 7z.",
         "cancel": "Huỷ",
         "submit": "Nộp",
+        "submitSuccess": "Đã nộp báo cáo và tải lên toàn bộ tệp đã chọn.",
         "videoTypeError": "Video phải là file MP4, WEBM, MOV, MKV hoặc AVI.",
         "videoSizeError": "Video không được vượt quá {limit} MB.",
         "unsupportedType": "\"{name}\" có định dạng không được hỗ trợ.",
         "fileSizeError": "\"{name}\" vượt quá {limit} MB.",
-        "maxAttachments": "Báo cáo hằng ngày chỉ được tối đa 5 tệp đính kèm."
+        "maxAttachments": "Báo cáo hằng ngày chỉ được tối đa {max} tệp đính kèm."
       },
 
       "editModal": {
@@ -61,6 +63,7 @@
         "delete": "Xoá",
         "cancel": "Huỷ",
         "update": "Cập Nhật",
+        "updateSuccess": "Đã cập nhật báo cáo và tải lên toàn bộ tệp đã chọn.",
         "deleteConfirmTitle": "Xoá Báo Cáo",
         "deleteConfirmDesc": "Hành động này không thể hoàn tác."
       }

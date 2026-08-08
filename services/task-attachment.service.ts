@@ -1,4 +1,5 @@
 import api from "@/lib/axios";
+import { UPLOAD_REQUEST_TIMEOUT_MS } from "@/lib/upload-policy";
 import type {
   TaskAttachmentListResponse,
   TaskAttachmentSuccessResponse,
@@ -96,7 +97,7 @@ export const taskAttachmentService = {
     const response = await api.post<SubmissionAttachmentSuccessResponse>(
       `/task-submissions/${submissionId}/attachments`,
       formData,
-      { headers: { "Content-Type": "multipart/form-data" } },
+      { timeout: UPLOAD_REQUEST_TIMEOUT_MS },
     );
     return response.data;
   },

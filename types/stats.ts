@@ -104,6 +104,7 @@ export interface InternPersonalStatsData {
   internName: string;
   tasksInProgress: number;
   tasksCompleted: number;
+  tasksOverdue: number;
   totalTasks: number;
   completionRate: number;
   dailyReportTodaySubmitted: boolean;

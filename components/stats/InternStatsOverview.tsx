@@ -8,7 +8,7 @@ import Spinner from "../ui/Spinner";
 import MetalCard from "../ui/MetalCard";
 import RejectedSubmissionsCard from "./RejectedSubmissionsCard";
 import Table from "../ui/Table";
-import { ClipboardList, CheckCircle2, Calendar, Award, ExternalLink, Clock, FileCheck } from "lucide-react";
+import { ClipboardList, CheckCircle2, Calendar, Award, ExternalLink, Clock, FileCheck, AlertTriangle } from "lucide-react";
 
 export default function InternStatsOverview() {
   const t = useTranslations("intern.dashboard");
@@ -40,11 +40,13 @@ export default function InternStatsOverview() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <StatsCard title={t("tasksInProgress")} value={stats.tasksInProgress} subtitle={t("totalTasks", { n: stats.totalTasks })} icon={<ClipboardList className="h-6 w-6 text-cyan-400" />} href="/intern/task"
           trend={{ text: t("completionRate", { n: stats.completionRate }), positive: true }} />
         <StatsCard title={t("tasksCompleted")} value={stats.tasksCompleted} subtitle={t("completedOf", { done: stats.tasksCompleted, total: stats.totalTasks })} icon={<CheckCircle2 className="h-6 w-6 text-emerald-400" />} href="/intern/task?status=DONE"
           trend={{ text: t("updateProgress"), positive: true }} />
+        <StatsCard title={t("tasksOverdue")} value={stats.tasksOverdue} subtitle={t("overdueHint")} icon={<AlertTriangle className="h-6 w-6 text-rose-400" />} href="/intern/task"
+          trend={{ text: stats.tasksOverdue > 0 ? t("overdueNeedsAttention") : t("noOverdueTasks"), positive: stats.tasksOverdue === 0 }} />
         <StatsCard title={t("todaysReport")} value={stats.dailyReportTodaySubmitted ? t("submitted") : t("notSubmitted")}
           subtitle={stats.dailyReportTodaySubmitted ? t("onTime") : t("submitByEvening")} icon={<FileCheck className="h-6 w-6 text-amber-400" />} href="/intern/daily-report"
           trend={{ text: stats.dailyReportTodaySubmitted ? t("completeStatus") : t("submitNowStatus"), positive: stats.dailyReportTodaySubmitted }} />
@@ -95,7 +97,13 @@ export default function InternStatsOverview() {
             <div className="flex items-center justify-between border-b border-white/10 pb-4"><h3 className="text-lg font-semibold text-foreground flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-emerald-400" />{t("internshipProgress")}</h3></div>
             <div className="mt-6 text-center space-y-4">
               <div className="inline-flex h-32 w-32 items-center justify-center rounded-full border-4 border-primary-light/30 bg-primary-light/5 p-4 shadow-glass"><div><span className="text-3xl font-extrabold text-foreground metal-text">{stats.completionRate}%</span><span className="block text-[10px] text-muted uppercase font-semibold">{t("completed")}</span></div></div>
-              <p className="text-xs text-muted" dangerouslySetInnerHTML={{ __html: t("completedTasksMsg", { done: stats.tasksCompleted, total: stats.totalTasks, strong: (chunks) => `<strong>${chunks}</strong>` }) }} />
+              <p className="text-xs text-muted">
+                {t.rich("completedTasksMsg", {
+                  done: stats.tasksCompleted,
+                  total: stats.totalTasks,
+                  strong: (chunks) => <strong>{chunks}</strong>,
+                })}
+              </p>
             </div>
           </div>
           <div className="pt-6 border-t border-white/10 mt-6">

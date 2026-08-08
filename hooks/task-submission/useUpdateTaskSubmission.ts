@@ -15,10 +15,13 @@ export function useUpdateTaskSubmission() {
     }: {
       id: string;
       payload: UpdateTaskSubmissionPayload;
+      suppressSuccessToast?: boolean;
     }) => taskSubmissionService.updateSubmission(id, payload),
 
     onSuccess: (_data, variables) => {
-      toast.success("Submission updated successfully.");
+      if (!variables.suppressSuccessToast) {
+        toast.success("Submission updated successfully.");
+      }
       queryClient.invalidateQueries({ queryKey: ["task-submissions"] });
       queryClient.invalidateQueries({ queryKey: ["task-submission", variables.id] });
     },

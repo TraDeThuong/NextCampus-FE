@@ -12,7 +12,9 @@ import { useDeleteReportAttachment } from "@/hooks/report-attachment/useDeleteRe
 import { useReportAttachments } from "@/hooks/report-attachment/useReportAttachments";
 import type { DailyReport } from "@/types/daily-report";
 import { toast } from "react-hot-toast";
-import { ATTACHMENT_MIME_TYPES, exceedsUploadLimit, UPLOAD_LIMITS_MB, VIDEO_MIME_TYPES } from "@/lib/upload-policy";
+import { ATTACHMENT_MIME_TYPES, exceedsUploadLimit, UPLOAD_LIMITS_MB, UPLOAD_MAX_FILES, VIDEO_MIME_TYPES } from "@/lib/upload-policy";
+
+const MAX_REPORT_ATTACHMENTS = UPLOAD_MAX_FILES.reportAttachment;
 
 type Props = { report: DailyReport; onClose: () => void };
 
@@ -40,14 +42,14 @@ export default function EditDailyReportModal({ report, onClose }: Props) {
 
   function handleAttachmentFilesChange(files: File[]) {
     const totalCurrentCount = existingAttachments.length + newAttachments.length;
-    const remainingSlots = Math.max(0, 5 - totalCurrentCount);
+    const remainingSlots = Math.max(0, MAX_REPORT_ATTACHMENTS - totalCurrentCount);
     const accepted: File[] = [];
     for (const file of files.slice(0, remainingSlots)) {
       if (!ATTACHMENT_MIME_TYPES.has(file.type)) { toast.error(tc("unsupportedType", { name: file.name })); continue; }
       if (exceedsUploadLimit(file, UPLOAD_LIMITS_MB.reportAttachment)) { toast.error(tc("fileSizeError", { name: file.name, limit: UPLOAD_LIMITS_MB.reportAttachment })); continue; }
       accepted.push(file);
     }
-    if (files.length > remainingSlots) toast.error(tc("maxAttachments"));
+    if (files.length > remainingSlots) toast.error(tc("maxAttachments", { max: MAX_REPORT_ATTACHMENTS }));
     if (accepted.length > 0) setNewAttachments((current) => [...current, ...accepted]);
   }
 
@@ -63,6 +65,7 @@ export default function EditDailyReportModal({ report, onClose }: Props) {
         await uploadAttachment.mutateAsync({ reportId: report.id, file });
         setNewAttachments((current) => current.filter((f) => f !== file));
       }
+      toast.success(tm("updateSuccess"));
       onClose();
     } catch (err) {
       console.error(err);
@@ -95,6 +98,7 @@ export default function EditDailyReportModal({ report, onClose }: Props) {
                 <div className="flex items-center gap-2 text-xs text-slate-500"><span className="h-px flex-1 bg-white/5" /><span>{tc("or")}</span><span className="h-px flex-1 bg-white/5" /></div>
                 {videoFile ? <div className="flex items-center justify-between rounded-xl border border-emerald-400/20 bg-emerald-500/5 px-4 py-2.5"><span className="text-sm text-emerald-300 truncate">{videoFile.name}</span><button type="button" onClick={() => setVideoFile(null)} disabled={isPending} className="text-xs text-slate-400 hover:text-red-400">{tc("remove")}</button></div> :
                  <input type="file" accept="video/mp4,video/webm,video/quicktime,video/x-matroska,video/x-msvideo,.mp4,.webm,.mov,.mkv,.avi" disabled={isPending || !!videoLink.trim()} onChange={(e) => handleVideoFileChange(e.target.files?.[0])} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-400 file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 file:cursor-pointer outline-none disabled:opacity-50" />}
+                <p className="text-xs text-slate-500">{tc("videoFileHint", { limit: UPLOAD_LIMITS_MB.reportVideo })}</p>
               </div>
             </div>
 
@@ -114,7 +118,7 @@ export default function EditDailyReportModal({ report, onClose }: Props) {
                   </div>
                 ))}
                 <input type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,.pdf,.doc,.docx,.zip,.rar,.7z" disabled={isPending} onChange={(e) => { const files = Array.from(e.target.files ?? []); handleAttachmentFilesChange(files); e.target.value = ""; }} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-400 file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 file:cursor-pointer outline-none disabled:opacity-50" />
-                <p className="text-xs text-slate-500">{tc("attachmentsHint", { limit: UPLOAD_LIMITS_MB.reportAttachment })}</p>
+                <p className="text-xs text-slate-500">{tc("attachmentsHint", { max: MAX_REPORT_ATTACHMENTS, limit: UPLOAD_LIMITS_MB.reportAttachment })}</p>
               </div>
             </div>
 
