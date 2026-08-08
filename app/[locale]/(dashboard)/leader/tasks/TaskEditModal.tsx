@@ -6,15 +6,16 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { Pencil, Loader2, Paperclip, X, Link, ImageIcon, Film, FileArchive, FileText, Trash2, CheckCircle2, AlertCircle, UserCheck, Users } from "lucide-react";
 import { toast } from "react-hot-toast";
+import axios from "axios";
 import Button from "@/components/ui/Button";
 import Spinner from "@/components/ui/Spinner";
 import { useUpdateTask } from "@/hooks/task/useUpdateTask";
 import { useTask } from "@/hooks/task/useTask";
 import { useTaskGroups } from "@/hooks/task-group/useTaskGroups";
 import { useInterns } from "@/hooks/intern/useInterns";
-import { useCreateTaskAssignment } from "@/hooks/task-assignment/useCreateTaskAssignment";
-import { useUpdateTaskAssignment } from "@/hooks/task-assignment/useUpdateTaskAssignment";
-import { useDeleteTaskAssignment } from "@/hooks/task-assignment/useDeleteTaskAssignment";
+import { useAssignTask } from "@/hooks/task-assignment/useAssignTask";
+import { useLookupAssignmentIntern } from "@/hooks/intern/useLookupAssignmentIntern";
+import { useUnassignTask } from "@/hooks/task-assignment/useUnassignTask";
 import { useDeleteTaskAttachment } from "@/hooks/task-attachment/useDeleteTaskAttachment";
 import { useUploadTaskAttachment } from "@/hooks/task-attachment/useUploadTaskAttachment";
 import { taskAttachmentService } from "@/services/task-attachment.service";
@@ -70,9 +71,9 @@ export default function TaskEditModal({ taskId, onClose, onCloseModal }: Props) 
   const updateTask = useUpdateTask();
   const uploadAttachment = useUploadTaskAttachment();
   const deleteAttachment = useDeleteTaskAttachment();
-  const createAssignment = useCreateTaskAssignment();
-  const updateAssignment = useUpdateTaskAssignment();
-  const deleteAssignment = useDeleteTaskAssignment();
+  const assignTask = useAssignTask();
+  const lookupAssignmentIntern = useLookupAssignmentIntern();
+  const unassignTask = useUnassignTask();
   const auth = useContext(AuthContext);
   const currentUserId = auth?.state.user?.id;
 
@@ -83,9 +84,7 @@ export default function TaskEditModal({ taskId, onClose, onCloseModal }: Props) 
   const taskGroups = taskGroupsData?.data ?? [];
 
   const { data: myInternsData } = useInterns({ leaderId: currentUserId });
-  const { data: allInternsData } = useInterns();
   const myInterns = myInternsData?.data ?? [];
-  const otherInterns = (allInternsData?.data ?? []).filter((i) => i.leaderId !== currentUserId);
 
   const [fileItems, setFileItems] = useState<FileItem[]>([]);
   const [linkUrl, setLinkUrl] = useState("");
@@ -96,6 +95,37 @@ export default function TaskEditModal({ taskId, onClose, onCloseModal }: Props) 
   const [isUploading, setIsUploading] = useState(false);
   const [assignMode, setAssignMode] = useState<"keep" | "none" | "my" | "other">("keep");
   const [selectedInternId, setSelectedInternId] = useState<string>("");
+  const [otherInternEmail, setOtherInternEmail] = useState("");
+  const [otherInternEmailError, setOtherInternEmailError] = useState("");
+
+  const handleOtherInternLookup = async () => {
+    const normalizedEmail = otherInternEmail.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      setSelectedInternId("");
+      setOtherInternEmailError(
+        tm.has("invalidInternEmail")
+          ? tm("invalidInternEmail")
+          : "Enter a valid intern email.",
+      );
+      lookupAssignmentIntern.reset();
+      return;
+    }
+
+    setOtherInternEmailError("");
+    setSelectedInternId("");
+    lookupAssignmentIntern.reset();
+    try {
+      const result = await lookupAssignmentIntern.mutateAsync(normalizedEmail);
+      setOtherInternEmail(result.data.email);
+      setSelectedInternId(result.data.id);
+    } catch {
+      setOtherInternEmailError(
+        tm.has("otherTeamInternNotFound")
+          ? tm("otherTeamInternNotFound")
+          : "No active intern from another team matches this email.",
+      );
+    }
+  };
 
   const addLink = () => {
     const trimmed = linkUrl.trim();
@@ -149,6 +179,11 @@ export default function TaskEditModal({ taskId, onClose, onCloseModal }: Props) 
   const deadlineVal = watch("deadline");
 
   const onSubmit = async (data: UpdateTaskPayload) => {
+    if (task?.assignment?.status === "DONE") {
+      toast.error(tm("completedTaskReadOnly"));
+      return;
+    }
+
     const payload: UpdateTaskPayload = { ...data, estDays: data.estDays || undefined, startDate: data.startDate || undefined, taskGroupId: data.taskGroupId || undefined, priority: data.priority || undefined, code: data.code || undefined, description: data.description || undefined, phase: data.phase || undefined, module: data.module || undefined, acceptanceCriteria: data.acceptanceCriteria || undefined, taskNotes: data.taskNotes || undefined };
     try {
       setIsUploading(true);
@@ -198,10 +233,17 @@ export default function TaskEditModal({ taskId, onClose, onCloseModal }: Props) 
         }
       }
 
-      if (assignMode === "none" && task?.assignment) { await deleteAssignment.mutateAsync(task.assignment.id); }
+      if (assignMode === "none" && task?.assignment) {
+        await unassignTask.mutateAsync(taskId);
+      }
       else if (selectedInternId) {
-        if (task?.assignment) { await updateAssignment.mutateAsync({ id: task.assignment.id, payload: { internId: selectedInternId } }); }
-        else { await createAssignment.mutateAsync({ taskId, internId: selectedInternId }); }
+        const internEmail = assignMode === "other"
+          ? otherInternEmail.trim().toLowerCase()
+          : undefined;
+        await assignTask.mutateAsync({
+          taskId,
+          payload: { internId: selectedInternId, internEmail },
+        });
       }
 
       queryClient.invalidateQueries({ queryKey: ["tasks"], exact: false });
@@ -213,8 +255,10 @@ export default function TaskEditModal({ taskId, onClose, onCloseModal }: Props) 
       } else {
         toast.error("Some attachments failed to upload. Please try again.");
       }
-    } catch {
-      toast.error("An unexpected error occurred. Please try again.");
+    } catch (error) {
+      if (!axios.isAxiosError(error)) {
+        toast.error("An unexpected error occurred. Please try again.");
+      }
     } finally {
       setIsUploading(false);
     }
@@ -222,6 +266,9 @@ export default function TaskEditModal({ taskId, onClose, onCloseModal }: Props) 
 
   if (isLoading) return <div className="flex justify-center py-12"><Spinner size="md" /></div>;
   if (!task) return <p className="py-8 text-center text-sm text-muted">{tm("taskNotFound")}</p>;
+  if (task.assignment?.status === "DONE") {
+    return <p className="py-8 text-center text-sm text-muted">{tm("completedTaskReadOnly")}</p>;
+  }
 
   const isPending = updateTask.isPending || isUploading;
   const existingAttachments = task.attachments ?? [];
@@ -426,7 +473,13 @@ export default function TaskEditModal({ taskId, onClose, onCloseModal }: Props) 
             {(["keep", "my", "other"] as const).map((mode) => {
               if (mode === "keep" && !task.assignment) return null;
               return (
-                <button key={mode} type="button" onClick={() => { setAssignMode(mode); setSelectedInternId(""); }} disabled={isPending}
+                <button key={mode} type="button" onClick={() => {
+                  setAssignMode(mode);
+                  setSelectedInternId("");
+                  setOtherInternEmail("");
+                  setOtherInternEmailError("");
+                  lookupAssignmentIntern.reset();
+                }} disabled={isPending}
                   className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${assignMode === mode ? "bg-primary-main/20 text-primary-light border border-primary-light/30" : "bg-white/5 text-muted border border-white/5 hover:bg-white/10"}`}>
                   {mode === "keep" && tm("keepCurrent")}
                   {mode === "my" && <span className="flex items-center gap-1"><UserCheck className="h-3 w-3" />{tm("myTeam")}</span>}
@@ -443,19 +496,73 @@ export default function TaskEditModal({ taskId, onClose, onCloseModal }: Props) 
             </select>
           )}
           {assignMode === "other" && (
-            <select value={selectedInternId} onChange={(e) => setSelectedInternId(e.target.value)} disabled={isPending} className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground focus:border-primary-light/40 focus:outline-none disabled:opacity-50">
-              <option value="">{tm("selectOtherIntern")}</option>
-              {otherInterns.map((intern) => <option key={intern.id} value={intern.id}>{intern.fullName}{intern.leader?.fullName ? ` (${intern.leader.fullName})` : ""}</option>)}
-            </select>
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <input
+                  type="email"
+                  value={otherInternEmail}
+                  onChange={(event) => {
+                    setOtherInternEmail(event.target.value);
+                    setSelectedInternId("");
+                    setOtherInternEmailError("");
+                    lookupAssignmentIntern.reset();
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      void handleOtherInternLookup();
+                    }
+                  }}
+                  placeholder={
+                    tm.has("otherTeamEmailPlaceholder")
+                      ? tm("otherTeamEmailPlaceholder")
+                      : "Enter the intern's exact email..."
+                  }
+                  disabled={isPending || lookupAssignmentIntern.isPending}
+                  className="min-w-0 flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-primary-light/40 focus:outline-none disabled:opacity-50"
+                />
+                <Button type="button" variant="glass" size="md" onClick={() => void handleOtherInternLookup()} disabled={isPending || lookupAssignmentIntern.isPending}>
+                  {lookupAssignmentIntern.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : tm.has("checkEmail") ? (
+                    tm("checkEmail")
+                  ) : (
+                    "Check"
+                  )}
+                </Button>
+              </div>
+              {otherInternEmailError && <p className="text-xs text-red-400">{otherInternEmailError}</p>}
+              {selectedInternId && lookupAssignmentIntern.data?.data && (
+                <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3">
+                  <p className="text-sm font-medium text-emerald-300">{lookupAssignmentIntern.data.data.fullName}</p>
+                  <p className="mt-0.5 text-xs text-slate-400">
+                    {tm.has("internLeader")
+                      ? tm("internLeader", {
+                          name:
+                            lookupAssignmentIntern.data.data.leader.fullName ||
+                            lookupAssignmentIntern.data.data.leader.email,
+                        })
+                      : `Leader: ${lookupAssignmentIntern.data.data.leader.fullName || lookupAssignmentIntern.data.data.leader.email}`}
+                  </p>
+                </div>
+              )}
+              {!selectedInternId && !otherInternEmailError && (
+                <p className="text-xs text-muted">
+                  {tm.has("verifyOtherTeamIntern")
+                    ? tm("verifyOtherTeamIntern")
+                    : "Enter the exact email to verify the intern and their leader."}
+                </p>
+              )}
+            </div>
           )}
-          {assignMode !== "keep" && assignMode !== "none" && (assignMode === "my" ? myInterns.length : otherInterns.length) === 0 && (
+          {assignMode === "my" && myInterns.length === 0 && (
             <p className="text-xs text-muted italic">{tm("noInternsAvailable")}</p>
           )}
         </div>
 
         <div className="flex items-center justify-end gap-3 pt-2">
           <Button type="button" variant="glass" size="md" disabled={isPending} onClick={onCloseModal}>{tm("cancel")}</Button>
-          <Button type="submit" variant="primary" size="md" isLoading={isPending}>
+          <Button type="submit" variant="primary" size="md" isLoading={isPending} disabled={isPending || (assignMode === "other" && !selectedInternId)}>
             {isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Pencil className="h-4 w-4 mr-2" />}{tm("saveChanges")}
           </Button>
         </div>

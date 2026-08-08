@@ -1,37 +1,28 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "react-hot-toast";
 import axios from "axios";
+import { toast } from "react-hot-toast";
 import { taskAssignmentService } from "@/services/task-assignment.service";
-import type { UpdateTaskAssignmentPayload } from "@/types/task-assignment";
 
-export function useUpdateTaskAssignment() {
+export function useUnassignTask() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      id,
-      payload,
-    }: {
-      id: string;
-      payload: UpdateTaskAssignmentPayload;
-    }) => taskAssignmentService.updateAssignment(id, payload),
+    mutationFn: (taskId: string) => taskAssignmentService.unassignTask(taskId),
 
-    onSuccess: (_data, variables) => {
-      toast.success("Assignment updated successfully.");
+    onSuccess: () => {
+      toast.success("Hủy giao việc thành công.");
       queryClient.invalidateQueries({ queryKey: ["task-assignments"], exact: false });
+      queryClient.invalidateQueries({ queryKey: ["tasks"], exact: false });
       queryClient.invalidateQueries({ queryKey: ["stats"], exact: false });
-      queryClient.invalidateQueries({
-        queryKey: ["task-assignment", variables.id],
-      });
     },
 
     onError: (error) => {
       const message =
         axios.isAxiosError(error) && error.response?.data?.message
           ? error.response.data.message
-          : "Failed to update assignment.";
+          : "Không thể hủy giao việc.";
       toast.error(message);
     },
   });

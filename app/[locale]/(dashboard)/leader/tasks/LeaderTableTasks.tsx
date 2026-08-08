@@ -19,9 +19,9 @@ import { useDepartments } from "@/hooks/department/useDepartments";
 import { useTasks } from "@/hooks/task/useTasks";
 import { useDeleteTask } from "@/hooks/task/useDeleteTask";
 import { useInterns } from "@/hooks/intern/useInterns";
-import { useCreateTaskAssignment } from "@/hooks/task-assignment/useCreateTaskAssignment";
-import { useUpdateTaskAssignment } from "@/hooks/task-assignment/useUpdateTaskAssignment";
-import { useDeleteTaskAssignment } from "@/hooks/task-assignment/useDeleteTaskAssignment";
+import { useAssignTask } from "@/hooks/task-assignment/useAssignTask";
+import { useUnassignTask } from "@/hooks/task-assignment/useUnassignTask";
+import { useLookupAssignmentIntern } from "@/hooks/intern/useLookupAssignmentIntern";
 import { AuthContext } from "@/contexts/AuthContext";
 import TaskEditModal from "./TaskEditModal";
 import TaskGroupMemberSelector from "./TaskGroupMemberSelector";
@@ -250,13 +250,13 @@ export default function LeaderTableTasks() {
                           <MoreHorizontal className="h-3.5 w-3.5" />
                         </button>
                         {taskMenuOpen === task.id && (
-                          <div ref={taskMenuRef} className="absolute right-0 top-full z-50 mt-1 w-32 rounded-xl border border-border bg-[#0f172a] p-1 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl">
+                          <div ref={taskMenuRef} className="absolute right-0 top-full z-50 mt-1 w-34 rounded-xl border border-border bg-[#0f172a] p-1 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl">
                             {(!task.assignment || !task.assignment.internId) && !checkIsOverdue(task.deadline) && (
                               <button
                                 onClick={() => { setTaskMenuOpen(null); setAiTask({ taskId: task.id, taskTitle: task.title, isAssigned: false }); }}
                                 className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-sky-400 hover:bg-sky-500/10 transition font-medium"
                               >
-                                <Sparkles className="h-3 w-3" />{t("aiAssign")}
+                                <Sparkles className="h-3 w-3 shrink-0" />{t("aiAssign")}
                               </button>
                             )}
                             <button
@@ -267,7 +267,9 @@ export default function LeaderTableTasks() {
                             </button>
                             <button
                               onClick={() => openTaskAction({ type: "edit", taskId: task.id, taskTitle: task.title })}
-                              className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground"
+                              disabled={task.assignment?.status === "DONE"}
+                              title={task.assignment?.status === "DONE" ? t("completedTaskReadOnly") : undefined}
+                              className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted"
                             >
                               <Pencil className="h-3 w-3" />{t("edit")}
                             </button>
@@ -592,7 +594,14 @@ function DeleteGroup({
           </div>
           <div className="space-y-2">
             <h3 className="text-base font-semibold text-foreground">{td("title")}</h3>
-            <p className="text-sm leading-6 text-muted" dangerouslySetInnerHTML={{ __html: td("confirm", { name: groupName }) }} />
+            <p className="text-sm leading-6 text-muted">
+              {td.rich("confirm", {
+                name: groupName,
+                strong: (chunks) => (
+                  <strong className="font-semibold text-foreground">{chunks}</strong>
+                ),
+              })}
+            </p>
             <p className="text-sm text-muted">{td("warning")}</p>
           </div>
         </div>
@@ -657,7 +666,7 @@ function InlineAssignCell({
   taskGroupDepartmentId,
 }: {
   taskId: string;
-  assignment: { id: string; internId: string; intern?: { id: string; fullName: string } } | null;
+  assignment: { id: string; internId: string; status: string; intern?: { id: string; fullName: string } } | null;
   deadline: string;
   taskGroupDepartmentId?: string | null;
 }) {
@@ -666,22 +675,23 @@ function InlineAssignCell({
   const auth = useContext(AuthContext);
   const currentUserId = auth?.state.user?.id;
   const [open, setOpen] = useState(false);
+  const [otherInternEmail, setOtherInternEmail] = useState("");
+  const [otherInternEmailError, setOtherInternEmailError] = useState("");
   const cellRef = useRef<HTMLDivElement>(null);
 
   const { data: myInternsData } = useInterns({ leaderId: currentUserId });
-  const { data: allInternsData } = useInterns();
   const myInterns = myInternsData?.data ?? [];
-  const otherInterns = (allInternsData?.data ?? []).filter((i) => i.leaderId !== currentUserId);
 
-  const createAssignment = useCreateTaskAssignment();
-  const updateAssignment = useUpdateTaskAssignment();
-  const deleteAssignment = useDeleteTaskAssignment();
+  const assignTask = useAssignTask();
+  const unassignTask = useUnassignTask();
+  const lookupAssignmentIntern = useLookupAssignmentIntern();
 
-  const isPending = createAssignment.isPending || updateAssignment.isPending || deleteAssignment.isPending;
+  const isPending = assignTask.isPending || unassignTask.isPending || lookupAssignmentIntern.isPending;
   const currentInternId = assignment?.internId ?? null;
 
   const isOverdue = checkIsOverdue(deadline);
-  const canClick = !isOverdue || !!assignment;
+  const isCompleted = assignment?.status === "DONE";
+  const canClick = !isCompleted && (!isOverdue || !!assignment);
 
   console.log("InlineAssignCell Debug:", { taskId, taskGroupDepartmentId, isOverdue });
 
@@ -689,10 +699,6 @@ function InlineAssignCell({
   const filteredMyInterns = taskGroupDepartmentId
     ? myInterns.filter((i) => i.department?.id === taskGroupDepartmentId)
     : myInterns;
-  const filteredOtherInterns = taskGroupDepartmentId
-    ? otherInterns.filter((i) => i.department?.id === taskGroupDepartmentId)
-    : otherInterns;
-
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (cellRef.current && !cellRef.current.contains(e.target as Node)) {
@@ -703,13 +709,12 @@ function InlineAssignCell({
     return () => document.removeEventListener("mousedown", handleClick);
   }, [open]);
 
-  async function handleAssign(internId: string) {
+  async function handleAssign(internId: string, internEmail?: string) {
     try {
-      if (assignment?.id) {
-        await updateAssignment.mutateAsync({ id: assignment.id, payload: { internId } });
-      } else {
-        await createAssignment.mutateAsync({ taskId, internId });
-      }
+      await assignTask.mutateAsync({
+        taskId,
+        payload: { internId, internEmail },
+      });
       queryClient.invalidateQueries({ queryKey: ["tasks"], exact: false });
       queryClient.invalidateQueries({ queryKey: ["stats"], exact: false });
     } catch {
@@ -718,10 +723,35 @@ function InlineAssignCell({
     setOpen(false);
   }
 
+  async function handleOtherInternLookup() {
+    const normalizedEmail = otherInternEmail.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      setOtherInternEmailError(
+        t.has("invalidInternEmail")
+          ? t("invalidInternEmail")
+          : "Enter a valid intern email.",
+      );
+      lookupAssignmentIntern.reset();
+      return;
+    }
+
+    setOtherInternEmailError("");
+    lookupAssignmentIntern.reset();
+    try {
+      await lookupAssignmentIntern.mutateAsync(normalizedEmail);
+    } catch {
+      setOtherInternEmailError(
+        t.has("otherTeamInternNotFound")
+          ? t("otherTeamInternNotFound")
+          : "No active intern from another team matches this email.",
+      );
+    }
+  }
+
   async function handleUnassign() {
     if (!assignment) return;
     try {
-      await deleteAssignment.mutateAsync(assignment.id);
+      await unassignTask.mutateAsync(taskId);
       queryClient.invalidateQueries({ queryKey: ["tasks"], exact: false });
       queryClient.invalidateQueries({ queryKey: ["stats"], exact: false });
     } catch {
@@ -731,13 +761,14 @@ function InlineAssignCell({
   }
 
   const assigneeName = assignment?.intern?.fullName;
-  const assigneeEmail = [...myInterns, ...otherInterns].find((i) => i.id === assignment?.internId)?.user?.email;
+  const assigneeEmail = myInterns.find((i) => i.id === assignment?.internId)?.user?.email;
 
   return (
     <div ref={cellRef} className="relative">
       <button
         onClick={() => setOpen(!open)}
         disabled={isPending || !canClick}
+        title={isCompleted ? t("completedTaskReadOnly") : undefined}
         className={`flex w-full items-center gap-1 rounded-lg px-2 py-1 text-sm transition hover:bg-white/5 disabled:opacity-50 ${
           assigneeName ? "text-foreground" : "text-muted"
         } ${!canClick ? "cursor-not-allowed" : ""}`}
@@ -761,7 +792,7 @@ function InlineAssignCell({
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-1 w-56 rounded-xl border border-border bg-[#1a1d2e] p-1 shadow-lg">
+        <div className="absolute left-0 top-full z-50 mt-1 w-80 rounded-xl border border-border bg-[#1a1d2e] p-1 shadow-lg">
           {/* My Team & Other Teams (Only show if not overdue) */}
           {!isOverdue && (
             <>
@@ -786,31 +817,72 @@ function InlineAssignCell({
                 </>
               )}
 
-              {filteredOtherInterns.length > 0 && (
-                <>
-                  <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted mt-0.5">
-                    {t("otherTeams")}
-                  </div>
-                  {filteredOtherInterns.map((intern) => (
-                    <button
-                      key={intern.id}
-                      onClick={() => handleAssign(intern.id)}
-                      disabled={isPending}
-                      className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-foreground hover:bg-white/5 transition disabled:opacity-50"
-                    >
-                      <span className="truncate flex-1 text-left">
-                        {intern.fullName}
-                        {intern.leader?.fullName && (
-                          <span className="ml-1 text-xs text-muted">({intern.leader.fullName})</span>
-                        )}
+              <div className="mt-0.5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted">
+                {t("otherTeams")}
+              </div>
+              <div className="space-y-2 px-2 pb-2">
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    value={otherInternEmail}
+                    onChange={(event) => {
+                      setOtherInternEmail(event.target.value);
+                      setOtherInternEmailError("");
+                      lookupAssignmentIntern.reset();
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        void handleOtherInternLookup();
+                      }
+                    }}
+                    placeholder={
+                      t.has("otherTeamEmailPlaceholder")
+                        ? t("otherTeamEmailPlaceholder")
+                        : "Exact intern email..."
+                    }
+                    disabled={isPending}
+                    className="min-w-0 flex-1 rounded-lg border border-border bg-card px-3 py-2 text-xs text-foreground placeholder:text-muted focus:border-primary-light/40 focus:outline-none disabled:opacity-50"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => void handleOtherInternLookup()}
+                    disabled={isPending}
+                    className="rounded-lg border border-border bg-white/5 px-3 py-2 text-xs text-foreground hover:bg-white/10 disabled:opacity-50"
+                  >
+                    {lookupAssignmentIntern.isPending ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : t.has("checkEmail") ? (
+                      t("checkEmail")
+                    ) : (
+                      "Check"
+                    )}
+                  </button>
+                </div>
+                {otherInternEmailError && <p className="text-xs text-red-400">{otherInternEmailError}</p>}
+                {lookupAssignmentIntern.data?.data && !otherInternEmailError && (
+                  <button
+                    type="button"
+                    onClick={() => handleAssign(lookupAssignmentIntern.data.data.id, lookupAssignmentIntern.data.data.email)}
+                    disabled={isPending}
+                    className="flex w-full items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-2 text-left hover:bg-emerald-500/10 disabled:opacity-50"
+                  >
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-medium text-emerald-300">{lookupAssignmentIntern.data.data.fullName}</span>
+                      <span className="block truncate text-[11px] text-slate-400">
+                        {t.has("internLeader")
+                          ? t("internLeader", {
+                              name:
+                                lookupAssignmentIntern.data.data.leader.fullName ||
+                                lookupAssignmentIntern.data.data.leader.email,
+                            })
+                          : `Leader: ${lookupAssignmentIntern.data.data.leader.fullName || lookupAssignmentIntern.data.data.leader.email}`}
                       </span>
-                      {currentInternId === intern.id && (
-                        <Check className="h-3.5 w-3.5 shrink-0 text-primary-light" />
-                      )}
-                    </button>
-                  ))}
-                </>
-              )}
+                    </span>
+                    <UserPlus className="h-3.5 w-3.5 shrink-0 text-emerald-300" />
+                  </button>
+                )}
+              </div>
             </>
           )}
 

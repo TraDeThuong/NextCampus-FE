@@ -29,6 +29,18 @@ export interface InternSuccessResponse {
     data: Intern;
 }
 
+export interface AssignmentInternLookup {
+    id: string;
+    fullName: string;
+    email: string;
+    leader: Pick<InternUser, "id" | "email" | "fullName">;
+}
+
+export interface AssignmentInternLookupResponse {
+    success: boolean;
+    data: AssignmentInternLookup;
+}
+
 export interface InternListResponse {
     success: boolean;
     data: Intern[];

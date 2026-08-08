@@ -68,6 +68,8 @@
       "overdueModalCurrent": "(current)",
       "overdueModalDeadlineLabel": "Deadline:",
       "overdueModalDeadlinePast": "Deadline cannot be in the past",
+      "overdueModalEstDaysLabel": "Est. days:",
+      "overdueModalEstDaysInvalid": "Estimated days must be between 0.1 and 365",
       "overdueModalRecreatedToast": "Task \"{title}\" recreated for {name}",
       "overdueModalRecreateError": "Failed to recreate task.",
       "overdueModalRecreatedFor": "Recreated → {code} for {name}",
