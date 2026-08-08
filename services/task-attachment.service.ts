@@ -87,7 +87,7 @@ export const taskAttachmentService = {
     return response.data;
   },
 
-  // POST /task-submissions/:submissionId/attachments
+  // POST /task-submissions/:submissionId/attachments (legacy - multipart qua server)
   uploadSubmissionAttachment: async (
     submissionId: string,
     file: File,
@@ -98,6 +98,35 @@ export const taskAttachmentService = {
       `/task-submissions/${submissionId}/attachments`,
       formData,
       { timeout: UPLOAD_REQUEST_TIMEOUT_MS },
+    );
+    return response.data;
+  },
+
+  // GET /task-submissions/:submissionId/attachments/upload-url
+  getSubmissionAttachmentPutUrl: async (
+    submissionId: string,
+    fileName: string,
+    mimeType: string,
+    fileSize: number,
+  ): Promise<{ success: true; data: { uploadUrl: string; filePath: string; publicUrl: string } }> => {
+    const response = await api.get(
+      `/task-submissions/${submissionId}/attachments/upload-url`,
+      { params: { fileName, mimeType, fileSize } },
+    );
+    return response.data;
+  },
+
+  // POST /task-submissions/:submissionId/attachments/confirm
+  confirmSubmissionAttachmentUpload: async (
+    submissionId: string,
+    filePath: string,
+    fileName: string,
+    mimeType: string,
+    fileSize: number,
+  ): Promise<SubmissionAttachmentSuccessResponse> => {
+    const response = await api.post<SubmissionAttachmentSuccessResponse>(
+      `/task-submissions/${submissionId}/attachments/confirm`,
+      { filePath, fileName, mimeType, fileSize },
     );
     return response.data;
   },

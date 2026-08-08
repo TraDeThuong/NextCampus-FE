@@ -9,12 +9,30 @@ export function useUploadSubmissionVideo() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, file }: { id: string; file: File }) =>
-      taskSubmissionService.uploadVideo(id, file),
+    mutationFn: async ({ id, file }: { id: string; file: File }) => {
+      // 1. Xin Presigned PUT URL từ server
+      const { data: presigned } = await taskSubmissionService.getVideoPutUrl(
+        id,
+        file.type,
+      );
+
+      // 2. Upload thẳng lên Cloudflare R2 (không qua server VPS)
+      await axios.put(presigned.uploadUrl, file, {
+        headers: { "Content-Type": file.type },
+        // Không dùng axios instance của app (tránh đính kèm Authorization header vào R2)
+        withCredentials: false,
+      });
+
+      // 3. Báo server lưu metadata vào database
+      return taskSubmissionService.confirmVideoUpload(id, presigned.filePath);
+    },
 
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["task-submissions"] });
-      queryClient.invalidateQueries({ queryKey: ["task-submission", variables.id] });
+      queryClient.invalidateQueries({
+        queryKey: ["task-submission", variables.id],
+      });
+      queryClient.invalidateQueries({ queryKey: ["task-submission-thread"] });
     },
 
     onError: (error) => {

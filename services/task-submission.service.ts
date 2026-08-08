@@ -65,7 +65,7 @@ export const taskSubmissionService = {
     return response.data;
   },
 
-  // POST /task-submissions/:id/video
+  // POST /task-submissions/:id/video (legacy - multipart qua server)
   uploadVideo: async (
     id: string,
     file: File,
@@ -76,6 +76,30 @@ export const taskSubmissionService = {
       `/task-submissions/${id}/video`,
       formData,
       { timeout: UPLOAD_REQUEST_TIMEOUT_MS },
+    );
+    return response.data;
+  },
+
+  // GET /task-submissions/:id/video/upload-url
+  getVideoPutUrl: async (
+    id: string,
+    mimeType: string,
+  ): Promise<{ success: true; data: { uploadUrl: string; filePath: string; publicUrl: string } }> => {
+    const response = await api.get(
+      `/task-submissions/${id}/video/upload-url`,
+      { params: { mimeType } },
+    );
+    return response.data;
+  },
+
+  // POST /task-submissions/:id/video/confirm
+  confirmVideoUpload: async (
+    id: string,
+    filePath: string,
+  ): Promise<TaskSubmissionSuccessResponse> => {
+    const response = await api.post<TaskSubmissionSuccessResponse>(
+      `/task-submissions/${id}/video/confirm`,
+      { filePath },
     );
     return response.data;
   },
