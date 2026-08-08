@@ -64,6 +64,7 @@ export interface TaskAssignment {
   supportId: string | null;
   assignedBy: string;
   status: AssignmentStatus;
+  blockedReason: string | null;
   assignedAt: string;
   updatedAt: string;
   task: AssignmentTask;
@@ -121,6 +122,7 @@ export type AssignTaskPayload = Omit<CreateTaskAssignmentPayload, "taskId">;
 
 export interface UpdateTaskAssignmentPayload {
   status?: AssignmentStatus;
+  blockedReason?: string;
   internId?: string;
   internEmail?: string;
 }

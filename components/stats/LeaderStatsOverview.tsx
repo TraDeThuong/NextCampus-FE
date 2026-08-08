@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useLeaderStats } from "@/hooks/stats/useLeaderStats";
+import { useTaskAssignments } from "@/hooks/task-assignment/useTaskAssignments";
+import { useAuth } from "@/hooks/auth/useAuth";
 import StatsCard from "./StatsCard";
 import Spinner from "../ui/Spinner";
 import MetalCard from "../ui/MetalCard";
@@ -11,23 +13,43 @@ import PendingApprovalCard from "./PendingApprovalCard";
 import PendingApprovalModal from "./PendingApprovalModal";
 import Table from "../ui/Table";
 import { AssignmentDetail } from "@/types/stats";
+import type { AssignmentStatus } from "@/types/task-assignment";
 import { Users, CheckCircle2, FileCheck, Award, ShieldAlert } from "lucide-react";
+
+const STATUS_MODAL_PAGE_SIZE = 10;
 
 export default function LeaderStatsOverview() {
   const t = useTranslations("leader.dashboard");
   const { data: response, isLoading, isError, refetch } = useLeaderStats();
+  const { state: { user } } = useAuth();
 
   const [modalConfig, setModalConfig] = useState<{
     isOpen: boolean;
     title: string;
     assignments: AssignmentDetail[];
+    status: AssignmentStatus | null;
+    page: number;
   }>({
     isOpen: false,
     title: "",
     assignments: [],
+    status: null,
+    page: 1,
   });
 
   const [pendingModalOpen, setPendingModalOpen] = useState(false);
+
+  const statusAssignmentsQuery = useTaskAssignments(
+    {
+      assignedBy: user?.id,
+      status: modalConfig.status ?? undefined,
+      page: modalConfig.page,
+      limit: STATUS_MODAL_PAGE_SIZE,
+      sortBy: "assignedAt",
+      order: "desc",
+    },
+    modalConfig.isOpen && Boolean(modalConfig.status && user?.id),
+  );
 
   if (isLoading) {
     return (
@@ -52,10 +74,32 @@ export default function LeaderStatsOverview() {
   }
 
   const stats = response.data;
-  const allAssignments = stats.recentAssignments ?? [];
   const rawOverdue = stats.overdueAssignments ?? [];
   const overdueAssignments = rawOverdue.filter((a) => a.isOverdue);
   const internProgress = stats.internProgress ?? [];
+
+  const statusAssignments: AssignmentDetail[] =
+    statusAssignmentsQuery.data?.data.map((assignment) => ({
+      id: assignment.id,
+      status: assignment.status,
+      taskTitle: assignment.task.title,
+      taskPriority: assignment.task.priority,
+      taskDeadline: assignment.task.deadline,
+      isOverdue:
+        assignment.status !== "DONE" &&
+        Boolean(
+          assignment.task.deadline &&
+          new Date(assignment.task.deadline) < new Date(),
+        ),
+      internName: assignment.intern.fullName ?? assignment.intern.user.fullName,
+      internEmail: assignment.intern.user.email,
+      leaderName: assignment.assigner.fullName,
+    })) ?? [];
+
+  const modalAssignments = modalConfig.status
+    ? statusAssignments
+    : modalConfig.assignments;
+  const statusMeta = statusAssignmentsQuery.data?.meta;
 
   const statusLabels: Record<string, string> = {
     PENDING_APPROVAL: t("statusPendingApproval"),
@@ -79,10 +123,6 @@ export default function LeaderStatsOverview() {
       border: "border-cyan-500/20", bg: "bg-cyan-500/10", hoverBg: "hover:bg-cyan-500/20",
       text: "text-cyan-400", textBold: "text-cyan-300",
     },
-    REVIEW: {
-      border: "border-amber-500/20", bg: "bg-amber-500/10", hoverBg: "hover:bg-amber-500/20",
-      text: "text-amber-400", textBold: "text-amber-300",
-    },
     DONE: {
       border: "border-emerald-500/20", bg: "bg-emerald-500/10", hoverBg: "hover:bg-emerald-500/20",
       text: "text-emerald-400", textBold: "text-emerald-300",
@@ -102,12 +142,17 @@ export default function LeaderStatsOverview() {
     BLOCKED: "blocked",
   };
 
-  const handleOpenStatusModal = (statusKey: string) => {
-    const filtered = allAssignments.filter((a) => a.status === statusKey);
+  const selectedStatusTotal = modalConfig.status
+    ? stats.assignments.byStatus[statusKeyToStatsKey[modalConfig.status]]
+    : modalAssignments.length;
+
+  const handleOpenStatusModal = (statusKey: AssignmentStatus) => {
     setModalConfig({
       isOpen: true,
       title: t("statusDetailTitle", { status: statusLabels[statusKey] ?? statusKey }),
-      assignments: filtered,
+      assignments: [],
+      status: statusKey,
+      page: 1,
     });
   };
 
@@ -116,6 +161,8 @@ export default function LeaderStatsOverview() {
       isOpen: true,
       title: t("overdueListTitle", { count: overdueAssignments.length }),
       assignments: overdueAssignments,
+      status: null,
+      page: 1,
     });
   };
 
@@ -123,9 +170,27 @@ export default function LeaderStatsOverview() {
     <div className="space-y-8 animate-fadeIn">
       <TaskAssignmentModal
         isOpen={modalConfig.isOpen}
-        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+        onClose={() =>
+          setModalConfig((current) => ({
+            ...current,
+            isOpen: false,
+            status: null,
+            page: 1,
+          }))
+        }
         title={modalConfig.title}
-        assignments={modalConfig.assignments}
+        assignments={modalAssignments}
+        isLoading={Boolean(modalConfig.status) && statusAssignmentsQuery.isLoading}
+        isError={Boolean(modalConfig.status) && statusAssignmentsQuery.isError}
+        onRetry={modalConfig.status ? () => statusAssignmentsQuery.refetch() : undefined}
+        page={modalConfig.page}
+        totalPages={modalConfig.status ? statusMeta?.totalPages ?? 1 : 1}
+        totalItems={modalConfig.status ? statusMeta?.total ?? selectedStatusTotal : selectedStatusTotal}
+        onPageChange={
+          modalConfig.status
+            ? (page) => setModalConfig((current) => ({ ...current, page }))
+            : undefined
+        }
       />
 
       <PendingApprovalModal
@@ -206,7 +271,7 @@ export default function LeaderStatsOverview() {
         </div>
 
         <div className="mt-6">
-          <Table columns="2.5fr 1.5fr 1.2fr 1.5fr">
+          <Table columns="1.8fr 1.8fr 1.2fr 1.5fr">
             <Table.Header>
               <span>{t("colIntern")}</span>
               <span>{t("colTaskProgress")}</span>
@@ -282,12 +347,12 @@ export default function LeaderStatsOverview() {
           <span className="text-xs text-muted">{t("taskStatusSubtitle")}</span>
         </div>
 
-        <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-center">
+        <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-center">
           {Object.entries(statusColors).map(([key, color]) => (
             <button
               key={key}
               type="button"
-              onClick={() => handleOpenStatusModal(key)}
+              onClick={() => handleOpenStatusModal(key as AssignmentStatus)}
               className={`p-3 rounded-xl border ${color.border} ${color.bg} ${color.hoverBg} transition-all cursor-pointer`}
             >
               <p className={`text-xs ${color.text} font-medium`}>

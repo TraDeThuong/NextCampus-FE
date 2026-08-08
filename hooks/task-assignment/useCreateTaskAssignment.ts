@@ -13,11 +13,12 @@ export function useCreateTaskAssignment() {
     mutationFn: (payload: CreateTaskAssignmentPayload) =>
       taskAssignmentService.createAssignment(payload),
 
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       toast.success("Assignment created successfully.");
       queryClient.invalidateQueries({ queryKey: ["task-assignments"], exact: false });
       queryClient.invalidateQueries({ queryKey: ["tasks"], exact: false });
       queryClient.invalidateQueries({ queryKey: ["stats"], exact: false });
+      queryClient.removeQueries({ queryKey: ["ai-recommendation", variables.taskId] });
     },
 
     onError: (error) => {

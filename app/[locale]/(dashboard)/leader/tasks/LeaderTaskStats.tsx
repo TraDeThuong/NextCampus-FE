@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { Calendar, CheckCircle, AlertTriangle, Clock, Timer, Layers, X, Eye } from "lucide-react";
+import { Calendar, CheckCircle, AlertTriangle, Clock, Timer, Layers, X, Eye, ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Button from "@/components/ui/Button";
@@ -16,8 +16,24 @@ import type { TaskStatusDistribution, TaskQueryParams } from "@/types/task";
 
 type TimePreset = "week" | "month" | "custom";
 type ModalType = "tasks" | "groups" | "done";
+type DateRange = { from: string; to: string; queryFrom: string; queryTo: string };
 
-function getWeekRange(): { from: string; to: string } {
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getCustomBoundary(value: string, endOfDay: boolean): string | undefined {
+  if (!value) return undefined;
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  date.setHours(endOfDay ? 23 : 0, endOfDay ? 59 : 0, endOfDay ? 59 : 0, endOfDay ? 999 : 0);
+  return date.toISOString();
+}
+
+function getWeekRange(): DateRange {
   const now = new Date();
   const day = now.getDay();
   const monday = new Date(now);
@@ -26,14 +42,24 @@ function getWeekRange(): { from: string; to: string } {
   const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
   sunday.setHours(23, 59, 59, 999);
-  return { from: monday.toISOString().split("T")[0], to: sunday.toISOString().split("T")[0] };
+  return {
+    from: formatLocalDate(monday),
+    to: formatLocalDate(sunday),
+    queryFrom: monday.toISOString(),
+    queryTo: sunday.toISOString(),
+  };
 }
 
-function getMonthRange(): { from: string; to: string } {
+function getMonthRange(): DateRange {
   const now = new Date();
   const first = new Date(now.getFullYear(), now.getMonth(), 1);
   const last = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-  return { from: first.toISOString().split("T")[0], to: last.toISOString().split("T")[0] };
+  return {
+    from: formatLocalDate(first),
+    to: formatLocalDate(last),
+    queryFrom: first.toISOString(),
+    queryTo: last.toISOString(),
+  };
 }
 
 function getStatusCount(byStatus: TaskStatusDistribution[], status: string): number {
@@ -55,16 +81,16 @@ export default function LeaderTaskStats() {
   const searchParams = useSearchParams();
 
   const dateFrom = useMemo(() => {
-    if (preset === "week") return getWeekRange().from;
-    if (preset === "custom" && customFrom) return customFrom;
-    if (preset === "month") return getMonthRange().from;
+    if (preset === "week") return getWeekRange().queryFrom;
+    if (preset === "custom") return getCustomBoundary(customFrom, false);
+    if (preset === "month") return getMonthRange().queryFrom;
     return undefined;
   }, [preset, customFrom]);
 
   const dateTo = useMemo(() => {
-    if (preset === "week") return getWeekRange().to;
-    if (preset === "custom" && customTo) return customTo;
-    if (preset === "month") return getMonthRange().to;
+    if (preset === "week") return getWeekRange().queryTo;
+    if (preset === "custom") return getCustomBoundary(customTo, true);
+    if (preset === "month") return getMonthRange().queryTo;
     return undefined;
   }, [preset, customTo]);
 
@@ -76,6 +102,7 @@ export default function LeaderTaskStats() {
 
   const { data: reviewTasksData, isLoading: reviewLoading } = useTasks({ status: "REVIEW", limit: 10 });
   const reviewTasks = reviewTasksData?.data ?? [];
+  const reviewTaskCount = reviewTasksData?.meta.total ?? 0;
 
   const overview = analytics?.overview;
   const doneCount = overview ? getStatusCount(overview.byStatus, "DONE") : 0;
@@ -83,9 +110,17 @@ export default function LeaderTaskStats() {
   const highPriorityCount = overview?.byPriority.find((p) => p.priority === "HIGH")?.count ?? 0;
   const completionRate = overview && overview.totalTasks > 0 ? Math.round((doneCount / overview.totalTasks) * 100) : 0;
 
-  const presetLabel = preset === "week" ? `${getWeekRange().from} – ${getWeekRange().to}` : preset === "month" ? `${getMonthRange().from} – ${getMonthRange().to}` : t("customRange");
+  const presetLabel = preset === "week" ? `${getWeekRange().from} – ${getWeekRange().to}` : preset === "month" ? `${getMonthRange().from} – ${getMonthRange().to}` : customFrom || customTo ? `${customFrom || "…"} – ${customTo || "…"}` : t("customRange");
 
-  const today = new Date().toISOString().split("T")[0];
+  const dateFilters = useMemo<TaskQueryParams>(() => ({
+    ...(dateFrom ? { deadlineFrom: dateFrom } : {}),
+    ...(dateTo ? { deadlineTo: dateTo } : {}),
+  }), [dateFrom, dateTo]);
+
+  const overdueDeadlineTo = useMemo(() => {
+    const now = new Date();
+    return dateTo && new Date(dateTo) < now ? dateTo : now.toISOString();
+  }, [dateTo]);
 
   const openReview = (assignmentId: string) => {
     const p = new URLSearchParams(searchParams.toString());
@@ -107,7 +142,7 @@ export default function LeaderTaskStats() {
               <input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} className="rounded-xl border border-border bg-card px-3 py-1.5 text-sm text-foreground focus:border-primary-light/40 focus:outline-none" />
             </div>
           )}
-          <span className="ml-2 text-xs text-muted">{presetLabel}</span>
+          <span className="ml-2 text-xs text-muted">{t("deadline")}: {presetLabel}</span>
         </div>
 
         {isLoading ? (
@@ -115,12 +150,12 @@ export default function LeaderTaskStats() {
         ) : overview ? (
           <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-[minmax(0,700px)_minmax(280px,1fr)]">
             <div className="grid grid-cols-2 gap-4">
-              <StatButton icon={<Timer className="h-5 w-5 text-blue-400" />} color="blue" value={overview.totalTasks} label={t("totalTasks")} onClick={() => setModal({ type: "tasks", title: t("totalTasks"), filters: {} })} />
+              <StatButton icon={<Timer className="h-5 w-5 text-blue-400" />} color="blue" value={overview.totalTasks} label={t("totalTasks")} onClick={() => setModal({ type: "tasks", title: t("totalTasks"), filters: dateFilters })} />
               <StatButton icon={<Layers className="h-5 w-5 text-purple-400" />} color="purple" value={totalGroups} label={t("totalGroups")} onClick={() => setModal({ type: "groups", title: t("totalGroups"), filters: {}, groups: taskGroupsData?.data ?? [] })} />
-              <StatButton icon={<CheckCircle className="h-5 w-5 text-emerald-400" />} color="emerald" value={doneCount} label={t("done")} sub={`${completionRate}%`} onClick={() => setModal({ type: "done", title: t("done"), filters: { status: "DONE" } })} />
-              <StatButton icon={<Clock className="h-5 w-5 text-amber-400" />} color="amber" value={inProgressCount} label={t("inProgress")} onClick={() => setModal({ type: "tasks", title: t("inProgress"), filters: { status: "IN_PROGRESS" } })} />
-              <StatButton icon={<AlertTriangle className="h-5 w-5 text-red-400" />} color="red" value={overview.overdueTasks} label={t("overdue")} onClick={() => setModal({ type: "tasks", title: t("overdue"), filters: { deadlineTo: today, statusNot: "DONE" } })} />
-              <StatButton icon={<AlertTriangle className="h-5 w-5 text-red-400" />} color="red" value={highPriorityCount} label={t("highPriority")} onClick={() => setModal({ type: "tasks", title: t("highPriority"), filters: { priority: "HIGH" } })} />
+              <StatButton icon={<CheckCircle className="h-5 w-5 text-emerald-400" />} color="emerald" value={doneCount} label={t("done")} sub={`${completionRate}%`} onClick={() => setModal({ type: "done", title: t("done"), filters: { ...dateFilters, status: "DONE" } })} />
+              <StatButton icon={<Clock className="h-5 w-5 text-amber-400" />} color="amber" value={inProgressCount} label={t("inProgress")} onClick={() => setModal({ type: "tasks", title: t("inProgress"), filters: { ...dateFilters, status: "IN_PROGRESS" } })} />
+              <StatButton icon={<AlertTriangle className="h-5 w-5 text-red-400" />} color="red" value={overview.overdueTasks} label={t("overdue")} onClick={() => setModal({ type: "tasks", title: t("overdue"), filters: { ...dateFilters, deadlineTo: overdueDeadlineTo, statusNot: "DONE" } })} />
+              <StatButton icon={<AlertTriangle className="h-5 w-5 text-red-400" />} color="red" value={highPriorityCount} label={t("highPriority")} onClick={() => setModal({ type: "tasks", title: t("highPriority"), filters: { ...dateFilters, priority: "HIGH" } })} />
             </div>
 
             <MetalCard className="relative overflow-hidden border-purple-500/30 shadow-[0_0_30px_rgba(168,85,247,0.12)]">
@@ -130,7 +165,7 @@ export default function LeaderTaskStats() {
                 <div className="mb-3 flex items-center gap-2">
                   <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-500/20"><Eye className="h-4 w-4 text-purple-300" /></div>
                   <h3 className="text-md font-bold tracking-wide uppercase bg-gradient-to-r from-purple-300 via-fuchsia-300 to-purple-200 bg-clip-text text-transparent">{t("awaitingReview")}</h3>
-                  {!reviewLoading && <span className="ml-auto rounded-full bg-purple-500/30 px-2.5 py-0.5 text-xs font-bold text-purple-200 border border-purple-400/30">{reviewTasks.length}</span>}
+                  {!reviewLoading && <span className="ml-auto rounded-full bg-purple-500/30 px-2.5 py-0.5 text-xs font-bold text-purple-200 border border-purple-400/30">{reviewTaskCount}</span>}
                 </div>
                 {reviewLoading ? (
                   <div className="flex justify-center py-6"><Spinner size="sm" /></div>
@@ -197,8 +232,10 @@ function StatButton({ icon, color, value, label, sub, onClick }: { icon: React.R
 
 function TaskTable({ filters }: { filters: TaskQueryParams }) {
   const t = useTranslations("leader.tasks");
-  const { data, isLoading } = useTasks({ ...filters, limit: 20 });
+  const [page, setPage] = useState(1);
+  const { data, isLoading } = useTasks({ ...filters, page, limit: 20 });
   const tasks = data?.data ?? [];
+  const meta = data?.meta;
   const router = useRouter();
 
   if (isLoading) return <div className="flex justify-center py-8"><Spinner size="sm" /></div>;
@@ -206,7 +243,7 @@ function TaskTable({ filters }: { filters: TaskQueryParams }) {
 
   return (
     <>
-      <p className="mb-3 text-xs text-muted">{t("tasksFound", { count: tasks.length, plural: tasks.length !== 1 ? "s" : "" })}</p>
+      <p className="mb-3 text-xs text-muted">{t("tasksFound", { count: meta?.total ?? tasks.length, plural: (meta?.total ?? tasks.length) !== 1 ? "s" : "" })}</p>
       <Table columns="80px 1fr 100px 70px 100px">
         <Table.Header><div>{t("colCode")}</div><div>{t("colTitle")}</div><div>{t("colOwner")}</div><div>{t("colPriority")}</div><div>{t("colDeadline")}</div></Table.Header>
         <Table.Body data={tasks} render={(task) => (
@@ -218,6 +255,11 @@ function TaskTable({ filters }: { filters: TaskQueryParams }) {
             <div className="text-sm text-muted">{new Date(task.deadline).toLocaleDateString("vi-VN")}</div>
           </Table.Row>
         )} />
+        {meta && meta.totalPages > 1 && (
+          <Table.Footer>
+            <TaskTablePagination meta={meta} onPageChange={setPage} />
+          </Table.Footer>
+        )}
       </Table>
     </>
   );
@@ -225,8 +267,10 @@ function TaskTable({ filters }: { filters: TaskQueryParams }) {
 
 function DoneTaskTable({ filters }: { filters: TaskQueryParams }) {
   const t = useTranslations("leader.tasks");
-  const { data, isLoading } = useTasks({ ...filters, limit: 20 });
+  const [page, setPage] = useState(1);
+  const { data, isLoading } = useTasks({ ...filters, page, limit: 20 });
   const tasks = data?.data ?? [];
+  const meta = data?.meta;
   const router = useRouter();
 
   if (isLoading) return <div className="flex justify-center py-8"><Spinner size="sm" /></div>;
@@ -234,7 +278,7 @@ function DoneTaskTable({ filters }: { filters: TaskQueryParams }) {
 
   return (
     <>
-      <p className="mb-3 text-xs text-muted">{t("doneTasksFound", { count: tasks.length, plural: tasks.length !== 1 ? "s" : "" })}</p>
+      <p className="mb-3 text-xs text-muted">{t("doneTasksFound", { count: meta?.total ?? tasks.length, plural: (meta?.total ?? tasks.length) !== 1 ? "s" : "" })}</p>
       <Table columns="80px 1fr 100px 100px 70px 100px">
         <Table.Header><div>{t("colCode")}</div><div>{t("colTitle")}</div><div>{t("colOwner")}</div><div>{t("colPhase")}</div><div>{t("colPriority")}</div><div>{t("colDeadline")}</div></Table.Header>
         <Table.Body data={tasks} render={(task) => (
@@ -247,25 +291,79 @@ function DoneTaskTable({ filters }: { filters: TaskQueryParams }) {
             <div className="text-sm text-muted">{new Date(task.deadline).toLocaleDateString("vi-VN")}</div>
           </Table.Row>
         )} />
+        {meta && meta.totalPages > 1 && (
+          <Table.Footer>
+            <TaskTablePagination meta={meta} onPageChange={setPage} />
+          </Table.Footer>
+        )}
       </Table>
     </>
   );
 }
 
+function TaskTablePagination({
+  meta,
+  onPageChange,
+}: {
+  meta: { total: number; page: number; totalPages: number };
+  onPageChange: (page: number) => void;
+}) {
+  const t = useTranslations("leader.tasks");
+
+  return (
+    <div className="flex w-full items-center justify-between gap-4 text-sm">
+      <p className="text-muted">
+        {t("pagination", { page: meta.page, totalPages: meta.totalPages, total: meta.total })}
+      </p>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          disabled={meta.page <= 1}
+          onClick={() => onPageChange(meta.page - 1)}
+          className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          disabled={meta.page >= meta.totalPages}
+          onClick={() => onPageChange(meta.page + 1)}
+          className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function GroupTable({ groups }: { groups: { id: string; name: string; description: string | null; _count?: { tasks: number } }[] }) {
   const t = useTranslations("leader.tasks");
+  const [page, setPage] = useState(1);
+  const limit = 20;
+  const totalPages = Math.ceil(groups.length / limit);
+  const visibleGroups = groups.slice((page - 1) * limit, page * limit);
+
   if (groups.length === 0) return <p className="py-8 text-center text-sm text-muted">{t("noGroupsFound")}</p>;
   return (
     <>
       <p className="mb-3 text-xs text-muted">{t("groupsCount", { count: groups.length, plural: groups.length !== 1 ? "s" : "" })}</p>
       <Table columns="1fr 80px">
         <Table.Header><div>{t("colName")}</div><div>{t("colTasks")}</div></Table.Header>
-        <Table.Body data={groups} render={(g) => (
+        <Table.Body data={visibleGroups} render={(g) => (
           <Table.Row key={g.id}>
             <div><p className="text-sm font-medium text-foreground">{g.name}</p>{g.description && <p className="text-xs text-muted">{g.description}</p>}</div>
             <div className="text-sm text-muted">{g._count?.tasks ?? 0}</div>
           </Table.Row>
         )} />
+        {totalPages > 1 && (
+          <Table.Footer>
+            <TaskTablePagination
+              meta={{ total: groups.length, page, totalPages }}
+              onPageChange={setPage}
+            />
+          </Table.Footer>
+        )}
       </Table>
     </>
   );

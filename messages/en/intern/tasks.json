@@ -26,9 +26,16 @@
 
       "submitWork": "Submit Work",
       "readyToStart": "Ready to start? Mark this task as In Progress.",
-      "blockedMsg": "Task is blocked. Unblock to continue working.",
+      "blockedMsg": "This task is blocked and waiting for the leader to reopen it.",
       "startWorking": "Start Working",
       "unblock": "Unblock",
+      "blockedReasonMissing": "No blocking reason was recorded.",
+      "blockTaskHint": "Cannot continue because of an external dependency or issue? Report the blocker to your leader.",
+      "blockTask": "Report Blocker",
+      "blockReason": "Blocking reason",
+      "blockReasonPlaceholder": "Describe what is preventing you from continuing and what you need...",
+      "cancelBlock": "Cancel",
+      "confirmBlock": "Block Task",
 
       "targetDeadline": "Target Deadline",
       "assignedAt": "Assigned At",
