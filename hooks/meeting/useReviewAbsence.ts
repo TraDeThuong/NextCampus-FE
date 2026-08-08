@@ -27,8 +27,9 @@ export function useReviewAbsence() {
       queryClient.invalidateQueries({ queryKey: ["absences"] }, { exact: false });
     },
 
-    onError: () => {
-      toast.error("Failed to review absence.");
+    onError: (error: any) => {
+      const errorMsg = error.response?.data?.message || "Failed to review absence.";
+      toast.error(errorMsg);
     },
   });
 }

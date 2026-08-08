@@ -15,7 +15,7 @@ import Spinner from "@/components/ui/Spinner";
 import LeaderRow from "./LeaderRow";
 
 const COLUMNS =
-    "minmax(220px,2.5fr) minmax(180px,1.5fr) minmax(180px,1.5fr) 80px 100px 40px";
+    "minmax(220px,2.5fr) minmax(180px,1.5fr) minmax(180px,1.5fr) minmax(120px,1fr) 150px 40px";
 
 export default function LeaderTable() {
     const t = useTranslations();

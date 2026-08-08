@@ -244,6 +244,7 @@ function ManagePositions({
     department: Department;
     onCloseModal?: () => void;
 }) {
+    const t = useTranslations();
     const { mutate: createPosition, isPending: creating } = useCreatePosition();
     const { mutate: updatePosition } = useUpdatePosition();
     const { mutate: deletePosition } = useDeletePosition();

@@ -43,7 +43,26 @@
       "selectDepartments": "Chọn tối đa {n} phòng ban",
       "noDepartments": "Không có phòng ban.",
       "maxDepartments": "Một leader chỉ quản lý tối đa {n} phòng ban.",
-      "multiDepartments": "{n} phòng ban"
+      "multiDepartments": "{n} phòng ban",
+      "details": {
+        "metaTitle": "Chi tiết Leader",
+        "back": "Quay lại danh sách Leader",
+        "contactInfo": "Thông tin liên hệ",
+        "email": "Email",
+        "phone": "Số điện thoại",
+        "position": "Vị trí",
+        "departments": "Phòng ban",
+        "internsManaged": "Thực tập sinh quản lý",
+        "managedInternsTitle": "Thực tập sinh đang quản lý ({count})",
+        "noInterns": "Chưa có thực tập sinh nào được gán cho leader này.",
+        "colName": "Tên",
+        "colEmail": "Email",
+        "colDept": "Phòng ban",
+        "colPosition": "Vị trí",
+        "colLeader": "Leader",
+        "colStatus": "Trạng thái",
+        "unassigned": "Chưa gán"
+      }
     }
   }
 }

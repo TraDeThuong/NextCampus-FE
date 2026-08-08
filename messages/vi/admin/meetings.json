@@ -2,6 +2,7 @@
   "admin": {
     "meetings": {
       "metaTitle": "Cuộc họp",
+      "busy": "Trùng lịch",
       "title": "Cuộc họp",
       "description": "Quản lý tất cả cuộc họp trong tổ chức.",
       "scheduleMeeting": "Lên lịch họp",

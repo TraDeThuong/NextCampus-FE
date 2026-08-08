@@ -18,8 +18,9 @@ export function useRsvpMeeting() {
       queryClient.invalidateQueries({ queryKey: ["meeting", variables.id] });
     },
 
-    onError: () => {
-      toast.error("Failed to send response.");
+    onError: (error: any) => {
+      const errorMsg = error.response?.data?.message || "Failed to send response.";
+      toast.error(errorMsg);
     },
   });
 }

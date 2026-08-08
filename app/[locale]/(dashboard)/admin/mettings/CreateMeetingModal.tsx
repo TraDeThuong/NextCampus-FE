@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -12,6 +12,7 @@ import Button from "@/components/ui/Button";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { useCreateMeeting } from "@/hooks/meeting/useCreateMeeting";
 import { getUsersService } from "@/services/user.service";
+import { meetingService } from "@/services/meeting.service";
 import type { CreateMeetingPayload, MeetingType, MeetingVisibility } from "@/types/meeting";
 
 interface Props {
@@ -116,6 +117,20 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
 
   const watchMeetingType = watch("meetingType");
   const watchVisibility = watch("visibility");
+  const watchStartTime = watch("startTime");
+  const watchEndTime = watch("endTime");
+
+  const allUserIds = useMemo(() => {
+    return leaders.map((l) => l.id).filter(Boolean);
+  }, [leaders]);
+
+  const { data: busyUsersRes } = useQuery({
+    queryKey: ["meetings", "busy-users", watchStartTime, watchEndTime, allUserIds.join(",")],
+    queryFn: () => meetingService.getBusyUsers(watchStartTime, watchEndTime, allUserIds.join(",")),
+    enabled: !!watchStartTime && !!watchEndTime && new Date(watchStartTime) < new Date(watchEndTime) && allUserIds.length > 0,
+    staleTime: 1000 * 30,
+  });
+  const busyUserIds = useMemo(() => new Set(busyUsersRes?.data ?? []), [busyUsersRes]);
 
   function toggleLeader(id: string) {
     setSelectedLeaderIds((prev) =>
@@ -318,33 +333,41 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
               <p className="mt-1 text-xs text-slate-600">{t("admin.meetings.noLeadersAvailable")}</p>
             ) : (
               <div className="mt-1.5 max-h-[180px] space-y-0.5 overflow-y-auto rounded-xl border border-white/10 bg-white/[0.02] p-2">
-                {leaders.map((leader) => (
-                  <label
-                    key={leader.id}
-                    className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition ${
-                      selectedLeaderIds.includes(leader.id)
-                        ? "bg-primary-main/10"
-                        : "hover:bg-white/5"
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedLeaderIds.includes(leader.id)}
-                      onChange={() => toggleLeader(leader.id)}
-                      className="accent-primary-main"
-                    />
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-700 text-[10px] text-slate-300">
-                        {(leader.fullName || leader.email)
-                          .charAt(0)
-                          .toUpperCase()}
+                {leaders.map((leader) => {
+                  const isBusy = busyUserIds.has(leader.id);
+                  return (
+                    <label
+                      key={leader.id}
+                      className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition ${
+                        selectedLeaderIds.includes(leader.id)
+                          ? "bg-primary-main/10"
+                          : "hover:bg-white/5"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedLeaderIds.includes(leader.id)}
+                        onChange={() => toggleLeader(leader.id)}
+                        className="accent-primary-main"
+                      />
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-700 text-[10px] text-slate-300">
+                          {(leader.fullName || leader.email)
+                            .charAt(0)
+                            .toUpperCase()}
+                        </div>
+                        <span className="text-sm text-slate-300">
+                          {leader.fullName || leader.email}
+                        </span>
                       </div>
-                      <span className="text-sm text-slate-300">
-                        {leader.fullName || leader.email}
-                      </span>
-                    </div>
-                  </label>
-                ))}
+                      {isBusy && (
+                        <span className="ml-auto rounded bg-red-500/10 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
+                          {t("admin.meetings.busy")}
+                        </span>
+                      )}
+                    </label>
+                  );
+                })}
               </div>
             )}
             {selectedLeaderIds.length > 0 && (

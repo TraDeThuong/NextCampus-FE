@@ -14,6 +14,12 @@ import {
   UserPlus,
   Key,
   ShieldAlert,
+  Calendar,
+  CalendarPlus,
+  CalendarX,
+  FileX,
+  ClipboardCheck,
+  XCircle,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { NotificationTemplate } from "@/types/notificationTemplate";
@@ -228,6 +234,96 @@ export const TEMPLATE_CATALOG = [
         'Chào {{fullName}},<br/><br/>Hệ thống NexCampus ghi nhận một lượt đăng nhập mới vào tài khoản của bạn với chi tiết bảo mật bên dưới:<br/><br/><table style="width:100%;border-collapse:collapse;margin:16px 0;background-color:#0f172a;color:#f8fafc;border-radius:8px;overflow:hidden;"><tr style="border-bottom:1px solid #1e293b;"><td style="padding:10px 16px;color:#94a3b8;width:140px;">Thời gian:</td><td style="padding:10px 16px;font-weight:bold;">{{time}}</td></tr><tr style="border-bottom:1px solid #1e293b;"><td style="padding:10px 16px;color:#94a3b8;">Địa chỉ IP:</td><td style="padding:10px 16px;font-weight:bold;">{{ip}}</td></tr><tr style="border-bottom:1px solid #1e293b;"><td style="padding:10px 16px;color:#94a3b8;">Vị trí (ước tính):</td><td style="padding:10px 16px;font-weight:bold;">{{location}}</td></tr><tr style="border-bottom:1px solid #1e293b;"><td style="padding:10px 16px;color:#94a3b8;">Thiết bị:</td><td style="padding:10px 16px;font-weight:bold;">{{device}}</td></tr><tr style="border-bottom:1px solid #1e293b;"><td style="padding:10px 16px;color:#94a3b8;">Hệ điều hành:</td><td style="padding:10px 16px;font-weight:bold;">{{os}}</td></tr><tr><td style="padding:10px 16px;color:#94a3b8;">Trình duyệt:</td><td style="padding:10px 16px;font-weight:bold;">{{browser}}</td></tr></table>Nếu chính bạn thực hiện đăng nhập này, bạn có thể bỏ qua email này.<br/><br/>Nếu <strong style="color:#ef4444;">ĐÂY KHÔNG PHẢI LÀ BẠN</strong>, tài khoản của bạn có nguy cơ bị xâm nhập. Vui lòng nhấn vào nút bên dưới để vô hiệu hóa phiên đăng nhập này ngay lập tức:<br/><p style="margin: 20px 0;"><a href="{{revokeUrl}}" style="display:inline-block;background-color:#dc2626;color:#ffffff;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;box-shadow:0 4px 12px rgba(220,38,38,0.3);">⚠️ ĐÂY KHÔNG PHẢI TÔI (Khóa phiên ngay)</a></p>Trân trọng,<br/>Đội ngũ NexCampus.',
     },
   },
+  {
+    type: "MEETING_INVITATION",
+    label: "Meeting Invitation",
+    description: "Sent to invitees when they are invited to a meeting",
+    icon: Calendar,
+    color: "blue",
+    variables: ["meetingTitle", "startTime", "creatorName"],
+    channels: ["web", "email"],
+    defaults: {
+      titleTemplate: "Meeting Invitation: {{meetingTitle}}",
+      contentTemplate: "{{creatorName}} invited you to a meeting at {{startTime}}.",
+      emailSubjectTemplate: null,
+      emailContentTemplate: null,
+    },
+  },
+  {
+    type: "MEETING_CREATED",
+    label: "Meeting Created",
+    description: "Sent to attendees when a new meeting is scheduled",
+    icon: CalendarPlus,
+    color: "cyan",
+    variables: ["meetingTitle", "startTime", "creatorName"],
+    channels: ["web", "email"],
+    defaults: {
+      titleTemplate: "New Meeting: {{meetingTitle}}",
+      contentTemplate: "{{creatorName}} scheduled a meeting at {{startTime}}.",
+      emailSubjectTemplate: null,
+      emailContentTemplate: null,
+    },
+  },
+  {
+    type: "MEETING_CANCELLED",
+    label: "Meeting Cancelled",
+    description: "Sent to attendees when a meeting is cancelled",
+    icon: CalendarX,
+    color: "rose",
+    variables: ["meetingTitle", "startTime"],
+    channels: ["web", "email"],
+    defaults: {
+      titleTemplate: "Meeting Cancelled: {{meetingTitle}}",
+      contentTemplate: "The meeting {{meetingTitle}} at {{startTime}} has been cancelled.",
+      emailSubjectTemplate: null,
+      emailContentTemplate: null,
+    },
+  },
+  {
+    type: "ABSENCE_SUBMITTED",
+    label: "Absence Submitted",
+    description: "Sent to leader/admin when an intern requests absence from a meeting",
+    icon: FileX,
+    color: "orange",
+    variables: ["meetingTitle", "userName", "reason"],
+    channels: ["web", "email"],
+    defaults: {
+      titleTemplate: "Leave Request: {{meetingTitle}}",
+      contentTemplate: "{{userName}} submitted a leave request. Reason: {{reason}}",
+      emailSubjectTemplate: null,
+      emailContentTemplate: null,
+    },
+  },
+  {
+    type: "ABSENCE_REVIEWED",
+    label: "Absence Reviewed",
+    description: "Sent to intern when their absence request is reviewed",
+    icon: ClipboardCheck,
+    color: "emerald",
+    variables: ["meetingTitle", "status"],
+    channels: ["web", "email"],
+    defaults: {
+      titleTemplate: "Leave Request {{status}}: {{meetingTitle}}",
+      contentTemplate: "Your leave request for {{meetingTitle}} has been {{status}}.",
+      emailSubjectTemplate: null,
+      emailContentTemplate: null,
+    },
+  },
+  {
+    type: "TASK_ASSIGNMENT_REJECTED",
+    label: "Task Assignment Rejected",
+    description: "Sent to assigner when a task assignment is rejected by a leader",
+    icon: XCircle,
+    color: "rose",
+    variables: ["taskTitle", "internName"],
+    channels: ["web", "email"],
+    defaults: {
+      titleTemplate: "Yêu cầu giao việc bị từ chối",
+      contentTemplate: 'Yêu cầu giao việc "{{taskTitle}}" cho {{internName}} đã bị từ chối bởi leader quản lý.',
+      emailSubjectTemplate: null,
+      emailContentTemplate: null,
+    },
+  },
 ] as const;
 
 export type TemplateCatalogItem = (typeof TEMPLATE_CATALOG)[number];
@@ -306,17 +402,19 @@ export default function TemplateSidebar({
         bg-[linear-gradient(145deg,#101827_0%,#1a2235_20%,#0f172a_55%,#050816_100%)]
         shadow-[0_12px_40px_rgba(0,0,0,.45)]
         overflow-hidden
+        h-full
+        flex flex-col
       "
     >
       {/* Header */}
-      <div className="border-b border-white/10 px-4 py-3.5">
+      <div className="border-b border-white/10 px-4 py-3.5 shrink-0">
         <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
           {t("admin.emails.templates")}
         </p>
       </div>
 
       {/* List */}
-      <ul className="p-2 space-y-1">
+      <ul className="p-2 space-y-1 overflow-y-auto no-scrollbar flex-1">
         {TEMPLATE_CATALOG.map((item) => {
           const colors = COLOR_MAP[item.color];
           const isSelected = selectedType === item.type;
@@ -375,7 +473,7 @@ export default function TemplateSidebar({
       </ul>
 
       {/* Footer legend */}
-      <div className="border-t border-white/5 px-4 py-3 flex items-center gap-2">
+      <div className="border-t border-white/5 px-4 py-3 flex items-center gap-2 shrink-0">
         <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
         <p className="text-xs text-slate-600">{t("admin.emails.dotSaved")}</p>
       </div>

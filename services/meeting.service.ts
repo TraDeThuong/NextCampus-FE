@@ -116,4 +116,16 @@ export const meetingService = {
     );
     return response.data;
   },
+
+  getBusyUsers: async (
+    startTime: string,
+    endTime: string,
+    userIds?: string,
+  ): Promise<{ success: boolean; data: string[] }> => {
+    const response = await api.get<{ success: boolean; data: string[] }>(
+      "/meetings/busy-users",
+      { params: { startTime, endTime, userIds } },
+    );
+    return response.data;
+  },
 };

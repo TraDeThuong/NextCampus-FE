@@ -16,7 +16,7 @@ import Spinner from "@/components/ui/Spinner";
 import AdminTeamRow from "./AdminTeamRow";
 
 const COLUMNS =
-    "1fr 1fr 1fr 1fr 40px";
+    "minmax(240px, 2.5fr) minmax(100px, 1fr) minmax(140px, 1.2fr) minmax(140px, 1.2fr) 40px";
 
 export default function AdminTeamTable() {
     const t = useTranslations();
