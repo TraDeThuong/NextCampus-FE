@@ -24,6 +24,7 @@ const statusBadge: Record<string, string> = {
   TODO: "border-slate-700 bg-slate-800/60 text-slate-400",
   BLOCKED: "border-rose-500/30 bg-rose-500/10 text-rose-400",
   PENDING_APPROVAL: "border-amber-500/20 bg-amber-500/10 text-amber-400",
+  UNASSIGNED: "border-orange-500/20 bg-orange-500/10 text-orange-400",
 };
 
 function getFileIcon(mime: string) {
@@ -81,7 +82,9 @@ export default function TaskDetailPage() {
         <div className="flex flex-wrap items-center gap-2.5 mb-3">
           <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700/60">{task.code || "—"}</span>
           {task.priority && <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md ${priorityBadge[task.priority] ?? ""}`}>{task.priority}</span>}
-          {task.assignment?.status && <span className={`inline-flex rounded-md px-2 py-0.5 text-xs font-semibold border ${statusBadge[task.assignment.status] ?? ""}`}>{task.assignment.status.replace("_", " ")}</span>}
+          <span className={`inline-flex rounded-md px-2 py-0.5 text-xs font-semibold border ${statusBadge[task.assignment?.status ?? "TODO"] ?? ""}`}>
+            {(task.assignment?.status ?? "TODO").replace("_", " ")}
+          </span>
           {(!task.assignment || !task.assignment.internId) && (
             <button onClick={() => setShowAi(true)} className="ml-auto flex items-center gap-1.5 rounded-xl border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 text-xs font-semibold text-sky-400 hover:bg-sky-500/20 hover:border-sky-500/50 transition-all">
               <Sparkles className="h-3.5 w-3.5" />{td("aiAssign")}

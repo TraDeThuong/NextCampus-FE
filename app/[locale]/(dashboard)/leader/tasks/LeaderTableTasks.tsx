@@ -240,7 +240,7 @@ export default function LeaderTableTasks() {
                       <InlineAssignCell taskId={task.id} assignment={task.assignment} deadline={task.deadline} taskGroupDepartmentId={task.taskGroup?.departmentId} />
                       <div className="truncate text-sm text-muted">{task.assignment?.support?.fullName ?? "—"}</div>
                       <div><PriorityBadge priority={task.priority} /></div>
-                      <div><StatusBadge status={task.assignment?.status ?? "UNASSIGNED"} assignmentId={task.assignment?.id} taskId={task.id} onReviewClick={handleOpenReview} /></div>
+                      <div><StatusBadge status={task.assignment?.status ?? "TODO"} assignmentId={task.assignment?.id} taskId={task.id} onReviewClick={handleOpenReview} /></div>
                       <div className="text-sm text-muted">{new Date(task.deadline).toLocaleDateString("vi-VN")}</div>
                       <div className="relative text-center">
                         <button
@@ -427,7 +427,7 @@ function ViewGroup({
                 <span className="font-mono text-xs text-muted">{t.code ?? "—"}</span>
                 <span className="flex-1 truncate text-foreground">{t.title}</span>
                 <PriorityBadge priority={t.priority} />
-                <StatusBadge status={t.assignment?.status ?? "UNASSIGNED"} assignmentId={t.assignment?.id} taskId={t.id} onReviewClick={onReviewClick} />
+                 <StatusBadge status={t.assignment?.status ?? "TODO"} assignmentId={t.assignment?.id} taskId={t.id} onReviewClick={onReviewClick} />
               </div>
             ))}
           </div>
