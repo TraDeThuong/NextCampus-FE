@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { useAiRecommendation } from "@/hooks/task/useAiRecommendation";
-import { useCreateTaskAssignment } from "@/hooks/task-assignment/useCreateTaskAssignment";
+import { useAssignTask } from "@/hooks/task-assignment/useAssignTask";
 import type { AiRecommendation, CandidateSummary } from "@/types/task-allocation";
 import { useState, useEffect } from "react";
 
@@ -186,13 +186,25 @@ export default function TaskAiRecommendationModal({
   onClose,
 }: Props) {
   const { data, isLoading, isError, error, refetch } = useAiRecommendation(taskId);
-  const assignMutation = useCreateTaskAssignment();
+  const assignMutation = useAssignTask();
   const [activeTab, setActiveTab] = useState<"summary" | "candidates">("summary");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleAssign = (internId: string) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     assignMutation.mutate(
-      { taskId, internId },
-      { onSuccess: onClose },
+      {
+        taskId,
+        payload: {
+          internId,
+          supportId: data?.support?.id || null,
+        },
+      },
+      {
+        onSuccess: onClose,
+        onError: () => setIsSubmitting(false),
+      },
     );
   };
 
@@ -356,7 +368,7 @@ export default function TaskAiRecommendationModal({
                           candidate={{ ...ownerCandidate, suggestedRole: "OWNER" }}
                           role="OWNER"
                           onAssign={!isAssigned ? () => handleAssign(ownerCandidate.id) : undefined}
-                          assigning={assignMutation.isPending}
+                          assigning={assignMutation.isPending || isSubmitting}
                         />
                       );
                     })()}
@@ -495,7 +507,7 @@ export default function TaskAiRecommendationModal({
                             variant="primary"
                             size="sm"
                             onClick={() => handleAssign(c.id)}
-                            isLoading={assignMutation.isPending}
+                            isLoading={assignMutation.isPending || isSubmitting}
                             className="shrink-0"
                           >
                             Giao

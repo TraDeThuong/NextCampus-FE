@@ -116,6 +116,7 @@ export interface CreateTaskAssignmentPayload {
   taskId: string;
   internId: string;
   internEmail?: string;
+  supportId?: string | null;
 }
 
 export type AssignTaskPayload = Omit<CreateTaskAssignmentPayload, "taskId">;
@@ -125,4 +126,5 @@ export interface UpdateTaskAssignmentPayload {
   blockedReason?: string;
   internId?: string;
   internEmail?: string;
+  supportId?: string | null;
 }
