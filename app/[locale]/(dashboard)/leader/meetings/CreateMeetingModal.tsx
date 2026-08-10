@@ -71,10 +71,26 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
     return Array.from(ids);
   }, [interns, leaders]);
 
+  const queryStartTime = useMemo(() => {
+    try {
+      return watchStartTime ? new Date(watchStartTime).toISOString() : "";
+    } catch {
+      return "";
+    }
+  }, [watchStartTime]);
+
+  const queryEndTime = useMemo(() => {
+    try {
+      return watchEndTime ? new Date(watchEndTime).toISOString() : "";
+    } catch {
+      return "";
+    }
+  }, [watchEndTime]);
+
   const { data: busyUsersRes } = useQuery({
-    queryKey: ["meetings", "busy-users", watchStartTime, watchEndTime, allUserIds.join(",")],
-    queryFn: () => meetingService.getBusyUsers(watchStartTime, watchEndTime, allUserIds.join(",")),
-    enabled: !!watchStartTime && !!watchEndTime && new Date(watchStartTime) < new Date(watchEndTime) && allUserIds.length > 0,
+    queryKey: ["meetings", "busy-users", queryStartTime, queryEndTime, allUserIds.join(",")],
+    queryFn: () => meetingService.getBusyUsers(queryStartTime, queryEndTime, allUserIds.join(",")),
+    enabled: !!queryStartTime && !!queryEndTime && new Date(queryStartTime) < new Date(queryEndTime) && allUserIds.length > 0,
     staleTime: 1000 * 30,
   });
   const busyUserIds = useMemo(() => new Set(busyUsersRes?.data ?? []), [busyUsersRes]);
@@ -84,7 +100,7 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
   function onSubmit(data: FormValues) {
     if (!currentUser) return;
     if (selectedParticipantIds.length === 0) { toast.error(t("selectOneParticipant")); return; }
-    const payload: CreateMeetingPayload = { title: data.title, description: data.description || undefined, hostId: currentUser.id, meetingType: data.meetingType, location: data.location || undefined, meetingLink: data.meetingLink || undefined, startTime: data.startTime, endTime: data.endTime, visibility: "PRIVATE", status: data.status, participantIds: selectedParticipantIds };
+    const payload: CreateMeetingPayload = { title: data.title, description: data.description || undefined, hostId: currentUser.id, meetingType: data.meetingType, location: data.location || undefined, meetingLink: data.meetingLink || undefined, startTime: new Date(data.startTime).toISOString(), endTime: new Date(data.endTime).toISOString(), visibility: "PRIVATE", status: data.status, participantIds: selectedParticipantIds };
     createMeeting.mutate(payload, { onSuccess: () => onCloseModal?.() });
   }
 

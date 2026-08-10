@@ -124,10 +124,26 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
     return leaders.map((l) => l.id).filter(Boolean);
   }, [leaders]);
 
+  const queryStartTime = useMemo(() => {
+    try {
+      return watchStartTime ? new Date(watchStartTime).toISOString() : "";
+    } catch {
+      return "";
+    }
+  }, [watchStartTime]);
+
+  const queryEndTime = useMemo(() => {
+    try {
+      return watchEndTime ? new Date(watchEndTime).toISOString() : "";
+    } catch {
+      return "";
+    }
+  }, [watchEndTime]);
+
   const { data: busyUsersRes } = useQuery({
-    queryKey: ["meetings", "busy-users", watchStartTime, watchEndTime, allUserIds.join(",")],
-    queryFn: () => meetingService.getBusyUsers(watchStartTime, watchEndTime, allUserIds.join(",")),
-    enabled: !!watchStartTime && !!watchEndTime && new Date(watchStartTime) < new Date(watchEndTime) && allUserIds.length > 0,
+    queryKey: ["meetings", "busy-users", queryStartTime, queryEndTime, allUserIds.join(",")],
+    queryFn: () => meetingService.getBusyUsers(queryStartTime, queryEndTime, allUserIds.join(",")),
+    enabled: !!queryStartTime && !!queryEndTime && new Date(queryStartTime) < new Date(queryEndTime) && allUserIds.length > 0,
     staleTime: 1000 * 30,
   });
   const busyUserIds = useMemo(() => new Set(busyUsersRes?.data ?? []), [busyUsersRes]);
@@ -156,8 +172,8 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
       meetingType: data.meetingType,
       location: data.location || undefined,
       meetingLink: data.meetingLink || undefined,
-      startTime: data.startTime,
-      endTime: data.endTime,
+      startTime: new Date(data.startTime).toISOString(),
+      endTime: new Date(data.endTime).toISOString(),
       visibility: data.visibility,
       status: data.status,
       participantIds:
