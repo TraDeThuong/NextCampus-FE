@@ -55,6 +55,8 @@
       "phoneRequired": "Vui lòng nhập số điện thoại",
       "invalidPhone": "Số điện thoại Việt Nam không hợp lệ",
       "departmentRequired": "Vui lòng chọn phòng ban",
+      "leaderRequired": "Vui lòng chọn leader",
+      "selectLeaderFirst": "Vui lòng chọn Leader trước",
       "positionRequired": "Vui lòng chọn vị trí",
       "startDateRequired": "Vui lòng chọn ngày bắt đầu",
       "durationMin": "Thời gian ít nhất 1 tháng",

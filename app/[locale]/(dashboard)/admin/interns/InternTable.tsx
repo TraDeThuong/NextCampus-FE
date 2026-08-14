@@ -15,7 +15,7 @@ import Spinner from "@/components/ui/Spinner";
 import InternRow from "./InternRow";
 
 const COLUMNS =
-    "minmax(200px,2fr) minmax(100px,1fr) minmax(110px,1fr) minmax(220px,2fr) 100px 150px 20px";
+    "minmax(160px,1.2fr) minmax(220px,2fr) minmax(100px,1fr) minmax(110px,1fr) 100px 150px 20px";
 
 export default function InternTable() {
     const t = useTranslations();
@@ -98,9 +98,9 @@ export default function InternTable() {
             >
                 <Table.Header>
                     <div>{t("admin.interns.colIntern")}</div>
+                    <div>{t("admin.interns.colLeader")}</div>
                     <div>{t("admin.interns.colDepartment")}</div>
                     <div>{t("admin.interns.colPosition")}</div>
-                    <div>{t("admin.interns.colLeader")}</div>
                     <div>{t("admin.interns.colDuration")}</div>
                     <div>{t("admin.interns.colStatus")}</div>
                     <div />

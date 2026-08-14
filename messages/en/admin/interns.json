@@ -55,6 +55,8 @@
       "phoneRequired": "Phone is required",
       "invalidPhone": "Invalid VN phone number",
       "departmentRequired": "Department is required",
+      "leaderRequired": "Leader is required",
+      "selectLeaderFirst": "Please select Leader first",
       "positionRequired": "Position is required",
       "startDateRequired": "Start date is required",
       "durationMin": "Duration must be at least 1 month",

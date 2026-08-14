@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { MoreVertical, Eye, Trash2, Circle, Loader2 } from "lucide-react";
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
+import { toast } from "react-hot-toast";
 
 import type { Intern } from "@/types/intern";
 import { useDeleteIntern } from "@/hooks/intern/useDeleteIntern";
@@ -29,6 +30,14 @@ export default function InternRow({ intern }: InternRowProps) {
         "department" | "position" | "leader" | "status" | null
     >(null);
     const leaders = useMemo(() => leadersData?.data ?? [], [leadersData?.data]);
+
+    const selectedLeader = useMemo(() => {
+        return intern.leaderId ? leaders.find((l) => l.userId === intern.leaderId) : null;
+    }, [intern.leaderId, leaders]);
+
+    const allowedDepartments = useMemo(() => {
+        return selectedLeader ? selectedLeader.departments : [];
+    }, [selectedLeader]);
 
     const { data: deptsData } = useDepartments();
     const departments = deptsData?.data ?? [];
@@ -156,6 +165,24 @@ export default function InternRow({ intern }: InternRowProps) {
                     </div>
                 </div>
 
+                {/* Leader */}
+                <div className="text-sm text-slate-400">
+                    <InlineSelect
+                        ariaLabel="Leader"
+                        value={intern.leaderId}
+                        placeholder={t("admin.interns.notSet")}
+                        loading={updatingField === "leader"}
+                        onChange={handleLeaderChange}
+                        options={[
+                            { value: null, label: t("admin.interns.notSet") },
+                            ...leaders.map((l) => ({
+                                value: l.userId,
+                                label: l.user.fullName ? `${l.user.fullName} (${l.user.email})` : l.user.email,
+                            })),
+                        ]}
+                    />
+                </div>
+
                 {/* Department */}
                 <div className="text-sm text-slate-400">
                     <InlineSelect
@@ -163,10 +190,12 @@ export default function InternRow({ intern }: InternRowProps) {
                         value={intern.department?.id ?? null}
                         placeholder={t("admin.interns.notSet")}
                         loading={updatingField === "department"}
+                        disabled={!intern.leaderId}
+                        onDisabledClick={() => toast.error(t("admin.interns.selectLeaderFirst"))}
                         onChange={handleDepartmentChange}
                         options={[
                             { value: null, label: t("admin.interns.notSet") },
-                            ...departments.map((d) => ({
+                            ...allowedDepartments.map((d) => ({
                                 value: d.id,
                                 label: d.name,
                             })),
@@ -181,30 +210,14 @@ export default function InternRow({ intern }: InternRowProps) {
                         value={intern.position?.id ?? null}
                         placeholder={t("admin.interns.notSet")}
                         loading={updatingField === "position"}
+                        disabled={!intern.department?.id}
+                        onDisabledClick={() => toast.error(t("admin.interns.departmentRequired"))}
                         onChange={handlePositionChange}
                         options={[
                             { value: null, label: t("admin.interns.notSet") },
                             ...positions.map((p) => ({
                                 value: p.id,
                                 label: p.name,
-                            })),
-                        ]}
-                    />
-                </div>
-
-                {/* Leader */}
-                <div className="text-sm text-slate-400">
-                    <InlineSelect
-                        ariaLabel="Leader"
-                        value={intern.leaderId}
-                        placeholder={t("admin.interns.notSet")}
-                        loading={updatingField === "leader"}
-                        onChange={handleLeaderChange}
-                        options={[
-                            { value: null, label: t("admin.interns.notSet") },
-                            ...leaders.map((l) => ({
-                                value: l.userId,
-                                label: l.user.fullName ? `${l.user.fullName} (${l.user.email})` : l.user.email,
                             })),
                         ]}
                     />

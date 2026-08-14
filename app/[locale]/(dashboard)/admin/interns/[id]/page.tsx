@@ -306,6 +306,13 @@ function InternshipInfo({ intern }: { intern: Intern }) {
     const { data: posData } = usePositions(intern.department?.id ?? undefined);
     const positions = posData?.data ?? [];
 
+    const selectedLeader = intern.leaderId
+        ? leaders.find((l) => l.userId === intern.leaderId)
+        : null;
+    const allowedDepartments = selectedLeader
+        ? selectedLeader.departments
+        : [];
+
     const startDate = new Date(intern.startDate).toLocaleDateString(
         locale === "vi" ? "vi-VN" : "en-GB",
         {
@@ -332,40 +339,6 @@ function InternshipInfo({ intern }: { intern: Intern }) {
                     {t("admin.interns.details.programPlacement")}
                 </h2>
                 <div className="mt-5 space-y-4">
-                    <InlineSelectRow
-                        icon={Building2}
-                        label={t("admin.interns.details.department")}
-                        value={intern.department?.name ?? t("admin.interns.details.notAssigned")}
-                        options={departments.map((d) => ({
-                            value: d.id,
-                            label: d.name,
-                        }))}
-                        currentId={intern.department?.id ?? ""}
-                        onChange={(id) =>
-                            updateIntern({
-                                id: intern.id,
-                                payload: { departmentId: id || undefined },
-                            })
-                        }
-                    />
-
-                    <InlineSelectRow
-                        icon={Briefcase}
-                        label={t("admin.interns.details.jobRole")}
-                        value={intern.position?.name ?? t("admin.interns.details.notAssigned")}
-                        options={positions.map((p) => ({
-                            value: p.id,
-                            label: p.name,
-                        }))}
-                        currentId={intern.position?.id ?? ""}
-                        onChange={(id) =>
-                            updateIntern({
-                                id: intern.id,
-                                payload: { positionId: id || undefined },
-                            })
-                        }
-                    />
-
                     <InlineSelectRow
                         icon={User}
                         label={t("admin.interns.details.mentor")}
@@ -394,6 +367,42 @@ function InternshipInfo({ intern }: { intern: Intern }) {
                                 },
                             });
                         }}
+                    />
+
+                    <InlineSelectRow
+                        icon={Building2}
+                        label={t("admin.interns.details.department")}
+                        value={intern.department?.name ?? t("admin.interns.details.notAssigned")}
+                        options={allowedDepartments.map((d) => ({
+                            value: d.id,
+                            label: d.name,
+                        }))}
+                        currentId={intern.department?.id ?? ""}
+                        disabled={!intern.leaderId}
+                        onChange={(id) =>
+                            updateIntern({
+                                id: intern.id,
+                                payload: { departmentId: id || undefined },
+                            })
+                        }
+                    />
+
+                    <InlineSelectRow
+                        icon={Briefcase}
+                        label={t("admin.interns.details.jobRole")}
+                        value={intern.position?.name ?? t("admin.interns.details.notAssigned")}
+                        options={positions.map((p) => ({
+                            value: p.id,
+                            label: p.name,
+                        }))}
+                        currentId={intern.position?.id ?? ""}
+                        disabled={!intern.department?.id}
+                        onChange={(id) =>
+                            updateIntern({
+                                id: intern.id,
+                                payload: { positionId: id || undefined },
+                            })
+                        }
                     />
 
                     <InfoRow
@@ -479,6 +488,7 @@ function InlineSelectRow({
     options,
     currentId,
     onChange,
+    disabled = false,
 }: {
     icon: React.ComponentType<{ className?: string }>;
     label: string;
@@ -486,6 +496,7 @@ function InlineSelectRow({
     options: { value: string; label: string }[];
     currentId: string;
     onChange: (id: string) => void;
+    disabled?: boolean;
 }) {
     const t = useTranslations();
     const [editing, setEditing] = useState(false);
@@ -496,7 +507,7 @@ function InlineSelectRow({
                 <Icon className="h-4 w-4 text-slate-500 group-hover:text-cyan-400 transition-colors" />
                 <span>{label}</span>
             </div>
-            {editing ? (
+            {editing && !disabled ? (
                 <div className="relative">
                     <select
                         value={currentId}
@@ -519,10 +530,15 @@ function InlineSelectRow({
                 </div>
             ) : (
                 <button
-                    onClick={() => setEditing(true)}
-                    className="rounded-md px-2 py-0.5 text-sm font-medium text-slate-200 transition-all duration-200 hover:bg-slate-800 hover:text-cyan-400 border border-transparent hover:border-slate-700"
+                    onClick={() => !disabled && setEditing(true)}
+                    disabled={disabled}
+                    className={`rounded-md px-2 py-0.5 text-sm font-medium text-slate-200 transition-all duration-200 border border-transparent ${
+                        disabled 
+                            ? "opacity-50 cursor-not-allowed text-slate-500" 
+                            : "hover:bg-slate-800 hover:text-cyan-400 hover:border-slate-700"
+                    }`}
                 >
-                    {value}
+                    {disabled ? t("admin.interns.selectLeaderFirst") : value}
                 </button>
             )}
         </div>
