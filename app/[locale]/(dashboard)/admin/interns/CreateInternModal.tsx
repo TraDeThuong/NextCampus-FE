@@ -34,11 +34,14 @@ export default function CreateInternModal({ open, onClose }: Props) {
   const { data: departmentsData } = useDepartments();
   const departments = departmentsData?.data ?? [];
 
-  const { data: positionsData } = usePositions(departmentId || undefined);
-  const positions = positionsData?.data ?? [];
-
   const { data: leadersData } = useLeaders();
   const leaders = leadersData?.data ?? [];
+
+  const selectedLeader = leaderId ? leaders.find((l) => l.userId === leaderId) : null;
+  const allowedDepartments = selectedLeader ? selectedLeader.departments : [];
+
+  const { data: positionsData } = usePositions(departmentId || undefined);
+  const positions = positionsData?.data ?? [];
 
   const isPending = directCreateIntern.isPending;
 
@@ -66,6 +69,7 @@ export default function CreateInternModal({ open, onClose }: Props) {
     if (!fullName.trim()) e.fullName = t("admin.interns.fullNameRequired");
     if (!phone.trim()) e.phone = t("admin.interns.phoneRequired");
     else if (!/^(0|\+84|84)(3|5|7|8|9)[0-9]{8}$/.test(phone.trim())) e.phone = t("admin.interns.invalidPhone");
+    if (!leaderId) e.leaderId = t("admin.interns.leaderRequired");
     if (!departmentId) e.departmentId = t("admin.interns.departmentRequired");
     if (!positionId) e.positionId = t("admin.interns.positionRequired");
     if (!startDate) e.startDate = t("admin.interns.startDateRequired");
@@ -160,6 +164,28 @@ export default function CreateInternModal({ open, onClose }: Props) {
               />
             </Field>
 
+            {/* Leader */}
+            <Field label={t("admin.interns.leader")} required error={errors.leaderId}>
+              <select
+                value={leaderId}
+                onChange={(e) => {
+                  setLeaderId(e.target.value);
+                  setDepartmentId("");
+                  setPositionId("");
+                  if (errors.leaderId) setErrors((p) => ({ ...p, leaderId: "" }));
+                }}
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-foreground outline-none focus:border-emerald-400/40 disabled:opacity-50"
+                disabled={isPending}
+              >
+                <option value="">{t("admin.interns.selectOption")}</option>
+                {leaders.map((leader) => (
+                  <option key={leader.id} value={leader.userId}>
+                    {leader.user.fullName ? `${leader.user.fullName} (${leader.user.email})` : leader.user.email}
+                  </option>
+                ))}
+              </select>
+            </Field>
+
             {/* Department & Position */}
             <div className="grid grid-cols-2 gap-4">
               <Field label={t("admin.interns.department")} required error={errors.departmentId}>
@@ -167,10 +193,10 @@ export default function CreateInternModal({ open, onClose }: Props) {
                   value={departmentId}
                   onChange={(e) => { setDepartmentId(e.target.value); setPositionId(""); if (errors.departmentId) setErrors((p) => ({ ...p, departmentId: "" })); }}
                   className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-foreground outline-none focus:border-emerald-400/40 disabled:opacity-50"
-                  disabled={isPending}
+                  disabled={isPending || !leaderId}
                 >
-                  <option value="">{t("admin.interns.selectOption")}</option>
-                  {departments.map((d) => (
+                  <option value="">{!leaderId ? t("admin.interns.selectLeaderFirst") : t("admin.interns.selectOption")}</option>
+                  {allowedDepartments.map((d) => (
                     <option key={d.id} value={d.id}>{d.name}</option>
                   ))}
                 </select>
@@ -209,23 +235,6 @@ export default function CreateInternModal({ open, onClose }: Props) {
                 />
               </Field>
             </div>
-
-            {/* Leader */}
-            <Field label={t("admin.interns.leader")}>
-              <select
-                value={leaderId}
-                onChange={(e) => setLeaderId(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-foreground outline-none focus:border-emerald-400/40 disabled:opacity-50"
-                disabled={isPending}
-              >
-                <option value="">{t("admin.interns.noLeader")}</option>
-                {leaders.map((leader) => (
-                  <option key={leader.id} value={leader.userId}>
-                    {leader.user.fullName ? `${leader.user.fullName} (${leader.user.email})` : leader.user.email}
-                  </option>
-                ))}
-              </select>
-            </Field>
 
             {/* Submit */}
             <div className="flex justify-end gap-3 pt-2">
