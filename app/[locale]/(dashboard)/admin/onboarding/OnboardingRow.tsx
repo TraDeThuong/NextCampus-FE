@@ -113,7 +113,7 @@ export default function OnboardingRow({ invite }: Props) {
     }
 
     function handleCopyLink() {
-        const link = `${window.location.origin}/apply?token=${invite.token ?? ""}`;
+        const link = `${window.location.origin}/onboarding/${invite.token ?? ""}/policies`;
         navigator.clipboard.writeText(link);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
@@ -506,6 +506,7 @@ function ConfirmContent({
     onAction: () => void;
     onCloseModal?: () => void;
 }) {
+    const t = useTranslations();
     const [loading, setLoading] = useState(false);
 
     const colorClasses =
