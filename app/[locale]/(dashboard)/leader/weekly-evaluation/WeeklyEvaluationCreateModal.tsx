@@ -65,22 +65,60 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
 
   const maxWeek = useMemo(() => {
     if (!selectedIntern) return 99;
-    const start = new Date(selectedIntern.startDate); start.setHours(0, 0, 0, 0);
-    const today = new Date(); const todayMidnight = new Date(today); todayMidnight.setHours(0, 0, 0, 0);
-    return Math.max(1, Math.ceil((todayMidnight.getTime() - start.getTime()) / (7 * 24 * 3600 * 1000)));
+    const tzOffset = 7 * 60 * 60 * 1000; // Asia/Ho_Chi_Minh is UTC+7
+    const startLocal = new Date(new Date(selectedIntern.startDate).getTime() + tzOffset);
+    const startMidnight = new Date(Date.UTC(
+      startLocal.getUTCFullYear(),
+      startLocal.getUTCMonth(),
+      startLocal.getUTCDate(),
+      0, 0, 0, 0
+    ));
+    const today = new Date();
+    const todayLocal = new Date(today.getTime() + tzOffset);
+    const todayMidnight = new Date(Date.UTC(
+      todayLocal.getUTCFullYear(),
+      todayLocal.getUTCMonth(),
+      todayLocal.getUTCDate(),
+      0, 0, 0, 0
+    ));
+    const diffMs = todayMidnight.getTime() - startMidnight.getTime();
+    const diffDays = Math.floor(diffMs / (24 * 3600 * 1000));
+    const elapsedWeeks = Math.floor(diffDays / 7) + 1;
+    return Math.max(1, elapsedWeeks);
   }, [selectedIntern]);
 
   const isWeekendAllowedForCurrentWeek = useMemo(() => {
-    const today = new Date(); const dayOfWeek = today.getDay(); const hours = today.getHours();
+    const tzOffset = 7 * 60 * 60 * 1000;
+    const today = new Date();
+    const todayLocal = new Date(today.getTime() + tzOffset);
+    const dayOfWeek = todayLocal.getUTCDay();
+    const hours = todayLocal.getUTCHours();
     return (dayOfWeek === 6 && hours >= 11) || dayOfWeek === 0;
   }, []);
 
   const handleInternChange = (id: string) => {
     setInternId(id); const intern = interns.find(i => i.id === id);
     if (intern) {
-      const start = new Date(intern.startDate); start.setHours(0, 0, 0, 0);
-      const today = new Date(); const todayMidnight = new Date(today); todayMidnight.setHours(0, 0, 0, 0);
-      setWeek(Math.max(1, Math.ceil((todayMidnight.getTime() - start.getTime()) / (7 * 24 * 3600 * 1000))));
+      const tzOffset = 7 * 60 * 60 * 1000;
+      const startLocal = new Date(new Date(intern.startDate).getTime() + tzOffset);
+      const startMidnight = new Date(Date.UTC(
+        startLocal.getUTCFullYear(),
+        startLocal.getUTCMonth(),
+        startLocal.getUTCDate(),
+        0, 0, 0, 0
+      ));
+      const today = new Date();
+      const todayLocal = new Date(today.getTime() + tzOffset);
+      const todayMidnight = new Date(Date.UTC(
+        todayLocal.getUTCFullYear(),
+        todayLocal.getUTCMonth(),
+        todayLocal.getUTCDate(),
+        0, 0, 0, 0
+      ));
+      const diffMs = todayMidnight.getTime() - startMidnight.getTime();
+      const diffDays = Math.floor(diffMs / (24 * 3600 * 1000));
+      const elapsedWeeks = Math.floor(diffDays / 7) + 1;
+      setWeek(Math.max(1, elapsedWeeks));
     }
   };
 
