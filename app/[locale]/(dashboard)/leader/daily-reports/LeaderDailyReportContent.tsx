@@ -17,10 +17,17 @@ import { useDailyReport } from "@/hooks/daily-report/useDailyReport";
 import type { DailyReport } from "@/types/daily-report";
 
 function isoDate(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const parts = formatter.formatToParts(d);
+  const year = parts.find((p) => p.type === "year")?.value || "";
+  const month = parts.find((p) => p.type === "month")?.value || "";
+  const day = parts.find((p) => p.type === "day")?.value || "";
+  return `${year}-${month}-${day}`;
 }
 
 function dateStrFromISO(iso: string): string {
@@ -49,11 +56,11 @@ export default function LeaderDailyReportContent() {
   );
 
   // Leader-wide stats: fetch today's and this week's reports
-  const todayStr = useMemo(() => new Date().toISOString().split("T")[0], []);
+  const todayStr = useMemo(() => isoDate(new Date()), []);
   const mondayStr = useMemo(() => {
     const d = new Date();
     d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
-    return d.toISOString().split("T")[0];
+    return isoDate(d);
   }, []);
 
   const { data: todayReportsData } = useDailyReports({
