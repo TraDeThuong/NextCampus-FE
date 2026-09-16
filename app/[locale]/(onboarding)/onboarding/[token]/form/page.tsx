@@ -202,7 +202,6 @@ export default function FormPage() {
             token as string,
             file.name,
             file.type,
-            file.size,
           );
 
           // Upload trực tiếp từ trình duyệt lên Cloudflare R2

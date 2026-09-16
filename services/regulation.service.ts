@@ -43,5 +43,14 @@ export const regulationService = {
     const response = await api.delete<MessageSuccessResponse>(`/regulations/${id}`);
     return response.data;
   },
+
+  // Thực tập sinh cam kết tuân thủ nội quy: POST /regulations/:id/acknowledge
+  acknowledgeRegulation: async (id: string): Promise<{ success: boolean; message: string }> => {
+    const response = await api.post<{ success: boolean; message: string }>(`/regulations/${id}/acknowledge`);
+    return response.data;
+  },
 };
 
+export const acknowledgeRegulationService = async (id: string): Promise<{ success: boolean; message: string }> => {
+  return regulationService.acknowledgeRegulation(id);
+};

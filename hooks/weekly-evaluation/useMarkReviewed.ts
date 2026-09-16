@@ -7,7 +7,7 @@ export function useMarkReviewed() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => weeklyEvaluationService.markReviewed(id),
+    mutationFn: (id: string) => weeklyEvaluationService.confirmView(id),
     onSuccess: (_, id) => {
       // Invalidate chi tiết và danh sách để cập nhật trạng thái "đã xem"
       queryClient.invalidateQueries({ queryKey: ["weeklyEvaluation", id] });
@@ -15,3 +15,6 @@ export function useMarkReviewed() {
     },
   });
 }
+
+export const useConfirmView = useMarkReviewed;
+

@@ -70,13 +70,23 @@ export const createApplicationService = async (
 export const getApplicationAttachmentPutUrl = async (
   token: string,
   fileName: string,
-  mimeType: string,
-  fileSize: number,
-): Promise<{ success: boolean; data: { uploadUrl: string; filePath: string; publicUrl: string } }> => {
-  const response = await api.get("/applications/attachments/upload-url", {
-    params: { token, fileName, mimeType, fileSize },
+  contentType: string,
+): Promise<{ success: boolean; data: { uploadUrl: string; fileKey: string; key?: string; filePath?: string; publicUrl?: string } }> => {
+  const response = await api.get<{
+    success: boolean;
+    data: { uploadUrl: string; key: string; publicUrl?: string };
+  }>("/applications/attachments/upload-url", {
+    params: { token, fileName, contentType },
   });
-  return response.data;
+  const resData = response.data.data;
+  return {
+    ...response.data,
+    data: {
+      ...resData,
+      fileKey: resData.key,
+      filePath: resData.key,
+    },
+  };
 };
 
 // 5. GET /applications — Danh sách đơn (Admin, Leader)

@@ -33,7 +33,7 @@ export default function InternWeeklyEvaluationList() {
 
   const avgScore = evaluations.length ? evaluations.reduce((sum, e) => sum + e.totalScore, 0) / evaluations.length : null;
   const latestEval = evaluations[0] ?? null;
-  const reviewedCount = evaluations.filter((e) => e.reviewedAt).length;
+  const reviewedCount = evaluations.filter((e) => e.viewedAt || e.reviewedAt).length;
 
   if (isLoading) return <div className="flex justify-center items-center py-20"><Spinner /></div>;
 
@@ -61,7 +61,7 @@ export default function InternWeeklyEvaluationList() {
           <Table columns="1.5fr 1.5fr 1fr 1fr">
             <Table.Header><span>{t("colWeek")}</span><span>{t("colScore")}</span><span className="text-center">{t("colStatus")}</span><span className="text-center">{t("colDetail")}</span></Table.Header>
             <Table.Body data={evaluations} render={(item: WeeklyEvaluation) => {
-              const level = getRatingLevel(item.totalScore); const isReviewed = !!item.reviewedAt;
+              const level = getRatingLevel(item.totalScore); const isReviewed = !!(item.viewedAt || item.reviewedAt);
               return (
                 <Table.Row key={item.id}>
                   <div className="flex flex-col gap-0.5"><span className="font-bold text-foreground text-sm">{t("week", { n: item.week })}</span><span className="text-[11px] text-muted">{new Date(item.createdAt).toLocaleDateString("vi-VN")}</span></div>

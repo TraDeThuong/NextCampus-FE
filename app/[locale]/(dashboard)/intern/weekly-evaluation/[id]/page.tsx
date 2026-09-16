@@ -117,7 +117,7 @@ export default function InternWeeklyEvaluationDetailPage() {
   const hasRatings = evaluation.ratings !== null && evaluation.ratings !== undefined;
   const ratings = evaluation.ratings as EvaluationRatings | null;
   const finalScore = hasRatings && ratings ? computeTotalFromRatings(ratings) : evaluation.totalScore;
-  const isReviewed = !!evaluation.reviewedAt;
+  const isReviewed = !!(evaluation.viewedAt || evaluation.reviewedAt);
 
   const handleMarkReviewed = async () => { try { await markReviewed.mutateAsync(params.id); } catch (err) { console.error(err); } };
 
@@ -141,7 +141,7 @@ export default function InternWeeklyEvaluationDetailPage() {
             </div>
             <div className="shrink-0">
               {isReviewed ? (
-                <div className="flex flex-col items-end gap-1"><div className="flex items-center gap-2 px-4 py-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-sm font-semibold"><CheckCircle2 className="h-4 w-4" />{td("reviewedConfirmed")}</div><span className="text-[11px] text-muted">{new Date(evaluation.reviewedAt!).toLocaleString("vi-VN")}</span></div>
+                <div className="flex flex-col items-end gap-1"><div className="flex items-center gap-2 px-4 py-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-sm font-semibold"><CheckCircle2 className="h-4 w-4" />{td("reviewedConfirmed")}</div><span className="text-[11px] text-muted">{new Date((evaluation.viewedAt || evaluation.reviewedAt)!).toLocaleString("vi-VN")}</span></div>
               ) : (
                 <Button variant="primary" size="md" onClick={handleMarkReviewed} disabled={markReviewed.isPending} className="flex items-center gap-2">{markReviewed.isPending ? <Spinner size="sm" /> : <CheckCircle2 className="h-4 w-4" />}{markReviewed.isPending ? td("confirming") : td("markReviewed")}</Button>
               )}
@@ -191,7 +191,7 @@ export default function InternWeeklyEvaluationDetailPage() {
                 <div className="flex justify-between text-muted"><span>{td("evaluator")}</span><span className="font-semibold text-foreground">{evaluation.leader?.fullName || evaluation.leader?.email || td("leader")}</span></div>
                 <div className="flex justify-between text-muted"><span>{td("createdAt")}</span><span className="font-semibold text-foreground">{new Date(evaluation.createdAt).toLocaleDateString("vi-VN")}</span></div>
                 <div className="flex justify-between text-muted"><span>{td("status")}</span><span className={`font-semibold flex items-center gap-1 ${isReviewed ? "text-emerald-400" : "text-amber-400"}`}>{isReviewed ? <><CheckCircle2 className="h-3 w-3" />{td("reviewed")}</> : <><Clock className="h-3 w-3" />{td("notReviewed")}</>}</span></div>
-                {isReviewed && <div className="flex justify-between text-muted"><span>{td("reviewedAt")}</span><span className="font-semibold text-foreground text-right">{new Date(evaluation.reviewedAt!).toLocaleString("vi-VN")}</span></div>}
+                {isReviewed && <div className="flex justify-between text-muted"><span>{td("reviewedAt")}</span><span className="font-semibold text-foreground text-right">{new Date((evaluation.viewedAt || evaluation.reviewedAt)!).toLocaleString("vi-VN")}</span></div>}
               </div>
             </div>
           </MetalCard>

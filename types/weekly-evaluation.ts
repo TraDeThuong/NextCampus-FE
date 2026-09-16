@@ -1,7 +1,7 @@
 import type { Intern } from "./intern";
 
 // ─── Rating Level ─────────────────────────────────────────────────────────────
-// 5 mức xếp loại: TOT=10, KHA=8, TB=6, TBY=4, YEU=2
+// 5 mức xếp loại chuẩn: TOT=10, KHA=8, TB=6, TBY=4, YEU=2
 export type RatingLevel = "TOT" | "KHA" | "TB" | "TBY" | "YEU";
 
 export const RATING_LABELS: Record<RatingLevel, string> = {
@@ -29,7 +29,7 @@ export const RATING_COLORS: Record<RatingLevel, string> = {
 };
 
 /**
- * 12 tiêu chí đánh giá theo mẫu mới.
+ * 12 tiêu chí đánh giá chuẩn chia làm 3 nhóm lớn
  */
 export interface EvaluationRatings {
   // Phần I: Kỷ luật và tư chất
@@ -40,7 +40,7 @@ export interface EvaluationRatings {
   communication: RatingLevel;    // 5. Giao tiếp và ứng xử
 
   // Phần II: Khả năng chuyên môn
-  knowledge: RatingLevel;        // 1. Kiến thức
+  knowledge: RatingLevel;        // 1. Kiến thức chuyên môn
   practicalSkills: RatingLevel;  // 2. Kỹ năng thực hành
   foreignLanguage: RatingLevel;  // 3. Năng lực ngoại ngữ
   teamwork: RatingLevel;         // 4. Kỹ năng làm việc nhóm
@@ -67,7 +67,7 @@ export const CRITERIA_SECTIONS = [
     id: "II",
     label: "Khả năng chuyên môn",
     criteria: [
-      { key: "knowledge" as keyof EvaluationRatings, label: "Kiến thức" },
+      { key: "knowledge" as keyof EvaluationRatings, label: "Kiến thức chuyên môn" },
       { key: "practicalSkills" as keyof EvaluationRatings, label: "Kỹ năng thực hành" },
       { key: "foreignLanguage" as keyof EvaluationRatings, label: "Năng lực ngoại ngữ" },
       { key: "teamwork" as keyof EvaluationRatings, label: "Kỹ năng làm việc nhóm" },
@@ -99,7 +99,7 @@ export const DEFAULT_RATINGS: EvaluationRatings = {
   progressDelivery: "TB",
 };
 
-// ─── WeeklyEvaluation ─────────────────────────────────────────────────────────
+// ─── WeeklyEvaluation Entity ──────────────────────────────────────────────────
 
 type WeeklyEvaluationIntern = Omit<Intern, "user" | "leader"> & {
   user: Pick<Intern["user"], "id" | "email" | "fullName">;
@@ -110,22 +110,37 @@ export interface WeeklyEvaluation {
   internId: string;
   leaderId: string;
   week: number;
+  year: number;
+  startDate?: string | null;
+  endDate?: string | null;
   communication: number;
   attitude: number;
   learning: number;
   coding: number;
   totalScore: number;
+  score?: number;
+  grade?: string | null;
   comment: string | null;
+  strengths?: string[];
+  weaknesses?: string[];
+  recommendations?: string[];
   ratings: EvaluationRatings | null;
   aiRatings: EvaluationRatings | null;
+  aiScore?: number | null;
   aiCommunication: number | null;
   aiAttitude: number | null;
   aiLearning: number | null;
   aiCoding: number | null;
   aiComment: string | null;
+  aiStrengths?: string[];
+  aiWeaknesses?: string[];
+  aiRecommendations?: string[];
   aiGeneratedAt: string | null;
   leaderEdited: boolean;
-  reviewedAt: string | null;
+  isAiAdjusted?: boolean;
+  viewedAt: string | null;
+  /** @deprecated Use viewedAt instead */
+  reviewedAt?: string | null;
   createdAt: string;
   updatedAt: string;
   intern: WeeklyEvaluationIntern;
@@ -133,6 +148,7 @@ export interface WeeklyEvaluation {
     id: string;
     email: string;
     fullName: string | null;
+    avatarUrl?: string | null;
   };
 }
 
@@ -141,6 +157,8 @@ export interface WeeklyEvaluation {
 export interface WeeklyEvaluationSuccessResponse {
   success: boolean;
   data: WeeklyEvaluation;
+  message?: string;
+  code?: string;
 }
 
 export interface WeeklyEvaluationListResponse {
@@ -159,46 +177,70 @@ export interface WeeklyEvaluationListResponse {
 export interface WeeklyEvaluationQueryParams {
   internId?: string;
   leaderId?: string;
+  departmentId?: string;
   week?: number;
-  sortBy?: "week" | "totalScore" | "createdAt";
+  year?: number;
+  sortBy?: "week" | "totalScore" | "score" | "createdAt";
   order?: "asc" | "desc";
   page?: number;
   limit?: number;
 }
+
+// ─── Payloads ───────────────────────────────────────────────────────────────
+
 export interface CreateWeeklyEvaluationPayload {
   internId: string;
   week: number;
+  year?: number;
   ratings: EvaluationRatings;
-  // Tính toán tự động, gửi để tương thích ngược
-  communication: number;
-  attitude: number;
-  learning: number;
-  coding: number;
+  communication?: number;
+  attitude?: number;
+  learning?: number;
+  coding?: number;
   comment?: string;
+  strengths?: string[];
+  weaknesses?: string[];
+  recommendations?: string[];
   aiRatings?: EvaluationRatings;
+  aiScore?: number;
   aiCommunication?: number;
   aiAttitude?: number;
   aiLearning?: number;
   aiCoding?: number;
   aiComment?: string;
+  aiStrengths?: string[];
+  aiWeaknesses?: string[];
+  aiRecommendations?: string[];
 }
 
 export interface UpdateWeeklyEvaluationPayload {
+  year?: number;
   ratings?: EvaluationRatings;
   communication?: number;
   attitude?: number;
   learning?: number;
   coding?: number;
   comment?: string | null;
+  strengths?: string[];
+  weaknesses?: string[];
+  recommendations?: string[];
 }
 
-export interface AiSuggestionPayload {
+// ─── AI Suggestion DTOs ──────────────────────────────────────────────────────
+
+export interface WeeklyEvaluationAiPayload {
   internId: string;
   week: number;
+  year?: number;
 }
+
+export type AiSuggestRequestDto = WeeklyEvaluationAiPayload;
+export type AiSuggestionPayload = WeeklyEvaluationAiPayload;
 
 export interface AiSuggestionData {
   ratings: EvaluationRatings;
+  score?: number;
+  grade?: string;
   communication: number;
   attitude: number;
   learning: number;
@@ -207,5 +249,40 @@ export interface AiSuggestionData {
   comment: string;
   strengths: string[];
   weaknesses: string[];
-  suggestions: string[];
+  recommendations?: string[];
+  suggestions?: string[];
+  dataUsed?: {
+    dailyReportsCount: number;
+    taskSubmissionsCount: number;
+    weekRange: {
+      from: string;
+      to: string;
+    };
+  };
 }
+
+// ─── Intern Progress Summary (6-Week Chart / Radar Data) ─────────────────────
+
+export interface WeeklyEvaluationSummary {
+  internId: string;
+  internName: string;
+  totalEvaluations: number;
+  avgScore: number;
+  overallGrade: string | null;
+  viewedCount: number;
+  unviewedCount: number;
+  trend: "IMPROVING" | "DECLINING" | "STABLE";
+  recentWeeks: Array<{
+    id: string;
+    week: number;
+    year: number;
+    score: number;
+    grade: string | null;
+    viewedAt: string | null;
+    comment: string | null;
+    createdAt: string;
+  }>;
+}
+
+export type InternEvaluationSummaryDto = WeeklyEvaluationSummary;
+

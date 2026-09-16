@@ -51,7 +51,7 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
   const t = useTranslations("leader.weeklyEvaluation.createModal");
   const tSections = useTranslations("leader.weeklyEvaluation.sections");
   const tCriteria = useTranslations("leader.weeklyEvaluation.criteria");
-  const tRatings = useTranslations("leader.weeklyEvaluation.ratings");
+
   const auth = useContext(AuthContext); const currentUserId = auth?.state.user?.id;
   const createEvaluation = useCreateWeeklyEvaluation(); const aiSuggestion = useAiSuggestion();
   const { data: internsData, isLoading: internsLoading } = useInterns({ status: "ACTIVE", leaderId: currentUserId || undefined });
@@ -138,9 +138,9 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
     if (selectedIntern && Number(week) === maxWeek && !isWeekendAllowedForCurrentWeek) { toast.error(t("weekendOnly")); return; }
     if (evaluatedWeeks.includes(Number(week))) { toast.error(t("weekAlreadyExists", { week })); return; }
     try {
-      const response = await aiSuggestion.mutateAsync({ internId, week: Number(week) });
+      const response = await aiSuggestion.mutateAsync({ internId, week: Number(week), year: new Date().getFullYear() });
       if (response?.data) { setRatings(response.data.ratings); setAiRatings(response.data.ratings); setComment(response.data.comment || ""); setAiComment(response.data.comment || ""); toast.success(t("aiSuggestionReceived")); }
-    } catch (err: any) { console.error(err); }
+    } catch (err: unknown) { console.error(err); }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -151,11 +151,11 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
     if (evaluatedWeeks.includes(Number(week))) { toast.error(t("weekAlreadyExists", { week })); return; }
 
     const payload: CreateWeeklyEvaluationPayload = {
-      internId, week: Number(week), ratings, communication: scores.communication, attitude: scores.attitude,
+      internId, week: Number(week), year: new Date().getFullYear(), ratings, communication: scores.communication, attitude: scores.attitude,
       learning: scores.learning, coding: scores.coding, comment: comment || undefined,
       ...(aiRatings && { aiRatings, aiCommunication: computeScores(aiRatings).communication, aiAttitude: computeScores(aiRatings).attitude, aiLearning: computeScores(aiRatings).learning, aiCoding: computeScores(aiRatings).coding, aiComment: aiComment || undefined }),
     };
-    try { await createEvaluation.mutateAsync(payload); onCloseModal?.(); } catch (err) { console.error(err); }
+    try { await createEvaluation.mutateAsync(payload); onCloseModal?.(); } catch (err: unknown) { console.error(err); }
   };
 
   const inputClass = "w-full rounded-xl border border-border px-4 py-2.5 text-sm text-foreground bg-card placeholder:text-muted focus:outline-none focus:border-primary-light/40";
