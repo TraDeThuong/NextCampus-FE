@@ -212,7 +212,7 @@ export default function FormPage() {
 
           return {
             fileName: file.name,
-            filePath: presigned.filePath,
+            filePath: presigned.filePath ?? "",
             mimeType: file.type,
             fileSize: file.size,
           };

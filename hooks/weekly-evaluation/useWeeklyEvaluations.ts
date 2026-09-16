@@ -6,7 +6,7 @@ import type { WeeklyEvaluationQueryParams } from "@/types/weekly-evaluation";
 
 export function useWeeklyEvaluations(params?: WeeklyEvaluationQueryParams) {
   return useQuery({
-    queryKey: ["weeklyEvaluations", params],
+    queryKey: ["weekly-evaluations", params],
     queryFn: () => weeklyEvaluationService.getWeeklyEvaluations(params),
     staleTime: 1000 * 60 * 2,
   });

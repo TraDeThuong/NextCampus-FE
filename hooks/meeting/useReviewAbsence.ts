@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import axios from "axios";
 import { meetingService } from "@/services/meeting.service";
 import type { ReviewAbsencePayload } from "@/types/meeting";
 
@@ -19,17 +20,16 @@ export function useReviewAbsence() {
 
     onSuccess: () => {
       toast.success("Absence request reviewed.");
-      queryClient.invalidateQueries(
-        { queryKey: ["meeting-absences"] },
-        { exact: false },
-      );
-      queryClient.invalidateQueries({ queryKey: ["meetings"] }, { exact: false });
-      queryClient.invalidateQueries({ queryKey: ["absences"] }, { exact: false });
+      queryClient.invalidateQueries({ queryKey: ["meeting-absences"] });
+      queryClient.invalidateQueries({ queryKey: ["meetings"] });
+      queryClient.invalidateQueries({ queryKey: ["absences"] });
     },
 
-    onError: (error: any) => {
-      const errorMsg = error.response?.data?.message || "Failed to review absence.";
-      toast.error(errorMsg);
+    onError: (error: unknown) => {
+      const errorMsg = axios.isAxiosError<{ message?: string }>(error)
+        ? error.response?.data?.message
+        : undefined;
+      toast.error(errorMsg ?? "Failed to review absence.");
     },
   });
 }

@@ -9,9 +9,11 @@ export function useAcknowledgeRegulation() {
 
   return useMutation({
     mutationFn: (id: string) => regulationService.acknowledgeRegulation(id),
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["regulations"] });
-      toast.success(data.message || "Đã cam kết tuân thủ nội quy thành công!");
+      queryClient.invalidateQueries({ queryKey: ["regulations", "active"] });
+      queryClient.invalidateQueries({ queryKey: ["activity-logs"] });
+      toast.success("Bạn đã xác nhận cam kết tuân thủ nội quy cơ quan thành công.");
     },
     onError: () => {
       toast.error("Không thể xác nhận cam kết nội quy. Vui lòng thử lại!");

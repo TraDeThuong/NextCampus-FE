@@ -64,7 +64,8 @@ function buildLeaderPageMap(leaderId?: string): Record<string, PrefetchBatch[]> 
 
 export function useLeaderPrefetchQueries() {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { state } = useAuth();
+  const user = state.user;
 
   const prefetchPage = useCallback(
     (pageKey: string) => {

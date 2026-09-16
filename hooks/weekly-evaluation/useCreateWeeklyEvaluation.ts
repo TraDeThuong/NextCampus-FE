@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import axios from "axios";
 import { weeklyEvaluationService } from "@/services/weekly-evaluation.service";
 import type { CreateWeeklyEvaluationPayload } from "@/types/weekly-evaluation";
 
@@ -14,12 +15,15 @@ export function useCreateWeeklyEvaluation() {
 
     onSuccess: () => {
       toast.success("Tạo đánh giá tuần thành công!");
-      queryClient.invalidateQueries({ queryKey: ["weeklyEvaluations"] });
+      queryClient.invalidateQueries({ queryKey: ["weekly-evaluations"] });
+      queryClient.invalidateQueries({ queryKey: ["stats"] });
     },
 
-    onError: (error: any) => {
-      const msg = error?.response?.data?.message || "Lỗi khi tạo đánh giá tuần.";
-      toast.error(msg);
+    onError: (error: unknown) => {
+      const msg = axios.isAxiosError<{ message?: string }>(error)
+        ? error.response?.data?.message
+        : undefined;
+      toast.error(msg ?? "Lỗi khi tạo đánh giá tuần.");
     },
   });
 }

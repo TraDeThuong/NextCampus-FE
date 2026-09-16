@@ -1,20 +1,25 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-hot-toast";
 import { weeklyEvaluationService } from "@/services/weekly-evaluation.service";
 
-export function useMarkReviewed() {
+export function useConfirmView() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (id: string) => weeklyEvaluationService.confirmView(id),
     onSuccess: (_, id) => {
-      // Invalidate chi tiết và danh sách để cập nhật trạng thái "đã xem"
-      queryClient.invalidateQueries({ queryKey: ["weeklyEvaluation", id] });
-      queryClient.invalidateQueries({ queryKey: ["weeklyEvaluations"] });
+      queryClient.invalidateQueries({ queryKey: ["weekly-evaluations"] });
+      queryClient.invalidateQueries({ queryKey: ["weekly-evaluation", id] });
+      queryClient.invalidateQueries({ queryKey: ["stats", "intern"] });
+      toast.success("Đã xác nhận xem đánh giá tuần thành công.");
+    },
+    onError: () => {
+      toast.error("Không thể xác nhận xem đánh giá. Vui lòng thử lại!");
     },
   });
 }
 
-export const useConfirmView = useMarkReviewed;
+export const useMarkReviewed = useConfirmView;
 

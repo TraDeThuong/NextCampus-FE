@@ -20,6 +20,7 @@ export function useUpdateRegulation() {
     onSuccess: () => {
       toast.success("Policy updated successfully.");
       queryClient.invalidateQueries({ queryKey: ["regulations"] });
+      queryClient.invalidateQueries({ queryKey: ["regulations", "active"] });
     },
 
     onError: () => {

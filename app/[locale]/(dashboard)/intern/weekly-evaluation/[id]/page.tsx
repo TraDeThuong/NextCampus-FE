@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
 import Button from "@/components/ui/Button";
+import WeeklyEvaluationExportButton from "@/components/pdf/WeeklyEvaluationExportButton";
 import { useWeeklyEvaluationDetail } from "@/hooks/weekly-evaluation/useWeeklyEvaluationDetail";
 import { useWeeklyEvaluations } from "@/hooks/weekly-evaluation/useWeeklyEvaluations";
 import { useMarkReviewed } from "@/hooks/weekly-evaluation/useMarkReviewed";
@@ -139,7 +140,8 @@ export default function InternWeeklyEvaluationDetailPage() {
                 <p className="mt-1 text-sm text-slate-400 flex items-center gap-1"><User className="h-4 w-4 text-slate-500" /><span>{td("evaluatedBy", { name: evaluation.leader?.fullName || evaluation.leader?.email || td("leader") })}</span><span className="text-slate-600 mx-2">|</span><Calendar className="h-4 w-4 text-slate-500" /><span>{new Date(evaluation.createdAt).toLocaleDateString("vi-VN")}</span></p>
               </div>
             </div>
-            <div className="shrink-0">
+            <div className="shrink-0 flex items-center gap-3">
+              <WeeklyEvaluationExportButton id={evaluation.id} />
               {isReviewed ? (
                 <div className="flex flex-col items-end gap-1"><div className="flex items-center gap-2 px-4 py-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-sm font-semibold"><CheckCircle2 className="h-4 w-4" />{td("reviewedConfirmed")}</div><span className="text-[11px] text-muted">{new Date((evaluation.viewedAt || evaluation.reviewedAt)!).toLocaleString("vi-VN")}</span></div>
               ) : (

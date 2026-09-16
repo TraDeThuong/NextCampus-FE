@@ -23,6 +23,7 @@ import Spinner from "@/components/ui/Spinner";
 import StatsCard from "@/components/stats/StatsCard";
 import Table from "@/components/ui/Table";
 import InternTasksModal from "../InternTasksModal";
+import InternshipSummaryExportButton from "@/components/pdf/InternshipSummaryExportButton";
 
 const assignmentStatusBadge: Record<string, string> = {
   TODO: "border-sky-400/20 bg-sky-500/10 text-sky-300",
@@ -188,9 +189,12 @@ function InternHeader({ intern, statusLabels }: { intern: Intern; statusLabels: 
             <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />{td("joined", { date: joined })}</span>
           </div>
         </div>
-        <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${internStatusBadge[intern.status] ?? ""}`}>
-          <Circle className="h-2 w-2 fill-current" />{statusLabels[intern.status] ?? intern.status}
-        </span>
+        <div className="flex items-center gap-3">
+          <InternshipSummaryExportButton internId={intern.id} />
+          <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${internStatusBadge[intern.status] ?? ""}`}>
+            <Circle className="h-2 w-2 fill-current" />{statusLabels[intern.status] ?? intern.status}
+          </span>
+        </div>
       </div>
     </MetalCard>
   );

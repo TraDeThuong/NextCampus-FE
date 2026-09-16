@@ -13,6 +13,7 @@ export function useDeleteRegulation() {
     onSuccess: () => {
       toast.success("Policy deleted successfully.");
       queryClient.invalidateQueries({ queryKey: ["regulations"] });
+      queryClient.invalidateQueries({ queryKey: ["regulations", "active"] });
     },
 
     onError: () => {
