@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AiEvaluationUiScenarios",
+  "description": "Bộ kịch bản kiểm thử hành vi giao diện khi nhận gợi ý đánh giá từ AI",
+  "version": "1.0.0",
+  "testCases": [
+    {
+      "id": "TC_UI_EVAL_01",
+      "name": "Nhận gợi ý thành công và tự động điền form",
+      "action": "Leader bấm nút 'Nhận gợi ý từ AI'",
+      "mockApiResponse": {
+        "success": true,
+        "data": {
+          "ratings": {
+            "ruleCompliance": "TOT",
+            "workAttitude": "TOT",
+            "learningCapacity": "KHA",
+            "pressureTolerance": "KHA",
+            "communication": "TOT",
+            "knowledge": "KHA",
+            "practicalSkill": "KHA",
+            "languageProficiency": "TB",
+            "teamwork": "TOT",
+            "creativity": "KHA",
+            "contentRequirement": "TOT",
+            "progressRequirement": "TOT"
+          },
+          "comment": "Thực tập sinh hoàn thành tốt nhiệm vụ, nộp đủ báo cáo ngày.",
+          "strengths": ["Chăm chỉ", "Đúng hạn"],
+          "weaknesses": ["Cần trau dồi tiếng Anh"],
+          "recommendations": ["Tìm hiểu thêm BullMQ"]
+        }
+      },
+      "expectedUiBehavior": {
+        "buttonLoadingState": "Hiển thị spinner trong khi request đang gửi",
+        "formAutoFill": "Toàn bộ 12 bộ chọn mức điểm tự động nhảy sang mức tương ứng",
+        "aiBadgeCount": 12,
+        "totalScoreCalculated": 8.0,
+        "useCommentButtonEnabled": true
+      }
+    },
+    {
+      "id": "TC_UI_EVAL_02",
+      "name": "Xử lý lỗi khi AI Service gặp sự cố 502/Timeout",
+      "action": "Leader bấm 'Nhận gợi ý từ AI' nhưng backend trả về 502",
+      "mockApiResponse": {
+        "status": 502,
+        "data": { "success": false, "message": "AI service temporarily unavailable" }
+      },
+      "expectedUiBehavior": {
+        "preventCrash": "Giao diện không bị trắng màn hình",
+        "showToast": "Hiển thị toast cảnh báo lỗi lịch sự",
+        "preserveUserData": "Các ô điểm Leader đã chọn trước đó vẫn được giữ nguyên vẹn",
+        "buttonReset": "Nút quay lại trạng thái bình thường (không bị kẹt loading)"
+      }
+    },
+    {
+      "id": "TC_UI_EVAL_03",
+      "name": "Leader điều chỉnh mức điểm khác gợi ý AI",
+      "action": "Leader click đổi tiêu chí ruleCompliance từ TOT sang KHA",
+      "expectedUiBehavior": {
+        "badgeRemoved": "Badge 'AI' ở nút TOT biến mất",
+        "realTimeRecalculate": "Thanh tổng điểm tự động tính lại ngay lập tức",
+        "auditState": "Ghi nhận tiêu chí này có sự can thiệp của con người"
+      }
+    }
+  ]
+}

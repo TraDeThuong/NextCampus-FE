@@ -1,0 +1,28 @@
+{
+  "telemetryId": "telemetry_fe_eval_20260916_001",
+  "timestamp": "2026-09-16T10:15:30.000Z",
+  "feature": "weekly-evaluation-ai-suggestion",
+  "clientMetrics": {
+    "roundTripTimeMs": 1820,
+    "renderDurationMs": 45,
+    "userDevice": "Desktop",
+    "browser": "Chrome 128"
+  },
+  "interactionResult": {
+    "aiSuggestedScore": 8.0,
+    "userFinalScore": 7.8,
+    "criteriaAdjustedByUserCount": 1,
+    "commentUsedVerbatim": false,
+    "commentEditedLength": 320,
+    "acceptanceRate": "91.6%"
+  },
+  "uxScorecardOutcome": {
+    "loadingScore": 25,
+    "transparencyScore": 25,
+    "humanControlScore": 20,
+    "errorHandlingScore": 20,
+    "accessibilityScore": 10,
+    "totalScore": 100,
+    "status": "PASS"
+  }
+}

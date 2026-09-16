@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EvaluationCriteriaUiConfig",
+  "description": "Cấu hình giao diện và màu sắc hiển thị 12 tiêu chí đánh giá tuần và gợi ý AI trong NexCampus Frontend",
+  "version": "1.0.0",
+  "ratingLevels": {
+    "TOT": {
+      "code": "TOT",
+      "label": "Tốt",
+      "score": 10,
+      "badgeClass": "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800",
+      "dotClass": "bg-emerald-500"
+    },
+    "KHA": {
+      "code": "KHA",
+      "label": "Khá",
+      "score": 8,
+      "badgeClass": "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800",
+      "dotClass": "bg-blue-500"
+    },
+    "TB": {
+      "code": "TB",
+      "label": "Trung bình",
+      "score": 6,
+      "badgeClass": "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800",
+      "dotClass": "bg-amber-500"
+    },
+    "TBY": {
+      "code": "TBY",
+      "label": "Trung bình yếu",
+      "score": 4,
+      "badgeClass": "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/40 dark:text-orange-300 dark:border-orange-800",
+      "dotClass": "bg-orange-500"
+    },
+    "YEU": {
+      "code": "YEU",
+      "label": "Yếu",
+      "score": 2,
+      "badgeClass": "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800",
+      "dotClass": "bg-rose-500"
+    }
+  },
+  "aiBadgeStyles": {
+    "badge": "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/50 dark:text-indigo-300 dark:border-indigo-800",
+    "highlightBorder": "ring-2 ring-indigo-500 ring-offset-1",
+    "tooltipText": "Mức điểm được gợi ý tự động từ phân tích báo cáo ngày và bài nộp của AI"
+  },
+  "groups": [
+    {
+      "id": "group_1",
+      "name": "I. Kỷ luật và tư chất",
+      "criteria": [
+        { "key": "ruleCompliance", "name": "Thực hiện nội quy của cơ quan", "tooltip": "Chấp hành giờ giấc, nộp daily report đúng hạn" },
+        { "key": "workAttitude", "name": "Thái độ làm việc", "tooltip": "Nghiêm túc, chủ động và có tinh thần trách nhiệm" },
+        { "key": "learningCapacity", "name": "Năng lực tiếp thu", "tooltip": "Khả năng nắm bắt kiến thức và tiếp thu phản hồi" },
+        { "key": "pressureTolerance", "name": "Khả năng vượt khó chịu áp lực", "tooltip": "Bền bỉ xử lý bug và gỡ blocker" },
+        { "key": "communication", "name": "Giao tiếp và ứng xử", "tooltip": "Giao tiếp lịch sự, chuẩn mực trong PR review và họp" }
+      ]
+    },
+    {
+      "id": "group_2",
+      "name": "II. Khả năng chuyên môn",
+      "criteria": [
+        { "key": "knowledge", "name": "Kiến thức", "tooltip": "Hiểu biết về stack kỹ thuật và kiến trúc" },
+        { "key": "practicalSkill", "name": "Kỹ năng thực hành", "tooltip": "Chất lượng code, tuân thủ convention và viết test" },
+        { "key": "languageProficiency", "name": "Năng lực ngoại ngữ", "tooltip": "Đọc tài liệu, viết PR description bằng tiếng Anh" },
+        { "key": "teamwork", "name": "Kỹ năng làm việc nhóm", "tooltip": "Phối hợp, review chéo và hỗ trợ đồng đội" },
+        { "key": "creativity", "name": "Tính sáng tạo", "tooltip": "Đề xuất cải tiến và tối ưu giải pháp" }
+      ]
+    },
+    {
+      "id": "group_3",
+      "name": "III. Kết quả thực hiện đề tài",
+      "criteria": [
+        { "key": "contentRequirement", "name": "Thực hiện yêu cầu về nội dung", "tooltip": "Đúng nghiệp vụ, pass acceptance criteria" },
+        { "key": "progressRequirement", "name": "Thực hiện yêu cầu về tiến độ", "tooltip": "Hoàn thành và nộp bài đúng hạn" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TaskAllocationUiConfig",
+  "description": "Cấu hình hiển thị kết quả gợi ý phân bổ công việc của AI trên giao diện Leader",
+  "version": "1.0.0",
+  "riskLevels": {
+    "HIGH": {
+      "level": "HIGH",
+      "label": "Rủi ro cao (Nguy cơ quá tải)",
+      "badgeClass": "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800",
+      "bannerClass": "bg-red-50 border-l-4 border-red-500 text-red-700 p-3 rounded-r",
+      "icon": "AlertTriangle",
+      "warningMessage": "Ứng viên đã đạt từ 80% hạn mức công việc tối đa. Cân nhắc đổi Owner hoặc giảm bớt task khác."
+    },
+    "MEDIUM": {
+      "level": "MEDIUM",
+      "label": "Rủi ro vừa phải",
+      "badgeClass": "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800",
+      "bannerClass": "bg-amber-50 border-l-4 border-amber-500 text-amber-700 p-3 rounded-r",
+      "icon": "Info",
+      "warningMessage": "Khối lượng công việc tương đối, cần theo dõi sát sao hạn chót."
+    },
+    "LOW": {
+      "level": "LOW",
+      "label": "Rủi ro thấp (An toàn)",
+      "badgeClass": "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800",
+      "bannerClass": "bg-emerald-50 border-l-4 border-emerald-500 text-emerald-700 p-3 rounded-r",
+      "icon": "CheckCircle",
+      "warningMessage": "Khối lượng công việc an toàn, ứng viên có đủ thời gian hoàn thành tốt."
+    }
+  },
+  "roles": {
+    "OWNER": {
+      "label": "Người phụ trách chính (Owner)",
+      "badgeClass": "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300",
+      "workloadNote": "Tính 100% số ngày ước tính"
+    },
+    "SUPPORT": {
+      "label": "Người hỗ trợ (Support)",
+      "badgeClass": "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/40 dark:text-purple-300",
+      "workloadNote": "Tính 50% số ngày ước tính"
+    }
+  },
+  "scoreDisplayWeights": {
+    "workloadScore": { "label": "Độ rảnh (Workload)", "weight": "30%" },
+    "skillScore": { "label": "Kỹ năng & Module", "weight": "25%" },
+    "performanceScore": { "label": "Hiệu suất gần nhất", "weight": "25%" },
+    "learningScore": { "label": "Tiềm năng học tập", "weight": "20%" }
+  }
+}

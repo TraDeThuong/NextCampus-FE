@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AiAllocationUiScenarios",
+  "description": "Bộ kịch bản kiểm thử hiển thị đề xuất phân công task trên giao diện",
+  "version": "1.0.0",
+  "testCases": [
+    {
+      "id": "TC_UI_ALLOC_01",
+      "name": "Hiển thị cảnh báo quá tải khi riskLevel là HIGH",
+      "mockApiResponse": {
+        "recommendedOwnerId": "intern_01",
+        "recommendedSupportId": "intern_02",
+        "riskLevel": "HIGH",
+        "workloadAnalysis": "Ứng viên đã đạt 8.5/10 ngày công việc",
+        "learningOpportunity": "Cơ hội nâng cao kiến thức tối ưu query",
+        "reasons": ["Đã làm module này", "Điểm code cao"]
+      },
+      "expectedUiBehavior": {
+        "renderAlertBanner": "Hiển thị banner màu đỏ viền trái",
+        "alertIcon": "AlertTriangle",
+        "ownerPreselected": "Tự động chọn intern_01 trong dropdown Owner",
+        "supportPreselected": "Tự động chọn intern_02 trong dropdown Support"
+      }
+    },
+    {
+      "id": "TC_UI_ALLOC_02",
+      "name": "Xử lý khi không có đề xuất Support (null)",
+      "mockApiResponse": {
+        "recommendedOwnerId": "intern_01",
+        "recommendedSupportId": null,
+        "riskLevel": "LOW",
+        "workloadAnalysis": "Khối lượng công việc an toàn",
+        "learningOpportunity": "Thực tập sinh tự chủ hoàn toàn",
+        "reasons": ["Task đơn giản 1 ngày"]
+      },
+      "expectedUiBehavior": {
+        "supportDropdownState": "Dropdown Support để giá trị 'Không có' (hoặc None)",
+        "noCrash": "Không xảy ra lỗi đọc thuộc tính null (Cannot read properties of null)",
+        "renderGreenBanner": "Badge màu xanh lá thể hiện an toàn"
+      }
+    }
+  ]
+}
