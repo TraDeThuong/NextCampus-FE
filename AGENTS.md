@@ -14,8 +14,10 @@ Trước khi thực hiện bất kỳ thay đổi nào, AI trợ lý **BẮT BU�
 2. [`.agents/memory.md`](file:///d:/NodeJS/NexCampus/NexCampus-FE/.agents/memory.md): Tổng hợp các quyết định kỹ thuật và quy chuẩn UI/UX bền vững đã được thống nhất và kiểm chứng.
 3. [`.agents/rules/architecture.md`](file:///d:/NodeJS/NexCampus/NexCampus-FE/.agents/rules/architecture.md): Quy chuẩn phân tầng 4 lớp (`Page/Component -> Domain Hook -> Service -> Axios Instance`) và quản lý cache Query keys.
 4. [`.agents/rules/frontend.md`](file:///d:/NodeJS/NexCampus/NexCampus-FE/.agents/rules/frontend.md): Quy ước chi tiết về Next.js App Router, Server vs Client Components, Design tokens Tailwind 4.
-5. [`.agents/rules/tech-defaults.md`](file:///d:/NodeJS/NexCampus/NexCampus-FE/.agents/rules/tech-defaults.md): Tiêu chuẩn TypeScript `strict`, Form validation Zod, xử lý múi giờ `Asia/Ho_Chi_Minh`.
-6. [`.agents/rules/workflow.md`](file:///d:/NodeJS/NexCampus/NexCampus-FE/.agents/rules/workflow.md): Quy trình 4 bước: Khảo sát -> Triển khai -> Kiểm tra chất lượng (`pnpm run lint`) -> Bàn giao.
+5. [`.agents/rules/ui-ux-checklist.md`](file:///d:/NodeJS/NexCampus/NexCampus-FE/.agents/rules/ui-ux-checklist.md): **Bộ checklist UI/UX bắt buộc**: 6 trạng thái component (Default, Hover, Focus, Active, Disabled, Loading), Table (overflow, responsive, sticky), Dropdown (max-height, search, multi-select), Form input (error, placeholder, required), Responsive breakpoints và Design system.
+6. [`.agents/rules/i18n-and-theming.md`](file:///d:/NodeJS/NexCampus/NexCampus-FE/.agents/rules/i18n-and-theming.md): **Quy chuẩn i18n & Theme**: Chuyển đổi ngôn ngữ Anh - Việt qua `next-intl` (font tiếng Việt riêng, cấm hardcode chuỗi), chế độ Theme Sáng / Tối / Theo hệ thống (class `.dark`, script chống nhấp nháy FOUC, semantic tokens Tailwind 4).
+7. [`.agents/rules/tech-defaults.md`](file:///d:/NodeJS/NexCampus/NexCampus-FE/.agents/rules/tech-defaults.md): Tiêu chuẩn TypeScript `strict`, Form validation Zod, xử lý múi giờ `Asia/Ho_Chi_Minh`.
+8. [`.agents/rules/workflow.md`](file:///d:/NodeJS/NexCampus/NexCampus-FE/.agents/rules/workflow.md): Quy trình 4 bước: Khảo sát -> Triển khai -> Kiểm tra chất lượng (`pnpm run lint`) -> Bàn giao.
 
 ---
 
@@ -41,7 +43,11 @@ Khi làm việc với các tính năng có yếu tố AI (Gợi ý đánh giá t
 3. **Quy chuẩn UI/UX đã khóa**:
    - **Icon + Heading**: Tuyệt đối **KHÔNG đặt `flex` trực tiếp lên thẻ heading** (`<h1>`-`<h3>`). Phải bọc icon và heading trong một `<div className="flex items-center gap-2">` riêng kèm `shrink-0` cho icon.
    - **Ô tìm kiếm (Search input)**: Không đặt icon kính lúp bên trong ô input; dùng padding `px-5 py-3` để đồng bộ hoàn toàn với các ô `FilterSelect`.
+   - **Chuẩn hóa Component & Form & Table**: Bắt buộc tuân thủ đủ 6 trạng thái thành phần (Normal, Hover, Focus, Active, Disabled, Loading), xử lý vỡ bảng (overflow, fixed/flex width, scroll/card list mobile, sticky header), menu giới hạn `max-h-60`, form hiển thị viền đỏ + icon + text lỗi rõ ràng theo [`.agents/rules/ui-ux-checklist.md`](file:///d:/NodeJS/NexCampus/NexCampus-FE/.agents/rules/ui-ux-checklist.md).
+   - **Đa ngôn ngữ & Theme**: Tuyệt đối không hardcode text tiếng Việt/Anh trực tiếp; dùng `useTranslations()`. Chế độ Theme (Sáng/Tối/Theo hệ thống) điều khiển qua class `.dark` trên thẻ `<html>` và token semantic Tailwind 4 theo [`.agents/rules/i18n-and-theming.md`](file:///d:/NodeJS/NexCampus/NexCampus-FE/.agents/rules/i18n-and-theming.md).
+
 4. **Bảo vệ mã nguồn & File hệ thống**:
    - Tuyệt đối không chỉnh sửa hoặc xóa các file/thư mục sinh tự động: `.next/`, `node_modules/`, `next-env.d.ts`, `tsconfig.tsbuildinfo`, `.env*`.
    - Dùng duy nhất `pnpm` làm package manager.
    - Lệnh kiểm tra chất lượng trước khi hoàn thành: `pnpm run lint`.
+

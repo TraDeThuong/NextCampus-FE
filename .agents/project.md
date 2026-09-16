@@ -14,8 +14,10 @@
 - **Form & Validation**: React Hook Form v7 + Zod (`@hookform/resolvers/zod`)
 - **HTTP Client**: Axios với interceptor nạp token in-memory và tự động refresh token
 - **Biểu đồ & Icon**: Recharts, Lucide React (`lucide-react`)
-- **Đa ngôn ngữ**: `next-intl` (route dynamic `app/[locale]/...`)
+- **Đa ngôn ngữ (i18n)**: `next-intl` (route dynamic `app/[locale]/...`, hỗ trợ tiếng Việt `vi` và tiếng Anh `en`, font tiếng Việt riêng)
+- **Hệ thống Theme**: 3 chế độ Sáng / Tối / Theo hệ thống (Light / Dark / System), class `.dark` trên `<html>`, lưu `localStorage`, đồng bộ `prefers-color-scheme`
 - **Package Manager**: `pnpm`
+
 
 ## Cấu trúc thư mục
 

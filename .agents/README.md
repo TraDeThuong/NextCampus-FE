@@ -12,6 +12,8 @@ NexCampus-FE/.agents/
 └── rules/
     ├── architecture.md    # Phân tầng: Page -> Hook -> Service -> Axios
     ├── frontend.md        # Quy ước Next.js 16 App Router, Client vs Server components, Tailwind 4
+    ├── ui-ux-checklist.md # Bộ checklist bắt buộc: Component States, Table, Dropdown, Form, Grid, Design System
+    ├── i18n-and-theming.md # Quy chuẩn chuyển đổi ngôn ngữ Anh - Việt & Chuyển đổi Theme Sáng/Tối/Hệ thống
     ├── tech-defaults.md   # TypeScript strict, Zod form, Date/Time Asia/Ho_Chi_Minh
     └── workflow.md        # Quy trình khảo sát, code, lint, build và bàn giao
 ```

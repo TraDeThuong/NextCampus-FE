@@ -38,3 +38,16 @@
 - **Khả năng tiếp cận (Accessibility - a11y)**:
   - Nút chỉ chứa icon bắt buộc phải có thuộc tính `aria-label`.
   - Tuyệt đối không gắn sự kiện `onClick` lên thẻ `<div>` hoặc `<span>` thuần túy nếu không có `role="button"` và `tabIndex={0}`. Ưu tiên dùng thẻ `<button type="button">`.
+
+---
+
+## 3. Bộ Checklist UI/UX Bắt Buộc Cho Mọi Thành Phần
+
+Chi tiết tại tài liệu chuyên biệt: [`.agents/rules/ui-ux-checklist.md`](file:///d:/NodeJS/NexCampus/NexCampus-FE/.agents/rules/ui-ux-checklist.md). Trước khi hoàn thiện bất kỳ giao diện nào, AI phải rà soát đủ 6 yếu tố:
+1. **Trạng thái Component (Component States)**: Đầy đủ 6 trạng thái: Normal, Hover, Focus/Focus-visible, Active/Pressed, Disabled, Loading (spinner + disable).
+2. **Bảng dữ liệu (Table)**: Xử lý Text Overflow (`truncate` + tooltip), Column Width (cố định vs co giãn), Mobile responsive (cuộn ngang hoặc card list), Sort & Filter (badge, clear filter), Phân trang & Empty state, Sticky header/column.
+3. **Menu thả xuống (Dropdown / Select)**: Chiều cao tối đa (`max-h-60 overflow-y-auto`), ô tìm kiếm bên trong khi danh sách dài, multi-select với checkbox và badges, tự động mở ngược lên (`side="top"`) khi ở đáy màn hình.
+4. **Form & Ô nhập liệu (Input Fields)**: Viền đỏ + câu lỗi + icon cảnh báo khi invalid; phân biệt màu placeholder vs value; dấu sao đỏ `*` bắt buộc; nút ẩn/hiện mật khẩu, format số và datepicker chuẩn.
+5. **Hệ thống lưới & Đáp ứng (Grid & Responsive)**: Breakpoints chuẩn (`sm`, `md`, `lg`, `xl`, `2xl`), layout tự co giãn (4 cột -> 2 cột -> 1 cột), drawer menu trên mobile.
+6. **Hệ thống thiết kế (Design System) & Tài nguyên**: Typography chuẩn cấp độ, bảng màu semantic NexCampus, icon SVG Lucide đồng bộ kèm `shrink-0`.
+

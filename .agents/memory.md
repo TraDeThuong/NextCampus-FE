@@ -34,6 +34,14 @@ Chỉ lưu các quyết định kiến trúc và UI/UX đã được xác nhận
   - Thực tập sinh không có quyền tự chấm điểm hoặc chỉnh sửa 12 tiêu chí.
   - Giao diện của Intern chỉ hiển thị điểm số, nhận xét và nút **"Đã xem đánh giá"**. Khi bấm, nút chuyển thành nhãn xanh *"Đã xác nhận xem lúc [thời gian]"*.
 
+- **2026-09-16 — Chuẩn hóa Trạng Thái Thành Phần & UI/UX Checklist**:
+  - Mọi interactive component (Button, Card, Input...) bắt buộc có đủ 6 trạng thái: Normal, Hover, Focus-visible, Active/Pressed, Disabled, Loading.
+  - Mọi Table phải có xử lý text overflow (`truncate` + tooltip), chiều rộng cột cố định/co giãn, cuộn ngang/chuyển card list trên mobile, sticky header/column, phân trang và empty state.
+  - Dropdown/Select phải có `max-h-60 overflow-y-auto`, searchable khi danh sách dài, flip placement khi chạm đáy màn hình.
+  - Form validation: Viền đỏ + icon cảnh báo + thông báo lỗi, placeholder tương phản rõ với value, dấu sao đỏ `*` bắt buộc, nút ẩn/hiện mật khẩu.
+  - Chi tiết quy chuẩn được quy định tại `.agents/rules/ui-ux-checklist.md`.
+
+
 ---
 
 ## 2. Quyết định Kỹ thuật & Luồng Dữ Liệu
@@ -51,3 +59,8 @@ Chỉ lưu các quyết định kiến trúc và UI/UX đã được xác nhận
   - Mọi kết quả từ AI (gợi ý đánh giá 12 tiêu chí, đề xuất phân công task) chỉ được điền vào form ở dạng xem trước (Draft).
   - Leader bắt buộc phải có quyền chỉnh sửa và chủ động bấm nút "Lưu" thì mới gửi request cập nhật vào database.
   - Khi AI service lỗi (timeout/502), hiển thị toast thông báo nhẹ nhàng và cho phép tiếp tục thao tác thủ công, không làm crash giao diện.
+
+- **2026-09-16 — Đa Ngôn Ngữ (i18n) & Chuyển Đổi Theme (Light / Dark / System)**:
+  - **i18n**: Hỗ trợ 2 ngôn ngữ `vi` (mặc định) và `en` qua `next-intl`. Dùng `useLocaleSwitcher()` để đổi `document.documentElement.lang` và URL qua `history.replaceState` không reload trang. Font tiếng Việt riêng (`--font-heading-vi`, `--font-body-vi`) để đảm bảo hiển thị chuẩn dấu thanh. Tuyệt đối không hardcode text tiếng Việt/Anh trực tiếp trong code.
+  - **Theme**: 3 chế độ `light`, `dark`, `system`. Class `.dark` trên thẻ `<html>`, lưu lựa chọn trong `localStorage` key `nexcampus-theme`. Khi chọn `system` phải lắng nghe media query `(prefers-color-scheme: dark)`. Bắt buộc có script inline chống nhấp nháy FOUC trong `<head>`. Sử dụng semantic CSS tokens (`bg-background`, `text-foreground`, `border-border`) thay vì hardcode mã màu.
+
