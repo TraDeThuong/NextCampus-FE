@@ -1,6 +1,5 @@
 "use client";
 
-import axios from "axios";
 import { createContext, useReducer, useEffect, useCallback, type ReactNode } from "react";
 import { setAccessToken, clearAccessToken } from "@/lib/token";
 import { authService } from "@/services/auth.service";

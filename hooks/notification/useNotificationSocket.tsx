@@ -27,7 +27,7 @@ export function useNotificationSocket() {
         const response = await notificationService.getTicket();
         if (!response.success || !response.ticket || !isMounted) return;
 
-        const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
+        const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:9999/api/v2";
         // Truyền ticket ngắn hạn thay vì Access Token dài hạn qua URL
         const streamUrl = `${rawApiUrl.replace(/\/$/, "")}/notifications/stream?ticket=${encodeURIComponent(response.ticket)}`;
 

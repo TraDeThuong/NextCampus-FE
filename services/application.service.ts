@@ -57,7 +57,8 @@ export const createApplicationService = async (
   payload: CreateApplicationPayload,
 ): Promise<ApplicationSuccessResponse> => {
   // Gửi trực tiếp payload JSON (chứa thông tin metadata của files đã upload trực tiếp)
-  const { files, ...data } = payload;
+  const data = { ...payload };
+  delete (data as { files?: unknown }).files;
   const response = await api.post<ApplicationSuccessResponse>(
     "/applications",
     data,

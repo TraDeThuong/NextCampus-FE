@@ -1,20 +1,32 @@
-import axios from "axios";
+import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import toast from "react-hot-toast";
 import { getAccessToken, setAccessToken, clearAccessToken } from "./token";
 
+/**
+ * Returns the localized pathname prefixed with current locale ('vi' or 'en')
+ */
 function getLocalePath(path: string): string {
     if (typeof window === "undefined") return path;
     const segments = window.location.pathname.split("/").filter(Boolean);
     const locale = segments[0];
     if (locale && ["vi", "en"].includes(locale)) {
-        return `/${locale}${path}`;
+        if (path.startsWith(`/${locale}/`) || path === `/${locale}`) {
+            return path;
+        }
+        const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+        return `/${locale}${normalizedPath}`;
     }
     return path;
 }
 
+/**
+ * Checks whether the current path is a public authentication route
+ */
 function isPublicRoute(pathname: string): boolean {
-    const localePrefix = pathname.split("/")[1];
+    const segments = pathname.split("/").filter(Boolean);
+    const localePrefix = segments[0];
     const cleanPath = localePrefix && ["vi", "en"].includes(localePrefix)
-        ? "/" + pathname.split("/").slice(2).join("/")
+        ? "/" + segments.slice(1).join("/")
         : pathname;
     return (
         cleanPath === "/login" ||
@@ -24,23 +36,28 @@ function isPublicRoute(pathname: string): boolean {
     );
 }
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:9999/api/v2";
+
 const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL,
+    baseURL: API_BASE_URL,
     // Required for the HTTP-only refreshToken cookie to be sent on cross-origin requests.
     withCredentials: true,
     timeout: 30000,
 });
 
 // Request interceptor — attach in-memory access token
-api.interceptors.request.use((config) => {
-    const token = getAccessToken();
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-});
+api.interceptors.request.use(
+    (config: InternalAxiosRequestConfig) => {
+        const token = getAccessToken();
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
 
-// Shared refresh promise to handle concurrent requests without double calls
+// Shared refresh promise to handle concurrent requests without race conditions
 let refreshPromise: Promise<string> | null = null;
 
 export async function executeTokenRefresh(): Promise<string> {
@@ -50,13 +67,20 @@ export async function executeTokenRefresh(): Promise<string> {
 
     refreshPromise = (async () => {
         try {
-            // POST /auth/refresh — no body; refreshToken cookie sent automatically
+            // POST /auth/refresh — no body; refreshToken cookie sent automatically via withCredentials
             const response = await axios.post(
-                `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+                `${API_BASE_URL}/auth/refresh`,
                 {},
                 { withCredentials: true }
             );
-            const { accessToken } = response.data.data;
+
+            const accessToken: string | undefined =
+                response.data?.data?.accessToken || response.data?.accessToken;
+
+            if (!accessToken) {
+                throw new Error("No access token returned from refresh endpoint");
+            }
+
             setAccessToken(accessToken);
             return accessToken;
         } finally {
@@ -67,22 +91,38 @@ export async function executeTokenRefresh(): Promise<string> {
     return refreshPromise;
 }
 
-// Response interceptor — silent token refresh on 401
-// The refreshToken is sent automatically via the HTTP-only cookie (withCredentials: true).
-// No token is ever read from or written to localStorage.
+interface ApiErrorResponse {
+    success?: boolean;
+    code?: string;
+    errorCode?: string;
+    message?: string;
+    data?: unknown;
+}
+
+// Response interceptor:
+// 1. Silent token refresh on 401 using in-memory lock
+// 2. 403 Forbidden handling: USER_INACTIVE redirects to login, Cross-Resource shows polite toast without logout
 api.interceptors.response.use(
     (response) => response,
-    async (error) => {
-        const originalRequest = error.config;
+    async (error: AxiosError<ApiErrorResponse>) => {
+        const originalRequest = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined;
 
-        if (
-            error.response?.status === 401 &&
-            !originalRequest._retry &&
-            !originalRequest.url?.includes("/auth/login") &&
-            !originalRequest.url?.includes("/auth/refresh") &&
-            !originalRequest.url?.includes("/auth/forgot-password") &&
-            !originalRequest.url?.includes("/auth/reset-password")
-        ) {
+        if (!originalRequest) {
+            return Promise.reject(error);
+        }
+
+        const status = error.response?.status;
+
+        // -------------------------------------------------------------------------
+        // 1. Handle 401 Unauthorized — Silent Token Refresh
+        // -------------------------------------------------------------------------
+        const isAuthBypassUrl =
+            originalRequest.url?.includes("/auth/login") ||
+            originalRequest.url?.includes("/auth/refresh") ||
+            originalRequest.url?.includes("/auth/forgot-password") ||
+            originalRequest.url?.includes("/auth/reset-password");
+
+        if (status === 401 && !originalRequest._retry && !isAuthBypassUrl) {
             originalRequest._retry = true;
 
             try {
@@ -93,7 +133,6 @@ api.interceptors.response.use(
                 clearAccessToken();
                 if (typeof window !== "undefined") {
                     const pathname = window.location.pathname;
-
                     if (!isPublicRoute(pathname)) {
                         window.location.href = getLocalePath("/login");
                     }
@@ -102,16 +141,32 @@ api.interceptors.response.use(
             }
         }
 
-        if (error.response?.status === 403) {
-            const errorCode = error.response?.data?.code;
-            if (
-                (errorCode === "USER_INACTIVE" || 
-                error.response?.data?.message?.toLowerCase().includes("inactive")) &&
-                !originalRequest.url?.includes("/auth/login")
-            ) {
+        // -------------------------------------------------------------------------
+        // 2. Handle 403 Forbidden — Account Inactive vs. Cross-Resource / Forbidden Action
+        // -------------------------------------------------------------------------
+        if (status === 403) {
+            const errorData = error.response?.data;
+            const errorCode = errorData?.code || errorData?.errorCode;
+            const errorMessage = typeof errorData?.message === "string" ? errorData.message.toLowerCase() : "";
+
+            const isUserInactive =
+                errorCode === "USER_INACTIVE" ||
+                errorMessage.includes("inactive") ||
+                errorMessage.includes("vô hiệu hóa");
+
+            if (isUserInactive && !originalRequest.url?.includes("/auth/login")) {
+                // Case 2.1: Account is deactivated/inactive -> clear token and redirect to login
                 clearAccessToken();
                 if (typeof window !== "undefined") {
                     window.location.href = getLocalePath("/login?reason=inactive");
+                }
+            } else {
+                // Case 2.2: Cross-resource violation / Forbidden action (e.g. cross-department stats, uninvited meeting, TASK_ALREADY_COMPLETED)
+                // NEVER automatically logout (session and token are valid). Show polite error toast.
+                if (typeof window !== "undefined") {
+                    toast.error("Bạn không có quyền thực hiện thao tác hoặc truy cập tài nguyên này.", {
+                        id: "forbidden-access-error",
+                    });
                 }
             }
         }

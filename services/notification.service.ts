@@ -86,7 +86,7 @@ export const notificationService = {
     emailContent?: string;
     sendWeb?: boolean;
     sendEmail?: boolean;
-  }): Promise<any> => {
+  }): Promise<unknown> => {
     const response = await api.post("/notifications/send-custom", payload);
     return response.data;
   },

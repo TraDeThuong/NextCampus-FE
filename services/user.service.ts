@@ -6,9 +6,6 @@ import {
   CreateUserPayload,
   UpdateUserPayload,
 } from "@/types/user";
-import { MessageSuccessResponse } from "@/types/auth";
-
-// 1. GET /users — Danh sách user (phân trang, filter, sort)
 export const getUsersService = async (
   params?: UserQueryParams,
 ): Promise<UserListResponse> => {
