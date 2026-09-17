@@ -1,3 +1,5 @@
+"use client";
+
 import { HiXMark } from "react-icons/hi2";
 import { createPortal } from "react-dom";
 import {
@@ -5,13 +7,14 @@ import {
   createContext,
   useContext,
   useState,
+  useEffect,
+  useCallback,
   isValidElement,
   Fragment,
   type ReactElement,
   type ReactNode,
 } from "react";
 import useOutsideClick from "@/hooks/useOutsideClick";
-
 
 interface ModalContextType {
   openName: string;
@@ -26,27 +29,51 @@ interface OpenProps {
 
 interface WindowProps {
   children: ReactNode;
-  name: string;
-  size?: "sm" | "md" | "lg";
+  name?: string;
+  size?: "sm" | "md" | "lg" | "xl";
+  title?: string;
+  onClose?: () => void;
+}
+
+interface DirectModalProps {
+  children: ReactNode;
+  isOpen?: boolean;
+  onClose?: () => void;
+  title?: string;
+  size?: "sm" | "md" | "lg" | "xl";
 }
 
 const ModalContext = createContext<ModalContextType | null>(null);
 
 function useModalContext() {
   const context = useContext(ModalContext);
-
-  if (!context) {
-    throw new Error("Modal components must be used inside <Modal>");
-  }
-
   return context;
 }
 
-function Modal({ children }: { children: ReactNode }) {
+function Modal({
+  children,
+  isOpen,
+  onClose,
+  title,
+  size = "lg",
+}: DirectModalProps) {
   const [openName, setOpenName] = useState("");
 
-  const close = () => setOpenName("");
+  const close = () => {
+    setOpenName("");
+    onClose?.();
+  };
   const open = (name: string) => setOpenName(name);
+
+  // If used in direct controlled mode (<Modal isOpen={true} onClose={...}>)
+  if (isOpen !== undefined) {
+    if (!isOpen) return null;
+    return (
+      <Window onClose={close} size={size} title={title}>
+        {children}
+      </Window>
+    );
+  }
 
   return (
     <ModalContext.Provider value={{ openName, open, close }}>
@@ -56,35 +83,69 @@ function Modal({ children }: { children: ReactNode }) {
 }
 
 function Open({ children, opens }: OpenProps) {
-  const { open } = useModalContext();
+  const ctx = useModalContext();
 
   return cloneElement(children, {
-    onClick: () => open(opens),
+    onClick: () => ctx?.open(opens),
   });
 }
 
 const windowSizes = {
-  sm: "max-w-[min(92vw,42rem)] p-5 sm:p-6",
-  md: "max-w-[min(94vw,72rem)] p-6 sm:p-8",
-  lg: "max-w-[min(96vw,112rem)] p-6 sm:p-10",
+  sm: "max-w-[min(92vw,36rem)] p-5 sm:p-6",
+  md: "max-w-[min(94vw,56rem)] p-6 sm:p-8",
+  lg: "max-w-[min(96vw,72rem)] p-6 sm:p-10",
+  xl: "max-w-[min(96vw,90rem)] p-6 sm:p-10",
 };
 
-function Window({ children, name, size = "lg" }: WindowProps) {
-  const { openName, close } = useModalContext();
+function Window({ children, name, size = "lg", title, onClose }: WindowProps) {
+  const ctx = useModalContext();
+  const handleClose = useCallback(() => {
+    if (onClose) {
+      onClose();
+    } else if (ctx) {
+      ctx.close();
+    }
+  }, [onClose, ctx]);
 
-  const ref = useOutsideClick<HTMLDivElement>(close);
+  const ref = useOutsideClick<HTMLDivElement>(handleClose);
 
-  if (name !== openName) return null;
+  const isVisible = name ? ctx?.openName === name : true;
+
+  // Keyboard Escape listener & body scroll lock
+  useEffect(() => {
+    if (!isVisible) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        handleClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isVisible, handleClose]);
+
+  if (!isVisible) return null;
+  if (typeof document === "undefined") return null;
 
   return createPortal(
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={title || "Modal"}
       className="
         fixed inset-0 z-[1000]
         flex items-center justify-center
         bg-black/70
-        p-4
+        p-4 sm:p-6
         backdrop-blur-md
-        animate-in fade-in duration-300
+        animate-fadeIn
       "
     >
       <div
@@ -96,7 +157,7 @@ function Window({ children, name, size = "lg" }: WindowProps) {
 
           rounded-[2rem]
           border border-border
-          bg-card
+          bg-[#0c1222]/95 dark:bg-[#0c1222]/95
           shadow-glass
           backdrop-blur-2xl
 
@@ -130,13 +191,23 @@ function Window({ children, name, size = "lg" }: WindowProps) {
           "
         />
 
-        <button
-          onClick={close}
-          className="
-            absolute right-4 top-4
-            flex h-12 w-12 items-center justify-center
+        {title && (
+          <div className="mb-4 pr-12">
+            <h2 className="text-lg sm:text-xl font-semibold metal-text truncate">
+              {title}
+            </h2>
+          </div>
+        )}
 
-            rounded-2xl
+        <button
+          type="button"
+          onClick={handleClose}
+          aria-label="Đóng"
+          className="
+            absolute right-4 top-4 z-10
+            flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center
+
+            rounded-xl sm:rounded-2xl
             border border-border
             bg-card
 
@@ -145,25 +216,29 @@ function Window({ children, name, size = "lg" }: WindowProps) {
 
             transition-all duration-200
 
-            hover:cursor-pointer
+            cursor-pointer
             hover:border-primary-light/40
             hover:bg-card-hover
             hover:text-foreground
             hover:shadow-[0_0_20px_rgba(21,174,245,0.15)]
+            active:scale-95
 
-            focus:outline-none
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-light
           "
         >
-          <HiXMark className="h-7 w-7 hover:cursor-pointer" />
+          <HiXMark className="h-6 w-6 shrink-0" />
         </button>
 
         <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
           {isValidElement(children) &&
           typeof children.type !== "string" &&
           children.type !== Fragment
-            ? cloneElement(children as ReactElement<{ onCloseModal?: () => void }>, {
-                onCloseModal: close,
-              })
+            ? cloneElement(
+                children as ReactElement<{ onCloseModal?: () => void }>,
+                {
+                  onCloseModal: handleClose,
+                }
+              )
             : children}
         </div>
       </div>

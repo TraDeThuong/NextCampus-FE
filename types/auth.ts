@@ -15,6 +15,8 @@ export interface LoginUser {
     email: string;
     fullName: string;
     role: "ADMIN" | "LEADER" | "INTERN" | string;
+    roleId?: string;
+    permissions?: string[];
     avatarUrl: string | null;
 }
 
@@ -65,6 +67,8 @@ export interface MeUser {
     email: string;
     fullName: string;
     role: "ADMIN" | "LEADER" | "INTERN" | string;
+    roleId?: string;
+    permissions?: string[];
     isActive: boolean;
     avatarUrl: string | null;
     createdAt: string;

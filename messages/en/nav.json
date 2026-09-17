@@ -1,0 +1,80 @@
+{
+  "admin": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "adminTeam": "Admin Team",
+      "leaders": "Leaders",
+      "interns": "Interns",
+      "department": "Department",
+      "onboarding": "Onboarding",
+      "mails": "Mails",
+      "meetings": "Meetings",
+      "policies": "Policies",
+      "regulations": "Regulations",
+      "roles": "Roles & Permissions",
+      "settings": "Settings",
+      "activityLogs": "Activity Logs",
+      "profile": "Profile"
+    }
+  },
+  "leader": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "interns": "Interns",
+      "department": "Department",
+      "tasks": "Tasks",
+      "taskGroups": "Task Groups",
+      "dailyReports": "Daily Reports",
+      "meetings": "Meetings",
+      "weeklyEvaluation": "Weekly Evaluation",
+      "profile": "Profile"
+    }
+  },
+  "intern": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "task": "Task",
+      "dailyReport": "Daily Report",
+      "meetings": "Meetings",
+      "weeklyEvaluation": "Weekly Evaluation",
+      "profile": "Profile"
+    }
+  },
+  "nav": {
+    "admin": {
+      "dashboard": "Dashboard",
+      "adminTeam": "Admin Team",
+      "leaders": "Leaders",
+      "interns": "Interns",
+      "department": "Department",
+      "onboarding": "Onboarding",
+      "mails": "Mails",
+      "meetings": "Meetings",
+      "policies": "Policies",
+      "regulations": "Regulations",
+      "roles": "Roles & Permissions",
+      "settings": "Settings",
+      "activityLogs": "Activity Logs",
+      "profile": "Profile"
+    },
+    "leader": {
+      "dashboard": "Dashboard",
+      "interns": "Interns",
+      "department": "Department",
+      "tasks": "Tasks",
+      "taskGroups": "Task Groups",
+      "dailyReports": "Daily Reports",
+      "meetings": "Meetings",
+      "weeklyEvaluation": "Weekly Evaluation",
+      "profile": "Profile"
+    },
+    "intern": {
+      "dashboard": "Dashboard",
+      "task": "Task",
+      "dailyReport": "Daily Report",
+      "meetings": "Meetings",
+      "weeklyEvaluation": "Weekly Evaluation",
+      "profile": "Profile"
+    }
+  }
+}

@@ -1,14 +1,17 @@
 import React, { ButtonHTMLAttributes, forwardRef } from 'react';
 
 export type ButtonVariant = 
-  | 'primary'       // Màu Brand Main chuẩn chỉnh
-  | 'glass'         // Phong cách kính mờ xuyên thấu (Glassmorphism)
-  | 'metal-silver'  // Ánh kim bạc cao cấp (Phong cách chủ đạo)
-  | 'metal-blue'    // Ánh thép xanh Futuristic
-  | 'chrome-glow'   // Chrome bóng bẩy kết hợp hiệu ứng phát quang
-  | 'danger';       // Trạng thái báo lỗi/xóa
+  | 'primary'       // Brand Main
+  | 'secondary'     // Secondary action
+  | 'glass'         // Glassmorphism card style
+  | 'outline'       // Border outline
+  | 'ghost'         // Transparent ghost button
+  | 'metal-silver'  // Silver metallic style
+  | 'metal-blue'    // Blue futuristic steel
+  | 'chrome-glow'   // Chrome with radiant glow
+  | 'danger';       // Danger/delete state
 
-export type ButtonSize = 'sm' | 'md' | 'lg';
+export type ButtonSize = 'sm' | 'md' | 'lg' | 'icon';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -30,17 +33,24 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
   ...props
 }, ref) => {
 
-  const baseStyles = 'relative inline-flex items-center justify-center font-semibold tracking-wide rounded-xl transition-all duration-300 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-40 select-none overflow-hidden';
+  const baseStyles = 'relative inline-flex items-center justify-center font-semibold tracking-wide rounded-xl transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-light focus-visible:ring-offset-2 focus-visible:ring-offset-background cursor-pointer disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-40 select-none overflow-hidden';
 
-  const sizeStyles = {
+  const sizeStyles: Record<ButtonSize, string> = {
+    icon: 'h-10 w-10 p-0 text-sm rounded-xl shrink-0',
     sm: 'px-3 py-2 text-xs rounded-lg gap-1.5',
     md: 'px-5 py-3 text-sm rounded-xl gap-2',
     lg: 'px-7 py-4 text-base rounded-2xl gap-2.5',
   };
 
-  const variantStyles = {
+  const variantStyles: Record<ButtonVariant, string> = {
     primary: 'bg-primary-main text-white shadow-soft hover:bg-primary-light hover:text-white',
     
+    secondary: 'bg-card text-foreground border border-border hover:bg-card-hover hover:border-border-strong',
+
+    outline: 'border border-border text-foreground bg-transparent hover:bg-card-hover hover:border-border-strong',
+
+    ghost: 'text-muted hover:text-foreground hover:bg-card-hover',
+
     glass: 'bg-card text-foreground border border-border hover:bg-card-hover hover:border-border-strong shadow-glass backdrop-blur-md',
     
     'metal-silver': 'bg-gradient-to-b from-white/10 to-white/5 border border-white/20 text-transparent bg-clip-text shadow-md before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/5 before:to-transparent hover:before:opacity-100 hover:border-white/40 [&>*]:metal-text',

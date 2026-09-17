@@ -52,7 +52,23 @@ export function proxy(request: NextRequest) {
   }
 
   const isAuthenticated = !!payload && !!payload.role;
-  const userRole = payload?.role?.toLowerCase();
+  const rawRole = payload?.role?.toLowerCase();
+
+  /**
+   * Xác định Portal cơ sở cho vai trò:
+   * - leader -> leader
+   * - intern -> intern
+   * - admin hoặc các custom role quản trị/vận hành (HR, MANAGER, COORDINATOR...) -> admin
+   */
+  const getPortalName = (role?: string) => {
+    const r = role?.toLowerCase();
+    if (r === "leader") return "leader";
+    if (r === "intern") return "intern";
+    return "admin";
+  };
+
+  const portal = getPortalName(rawRole);
+  const targetDashboard = `/${portal}/dashboard`;
 
   const isAuthRoute =
     pathname.startsWith("/login") ||
@@ -66,13 +82,11 @@ export function proxy(request: NextRequest) {
 
   // 1. Authenticated user accessing auth routes (/login, /forgot-password) -> Redirect to their role dashboard
   if (isAuthenticated && isAuthRoute) {
-    const targetDashboard = `/${userRole}/dashboard`;
     return NextResponse.redirect(new URL(targetDashboard, request.url));
   }
 
   // 2. Authenticated user accessing root "/" -> Redirect to their role dashboard
   if (isAuthenticated && pathname === "/") {
-    const targetDashboard = `/${userRole}/dashboard`;
     return NextResponse.redirect(new URL(targetDashboard, request.url));
   }
 
@@ -83,14 +97,14 @@ export function proxy(request: NextRequest) {
 
   // 4. Authenticated user accessing wrong role area -> Redirect to own dashboard
   if (isAuthenticated && isDashboardRoute) {
-    if (pathname.startsWith("/admin") && userRole !== "admin") {
-      return NextResponse.redirect(new URL(`/${userRole}/dashboard`, request.url));
+    if (pathname.startsWith("/admin") && portal !== "admin") {
+      return NextResponse.redirect(new URL(targetDashboard, request.url));
     }
-    if (pathname.startsWith("/leader") && userRole !== "leader") {
-      return NextResponse.redirect(new URL(`/${userRole}/dashboard`, request.url));
+    if (pathname.startsWith("/leader") && portal !== "leader") {
+      return NextResponse.redirect(new URL(targetDashboard, request.url));
     }
-    if (pathname.startsWith("/intern") && userRole !== "intern") {
-      return NextResponse.redirect(new URL(`/${userRole}/dashboard`, request.url));
+    if (pathname.startsWith("/intern") && portal !== "intern") {
+      return NextResponse.redirect(new URL(targetDashboard, request.url));
     }
   }
 

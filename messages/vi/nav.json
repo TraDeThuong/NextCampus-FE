@@ -1,0 +1,80 @@
+{
+  "admin": {
+    "nav": {
+      "dashboard": "Tổng quan",
+      "adminTeam": "Nhóm Admin",
+      "leaders": "Leader",
+      "interns": "Thực tập sinh",
+      "department": "Phòng ban",
+      "onboarding": "Onboarding",
+      "mails": "Email",
+      "meetings": "Cuộc họp",
+      "policies": "Chính sách",
+      "regulations": "Nội quy thực tập",
+      "roles": "Vai trò & Phân quyền",
+      "settings": "Cấu hình",
+      "activityLogs": "Nhật ký",
+      "profile": "Hồ sơ"
+    }
+  },
+  "leader": {
+    "nav": {
+      "dashboard": "Tổng quan",
+      "interns": "Thực tập sinh",
+      "department": "Phòng ban",
+      "tasks": "Nhiệm vụ",
+      "taskGroups": "Nhóm công việc",
+      "dailyReports": "Báo cáo ngày",
+      "meetings": "Cuộc họp",
+      "weeklyEvaluation": "Đánh giá tuần",
+      "profile": "Hồ sơ"
+    }
+  },
+  "intern": {
+    "nav": {
+      "dashboard": "Tổng quan",
+      "task": "Nhiệm vụ",
+      "dailyReport": "Báo cáo ngày",
+      "meetings": "Cuộc họp",
+      "weeklyEvaluation": "Đánh giá tuần",
+      "profile": "Hồ sơ"
+    }
+  },
+  "nav": {
+    "admin": {
+      "dashboard": "Tổng quan",
+      "adminTeam": "Nhóm Admin",
+      "leaders": "Leader",
+      "interns": "Thực tập sinh",
+      "department": "Phòng ban",
+      "onboarding": "Onboarding",
+      "mails": "Email",
+      "meetings": "Cuộc họp",
+      "policies": "Chính sách",
+      "regulations": "Nội quy thực tập",
+      "roles": "Vai trò & Phân quyền",
+      "settings": "Cấu hình",
+      "activityLogs": "Nhật ký",
+      "profile": "Hồ sơ"
+    },
+    "leader": {
+      "dashboard": "Tổng quan",
+      "interns": "Thực tập sinh",
+      "department": "Phòng ban",
+      "tasks": "Nhiệm vụ",
+      "taskGroups": "Nhóm công việc",
+      "dailyReports": "Báo cáo ngày",
+      "meetings": "Cuộc họp",
+      "weeklyEvaluation": "Đánh giá tuần",
+      "profile": "Hồ sơ"
+    },
+    "intern": {
+      "dashboard": "Tổng quan",
+      "task": "Nhiệm vụ",
+      "dailyReport": "Báo cáo ngày",
+      "meetings": "Cuộc họp",
+      "weeklyEvaluation": "Đánh giá tuần",
+      "profile": "Hồ sơ"
+    }
+  }
+}

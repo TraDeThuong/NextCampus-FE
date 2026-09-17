@@ -68,6 +68,13 @@
       "light": "Light",
       "dark": "Dark",
       "system": "System"
+    },
+    "language": {
+      "toggle": "Switch language",
+      "switchToEn": "Switch to English (EN)",
+      "switchToVi": "Switch to Vietnamese (VN)",
+      "vi": "Tiếng Việt",
+      "en": "English"
     }
   }
 }

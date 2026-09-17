@@ -6,11 +6,11 @@ import { Link } from "@/i18n/navigation";
 import { LogOut, User, Menu } from "lucide-react";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { useLogout } from "@/hooks/auth/useLogout";
-import { useTranslations, useLocale } from "next-intl";
-import { useLocaleSwitcher } from "@/providers/LocaleProvider";
+import { useTranslations } from "next-intl";
 import Spinner from "../ui/Spinner";
 import NotificationBell from "../notification/NotificationBell";
 import ThemeToggle from "../theme/ThemeToggle";
+import LanguageToggle from "./LanguageToggle";
 
 type HeaderProps = {
   role: string;
@@ -19,17 +19,11 @@ type HeaderProps = {
 
 export default function Header({ role, onMenuClick }: HeaderProps) {
     const t = useTranslations();
-    const locale = useLocale();
-    const { setLocale } = useLocaleSwitcher();
     const { state } = useAuth();
     const { logoutMutate, isLoading } = useLogout();
 
     const handleLogout = () => {
         logoutMutate();
-    };
-
-    const toggleLanguage = () => {
-      setLocale(locale === "vi" ? "en" : "vi");
     };
 
   return (
@@ -65,18 +59,8 @@ export default function Header({ role, onMenuClick }: HeaderProps) {
           {/* Theme Switcher */}
           <ThemeToggle />
 
-          {/* Language Switch */}
-          <button
-            onClick={toggleLanguage}
-            className="flex items-center gap-2 text-sm text-white/70 hover:text-white transition cursor-pointer"
-          >
-            <span className="text-2xl">
-              {locale === "vi" ? "🇻🇳" : "🇺🇸"}
-            </span>
-            <span className="hidden sm:inline">
-              {locale === "vi" ? "VN" : "EN"}
-            </span>
-          </button>
+          {/* Language Switcher */}
+          <LanguageToggle />
 
           {/* Notification Bell */}
           <NotificationBell />

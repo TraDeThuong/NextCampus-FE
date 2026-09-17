@@ -10,7 +10,7 @@ export interface ApiError {
 
 export interface UserRole {
   id: string;
-  name: "ADMIN" | "LEADER" | "INTERN";
+  name: "ADMIN" | "LEADER" | "INTERN" | string;
 }
 
 export interface User {
@@ -48,7 +48,7 @@ export interface UserListResponse {
 export interface UserQueryParams {
   email?: string;
   fullName?: string;
-  roleName?: "ADMIN" | "LEADER" | "INTERN";
+  roleName?: string;
   isActive?: boolean;
   sortBy?: "createdAt" | "email" | "fullName";
   order?: "asc" | "desc";
@@ -59,11 +59,14 @@ export interface UserQueryParams {
 export interface CreateUserPayload {
   email: string;
   password?: string;
-  roleName?: "ADMIN" | "LEADER" | "INTERN";
+  roleName?: string;
   roleId?: string;
+  fullName?: string;
 }
 
 export interface UpdateUserPayload {
   isActive?: boolean;
-  role?: "LEADER" | "INTERN";
+  role?: string;
+  roleId?: string;
+  fullName?: string;
 }

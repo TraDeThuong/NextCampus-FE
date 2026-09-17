@@ -68,6 +68,13 @@
       "light": "Sáng",
       "dark": "Tối",
       "system": "Hệ thống"
+    },
+    "language": {
+      "toggle": "Chuyển ngôn ngữ",
+      "switchToEn": "Chuyển sang Tiếng Anh (EN)",
+      "switchToVi": "Chuyển sang Tiếng Việt (VN)",
+      "vi": "Tiếng Việt",
+      "en": "English"
     }
   }
 }

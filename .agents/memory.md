@@ -64,3 +64,8 @@ Chỉ lưu các quyết định kiến trúc và UI/UX đã được xác nhận
   - **i18n**: Hỗ trợ 2 ngôn ngữ `vi` (mặc định) và `en` qua `next-intl`. Dùng `useLocaleSwitcher()` để đổi `document.documentElement.lang` và URL qua `history.replaceState` không reload trang. Font tiếng Việt riêng (`--font-heading-vi`, `--font-body-vi`) để đảm bảo hiển thị chuẩn dấu thanh. Tuyệt đối không hardcode text tiếng Việt/Anh trực tiếp trong code.
   - **Theme**: 3 chế độ `light`, `dark`, `system`. Class `.dark` trên thẻ `<html>`, lưu lựa chọn trong `localStorage` key `nexcampus-theme`. Khi chọn `system` phải lắng nghe media query `(prefers-color-scheme: dark)`. Bắt buộc có script inline chống nhấp nháy FOUC trong `<head>`. Sử dụng semantic CSS tokens (`bg-background`, `text-foreground`, `border-border`) thay vì hardcode mã màu.
 
+- **2026-09-17 — Kiến trúc Đa Ngôn Ngữ Feature-Based (i18n)**:
+  - Xóa bỏ hoàn toàn việc chia thư mục i18n theo Role (`admin/`, `leader/`, `intern/`).
+  - Dữ liệu dịch thuật được tổ chức theo Mô-đun/Tính năng chuẩn hóa (`messages/${locale}/*.json`): `roles.json`, `departments.json`, `tasks.json`, `task-groups.json`, `meetings.json`, `daily-reports.json`, `weekly-evaluations.json`, `users.json`, `onboarding.json`, `emails.json`, `regulations.json`, `dashboards.json`, `activity-logs.json`, `profile.json`, `settings.json`.
+  - Bộ nạp `loadLocaleMessages()` trong `i18n/load-messages.ts` hợp nhất tự động và bảo lưu tương thích ngược 100% với các namespace portal cũ.
+

@@ -10,6 +10,7 @@ import {
   UserRoundPen,
   History,
   Settings,
+  ShieldCheck,
 } from "lucide-react";
 
 import { LuAlarmClock } from "react-icons/lu";
@@ -28,6 +29,7 @@ export default function AdminSidebar() {
   const menus = [
     { name: t("admin.nav.dashboard"),     href: "/admin/dashboard",     icon: LayoutDashboard },
     { name: t("admin.nav.adminTeam"),     href: "/admin/admin-team",    icon: MdManageAccounts },
+    { name: t("admin.nav.roles"),         href: "/admin/roles",         icon: ShieldCheck },
     { name: t("admin.nav.leaders"),       href: "/admin/leaders",       icon: UserCheck },
     { name: t("admin.nav.interns"),       href: "/admin/interns",       icon: Users },
     { name: t("admin.nav.department"),    href: "/admin/department",    icon: PiBuildingOfficeLight },

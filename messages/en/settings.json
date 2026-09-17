@@ -1,0 +1,52 @@
+{
+  "admin": {
+    "settings": {
+      "metaTitle": "System Settings",
+      "title": "System Settings & Operational Parameters",
+      "subtitle": "Manage workload quotas, schedule rules, and file upload limits across NexCampus",
+      "saveSettings": "Save Settings",
+      "saving": "Saving...",
+      "saveSuccess": "System settings updated successfully!",
+      "saveError": "Failed to update system settings. Please try again.",
+      "loadError": "Failed to load system settings.",
+      "dailyReportDeadlineTitle": "Daily Report Deadline Time",
+      "dailyReportDeadlineDesc": "Cutoff time for interns to submit their daily reports (Format HH:mm, e.g. 17:30)",
+      "maxActiveTasksTitle": "Maximum Active Tasks",
+      "maxActiveTasksDesc": "Maximum number of in-progress tasks that can be assigned to an intern simultaneously",
+      "maxWorkloadDaysTitle": "Maximum Workload Days",
+      "maxWorkloadDaysDesc": "Maximum cumulative workload days allowed for an intern at any given time",
+      "submissionMaxFileSizeTitle": "Maximum Submission File Size",
+      "submissionMaxFileSizeDesc": "Maximum allowed size (in MB) for task submission demo files and videos",
+      "reportAttachmentMaxSizeTitle": "Maximum Report Attachment Size",
+      "reportAttachmentMaxSizeDesc": "Maximum allowed size (in MB) for daily report attachment files",
+      "tasksUnit": "tasks",
+      "daysUnit": "days",
+      "mbUnit": "MB",
+      "resetDefaults": "Reset to Defaults"
+    }
+  },
+  "settings": {
+    "metaTitle": "System Settings",
+    "title": "System Settings & Operational Parameters",
+    "subtitle": "Manage workload quotas, schedule rules, and file upload limits across NexCampus",
+    "saveSettings": "Save Settings",
+    "saving": "Saving...",
+    "saveSuccess": "System settings updated successfully!",
+    "saveError": "Failed to update system settings. Please try again.",
+    "loadError": "Failed to load system settings.",
+    "dailyReportDeadlineTitle": "Daily Report Deadline Time",
+    "dailyReportDeadlineDesc": "Cutoff time for interns to submit their daily reports (Format HH:mm, e.g. 17:30)",
+    "maxActiveTasksTitle": "Maximum Active Tasks",
+    "maxActiveTasksDesc": "Maximum number of in-progress tasks that can be assigned to an intern simultaneously",
+    "maxWorkloadDaysTitle": "Maximum Workload Days",
+    "maxWorkloadDaysDesc": "Maximum cumulative workload days allowed for an intern at any given time",
+    "submissionMaxFileSizeTitle": "Maximum Submission File Size",
+    "submissionMaxFileSizeDesc": "Maximum allowed size (in MB) for task submission demo files and videos",
+    "reportAttachmentMaxSizeTitle": "Maximum Report Attachment Size",
+    "reportAttachmentMaxSizeDesc": "Maximum allowed size (in MB) for daily report attachment files",
+    "tasksUnit": "tasks",
+    "daysUnit": "days",
+    "mbUnit": "MB",
+    "resetDefaults": "Reset to Defaults"
+  }
+}

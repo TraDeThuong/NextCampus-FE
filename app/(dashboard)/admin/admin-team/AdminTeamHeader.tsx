@@ -11,8 +11,11 @@ import MetalCard from "@/components/ui/MetalCard";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 
+import { useRoles } from "@/hooks/rbac/useRoles";
+
 type FormValues = {
     email: string;
+    roleId?: string;
 };
 
 export default function AdminTeamHeader() {
@@ -20,8 +23,8 @@ export default function AdminTeamHeader() {
     const queryClient = useQueryClient();
 
     const { mutate: createAdmin, isPending } = useMutation({
-        mutationFn: (email: string) =>
-            createUserService({ email, roleName: "ADMIN" }),
+        mutationFn: ({ email, roleId }: { email: string; roleId?: string }) =>
+            createUserService({ email, roleId, roleName: !roleId ? "ADMIN" : undefined }),
         onSuccess: () => {
             toast.success(t("admin.adminTeam.createSuccess"));
             queryClient.invalidateQueries({ queryKey: ["users"] });
@@ -60,7 +63,7 @@ export default function AdminTeamHeader() {
             <Modal.Window name="invite-admin" size="sm">
                 <InviteAdminForm
                     isPending={isPending}
-                    onSubmit={(email) => createAdmin(email)}
+                    onSubmit={(data) => createAdmin(data)}
                 />
             </Modal.Window>
         </Modal>
@@ -73,15 +76,23 @@ function InviteAdminForm({
     onCloseModal,
 }: {
     isPending: boolean;
-    onSubmit: (email: string) => void;
+    onSubmit: (data: FormValues) => void;
     onCloseModal?: () => void;
 }) {
     const t = useTranslations();
+    const { data: rolesRes } = useRoles();
+    const roles = rolesRes?.data ?? [];
+    const defaultRole = roles.find((r) => r.name === "ADMIN");
+
     const {
         register,
         handleSubmit,
         formState: { errors },
-    } = useForm<FormValues>();
+    } = useForm<FormValues>({
+        defaultValues: {
+            roleId: defaultRole?.id,
+        },
+    });
 
     return (
         <div className="px-2 py-8 text-center">
@@ -96,29 +107,50 @@ function InviteAdminForm({
             </p>
 
             <form
-                onSubmit={handleSubmit((data) => onSubmit(data.email))}
-                className="mt-6 space-y-4"
+                onSubmit={handleSubmit((data) => onSubmit(data))}
+                className="mt-6 space-y-4 text-left"
             >
-                <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                    <input
-                        type="email"
-                        placeholder={t("admin.adminTeam.emailPlaceholder")}
-                        {...register("email", {
-                            required: t("admin.adminTeam.emailRequired"),
-                            pattern: {
-                                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                                message: t("admin.adminTeam.invalidEmail"),
-                            },
-                        })}
-                        className="w-full rounded-xl border border-white/10 bg-white/5 py-3 pl-11 pr-4 text-sm text-white outline-none transition focus:border-cyan-400/50 placeholder:text-slate-600"
-                    />
+                <div>
+                    <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
+                        Email thành viên <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="relative">
+                        <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                        <input
+                            type="email"
+                            placeholder={t("admin.adminTeam.emailPlaceholder")}
+                            {...register("email", {
+                                required: t("admin.adminTeam.emailRequired"),
+                                pattern: {
+                                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                                    message: t("admin.adminTeam.invalidEmail"),
+                                },
+                            })}
+                            className="w-full rounded-xl border border-white/10 bg-white/5 py-3 pl-11 pr-4 text-sm text-white outline-none transition focus:border-cyan-400/50 placeholder:text-slate-600"
+                        />
+                    </div>
+                    {errors.email && (
+                        <p className="text-xs text-red-400 mt-1">
+                            {errors.email.message}
+                        </p>
+                    )}
                 </div>
-                {errors.email && (
-                    <p className="text-sm text-red-400">
-                        {errors.email.message}
-                    </p>
-                )}
+
+                <div>
+                    <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
+                        Vai trò được gán
+                    </label>
+                    <select
+                        {...register("roleId")}
+                        className="w-full rounded-xl border border-white/10 bg-slate-900 py-3 px-4 text-sm text-white outline-none focus:border-cyan-400/50 cursor-pointer"
+                    >
+                        {roles.map((r) => (
+                            <option key={r.id} value={r.id}>
+                                {r.name} {r.isSystem ? "(Hệ thống)" : "(Tùy chỉnh)"}
+                            </option>
+                        ))}
+                    </select>
+                </div>
 
                 <div className="flex justify-center gap-3 pt-2">
                     <button

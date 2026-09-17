@@ -38,7 +38,10 @@ const messageCache = globalForMessages.messageCache;
 const shouldCacheMessages = process.env.NODE_ENV === "production";
 
 /**
- * Load all message files for a given locale and merge them into one object.
+ * Tải toàn bộ các tệp thông điệp ngôn ngữ tổ chức theo Feature-based (Mô-đun/Tính năng).
+ * Hỗ trợ đồng thời:
+ * 1. Namespace theo tính năng: roles, departments, tasks, meetings, users...
+ * 2. Namespace portal kế thừa (admin.*, leader.*, intern.*) bảo đảm tương thích ngược 100%.
  */
 export async function loadLocaleMessages(
   locale: string,
@@ -49,165 +52,73 @@ export async function loadLocaleMessages(
 
   const files: Record<string, unknown> = {};
 
-  // Common
+  // 1. Common (Dùng chung toàn hệ thống)
   const common = (await import(`../messages/${locale}/common.json`)).default;
   deepMerge(files, common);
 
-  // Admin
-  const adminNav = (await import(`../messages/${locale}/admin/nav.json`))
-    .default;
-  deepMerge(files, adminNav);
+  // 2. Navigation (Thanh điều hướng)
+  const nav = (await import(`../messages/${locale}/nav.json`)).default;
+  deepMerge(files, nav);
 
-  const adminDashboard = (
-    await import(`../messages/${locale}/admin/dashboard.json`)
-  ).default;
-  deepMerge(files, adminDashboard);
+  // 3. Dashboards (Tổng quan)
+  const dashboards = (await import(`../messages/${locale}/dashboards.json`)).default;
+  deepMerge(files, dashboards);
 
-  const adminTeam = (
-    await import(`../messages/${locale}/admin/admin-team.json`)
-  ).default;
-  deepMerge(files, adminTeam);
+  // 4. Users & Nhân sự (Admin Team, Leaders, Interns)
+  const users = (await import(`../messages/${locale}/users.json`)).default;
+  deepMerge(files, users);
 
-  const adminLeaders = (
-    await import(`../messages/${locale}/admin/leaders.json`)
-  ).default;
-  deepMerge(files, adminLeaders);
+  // 5. Roles & Phân quyền (Dynamic RBAC)
+  const roles = (await import(`../messages/${locale}/roles.json`)).default;
+  deepMerge(files, roles);
 
-  const adminInterns = (
-    await import(`../messages/${locale}/admin/interns.json`)
-  ).default;
-  deepMerge(files, adminInterns);
+  // 6. Departments & Chức vụ
+  const departments = (await import(`../messages/${locale}/departments.json`)).default;
+  deepMerge(files, departments);
 
-  const adminDepartment = (
-    await import(`../messages/${locale}/admin/department.json`)
-  ).default;
-  deepMerge(files, adminDepartment);
+  // 7. Tasks (Quản lý và nộp nhiệm vụ)
+  const tasks = (await import(`../messages/${locale}/tasks.json`)).default;
+  deepMerge(files, tasks);
 
-  const adminOnboarding = (
-    await import(`../messages/${locale}/admin/onboarding.json`)
-  ).default;
-  deepMerge(files, adminOnboarding);
+  // 8. Task Groups (Nhóm công việc)
+  const taskGroups = (await import(`../messages/${locale}/task-groups.json`)).default;
+  deepMerge(files, taskGroups);
 
-  const adminEmails = (
-    await import(`../messages/${locale}/admin/emails.json`)
-  ).default;
-  deepMerge(files, adminEmails);
+  // 9. Daily Reports (Báo cáo ngày)
+  const dailyReports = (await import(`../messages/${locale}/daily-reports.json`)).default;
+  deepMerge(files, dailyReports);
 
-  const adminMeetings = (
-    await import(`../messages/${locale}/admin/meetings.json`)
-  ).default;
-  deepMerge(files, adminMeetings);
+  // 10. Meetings (Cuộc họp & Điểm danh)
+  const meetings = (await import(`../messages/${locale}/meetings.json`)).default;
+  deepMerge(files, meetings);
 
-  const adminPolicies = (
-    await import(`../messages/${locale}/admin/policies.json`)
-  ).default;
-  deepMerge(files, adminPolicies);
-  if (adminPolicies && typeof adminPolicies === "object" && "admin" in adminPolicies) {
-    const adminObj = (adminPolicies as { admin: { policies: Record<string, unknown> } }).admin;
-    if (adminObj?.policies) {
-      deepMerge(files, { admin: { regulations: adminObj.policies } });
-    }
-  }
+  // 11. Weekly Evaluations (Đánh giá tuần 12 tiêu chí)
+  const weeklyEval = (await import(`../messages/${locale}/weekly-evaluations.json`)).default;
+  deepMerge(files, weeklyEval);
 
-  const adminProfile = (
-    await import(`../messages/${locale}/admin/profile.json`)
-  ).default;
-  deepMerge(files, adminProfile);
+  // 12. Onboarding (Đơn ứng tuyển & Tiếp nhận)
+  const onboarding = (await import(`../messages/${locale}/onboarding.json`)).default;
+  deepMerge(files, onboarding);
 
-  const adminActivityLogs = (
-    await import(`../messages/${locale}/admin/activity-logs.json`)
-  ).default;
-  deepMerge(files, adminActivityLogs);
+  // 13. Emails & Thông báo
+  const emails = (await import(`../messages/${locale}/emails.json`)).default;
+  deepMerge(files, emails);
 
-  const adminSettings = (
-    await import(`../messages/${locale}/admin/settings.json`)
-  ).default;
-  deepMerge(files, adminSettings);
+  // 14. Regulations & Chính sách
+  const regulations = (await import(`../messages/${locale}/regulations.json`)).default;
+  deepMerge(files, regulations);
 
-  // Leader
-  const leaderNav = (await import(`../messages/${locale}/leader/nav.json`))
-    .default;
-  deepMerge(files, leaderNav);
+  // 15. Profile (Hồ sơ người dùng)
+  const profile = (await import(`../messages/${locale}/profile.json`)).default;
+  deepMerge(files, profile);
 
-  const leaderDashboard = (
-    await import(`../messages/${locale}/leader/dashboard.json`)
-  ).default;
-  deepMerge(files, leaderDashboard);
+  // 16. Activity Logs (Nhật ký hoạt động)
+  const activityLogs = (await import(`../messages/${locale}/activity-logs.json`)).default;
+  deepMerge(files, activityLogs);
 
-  const leaderInterns = (
-    await import(`../messages/${locale}/leader/interns.json`)
-  ).default;
-  deepMerge(files, leaderInterns);
-
-  const leaderDepartment = (
-    await import(`../messages/${locale}/leader/department.json`)
-  ).default;
-  deepMerge(files, leaderDepartment);
-
-  const leaderTasks = (
-    await import(`../messages/${locale}/leader/tasks.json`)
-  ).default;
-  deepMerge(files, leaderTasks);
-
-  const leaderTaskGroups = (
-    await import(`../messages/${locale}/leader/task-groups.json`)
-  ).default;
-  deepMerge(files, leaderTaskGroups);
-
-  const leaderDailyReports = (
-    await import(`../messages/${locale}/leader/daily-reports.json`)
-  ).default;
-  deepMerge(files, leaderDailyReports);
-
-  const leaderMeetings = (
-    await import(`../messages/${locale}/leader/meetings.json`)
-  ).default;
-  deepMerge(files, leaderMeetings);
-
-  const leaderWeeklyEval = (
-    await import(`../messages/${locale}/leader/weekly-evaluation.json`)
-  ).default;
-  deepMerge(files, leaderWeeklyEval);
-
-  const leaderProfile = (
-    await import(`../messages/${locale}/leader/profile.json`)
-  ).default;
-  deepMerge(files, leaderProfile);
-
-  // Intern
-  const internNav = (await import(`../messages/${locale}/intern/nav.json`))
-    .default;
-  deepMerge(files, internNav);
-
-  const internDashboard = (
-    await import(`../messages/${locale}/intern/dashboard.json`)
-  ).default;
-  deepMerge(files, internDashboard);
-
-  const internTasks = (
-    await import(`../messages/${locale}/intern/tasks.json`)
-  ).default;
-  deepMerge(files, internTasks);
-
-  const internDailyReport = (
-    await import(`../messages/${locale}/intern/daily-report.json`)
-  ).default;
-  deepMerge(files, internDailyReport);
-
-  const internMeetings = (
-    await import(`../messages/${locale}/intern/meetings.json`)
-  ).default;
-  deepMerge(files, internMeetings);
-
-  const internWeeklyEval = (
-    await import(`../messages/${locale}/intern/weekly-evaluation.json`)
-  ).default;
-  deepMerge(files, internWeeklyEval);
-
-  const internProfile = (
-    await import(`../messages/${locale}/intern/profile.json`)
-  ).default;
-  deepMerge(files, internProfile);
+  // 17. Settings (Cấu hình hệ thống)
+  const settings = (await import(`../messages/${locale}/settings.json`)).default;
+  deepMerge(files, settings);
 
   const messages = files as AbstractIntlMessages;
 
