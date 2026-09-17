@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Building2, Briefcase, Phone, Calendar, Clock, Circle, User, type LucideIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 import { useUpdateIntern } from "@/hooks/profile/useUpdateIntern";
 import type { Intern } from "@/types/intern";
@@ -15,6 +15,7 @@ type FormValues = { phone: string; discordUsername: string };
 
 export default function InternInfoCard({ intern }: InternInfoCardProps) {
     const t = useTranslations("intern.profile");
+    const locale = useLocale();
     const { mutate: updateIntern, isPending } = useUpdateIntern();
 
     const { register, handleSubmit, reset, formState: { errors, isDirty } } = useForm<FormValues>({
@@ -23,9 +24,10 @@ export default function InternInfoCard({ intern }: InternInfoCardProps) {
 
     useEffect(() => { reset({ phone: intern.phone, discordUsername: intern.discordUsername ?? "" }); }, [intern, reset]);
 
-    const startDate = new Date(intern.startDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+    const dateLocale = locale === "vi" ? "vi-VN" : "en-GB";
+    const startDate = new Date(intern.startDate).toLocaleDateString(dateLocale, { day: "2-digit", month: "short", year: "numeric" });
     const endDate = new Date(intern.startDate); endDate.setMonth(endDate.getMonth() + intern.duration);
-    const endDateStr = endDate.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+    const endDateStr = endDate.toLocaleDateString(dateLocale, { day: "2-digit", month: "short", year: "numeric" });
 
     const statusConfig: Record<string, { label: string; className: string; dotClass: string }> = {
         ACTIVE: { label: t("active"), className: "border-emerald-400/20 bg-emerald-500/10 text-emerald-300", dotClass: "text-emerald-400" },

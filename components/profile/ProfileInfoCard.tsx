@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Mail, Shield, Calendar, User, Fingerprint } from "lucide-react";
+import { User } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { useUpdateProfile } from "@/hooks/profile/useUpdateProfile";
@@ -38,13 +38,6 @@ export default function ProfileInfoCard({ profile }: ProfileInfoCardProps) {
     const onSubmit = async (data: FormValues) => {
         await updateProfileAsync({ fullName: data.fullName });
     };
-
-    const roleName = profile.role;
-    const createdAt = new Date(profile.createdAt).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-    });
 
     return (
         <MetalCard>
@@ -82,13 +75,6 @@ export default function ProfileInfoCard({ profile }: ProfileInfoCardProps) {
                         )}
                     </div>
 
-                    <div className="grid gap-4 md:grid-cols-2">
-                        <ReadonlyField icon={<Mail className="h-4 w-4" />} label={t("email")} value={profile.email} />
-                        <ReadonlyField icon={<Shield className="h-4 w-4" />} label={t("role")} value={roleName} />
-                        <ReadonlyField icon={<Fingerprint className="h-4 w-4" />} label={t("userId")} value={profile.id} />
-                        <ReadonlyField icon={<Calendar className="h-4 w-4" />} label={t("createdAt")} value={createdAt} />
-                    </div>
-
                     {isDirty && (
                         <div className="flex justify-end gap-3">
                             <button
@@ -106,23 +92,5 @@ export default function ProfileInfoCard({ profile }: ProfileInfoCardProps) {
                 </form>
             </section>
         </MetalCard>
-    );
-}
-
-type ReadonlyFieldProps = {
-    label: string;
-    value: string;
-    icon: React.ReactNode;
-};
-
-function ReadonlyField({ label, value, icon }: ReadonlyFieldProps) {
-    return (
-        <div className="rounded-2xl border border-slate-200 p-4">
-            <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-500">
-                {icon}
-                <span>{label}</span>
-            </div>
-            <p className="break-all text-sm font-medium text-white">{value}</p>
-        </div>
     );
 }

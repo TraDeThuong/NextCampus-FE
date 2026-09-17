@@ -1,10 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { CalendarDays, Mail, ShieldCheck, Circle, Camera, Loader2 } from "lucide-react";
+import { CalendarDays, Mail, ShieldCheck, Camera, Loader2, Fingerprint } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "react-hot-toast";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 import { useUploadAvatar } from "@/hooks/profile/useUploadAvatar";
 import { exceedsUploadLimit, IMAGE_MIME_TYPES, UPLOAD_LIMITS_MB } from "@/lib/upload-policy";
@@ -16,12 +16,16 @@ type ProfileHeaderProps = {
 
 export default function ProfileHeader({ profile }: ProfileHeaderProps) {
     const t = useTranslations("admin.profile");
+    const locale = useLocale();
 
-    const joinedDate = new Date(profile.createdAt).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-    });
+    const joinedDate = new Date(profile.createdAt).toLocaleDateString(
+        locale === "vi" ? "vi-VN" : "en-GB",
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+        }
+    );
 
     const inputRef = useRef<HTMLInputElement>(null);
     const { uploadAvatarAsync, isPending } = useUploadAvatar();
@@ -63,35 +67,36 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
             <div className="h-36 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800" />
 
             <div className="relative px-8 pb-8">
-                <div className="-mt-16 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-                    <div className="flex flex-col gap-6 sm:flex-row sm:items-end">
-                        <div className="relative">
-                            <div className="absolute inset-0 rounded-[28px] bg-cyan-400/20 blur-xl" />
+                <div className="-mt-16 sm:-mt-20 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+                        <div className="relative shrink-0">
+                            <div className="absolute inset-0 rounded-[32px] bg-cyan-400/20 blur-xl" />
                             <button
                                 type="button"
                                 onClick={handleChooseFile}
                                 disabled={isPending}
-                                className="group/avatar relative h-32 w-32 overflow-hidden rounded-[28px] border border-white/15 bg-gradient-to-br from-slate-700 to-slate-950 shadow-[0_12px_40px_rgba(0,0,0,.45)] disabled:cursor-not-allowed"
+                                className="group/avatar relative h-36 w-36 sm:h-40 sm:w-40 overflow-hidden rounded-[32px] border border-white/15 bg-gradient-to-br from-slate-700 to-slate-950 shadow-[0_12px_40px_rgba(0,0,0,.45)] disabled:cursor-not-allowed"
                             >
                                 {(preview || profile.avatarUrl) ? (
                                     <Image
                                         src={preview ?? profile.avatarUrl!}
                                         alt={profile.fullName}
                                         fill
-                                        sizes="128px"
+                                        sizes="160px"
                                         className="object-cover transition group-hover/avatar:scale-110"
                                     />
                                 ) : (
-                                    <div className="flex h-full w-full items-center justify-center text-5xl font-bold text-slate-300">
+                                    <div className="flex h-full w-full items-center justify-center text-6xl font-bold text-slate-300">
                                         {profile.fullName?.charAt(0).toUpperCase()}
                                     </div>
                                 )}
                                 <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition group-hover/avatar:opacity-100">
-                                    <Camera className="h-8 w-8 text-white" />
+                                    <Camera className="h-9 w-9 text-white" />
                                 </div>
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover/avatar:opacity-0 pointer-events-none" />
                                 {isPending && (
                                     <div className="absolute inset-0 flex items-center justify-center bg-black/60">
-                                        <Loader2 className="h-8 w-8 animate-spin text-white" />
+                                        <Loader2 className="h-9 w-9 animate-spin text-white" />
                                     </div>
                                 )}
                             </button>
@@ -113,22 +118,16 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
                                     <Mail className="h-4 w-4 text-primary-light" />
                                     <span>{profile.email}</span>
                                 </div>
+                                <div className="mt-1.5 flex items-center gap-2 text-xs text-slate-400 font-mono">
+                                    <Fingerprint className="h-4 w-4 text-primary-light" />
+                                    <span>{profile.id}</span>
+                                </div>
                             </div>
 
                             <div className="flex flex-wrap gap-3">
                                 <span className="inline-flex items-center gap-2 rounded-full border border-cyan-400/100 bg-cyan-400/10 px-4 py-2 text-sm font-semibold text-primary-light backdrop-blur-xl">
                                     <ShieldCheck className="h-4 w-4" />
                                     {profile.role}
-                                </span>
-                                <span
-                                    className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium backdrop-blur-xl ${
-                                        profile.isActive
-                                            ? "border border-emerald-400/20 bg-emerald-500/10 text-emerald-300"
-                                            : "border border-red-400/20 bg-red-500/10 text-red-300"
-                                    }`}
-                                >
-                                    <Circle className="h-3 w-3 fill-current" />
-                                    {profile.isActive ? t("active") : t("inactive")}
                                 </span>
                             </div>
                         </div>

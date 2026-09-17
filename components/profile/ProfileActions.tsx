@@ -27,14 +27,14 @@ export default function ProfileActions() {
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,.18),transparent_60%)]" />
                         <div className="absolute left-4 right-4 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent" />
                         <div className="relative z-10 flex items-start gap-4">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-500/10">
+                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-500/10">
                                 <ShieldCheck className="h-5 w-5 text-emerald-300" />
                             </div>
-                            <div>
-                                <h3 className="font-semibold text-white">
+                            <div className="min-w-0 flex-1">
+                                <h3 className="text-sm font-semibold text-white">
                                     {t("accountSecurity")}
                                 </h3>
-                                <p className="mt-1 text-sm leading-6 text-slate-300">
+                                <p className="mt-0.5 text-xs leading-5 text-slate-300">
                                     {t("accountSecurityDesc")}
                                 </p>
                             </div>

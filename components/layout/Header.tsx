@@ -50,7 +50,7 @@ export default function Header({ role, onMenuClick }: HeaderProps) {
             <Menu size={20} />
           </button>
           <h2 className="text-base sm:text-xl metal-text font-semibold tracking-wide truncate">
-            {role} {t("header.dashboard")}
+            {role}
           </h2>
         </div>
 
@@ -68,7 +68,8 @@ export default function Header({ role, onMenuClick }: HeaderProps) {
           {/* Profile */}
           <Link
             href={`/${role.toLowerCase()}/profile`}
-            className="flex items-center gap-2 sm:gap-3 rounded-full border border-white/10 bg-white/5 p-1 sm:px-3 sm:py-2 backdrop-blur-lg transition hover:bg-white/10 cursor-pointer"
+            title={state.user?.fullName ?? "User"}
+            className="flex items-center gap-2 md:gap-3 rounded-full border border-white/10 bg-white/5 p-1 md:px-3 md:py-2 backdrop-blur-lg transition hover:bg-white/10 cursor-pointer max-w-fit md:max-w-[260px]"
           >
             {state.user?.avatarUrl ? (
               <Image
@@ -76,19 +77,21 @@ export default function Header({ role, onMenuClick }: HeaderProps) {
                 alt={state.user.fullName ?? "User"}
                 width={40}
                 height={40}
-                className="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover"
+                className="h-8 w-8 md:h-10 md:w-10 shrink-0 rounded-full object-cover"
               />
             ) : (
-              <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-linear-to-br from-primary-main to-primary-light">
-                <User className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+              <div className="flex h-8 w-8 md:h-10 md:w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-primary-main to-primary-light">
+                <User className="h-4 w-4 md:h-5 md:w-5 text-white" />
               </div>
             )}
-            <p
-              className="hidden sm:block text-sm sm:text-lg font-medium metal-text"
-              style={{ fontFamily: "var(--font-body-vi), sans-serif" }}
-            >
-              {state.user?.fullName ?? "User"}
-            </p>
+            <span className="hidden md:inline-block min-w-0 truncate">
+              <span
+                className="text-sm sm:text-base font-medium metal-text truncate"
+                style={{ fontFamily: "var(--font-body-vi), sans-serif" }}
+              >
+                {state.user?.fullName ?? "User"}
+              </span>
+            </span>
           </Link>
 
           {/* Logout Button */}
