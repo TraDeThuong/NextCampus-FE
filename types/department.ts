@@ -1,6 +1,9 @@
 export interface Department {
     id: string;
     name: string;
+    description?: string | null;
+    positionsCount?: number;
+    internsCount?: number;
     positions: { id: string; name: string }[];
     leaders?: {
         id: string;

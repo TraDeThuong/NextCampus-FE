@@ -82,7 +82,9 @@
       "invalidInternEmail": "Hãy nhập email TTS hợp lệ.",
       "otherTeamInternNotFound": "Không tìm thấy TTS active thuộc team khác với email này.",
       "internLeader": "Leader: {name}",
-      "completedTaskReadOnly": "Công việc đã hoàn thành không thể chỉnh sửa.",
+      "completedTaskReadOnly": "Công việc đã hoàn thành, không thể sửa đổi.",
+      "unblock": "Mở chặn",
+      "unblockTask": "Mở chặn (Unblock)",
 
       "noTasksFound": "Không tìm thấy công việc.",
       "noDoneTasksFound": "Không tìm thấy công việc hoàn thành.",

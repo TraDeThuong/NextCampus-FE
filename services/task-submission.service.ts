@@ -113,4 +113,19 @@ export const taskSubmissionService = {
     );
     return response.data;
   },
+
+  // POST /task-submissions/:id/review
+  reviewSubmission: async (
+    id: string,
+    payload: {
+      reviewStatus: "APPROVED" | "REJECTED";
+      reviewComment?: string;
+    },
+  ): Promise<TaskSubmissionSuccessResponse> => {
+    const response = await api.post<TaskSubmissionSuccessResponse>(
+      `/task-submissions/${id}/review`,
+      payload,
+    );
+    return response.data;
+  },
 };

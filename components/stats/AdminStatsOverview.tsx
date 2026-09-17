@@ -9,7 +9,13 @@ import Spinner from "../ui/Spinner";
 import MetalCard from "../ui/MetalCard";
 import TaskAssignmentModal from "./TaskAssignmentModal";
 import Table from "../ui/Table";
-import { AssignmentDetail } from "@/types/stats";
+import type {
+  AssignmentDetail,
+  LeaderTeamProgress,
+  DepartmentDistribution,
+  ActionAlert,
+  ActivityLog,
+} from "@/types/stats";
 import {
   Users,
   FileText,
@@ -66,26 +72,16 @@ export default function AdminStatsOverview() {
     );
   }
 
-  const stats: any = response?.data || {};
+  const stats = response?.data;
 
-  const rawOverdue = Array.isArray(stats?.overdueAssignments)
-    ? stats.overdueAssignments
-    : [];
-  const overdueAssignments = rawOverdue.filter((a: any) => a?.isOverdue);
-  const leaderTeams = Array.isArray(stats?.leaderTeams)
-    ? stats.leaderTeams
-    : [];
-  const recentActivities = Array.isArray(stats?.recentActivities)
-    ? stats.recentActivities
-    : [];
-  const departmentDistribution = Array.isArray(stats?.departmentDistribution)
-    ? stats.departmentDistribution
-    : [];
-  const actionAlerts = Array.isArray(stats?.actionAlerts)
-    ? stats.actionAlerts
-    : [];
+  const rawOverdue = stats?.overdueAssignments ?? [];
+  const overdueAssignments = rawOverdue.filter((a) => a.isOverdue);
+  const leaderTeams = stats?.leaderTeams ?? [];
+  const recentActivities = stats?.recentActivities ?? [];
+  const departmentDistribution = stats?.departmentDistribution ?? [];
+  const actionAlerts = stats?.actionAlerts ?? [];
   const missingLeaderDepts = departmentDistribution.filter(
-    (d: any) => d?.leaderCount === 0,
+    (d) => d.leaderCount === 0,
   );
 
   const displayedLeaderTeams = showAllLeaders
@@ -133,11 +129,11 @@ export default function AdminStatsOverview() {
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <StatsCard
           title={t("admin.dashboard.activeInterns")}
-          value={stats?.interns?.active ?? stats?.system?.activeInterns ?? 0}
+          value={stats?.interns?.active ?? 0}
           subtitle={t("admin.dashboard.retentionRate", {
             pct: Math.round(
-              ((stats?.interns?.active ?? stats?.system?.activeInterns ?? 0) /
-                (stats?.interns?.total ?? stats?.system?.totalInterns ?? 1)) *
+              ((stats?.interns?.active ?? 0) /
+                (stats?.interns?.total || 1)) *
                 100,
             ),
           })}
@@ -145,7 +141,7 @@ export default function AdminStatsOverview() {
           href="/admin/interns?status=ACTIVE"
           trend={{
             text: t("admin.dashboard.completed", {
-              n: stats?.interns?.completed ?? stats?.system?.completedInterns ?? 0,
+              n: stats?.interns?.completed ?? 0,
             }),
             positive: true,
           }}
@@ -153,12 +149,9 @@ export default function AdminStatsOverview() {
 
         <StatsCard
           title={t("admin.dashboard.leaderTeam")}
-          value={stats?.system?.leaders ?? stats?.system?.activeLeaders ?? 0}
+          value={stats?.system?.leaders ?? 0}
           subtitle={t("admin.dashboard.managingDepts", {
-            n:
-              stats?.system?.departments ??
-              stats?.system?.activeDepartments ??
-              0,
+            n: stats?.system?.departments ?? 0,
           })}
           icon={<UserCheck className="h-6 w-6 text-indigo-400" />}
           href="/admin/leaders"
@@ -170,30 +163,18 @@ export default function AdminStatsOverview() {
 
         <StatsCard
           title={t("admin.dashboard.pendingApps")}
-          value={
-            stats?.applications?.pending ??
-            stats?.applications?.pendingApplications ??
-            0
-          }
+          value={stats?.applications?.pending ?? 0}
           subtitle={t("admin.dashboard.totalApps", {
-            n:
-              stats?.applications?.total ??
-              stats?.applications?.totalApplications ??
-              0,
+            n: stats?.applications?.total ?? 0,
           })}
           icon={<FileText className="h-6 w-6 text-amber-400" />}
           href="/admin/onboarding?inviteStatus=USED&applicationStatus=PENDING"
           trend={{
             text:
-              (stats?.applications?.pending ??
-                stats?.applications?.pendingApplications ??
-                0) > 0
+              (stats?.applications?.pending ?? 0) > 0
                 ? t("admin.dashboard.needReview")
                 : t("admin.dashboard.allDone"),
-            positive:
-              (stats?.applications?.pending ??
-                stats?.applications?.pendingApplications ??
-                0) === 0,
+            positive: (stats?.applications?.pending ?? 0) === 0,
           }}
         />
       </div>
@@ -246,15 +227,15 @@ export default function AdminStatsOverview() {
 
             <Table.Body
               data={displayedLeaderTeams}
-              render={(team: any) => {
+              render={(team: LeaderTeamProgress) => {
                 const assignments = team.assignments ?? {
-                  done: team.completedTasksCount ?? 0,
-                  inProgress: team.activeTasksCount ?? 0,
+                  done: 0,
+                  inProgress: 0,
                   review: 0,
                   blocked: 0,
                 };
                 const total =
-                  team.totalAssignments ??
+                  team.totalAssignments ||
                   ((assignments.done +
                     assignments.inProgress +
                     assignments.review +
@@ -263,10 +244,8 @@ export default function AdminStatsOverview() {
                 const percentDone = Math.round(
                   (assignments.done / total) * 100,
                 );
-                const internCount =
-                  team.totalInterns ?? team.internCount ?? 0;
-                const overdueCount =
-                  team.overdueCount ?? team.overdueTasksCount ?? 0;
+                const internCount = team.totalInterns ?? 0;
+                const overdueCount = team.overdueCount ?? 0;
 
                 return (
                   <Table.Row key={team.leaderId}>
@@ -384,7 +363,7 @@ export default function AdminStatsOverview() {
         <div className="mt-6">
           {departmentDistribution.length > 0 ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {departmentDistribution.map((dept: any) => {
+              {departmentDistribution.map((dept: DepartmentDistribution) => {
                 const isMissingLeader = dept.leaderCount === 0;
                 return (
                   <div
@@ -461,7 +440,7 @@ export default function AdminStatsOverview() {
 
           <div className="mt-5 space-y-3">
             {recentActivities.length > 0 ? (
-              recentActivities.slice(0, 3).map((act: any) => (
+              recentActivities.slice(0, 3).map((act: ActivityLog) => (
                 <div
                   key={act.id}
                   className="flex items-start gap-3 p-3.5 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-colors"
@@ -514,7 +493,7 @@ export default function AdminStatsOverview() {
 
           <div className="mt-5 space-y-3.5">
             {/* Dynamic action alerts from backend */}
-            {actionAlerts.map((alert: any) => (
+            {actionAlerts.map((alert: ActionAlert) => (
               <div
                 key={alert.id}
                 className="flex items-center justify-between p-3.5 rounded-2xl border border-rose-500/30 bg-rose-500/10"
@@ -545,10 +524,7 @@ export default function AdminStatsOverview() {
                 <div>
                   <p className="text-xs font-bold text-foreground group-hover:text-amber-300 transition-colors">
                     {t("admin.dashboard.pendingAppsCount", {
-                      n:
-                        stats?.applications?.pending ??
-                        stats?.applications?.pendingApplications ??
-                        0,
+                      n: stats?.applications?.pending ?? 0,
                     })}
                   </p>
                   <p className="text-[11px] text-muted">{t("admin.dashboard.needApproveReject")}</p>
@@ -572,10 +548,7 @@ export default function AdminStatsOverview() {
                 <div>
                   <p className="text-xs font-bold text-foreground group-hover:text-rose-300 transition-colors">
                     {t("admin.dashboard.overdueTasksCount", {
-                      n:
-                        stats?.tasks?.overdue ??
-                        stats?.tasks?.overdueTasks ??
-                        0,
+                      n: stats?.tasks?.overdue ?? 0,
                     })}
                   </p>
                   <p className="text-[11px] text-muted">{t("admin.dashboard.clickToSeeOverdue")}</p>
@@ -601,7 +574,7 @@ export default function AdminStatsOverview() {
                       {missingLeaderDepts.length} phòng ban chưa có Leader phụ trách
                     </p>
                     <p className="text-[11px] text-muted truncate max-w-xs">
-                      {missingLeaderDepts.map((d: any) => d.departmentName).join(", ")}
+                      {missingLeaderDepts.map((d) => d.departmentName).join(", ")}
                     </p>
                   </div>
                 </div>
@@ -623,10 +596,7 @@ export default function AdminStatsOverview() {
                 <div>
                   <p className="text-xs font-bold text-foreground">
                     {t("admin.dashboard.droppedInterns", {
-                      n:
-                        stats?.interns?.dropped ??
-                        stats?.system?.droppedInterns ??
-                        0,
+                      n: stats?.interns?.dropped ?? 0,
                     })}
                   </p>
                   <p className="text-[11px] text-muted">{t("admin.dashboard.droppedList")}</p>

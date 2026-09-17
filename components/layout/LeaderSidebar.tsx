@@ -10,6 +10,7 @@ import {
   FileBarChart,
   UserRoundPen,
   Building2,
+  Layers,
 } from "lucide-react";
 import { LuAlarmClock } from "react-icons/lu";
 import { useTranslations } from "next-intl";
@@ -33,6 +34,7 @@ export default function LeaderSidebar() {
     { name: t("leader.nav.dashboard"),        href: "/leader/dashboard",         icon: LayoutDashboard },
     { name: t("leader.nav.interns"),          href: "/leader/interns",           icon: Users },
     { name: t("leader.nav.department"),       href: "/leader/department",        icon: Building2 },
+    { name: t("leader.nav.taskGroups"),       href: "/leader/task-groups",       icon: Layers },
     { name: t("leader.nav.tasks"),            href: "/leader/tasks",             icon: CheckSquare },
     { name: t("leader.nav.dailyReports"),     href: "/leader/daily-reports",     icon: ClipboardCheck },
     { name: t("leader.nav.meetings"),         href: "/leader/meetings",          icon: LuAlarmClock },

@@ -21,65 +21,80 @@ export const RATING_SCORES: Record<RatingLevel, number> = {
 };
 
 export const RATING_COLORS: Record<RatingLevel, string> = {
-  TOT: "text-emerald-700 dark:text-emerald-400 border-emerald-600/30 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10",
-  KHA: "text-blue-700 dark:text-blue-400 border-blue-600/30 dark:border-blue-500/30 bg-blue-50 dark:bg-blue-500/10",
-  TB: "text-amber-700 dark:text-amber-400 border-amber-600/30 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10",
-  TBY: "text-orange-700 dark:text-orange-400 border-orange-600/30 dark:border-orange-500/30 bg-orange-50 dark:bg-orange-500/10",
-  YEU: "text-rose-700 dark:text-red-400 border-rose-600/30 dark:border-red-500/30 bg-rose-50 dark:bg-red-500/10",
+  TOT: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800",
+  KHA: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800",
+  TB: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800",
+  TBY: "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/40 dark:text-orange-300 dark:border-orange-800",
+  YEU: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800",
 };
 
 /**
- * 12 tiêu chí đánh giá chuẩn chia làm 3 nhóm lớn
+ * 12 tiêu chí đánh giá chuẩn chia làm 3 nhóm lớn đồng bộ Backend v2 & evaluation-criteria-ui-config.json
  */
 export interface EvaluationRatings {
-  // Phần I: Kỷ luật và tư chất
+  // Nhóm I: Kỷ luật & tư chất
   ruleCompliance: RatingLevel;   // 1. Thực hiện nội quy của cơ quan
   workAttitude: RatingLevel;     // 2. Thái độ làm việc
   learningCapacity: RatingLevel; // 3. Năng lực tiếp thu
-  resilience: RatingLevel;       // 4. Khả năng vượt khó, chịu áp lực
+  pressureTolerance: RatingLevel;// 4. Khả năng vượt khó, chịu áp lực
   communication: RatingLevel;    // 5. Giao tiếp và ứng xử
 
-  // Phần II: Khả năng chuyên môn
-  knowledge: RatingLevel;        // 1. Kiến thức chuyên môn
-  practicalSkills: RatingLevel;  // 2. Kỹ năng thực hành
-  foreignLanguage: RatingLevel;  // 3. Năng lực ngoại ngữ
+  // Nhóm II: Chuyên môn
+  knowledge: RatingLevel;        // 1. Kiến thức
+  practicalSkill: RatingLevel;   // 2. Kỹ năng thực hành
+  languageProficiency: RatingLevel; // 3. Năng lực ngoại ngữ
   teamwork: RatingLevel;         // 4. Kỹ năng làm việc nhóm
   creativity: RatingLevel;       // 5. Tính sáng tạo
 
-  // Phần III: Kết quả thực hiện đề tài
-  contentQuality: RatingLevel;   // 1. Thực hiện yêu cầu về nội dung
-  progressDelivery: RatingLevel; // 2. Thực hiện yêu cầu về tiến độ
+  // Nhóm III: Kết quả đề tài
+  contentRequirement: RatingLevel; // 1. Thực hiện yêu cầu về nội dung
+  progressRequirement: RatingLevel;// 2. Thực hiện yêu cầu về tiến độ
+
+  // Tương thích ngược nếu còn code cũ tham chiếu
+  resilience?: RatingLevel;
+  practicalSkills?: RatingLevel;
+  foreignLanguage?: RatingLevel;
+  contentQuality?: RatingLevel;
+  progressDelivery?: RatingLevel;
 }
+
+export type EvaluationCriteriaKey = keyof Omit<
+  EvaluationRatings,
+  "resilience" | "practicalSkills" | "foreignLanguage" | "contentQuality" | "progressDelivery"
+>;
 
 export const CRITERIA_SECTIONS = [
   {
     id: "I",
     label: "Kỷ luật và tư chất",
+    name: "I. Kỷ luật và tư chất",
     criteria: [
-      { key: "ruleCompliance" as keyof EvaluationRatings, label: "Thực hiện nội quy của cơ quan" },
-      { key: "workAttitude" as keyof EvaluationRatings, label: "Thái độ làm việc" },
-      { key: "learningCapacity" as keyof EvaluationRatings, label: "Năng lực tiếp thu" },
-      { key: "resilience" as keyof EvaluationRatings, label: "Khả năng vượt khó, chịu áp lực" },
-      { key: "communication" as keyof EvaluationRatings, label: "Giao tiếp và ứng xử" },
+      { key: "ruleCompliance" as const, label: "Thực hiện nội quy của cơ quan", name: "Thực hiện nội quy của cơ quan", tooltip: "Chấp hành giờ giấc, nộp daily report đúng hạn" },
+      { key: "workAttitude" as const, label: "Thái độ làm việc", name: "Thái độ làm việc", tooltip: "Nghiêm túc, chủ động và có tinh thần trách nhiệm" },
+      { key: "learningCapacity" as const, label: "Năng lực tiếp thu", name: "Năng lực tiếp thu", tooltip: "Khả năng nắm bắt kiến thức và tiếp thu phản hồi" },
+      { key: "pressureTolerance" as const, label: "Khả năng vượt khó chịu áp lực", name: "Khả năng vượt khó chịu áp lực", tooltip: "Bền bỉ xử lý bug và gỡ blocker" },
+      { key: "communication" as const, label: "Giao tiếp và ứng xử", name: "Giao tiếp và ứng xử", tooltip: "Giao tiếp lịch sự, chuẩn mực trong PR review và họp" },
     ],
   },
   {
     id: "II",
     label: "Khả năng chuyên môn",
+    name: "II. Khả năng chuyên môn",
     criteria: [
-      { key: "knowledge" as keyof EvaluationRatings, label: "Kiến thức chuyên môn" },
-      { key: "practicalSkills" as keyof EvaluationRatings, label: "Kỹ năng thực hành" },
-      { key: "foreignLanguage" as keyof EvaluationRatings, label: "Năng lực ngoại ngữ" },
-      { key: "teamwork" as keyof EvaluationRatings, label: "Kỹ năng làm việc nhóm" },
-      { key: "creativity" as keyof EvaluationRatings, label: "Tính sáng tạo" },
+      { key: "knowledge" as const, label: "Kiến thức", name: "Kiến thức", tooltip: "Hiểu biết về stack kỹ thuật và kiến trúc" },
+      { key: "practicalSkill" as const, label: "Kỹ năng thực hành", name: "Kỹ năng thực hành", tooltip: "Chất lượng code, tuân thủ convention và viết test" },
+      { key: "languageProficiency" as const, label: "Năng lực ngoại ngữ", name: "Năng lực ngoại ngữ", tooltip: "Đọc tài liệu, viết PR description bằng tiếng Anh" },
+      { key: "teamwork" as const, label: "Kỹ năng làm việc nhóm", name: "Kỹ năng làm việc nhóm", tooltip: "Phối hợp, review chéo và hỗ trợ đồng đội" },
+      { key: "creativity" as const, label: "Tính sáng tạo", name: "Tính sáng tạo", tooltip: "Đề xuất cải tiến và tối ưu giải pháp" },
     ],
   },
   {
     id: "III",
     label: "Kết quả thực hiện đề tài",
+    name: "III. Kết quả thực hiện đề tài",
     criteria: [
-      { key: "contentQuality" as keyof EvaluationRatings, label: "Thực hiện yêu cầu về nội dung" },
-      { key: "progressDelivery" as keyof EvaluationRatings, label: "Thực hiện yêu cầu về tiến độ" },
+      { key: "contentRequirement" as const, label: "Thực hiện yêu cầu về nội dung", name: "Thực hiện yêu cầu về nội dung", tooltip: "Đúng nghiệp vụ, pass acceptance criteria" },
+      { key: "progressRequirement" as const, label: "Thực hiện yêu cầu về tiến độ", name: "Thực hiện yêu cầu về tiến độ", tooltip: "Hoàn thành và nộp bài đúng hạn" },
     ],
   },
 ] as const;
@@ -88,15 +103,15 @@ export const DEFAULT_RATINGS: EvaluationRatings = {
   ruleCompliance: "TB",
   workAttitude: "TB",
   learningCapacity: "TB",
-  resilience: "TB",
+  pressureTolerance: "TB",
   communication: "TB",
   knowledge: "TB",
-  practicalSkills: "TB",
-  foreignLanguage: "TB",
+  practicalSkill: "TB",
+  languageProficiency: "TB",
   teamwork: "TB",
   creativity: "TB",
-  contentQuality: "TB",
-  progressDelivery: "TB",
+  contentRequirement: "TB",
+  progressRequirement: "TB",
 };
 
 // ─── WeeklyEvaluation Entity ──────────────────────────────────────────────────

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo, useContext } from "react";
-import { Layers, MoreHorizontal, Eye, Pencil, Trash2, Loader2, ChevronLeft, ChevronRight, Check, ChevronDown, UserPlus, UserX, Sparkles, Building } from "lucide-react";
+import { Layers, MoreHorizontal, Eye, Pencil, Trash2, Loader2, ChevronLeft, ChevronRight, Check, ChevronDown, UserPlus, UserX, Sparkles, Building, RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import TaskAiRecommendationModal from "./TaskAiRecommendationModal";
 import TaskGroupAiAllocationModal from "./TaskGroupAiAllocationModal";
@@ -21,6 +21,7 @@ import { useDeleteTask } from "@/hooks/task/useDeleteTask";
 import { useInterns } from "@/hooks/intern/useInterns";
 import { useAssignTask } from "@/hooks/task-assignment/useAssignTask";
 import { useUnassignTask } from "@/hooks/task-assignment/useUnassignTask";
+import { useUnblockTaskAssignment } from "@/hooks/task-assignment/useUnblockTaskAssignment";
 import { useLookupAssignmentIntern } from "@/hooks/intern/useLookupAssignmentIntern";
 import { AuthContext } from "@/contexts/AuthContext";
 import TaskEditModal from "./TaskEditModal";
@@ -76,6 +77,11 @@ export default function LeaderTableTasks() {
     const p = new URLSearchParams(searchParams.toString());
     p.set("reviewAssignmentId", aId);
     router.push(`${pathname}?${p.toString()}`, { scroll: false });
+  };
+
+  const unblockTask = useUnblockTaskAssignment();
+  const handleUnblockTask = (aId: string) => {
+    unblockTask.mutate(aId);
   };
 
   const { data: groupsData, isLoading: groupsLoading } = useTaskGroups();
@@ -225,98 +231,318 @@ export default function LeaderTableTasks() {
             {tasksLoading ? (
               <div className="flex justify-center py-12"><Spinner /></div>
             ) : tasks.length > 0 ? (
-              <Table columns="60px minmax(180px,260px) minmax(145px,1fr) minmax(125px,0.8fr) minmax(75px,0.25fr) minmax(95px,0.35fr) minmax(85px,0.3fr) 40px">
-                  <Table.Header>
-                    <div>{t("colCode")}</div><div>{t("colTitle")}</div><div>{t("colOwner")}</div><div>{t("colSupport")}</div><div>{t("colPriority")}</div><div>{t("colStatus")}</div>
-                    <div>{t("colDeadline")}</div><div></div>
-                  </Table.Header>
-                  <Table.Body data={tasks} render={(task) => (
-                    <Table.Row key={task.id}>
-                      <div className="font-mono text-xs text-muted">{task.code ?? "—"}</div>
-                      <button
-                        onClick={() => router.push(`${pathname}/${task.id}`)}
-                        className="truncate text-sm text-left hover:text-primary-light transition cursor-pointer"
+              <>
+                {/* Mobile Card List (md:hidden) */}
+                <div className="md:hidden space-y-3">
+                  {tasks.map((task) => {
+                    const isCompleted = task.assignment?.status === "DONE";
+                    const isBlocked = task.assignment?.status === "BLOCKED";
+
+                    return (
+                      <div
+                        key={task.id}
+                        className={`rounded-2xl border p-4 space-y-3 transition-all ${
+                          isCompleted
+                            ? "border-emerald-500/30 bg-emerald-500/[0.03]"
+                            : isBlocked
+                            ? "border-rose-500/30 bg-rose-500/[0.03]"
+                            : "border-border bg-card/60"
+                        }`}
                       >
-                        {task.title}
-                      </button>
-                      <InlineAssignCell taskId={task.id} assignment={task.assignment} deadline={task.deadline} taskGroupDepartmentId={task.taskGroup?.departmentId} />
-                      <div className="truncate text-sm text-muted">{task.assignment?.support?.fullName ?? "—"}</div>
-                      <div><PriorityBadge priority={task.priority} /></div>
-                      <div><StatusBadge status={task.assignment?.status ?? "TODO"} assignmentId={task.assignment?.id} taskId={task.id} onReviewClick={handleOpenReview} /></div>
-                      <div className="text-sm text-muted">{new Date(task.deadline).toLocaleDateString("vi-VN")}</div>
-                      <div className="relative text-center">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setTaskMenuOpen(taskMenuOpen === task.id ? null : task.id); }}
-                          className="flex h-7 w-7 items-center justify-center rounded-lg text-muted hover:bg-white/10 hover:text-foreground"
-                        >
-                          <MoreHorizontal className="h-3.5 w-3.5" />
-                        </button>
-                        {taskMenuOpen === task.id && (
-                          <div ref={taskMenuRef} className="absolute right-0 top-full z-50 mt-1 w-34 rounded-xl border border-border bg-[#0f172a] p-1 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl">
-                            {(!task.assignment || !task.assignment.internId) && !checkIsOverdue(task.deadline) && (
-                              <button
-                                onClick={() => { setTaskMenuOpen(null); setAiTask({ taskId: task.id, taskTitle: task.title, isAssigned: false }); }}
-                                className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-sky-400 hover:bg-sky-500/10 transition font-medium"
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="font-mono text-xs text-muted bg-white/5 px-2 py-0.5 rounded border border-white/5">
+                              {task.code ?? "—"}
+                            </span>
+                            <PriorityBadge priority={task.priority} />
+                            <StatusBadge
+                              status={task.assignment?.status ?? "TODO"}
+                              assignmentId={task.assignment?.id}
+                              taskId={task.id}
+                              onReviewClick={handleOpenReview}
+                              onUnblockClick={handleUnblockTask}
+                              isUnblocking={unblockTask.isPending}
+                            />
+                          </div>
+
+                          <div className="relative">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setTaskMenuOpen(taskMenuOpen === task.id ? null : task.id);
+                              }}
+                              className="flex h-8 w-8 items-center justify-center rounded-lg text-muted hover:bg-white/10 hover:text-foreground transition"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </button>
+                            {taskMenuOpen === task.id && (
+                              <div
+                                ref={taskMenuRef}
+                                className="absolute right-0 top-full z-50 mt-1 w-44 rounded-xl border border-border bg-[#0f172a] p-1 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl"
                               >
-                                <Sparkles className="h-3 w-3 shrink-0" />{t("aiAssign")}
-                              </button>
+                                {(!task.assignment || !task.assignment.internId) && !checkIsOverdue(task.deadline) && (
+                                  <button
+                                    onClick={() => {
+                                      setTaskMenuOpen(null);
+                                      setAiTask({ taskId: task.id, taskTitle: task.title, isAssigned: false });
+                                    }}
+                                    className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-sky-400 hover:bg-sky-500/10 transition font-medium"
+                                  >
+                                    <Sparkles className="h-3.5 w-3.5 shrink-0" />
+                                    {t("aiAssign")}
+                                  </button>
+                                )}
+                                {isBlocked && task.assignment?.id && (
+                                  <button
+                                    onClick={() => {
+                                      setTaskMenuOpen(null);
+                                      handleUnblockTask(task.assignment!.id);
+                                    }}
+                                    disabled={unblockTask.isPending}
+                                    className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-sky-400 hover:bg-sky-500/10 transition font-medium"
+                                  >
+                                    <RotateCcw className="h-3.5 w-3.5 shrink-0" />
+                                    {t("unblockTask")}
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => {
+                                    setTaskMenuOpen(null);
+                                    router.push(`${pathname}/${task.id}`);
+                                  }}
+                                  className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground"
+                                >
+                                  <Eye className="h-3.5 w-3.5" />
+                                  {t("view")}
+                                </button>
+                                <button
+                                  onClick={() => openTaskAction({ type: "edit", taskId: task.id, taskTitle: task.title })}
+                                  disabled={isCompleted}
+                                  title={isCompleted ? t("completedTaskReadOnly") : undefined}
+                                  className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted"
+                                >
+                                  <Pencil className="h-3.5 w-3.5" />
+                                  {t("edit")}
+                                </button>
+                                <button
+                                  onClick={() => openTaskAction({ type: "delete", taskId: task.id, taskTitle: task.title })}
+                                  disabled={isCompleted}
+                                  title={isCompleted ? t("completedTaskReadOnly") : undefined}
+                                  className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-red-400 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-red-400"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                  {t("delete")}
+                                </button>
+                              </div>
                             )}
-                            <button
-                              onClick={() => { setTaskMenuOpen(null); router.push(`${pathname}/${task.id}`); }}
-                              className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground"
-                            >
-                              <Eye className="h-3 w-3" />{t("view")}
-                            </button>
-                            <button
-                              onClick={() => openTaskAction({ type: "edit", taskId: task.id, taskTitle: task.title })}
-                              disabled={task.assignment?.status === "DONE"}
-                              title={task.assignment?.status === "DONE" ? t("completedTaskReadOnly") : undefined}
-                              className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted"
-                            >
-                              <Pencil className="h-3 w-3" />{t("edit")}
-                            </button>
-                            <button
-                              onClick={() => openTaskAction({ type: "delete", taskId: task.id, taskTitle: task.title })}
-                              disabled={task.assignment?.status === "DONE"}
-                              title={task.assignment?.status === "DONE" ? t("completedTaskReadOnly") : undefined}
-                              className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-red-400 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-red-400"
-                            >
-                              <Trash2 className="h-3 w-3" />{t("delete")}
-                            </button>
+                          </div>
+                        </div>
+
+                        <div>
+                          <button
+                            onClick={() => router.push(`${pathname}/${task.id}`)}
+                            title={task.title}
+                            className="text-sm font-semibold text-foreground hover:text-primary-light transition text-left line-clamp-2 block"
+                          >
+                            {task.title}
+                          </button>
+                        </div>
+
+                        {isCompleted && (
+                          <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs text-emerald-300 font-medium">
+                            <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                            <span>{t("completedTaskReadOnly")}</span>
                           </div>
                         )}
+
+                        <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-border/40">
+                          <div>
+                            <span className="text-muted block text-[11px] mb-0.5">{t("colOwner")}</span>
+                            <InlineAssignCell
+                              taskId={task.id}
+                              assignment={task.assignment}
+                              deadline={task.deadline}
+                              taskGroupDepartmentId={task.taskGroup?.departmentId}
+                            />
+                          </div>
+                          <div>
+                            <span className="text-muted block text-[11px] mb-0.5">{t("colDeadline")}</span>
+                            <span className="text-foreground font-medium">
+                              {new Date(task.deadline).toLocaleDateString("vi-VN")}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                    </Table.Row>
-                  )} />
+                    );
+                  })}
+                </div>
+
+                {/* Desktop Table View (hidden md:block) */}
+                <div className="hidden md:block">
+                  <Table columns="60px minmax(180px,260px) minmax(145px,1fr) minmax(125px,0.8fr) minmax(75px,0.25fr) minmax(110px,0.4fr) minmax(85px,0.3fr) 40px">
+                    <Table.Header>
+                      <div>{t("colCode")}</div>
+                      <div>{t("colTitle")}</div>
+                      <div>{t("colOwner")}</div>
+                      <div>{t("colSupport")}</div>
+                      <div>{t("colPriority")}</div>
+                      <div>{t("colStatus")}</div>
+                      <div>{t("colDeadline")}</div>
+                      <div></div>
+                    </Table.Header>
+                    <Table.Body
+                      data={tasks}
+                      render={(task) => {
+                        const isCompleted = task.assignment?.status === "DONE";
+                        const isBlocked = task.assignment?.status === "BLOCKED";
+
+                        return (
+                          <Table.Row key={task.id}>
+                            <div className="font-mono text-xs text-muted">{task.code ?? "—"}</div>
+                            <div className="min-w-0 pr-2">
+                              <button
+                                onClick={() => router.push(`${pathname}/${task.id}`)}
+                                title={task.title}
+                                className="truncate block text-sm text-left hover:text-primary-light transition cursor-pointer max-w-[240px] font-medium"
+                              >
+                                {task.title}
+                              </button>
+                              {isCompleted && (
+                                <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-medium mt-0.5" title={t("completedTaskReadOnly")}>
+                                  <Check className="h-2.5 w-2.5" />
+                                  {t("completedTaskReadOnly")}
+                                </span>
+                              )}
+                            </div>
+                            <InlineAssignCell
+                              taskId={task.id}
+                              assignment={task.assignment}
+                              deadline={task.deadline}
+                              taskGroupDepartmentId={task.taskGroup?.departmentId}
+                            />
+                            <div className="truncate text-sm text-muted">
+                              {task.assignment?.support?.fullName ?? "—"}
+                            </div>
+                            <div>
+                              <PriorityBadge priority={task.priority} />
+                            </div>
+                            <div>
+                              <StatusBadge
+                                status={task.assignment?.status ?? "TODO"}
+                                assignmentId={task.assignment?.id}
+                                taskId={task.id}
+                                onReviewClick={handleOpenReview}
+                                onUnblockClick={handleUnblockTask}
+                                isUnblocking={unblockTask.isPending}
+                              />
+                            </div>
+                            <div className="text-sm text-muted">
+                              {new Date(task.deadline).toLocaleDateString("vi-VN")}
+                            </div>
+                            <div className="relative text-center">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setTaskMenuOpen(taskMenuOpen === task.id ? null : task.id);
+                                }}
+                                className="flex h-7 w-7 items-center justify-center rounded-lg text-muted hover:bg-white/10 hover:text-foreground"
+                              >
+                                <MoreHorizontal className="h-3.5 w-3.5" />
+                              </button>
+                              {taskMenuOpen === task.id && (
+                                <div
+                                  ref={taskMenuRef}
+                                  className="absolute right-0 top-full z-50 mt-1 w-44 rounded-xl border border-border bg-[#0f172a] p-1 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl"
+                                >
+                                  {(!task.assignment || !task.assignment.internId) && !checkIsOverdue(task.deadline) && (
+                                    <button
+                                      onClick={() => {
+                                        setTaskMenuOpen(null);
+                                        setAiTask({ taskId: task.id, taskTitle: task.title, isAssigned: false });
+                                      }}
+                                      className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-sky-400 hover:bg-sky-500/10 transition font-medium"
+                                    >
+                                      <Sparkles className="h-3 w-3 shrink-0" />
+                                      {t("aiAssign")}
+                                    </button>
+                                  )}
+                                  {isBlocked && task.assignment?.id && (
+                                    <button
+                                      onClick={() => {
+                                        setTaskMenuOpen(null);
+                                        handleUnblockTask(task.assignment!.id);
+                                      }}
+                                      disabled={unblockTask.isPending}
+                                      className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-sky-400 hover:bg-sky-500/10 transition font-medium"
+                                    >
+                                      <RotateCcw className="h-3 w-3 shrink-0" />
+                                      {t("unblockTask")}
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={() => {
+                                      setTaskMenuOpen(null);
+                                      router.push(`${pathname}/${task.id}`);
+                                    }}
+                                    className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground"
+                                  >
+                                    <Eye className="h-3 w-3" />
+                                    {t("view")}
+                                  </button>
+                                  <button
+                                    onClick={() => openTaskAction({ type: "edit", taskId: task.id, taskTitle: task.title })}
+                                    disabled={isCompleted}
+                                    title={isCompleted ? t("completedTaskReadOnly") : undefined}
+                                    className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted"
+                                  >
+                                    <Pencil className="h-3 w-3" />
+                                    {t("edit")}
+                                  </button>
+                                  <button
+                                    onClick={() => openTaskAction({ type: "delete", taskId: task.id, taskTitle: task.title })}
+                                    disabled={isCompleted}
+                                    title={isCompleted ? t("completedTaskReadOnly") : undefined}
+                                    className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-red-400 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-red-400"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                    {t("delete")}
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </Table.Row>
+                        );
+                      }}
+                    />
+                  </Table>
+                </div>
 
                 {meta && meta.totalPages > 1 && (
-                  <Table.Footer>
-                    <div className="flex w-full items-center justify-between gap-4 text-md">
-                      <p className="text-muted">
-                        {t("pagination", { page: meta.page, totalPages: meta.totalPages, total: meta.total })}
-                      </p>
+                  <div className="mt-4 flex w-full items-center justify-between gap-4 border-t border-white/5 px-2 pt-4 text-sm text-muted">
+                    <p className="text-muted">
+                      {t("pagination", { page: meta.page, totalPages: meta.totalPages, total: meta.total })}
+                    </p>
 
-                      <div className="flex items-center gap-2">
-                        <button
-                          disabled={meta.page <= 1}
-                          onClick={() => goToPage(meta.page - 1)}
-                          className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:opacity-30"
-                        >
-                          <ChevronLeft className="h-4 w-4" />
-                        </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        disabled={meta.page <= 1}
+                        onClick={() => goToPage(meta.page - 1)}
+                        className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:opacity-30"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </button>
 
-                        <button
-                          disabled={meta.page >= meta.totalPages}
-                          onClick={() => goToPage(meta.page + 1)}
-                          className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:opacity-30"
-                        >
-                          <ChevronRight className="h-4 w-4" />
-                        </button>
-                      </div>
+                      <button
+                        disabled={meta.page >= meta.totalPages}
+                        onClick={() => goToPage(meta.page + 1)}
+                        className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:opacity-30"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
                     </div>
-                  </Table.Footer>
+                  </div>
                 )}
-                </Table>
+              </>
             ) : (
               <p className="py-12 text-center text-sm text-muted">{t("noTasksFound")}</p>
             )}
@@ -917,20 +1143,93 @@ function PriorityBadge({ priority }: { priority: string }) {
   return <span className={`inline-flex rounded-lg px-2 py-0.5 text-xs ${colors[priority] ?? "bg-white/5 text-muted"}`}>{priority}</span>;
 }
 
-function StatusBadge({ status, assignmentId, taskId, onReviewClick }: { status: string; assignmentId?: string; taskId?: string; onReviewClick?: (assignmentId: string, taskId: string) => void }) {
-  const colors: Record<string, string> = { DONE: "bg-emerald-500/10 text-emerald-400", IN_PROGRESS: "bg-blue-500/10 text-blue-400", REVIEW: "bg-purple-500/10 text-purple-400", TODO: "bg-white/5 text-muted", BLOCKED: "bg-red-500/10 text-red-400", PENDING_APPROVAL: "bg-amber-500/10 text-amber-400", UNASSIGNED: "bg-orange-500/10 text-orange-400" };
+function StatusBadge({
+  status,
+  assignmentId,
+  taskId,
+  onReviewClick,
+  onUnblockClick,
+  isUnblocking,
+}: {
+  status: string;
+  assignmentId?: string;
+  taskId?: string;
+  onReviewClick?: (assignmentId: string, taskId: string) => void;
+  onUnblockClick?: (assignmentId: string) => void;
+  isUnblocking?: boolean;
+}) {
+  const t = useTranslations("leader.tasks");
+  const colors: Record<string, string> = {
+    DONE: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
+    IN_PROGRESS: "border-sky-500/30 bg-sky-500/10 text-sky-300",
+    REVIEW: "border-purple-500/30 bg-purple-500/10 text-purple-300",
+    TODO: "border-slate-700 bg-slate-800/60 text-slate-400",
+    BLOCKED: "border-rose-500/30 bg-rose-500/10 text-rose-300",
+    PENDING_APPROVAL: "border-amber-500/30 bg-amber-500/10 text-amber-300",
+    UNASSIGNED: "border-orange-500/30 bg-orange-500/10 text-orange-300",
+  };
+
+  if (status === "DONE") {
+    return (
+      <span
+        title={t("completedTaskReadOnly")}
+        className={`inline-flex items-center gap-1 rounded-lg border px-2 py-0.5 text-xs font-medium ${colors[status] ?? "border-border bg-card text-muted"}`}
+      >
+        <Check className="h-3 w-3 shrink-0 text-emerald-400" />
+        {status.replace("_", " ")}
+      </span>
+    );
+  }
+
+  if (status === "BLOCKED" && assignmentId && onUnblockClick) {
+    return (
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span
+          className={`inline-flex items-center gap-1 rounded-lg border px-2 py-0.5 text-xs font-medium ${colors[status] ?? "border-border bg-card text-muted"}`}
+        >
+          {status.replace("_", " ")}
+        </span>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onUnblockClick(assignmentId);
+          }}
+          disabled={isUnblocking}
+          title={t("unblockTask")}
+          className="inline-flex items-center gap-1 rounded-md border border-sky-400/40 bg-sky-500/15 px-1.5 py-0.5 text-[11px] font-semibold text-sky-300 hover:bg-sky-500/25 hover:border-sky-400/60 transition disabled:opacity-50 cursor-pointer"
+        >
+          {isUnblocking ? (
+            <Loader2 className="h-2.5 w-2.5 animate-spin shrink-0" />
+          ) : (
+            <RotateCcw className="h-2.5 w-2.5 shrink-0" />
+          )}
+          {t("unblock")}
+        </button>
+      </div>
+    );
+  }
 
   if (status === "REVIEW" && assignmentId && taskId && onReviewClick) {
     return (
       <button
+        type="button"
         onClick={() => onReviewClick(assignmentId, taskId)}
-        className={`inline-flex rounded-lg px-2 py-0.5 text-xs cursor-pointer transition hover:opacity-80 hover:scale-105 ${colors[status] ?? "bg-white/5 text-muted"}`}
+        className={`inline-flex items-center gap-1 rounded-lg border px-2 py-0.5 text-xs cursor-pointer transition hover:scale-105 hover:opacity-90 font-medium ${colors[status] ?? "border-border bg-card text-muted"}`}
       >
+        <span className="h-1.5 w-1.5 rounded-full bg-purple-400 animate-pulse" />
         {status.replace("_", " ")}
       </button>
     );
   }
-  return <span className={`inline-flex rounded-lg px-2 py-0.5 text-xs ${colors[status] ?? "bg-white/5 text-muted"}`}>{status.replace("_", " ")}</span>;
+
+  return (
+    <span
+      className={`inline-flex rounded-lg border px-2 py-0.5 text-xs font-medium ${colors[status] ?? "border-border bg-card text-muted"}`}
+    >
+      {status.replace("_", " ")}
+    </span>
+  );
 }
 
 function DetailRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {

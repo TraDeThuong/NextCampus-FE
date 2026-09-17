@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, FileText, Link, Calendar, Flag, User, Layers, Circle, ChevronRight } from "lucide-react";
+import { X, FileText, Link, Calendar, User, Layers, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useTaskAssignments } from "@/hooks/task-assignment/useTaskAssignments";
 import { useTask } from "@/hooks/task/useTask";

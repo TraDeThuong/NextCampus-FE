@@ -11,7 +11,7 @@ import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
 import DepartmentRow from "./DepartmentRow";
 
-const COLUMNS = "minmax(180px, 1.2fr) minmax(280px, 2.8fr) minmax(220px, 1.8fr) 100px";
+const COLUMNS = "minmax(180px, 1.2fr) minmax(220px, 1.8fr) minmax(150px, 1fr) minmax(200px, 1.4fr) 100px";
 
 export default function DepartmentTable() {
     const t = useTranslations();
@@ -69,7 +69,8 @@ export default function DepartmentTable() {
             >
                 <Table.Header>
                     <div>{t("admin.department.colDepartment")}</div>
-                    <div>{t("admin.department.colPositions")}</div>
+                    <div>{t("admin.department.colDescription")}</div>
+                    <div>{t("admin.department.colPositionsCount")}</div>
                     <div>{t("admin.department.colLeader")}</div>
                     <div className="text-right pr-4">{t("admin.department.colActions")}</div>
                 </Table.Header>

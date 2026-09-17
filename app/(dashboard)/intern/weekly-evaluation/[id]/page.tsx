@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter, notFound } from "next/navigation";
-import { ArrowLeft, User, Calendar, BookOpen, Star, MessageSquare, ClipboardList, CheckCircle2, Clock, TrendingUp, TrendingDown, Sparkles } from "lucide-react";
+import { ArrowLeft, User, Calendar, BookOpen, Star, MessageSquare, ClipboardList, CheckCircle2, Clock, TrendingUp, TrendingDown, Sparkles, Info } from "lucide-react";
 import { useTranslations } from "next-intl";
 import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
@@ -31,20 +31,36 @@ function CriteriaTable({ ratings, aiRatings }: { ratings: EvaluationRatings; aiR
   return (
     <div className="space-y-4">
       {CRITERIA_SECTIONS.map((section) => (
-        <div key={section.id} className="rounded-2xl overflow-hidden border border-border/40">
-          <div className="flex items-center gap-2 px-4 py-2.5 bg-white/[0.04] border-b border-border/40">
-            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-primary-main/20 text-xs font-bold text-primary-light shrink-0">{section.id}</span>
-            <span className="text-sm font-semibold text-foreground">{tSections(section.id)}</span>
+        <div key={section.id} className="rounded-2xl overflow-hidden border border-white/10 bg-white/[0.01]">
+          <div className="flex items-center gap-2 px-4 py-2.5 bg-white/[0.04] border-b border-white/10">
+            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-cyan-500/20 text-xs font-bold text-cyan-300 shrink-0">{section.id}</span>
+            <span className="text-sm font-semibold text-slate-200">{tSections(section.id)}</span>
           </div>
-          <div className="divide-y divide-border/20">
+          <div className="divide-y divide-white/5">
             {section.criteria.map((criterion, idx) => {
-              const level = ratings[criterion.key]; const aiLevel = aiRatings?.[criterion.key]; const isDiff = aiLevel && aiLevel !== level;
+              const level = ratings[criterion.key];
+              const aiLevel = aiRatings?.[criterion.key];
+              const isDiff = aiLevel && aiLevel !== level;
               return (
-                <div key={criterion.key} className="flex items-center gap-4 px-4 py-2.5 hover:bg-white/[0.01]">
-                  <span className="text-xs text-muted font-mono shrink-0 w-5">{idx + 1}.</span>
-                  <span className="flex-1 text-sm text-slate-300">{tCriteria(criterion.key)}</span>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {aiLevel && isDiff && <div className="flex items-center gap-1"><Sparkles className="h-3 w-3 text-primary-light/50" /><span className={`text-xs px-2 py-0.5 rounded border opacity-60 ${RATING_COLORS[aiLevel]}`}>{tRatings(aiLevel)}</span></div>}
+                <div key={criterion.key} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 px-4 py-3 hover:bg-white/[0.02] transition-colors">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <span className="text-xs text-slate-500 font-mono shrink-0 w-5">{idx + 1}.</span>
+                    <span className="text-sm text-slate-300" title={criterion.tooltip}>{tCriteria(criterion.key)}</span>
+                    {criterion.tooltip && (
+                      <span className="text-slate-500 hover:text-cyan-400 cursor-help transition shrink-0" title={criterion.tooltip}>
+                        <Info className="h-3.5 w-3.5" />
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0 pl-7 sm:pl-0">
+                    {aiLevel && isDiff && (
+                      <div className="flex items-center gap-1">
+                        <Sparkles className="h-3 w-3 text-sky-400" />
+                        <span className={`text-xs px-2 py-0.5 rounded-lg border opacity-75 ${RATING_COLORS[aiLevel]}`} title={`AI gợi ý: ${tRatings(aiLevel)}`}>
+                          AI: {tRatings(aiLevel)}
+                        </span>
+                      </div>
+                    )}
                     <RatingBadge level={level} />
                   </div>
                 </div>
@@ -54,7 +70,12 @@ function CriteriaTable({ ratings, aiRatings }: { ratings: EvaluationRatings; aiR
           {(() => {
             const keys = section.criteria.map((c) => c.key);
             const avg = parseFloat((keys.map((k) => RATING_SCORES[ratings[k]]).reduce((a, b) => a + b, 0) / keys.length).toFixed(1));
-            return <div className="flex justify-end px-4 py-2 bg-white/[0.02] border-t border-border/20"><span className="text-xs text-muted mr-2">{td("sectionScore", { id: section.id })}</span><span className="text-xs font-bold text-primary-light">{avg.toFixed(1)} / 10</span></div>;
+            return (
+              <div className="flex justify-end px-4 py-2.5 bg-white/[0.02] border-t border-white/5">
+                <span className="text-xs text-slate-400 mr-2">{td("sectionScore", { id: section.id })}</span>
+                <span className="text-xs font-bold text-cyan-300">{avg.toFixed(1)} / 10</span>
+              </div>
+            );
           })()}
         </div>
       ))}

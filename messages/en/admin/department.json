@@ -44,6 +44,19 @@
       "leadersUnavailable": "Leaders unavailable",
       "selectLeader": "Select leader",
       "noLeadersAvailable": "No leaders available.",
+      "colDescription": "Description",
+      "colPositionsCount": "Positions Count",
+      "positionsCount": "{count} positions",
+      "defaultDescription": "Specialized department for core operations and development",
+      "editDepartment": "Edit Department",
+      "editDepartmentTitle": "Edit Department & Positions",
+      "editDepartmentDescription": "Update department details and manage child job positions dynamically.",
+      "saveChanges": "Save Changes",
+      "updating": "Updating...",
+      "positionName": "Position Name",
+      "positionPlaceholder": "Enter position title...",
+      "addPositionField": "Add New Position",
+      "positionRequired": "Please enter a position name",
       "maxDepartmentsToast": "A leader can manage at most {n} departments."
     }
   }

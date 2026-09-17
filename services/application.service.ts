@@ -52,15 +52,14 @@ export const revokeInviteService = async (
   return response.data;
 };
 
-// 4. POST /applications — Nộp đơn (Public)
+// 4. POST /applications/submit — Nộp đơn (Public)
 export const createApplicationService = async (
   payload: CreateApplicationPayload,
 ): Promise<ApplicationSuccessResponse> => {
-  // Gửi trực tiếp payload JSON (chứa thông tin metadata của files đã upload trực tiếp)
   const data = { ...payload };
   delete (data as { files?: unknown }).files;
   const response = await api.post<ApplicationSuccessResponse>(
-    "/applications",
+    "/applications/submit",
     data,
   );
   return response.data;

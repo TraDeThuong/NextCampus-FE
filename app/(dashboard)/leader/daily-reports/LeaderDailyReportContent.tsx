@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { Loader2, FileText, Users, FileCheck, AlertCircle, CalendarDays } from "lucide-react";
+import { Loader2, FileText, Users, FileCheck, AlertCircle, CalendarDays, Filter, RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import MetalCard from "@/components/ui/MetalCard";
 import StatsCard from "@/components/stats/StatsCard";
@@ -64,12 +64,17 @@ export default function LeaderDailyReportContent() {
   }, []);
 
   const { data: todayReportsData } = useDailyReports({
+    date: todayStr,
+    from: todayStr,
+    to: todayStr,
     createdAtFrom: todayStr,
     createdAtTo: todayStr,
     limit: 100,
   });
 
   const { data: weekReportsData } = useDailyReports({
+    from: mondayStr,
+    to: todayStr,
     createdAtFrom: mondayStr,
     createdAtTo: todayStr,
     limit: 100,
@@ -115,6 +120,12 @@ export default function LeaderDailyReportContent() {
   );
   const [missingDate, setMissingDate] = useState<string | null>(null);
 
+  // Date filters
+  const [filterMode, setFilterMode] = useState<"all" | "single" | "range">("all");
+  const [singleDate, setSingleDate] = useState<string>("");
+  const [fromDate, setFromDate] = useState<string>("");
+  const [toDate, setToDate] = useState<string>("");
+
   const handleSelectIntern = useCallback(
     (id: string) => {
       setSelectedInternId(id);
@@ -141,17 +152,41 @@ export default function LeaderDailyReportContent() {
     return { start, end };
   }, [selectedIntern]);
 
+  // Query filter calculation based on filter mode
+  const activeQueryParams = useMemo(() => {
+    if (!selectedInternId) return undefined;
+    if (filterMode === "single" && singleDate) {
+      return {
+        internId: selectedInternId,
+        date: singleDate,
+        from: singleDate,
+        to: singleDate,
+        limit: 100,
+      };
+    }
+    if (filterMode === "range" && (fromDate || toDate)) {
+      return {
+        internId: selectedInternId,
+        from: fromDate || undefined,
+        to: toDate || undefined,
+        limit: 100,
+      };
+    }
+    if (dateRange) {
+      return {
+        internId: selectedInternId,
+        from: isoDate(dateRange.start),
+        to: isoDate(dateRange.end),
+        createdAtFrom: isoDate(dateRange.start),
+        createdAtTo: isoDate(dateRange.end),
+        limit: 100,
+      };
+    }
+    return { internId: selectedInternId, limit: 100 };
+  }, [selectedInternId, filterMode, singleDate, fromDate, toDate, dateRange]);
+
   // Fetch reports for selected intern
-  const { data: reportsData } = useDailyReports(
-    dateRange && selectedInternId
-      ? {
-          internId: selectedInternId,
-          createdAtFrom: isoDate(dateRange.start),
-          createdAtTo: isoDate(dateRange.end),
-          limit: 100,
-        }
-      : undefined,
-  );
+  const { data: reportsData } = useDailyReports(activeQueryParams);
 
   const { data: singleReportData } = useDailyReport(
     selectedReportId ?? undefined,
@@ -161,7 +196,8 @@ export default function LeaderDailyReportContent() {
     const map = new Map<string, DailyReport>();
     if (reportsData?.data) {
       for (const r of reportsData.data) {
-        map.set(dateStrFromISO(r.createdAt), r);
+        const dateKey = r.date ? isoDate(new Date(r.date)) : dateStrFromISO(r.createdAt);
+        map.set(dateKey, r);
       }
     }
     return map;
@@ -248,6 +284,96 @@ export default function LeaderDailyReportContent() {
           subtitle={t("workingDays", { days: overviewStats.weekWorkingDays })}
           icon={<CalendarDays className="h-5 w-5 text-indigo-400" />}
         />
+      </div>
+
+      {/* Filter toolbar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/5 bg-white/[0.02] p-3.5 px-5">
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+          <Filter className="h-4 w-4 text-cyan-400" />
+          <span>Bộ lọc ngày báo cáo (Asia/Ho_Chi_Minh):</span>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex rounded-xl bg-white/5 p-1 border border-white/10 text-xs">
+            <button
+              type="button"
+              onClick={() => setFilterMode("all")}
+              className={`px-3 py-1 rounded-lg transition ${
+                filterMode === "all"
+                  ? "bg-cyan-500/20 text-cyan-300 font-medium"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              Kỳ thực tập
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilterMode("single")}
+              className={`px-3 py-1 rounded-lg transition ${
+                filterMode === "single"
+                  ? "bg-cyan-500/20 text-cyan-300 font-medium"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              Theo ngày
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilterMode("range")}
+              className={`px-3 py-1 rounded-lg transition ${
+                filterMode === "range"
+                  ? "bg-cyan-500/20 text-cyan-300 font-medium"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              Khoảng ngày
+            </button>
+          </div>
+
+          {filterMode === "single" && (
+            <input
+              type="date"
+              value={singleDate}
+              onChange={(e) => setSingleDate(e.target.value)}
+              className="rounded-xl border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200 focus:outline-none focus:border-cyan-500/50"
+            />
+          )}
+
+          {filterMode === "range" && (
+            <div className="flex items-center gap-1.5 text-xs text-slate-400">
+              <span>Từ</span>
+              <input
+                type="date"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+                className="rounded-xl border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200 focus:outline-none focus:border-cyan-500/50"
+              />
+              <span>đến</span>
+              <input
+                type="date"
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
+                className="rounded-xl border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200 focus:outline-none focus:border-cyan-500/50"
+              />
+            </div>
+          )}
+
+          {filterMode !== "all" && (
+            <button
+              type="button"
+              onClick={() => {
+                setFilterMode("all");
+                setSingleDate("");
+                setFromDate("");
+                setToDate("");
+              }}
+              className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition"
+            >
+              <RotateCcw className="h-3 w-3" />
+              Đặt lại
+            </button>
+          )}
+        </div>
       </div>
 
       {/* 3-column layout in a shared card */}

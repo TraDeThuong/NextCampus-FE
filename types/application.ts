@@ -105,13 +105,16 @@ export interface CreateApplicationPayload {
   fullName: string;
   email: string;
   phone: string;
+  university?: string;
+  major?: string;
   preferredDepartment: string;
   preferredPosition: string;
   startDate: string;
-  duration: number;
+  duration?: number;
   token: string;
-  regulationId: string;
+  regulationId?: string;
   acceptedRegulations: boolean;
+  cvUrl?: string;
   files?: File[];
   uploadedFiles?: Array<{
     fileName: string;

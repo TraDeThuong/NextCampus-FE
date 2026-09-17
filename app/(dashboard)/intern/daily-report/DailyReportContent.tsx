@@ -57,6 +57,8 @@ export default function DailyReportContent() {
   const { data: reportsData } = useDailyReports(
     dateRange
       ? {
+          from: isoDate(dateRange.start),
+          to: isoDate(dateRange.end),
           createdAtFrom: isoDate(dateRange.start),
           createdAtTo: isoDate(dateRange.end),
           limit: 100,
@@ -72,7 +74,7 @@ export default function DailyReportContent() {
     const map = new Map<string, DailyReport>();
     if (reportsData?.data) {
       for (const r of reportsData.data) {
-        const dateStr = dateStrFromISO(r.createdAt);
+        const dateStr = r.date ? isoDate(new Date(r.date)) : dateStrFromISO(r.createdAt);
         map.set(dateStr, r);
       }
     }

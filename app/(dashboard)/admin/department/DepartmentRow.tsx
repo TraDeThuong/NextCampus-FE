@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { MoreVertical, Trash2, Edit3, X, Loader2, Settings, Briefcase } from "lucide-react";
+import { MoreVertical, Trash2, Edit3, X, Loader2, Settings, Briefcase, Building2, Plus } from "lucide-react";
 import type { Department } from "@/types/department";
 import type { Leader } from "@/types/leader";
 import { useDeleteDepartment } from "@/hooks/department/useDeleteDepartment";
@@ -10,7 +10,7 @@ import { useCreatePosition } from "@/hooks/department/useCreatePosition";
 import { useUpdatePosition } from "@/hooks/department/useUpdatePosition";
 import { useDeletePosition } from "@/hooks/department/useDeletePosition";
 import { useDepartments } from "@/hooks/department/useDepartments";
-import { PREDEFINED_DEPARTMENTS, PREDEFINED_POSITIONS, GENERAL_POSITIONS } from "@/types/department";
+import { PREDEFINED_POSITIONS, GENERAL_POSITIONS } from "@/types/department";
 import { useTranslations } from "next-intl";
 import Table from "@/components/ui/Table";
 import Modal from "@/components/ui/Modal";
@@ -33,13 +33,7 @@ export default function DepartmentRow({
     const t = useTranslations();
     const { mutate: deleteDepartment } = useDeleteDepartment();
     const { mutate: updateDepartment } = useUpdateDepartment();
-    const { data: deptData } = useDepartments();
-    const departments = deptData?.data ?? [];
 
-    const [isEditingDept, setIsEditingDept] = useState(false);
-    const [deptNameValue, setDeptNameValue] = useState(department.name);
-    const [deptSuggestIdx, setDeptSuggestIdx] = useState(0);
-    const [originalDeptTyped, setOriginalDeptTyped] = useState(department.name);
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -53,112 +47,26 @@ export default function DepartmentRow({
         return () => document.removeEventListener("mousedown", handleClick);
     }, []);
 
-    const deptExists = departments.some(
-        (d) => d.id !== department.id && d.name.toLowerCase().trim() === deptNameValue.toLowerCase().trim()
-    );
-
-    const handleRenameSubmit = () => {
-        if (deptExists) {
-            toast.error(t("admin.department.deptNameExistsToast"));;
-            setDeptNameValue(department.name);
-            setOriginalDeptTyped(department.name);
-            setIsEditingDept(false);
-            return;
-        }
-        if (deptNameValue.trim() && deptNameValue.trim() !== department.name) {
-            updateDepartment({
-                id: department.id,
-                payload: { name: deptNameValue.trim() },
-            });
-        }
-        setIsEditingDept(false);
-    };
-
-    const handleDeptKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === "Tab") {
-            const matches = PREDEFINED_DEPARTMENTS.filter((d) =>
-                d.toLowerCase().includes(originalDeptTyped.toLowerCase())
-            );
-            if (matches.length > 0) {
-                e.preventDefault();
-                if (matches.length === 1) {
-                    setDeptNameValue(matches[0]);
-                } else {
-                    const index = deptSuggestIdx % matches.length;
-                    setDeptNameValue(matches[index]);
-                    setDeptSuggestIdx(index + 1);
-                }
-            }
-        } else if (e.key === "Enter") {
-            if (deptExists) {
-                toast.error(t("admin.department.deptNameExistsToast"));;
-                return;
-            }
-            handleRenameSubmit();
-        } else if (e.key === "Escape") {
-            setDeptNameValue(department.name);
-            setOriginalDeptTyped(department.name);
-            setIsEditingDept(false);
-        }
-    };
-
     return (
         <Modal>
             <Table.Row>
                 {/* Department Name */}
-                <div className="text-sm font-medium text-white min-w-0 pr-4 relative">
-                    {isEditingDept ? (
-                        <div className="relative">
-                            <input
-                                type="text"
-                                list={`departments-list-${department.id}`}
-                                value={deptNameValue}
-                                onChange={(e) => {
-                                    setDeptNameValue(e.target.value);
-                                    setOriginalDeptTyped(e.target.value);
-                                    setDeptSuggestIdx(0);
-                                }}
-                                onKeyDown={handleDeptKeyDown}
-                                onBlur={handleRenameSubmit}
-                                autoFocus
-                                className="w-full rounded-lg border border-cyan-400/30 bg-[#0f172a] px-3 py-1.5 text-sm text-white outline-none"
-                            />
-                            <datalist id={`departments-list-${department.id}`}>
-                                {PREDEFINED_DEPARTMENTS.map((dept) => (
-                                    <option key={dept} value={dept} />
-                                ))}
-                            </datalist>
-                            {deptExists && (
-                                <p className="absolute left-0 top-full z-10 text-[10px] text-yellow-500 bg-[#0f172a] border border-yellow-500/20 px-2 py-0.5 rounded mt-0.5 shadow-md whitespace-nowrap">
-                                    {t("admin.department.deptNameExistsWarning")}
-                                </p>
-                            )}
-                        </div>
-                    ) : (
-                        <span
-                            className="cursor-pointer hover:text-cyan-400 transition"
-                            onDoubleClick={() => setIsEditingDept(true)}
-                            title={t("admin.department.doubleClickToRename")}
-                        >
-                            {department.name}
-                        </span>
-                    )}
+                <div className="text-sm font-semibold text-white min-w-0 pr-4 flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-cyan-400 shrink-0" />
+                    <span className="truncate">{department.name}</span>
                 </div>
 
-                {/* Positions badges */}
-                <div className="flex flex-wrap items-center">
-                    {department.positions.length === 0 ? (
-                        <span className="text-xs text-slate-500 italic">{t("admin.department.noPositions")}</span>
-                    ) : (
-                        department.positions.map((pos) => (
-                            <span
-                                key={pos.id}
-                                className="inline-flex items-center rounded-md bg-cyan-400/10 px-2 py-0.5 text-xs font-medium text-cyan-400 ring-1 ring-inset ring-cyan-400/20 mr-1.5 mb-1"
-                            >
-                                {pos.name}
-                            </span>
-                        ))
-                    )}
+                {/* Description */}
+                <div className="text-xs text-slate-400 min-w-0 pr-4 truncate" title={department.description || t("admin.department.defaultDescription")}>
+                    {department.description || t("admin.department.defaultDescription")}
+                </div>
+
+                {/* Positions Count */}
+                <div className="flex items-center">
+                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-cyan-400/10 px-2.5 py-1 text-xs font-medium text-cyan-300 ring-1 ring-inset ring-cyan-400/20">
+                        <Briefcase className="h-3 w-3 shrink-0" />
+                        {t("admin.department.positionsCount", { count: department.positions.length })}
+                    </span>
                 </div>
 
                 {/* Leaders */}
@@ -182,7 +90,18 @@ export default function DepartmentRow({
                     </button>
 
                     {menuOpen && (
-                        <div className="absolute right-0 top-full z-50 mt-2 w-44 rounded-2xl border border-white/10 bg-[#0f172a] p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl text-left">
+                        <div className="absolute right-0 top-full z-50 mt-2 w-48 rounded-2xl border border-white/10 bg-[#0f172a] p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl text-left">
+                            <Modal.Open opens={`edit-department-${department.id}`}>
+                                <button
+                                    type="button"
+                                    onClick={() => setMenuOpen(false)}
+                                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
+                                >
+                                    <Edit3 className="h-4 w-4" />
+                                    {t("admin.department.editDepartment")}
+                                </button>
+                            </Modal.Open>
+
                             <Modal.Open opens={`manage-positions-${department.id}`}>
                                 <button
                                     type="button"
@@ -193,18 +112,6 @@ export default function DepartmentRow({
                                     {t("admin.department.positions")}
                                 </button>
                             </Modal.Open>
-
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setMenuOpen(false);
-                                    setIsEditingDept(true);
-                                }}
-                                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
-                            >
-                                <Edit3 className="h-4 w-4" />
-                                {t("admin.department.rename")}
-                            </button>
 
                             <Modal.Open opens={`delete-department-${department.id}`}>
                                 <button
@@ -221,6 +128,13 @@ export default function DepartmentRow({
                 </div>
             </Table.Row>
 
+            <Modal.Window name={`edit-department-${department.id}`} size="md">
+                <EditDepartmentModal
+                    department={department}
+                    onUpdateName={(name) => updateDepartment({ id: department.id, payload: { name } })}
+                />
+            </Modal.Window>
+
             <Modal.Window name={`manage-positions-${department.id}`} size="md">
                 <ManagePositions department={department} />
             </Modal.Window>
@@ -235,6 +149,242 @@ export default function DepartmentRow({
                 />
             </Modal.Window>
         </Modal>
+    );
+}
+
+function EditDepartmentModal({
+    department,
+    onUpdateName,
+    onCloseModal,
+}: {
+    department: Department;
+    onUpdateName: (name: string) => void;
+    onCloseModal?: () => void;
+}) {
+    const t = useTranslations();
+    const { data: deptData } = useDepartments();
+    const departments = deptData?.data ?? [];
+
+    const { mutate: createPosition, isPending: creatingPos } = useCreatePosition();
+    const { mutate: updatePosition } = useUpdatePosition();
+    const { mutate: deletePosition } = useDeletePosition();
+
+    const [deptName, setDeptName] = useState(department.name);
+    const [newPositionName, setNewPositionName] = useState("");
+    const [editingPosId, setEditingPosId] = useState<string | null>(null);
+    const [editingPosName, setEditingPosName] = useState("");
+
+    const predefinedForDept = PREDEFINED_POSITIONS[deptName] || GENERAL_POSITIONS;
+
+    const deptExists = departments.some(
+        (d) => d.id !== department.id && d.name.toLowerCase().trim() === deptName.toLowerCase().trim()
+    );
+
+    const handleSave = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!deptName.trim()) return;
+        if (deptExists) {
+            toast.error(t("admin.department.deptNameExistsToast"));
+            return;
+        }
+        if (deptName.trim() !== department.name) {
+            onUpdateName(deptName.trim());
+        }
+        onCloseModal?.();
+    };
+
+    const handleAddPosition = (e?: React.SyntheticEvent) => {
+        e?.preventDefault();
+        const trimmed = newPositionName.trim();
+        if (!trimmed) return;
+        const exists = department.positions.some(
+            (p) => p.name.toLowerCase().trim() === trimmed.toLowerCase()
+        );
+        if (exists) {
+            toast.error(t("admin.department.positionExistsWarning"));
+            return;
+        }
+        createPosition(
+            { name: trimmed, departmentId: department.id },
+            {
+                onSuccess: () => {
+                    setNewPositionName("");
+                },
+            }
+        );
+    };
+
+    const handleUpdatePos = (posId: string, currentName: string) => {
+        const trimmed = editingPosName.trim();
+        if (trimmed && trimmed !== currentName) {
+            updatePosition({ id: posId, payload: { name: trimmed } });
+        }
+        setEditingPosId(null);
+    };
+
+    return (
+        <div className="px-2 py-6 text-left">
+            <div className="flex items-center gap-2 mb-2">
+                <Building2 className="h-5 w-5 text-cyan-400 shrink-0" />
+                <h3 className="text-lg font-bold text-white">
+                    {t("admin.department.editDepartmentTitle")}
+                </h3>
+            </div>
+            <p className="text-sm text-slate-400 mb-6">
+                {t("admin.department.editDepartmentDescription")}
+            </p>
+
+            <form onSubmit={handleSave} className="space-y-6">
+                {/* Department Name */}
+                <div>
+                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
+                        {t("admin.department.departmentName")}
+                    </label>
+                    <input
+                        type="text"
+                        value={deptName}
+                        onChange={(e) => setDeptName(e.target.value)}
+                        placeholder={t("admin.department.deptNamePlaceholder")}
+                        className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 px-4 text-sm text-white outline-none transition focus:border-cyan-400/50 placeholder:text-slate-600"
+                    />
+                    {deptExists && (
+                        <p className="text-xs text-red-400 mt-1.5">
+                            {t("admin.department.deptNameExistsError")}
+                        </p>
+                    )}
+                </div>
+
+                {/* Positions Management */}
+                <div>
+                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">
+                        {t("admin.department.jobPositions")} ({department.positions.length})
+                    </label>
+
+                    {/* Dynamic positions list */}
+                    <div className="space-y-2 max-h-52 overflow-y-auto mb-3 pr-1 custom-scrollbar">
+                        {department.positions.length === 0 ? (
+                            <p className="text-xs text-slate-500 italic py-2">
+                                {t("admin.department.noPositionsDefined")}
+                            </p>
+                        ) : (
+                            department.positions.map((pos) => (
+                                <div
+                                    key={pos.id}
+                                    className="flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2"
+                                >
+                                    {editingPosId === pos.id ? (
+                                        <input
+                                            type="text"
+                                            value={editingPosName}
+                                            onChange={(e) => setEditingPosName(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Enter") {
+                                                    e.preventDefault();
+                                                    handleUpdatePos(pos.id, pos.name);
+                                                } else if (e.key === "Escape") {
+                                                    setEditingPosId(null);
+                                                }
+                                            }}
+                                            onBlur={() => handleUpdatePos(pos.id, pos.name)}
+                                            autoFocus
+                                            className="flex-1 rounded-lg border border-cyan-400/30 bg-[#0f172a] px-2 py-1 text-sm text-white outline-none"
+                                        />
+                                    ) : (
+                                        <span className="text-sm text-slate-300 font-medium">
+                                            {pos.name}
+                                        </span>
+                                    )}
+
+                                    <div className="flex items-center gap-1 shrink-0">
+                                        {editingPosId === pos.id ? (
+                                            <button
+                                                type="button"
+                                                onClick={() => setEditingPosId(null)}
+                                                className="p-1 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white"
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </button>
+                                        ) : (
+                                            <>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setEditingPosId(pos.id);
+                                                        setEditingPosName(pos.name);
+                                                    }}
+                                                    className="p-1 rounded-lg hover:bg-white/5 text-slate-400 hover:text-cyan-400 transition"
+                                                >
+                                                    <Edit3 className="h-4 w-4" />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        if (confirm(t("admin.department.deletePositionConfirm", { name: pos.name }))) {
+                                                            deletePosition({ id: pos.id, departmentId: department.id });
+                                                        }
+                                                    }}
+                                                    className="p-1 rounded-lg hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+
+                    {/* Add Position Dynamic Field */}
+                    <div className="flex gap-2">
+                        <input
+                            type="text"
+                            list={`positions-list-edit-${department.id}`}
+                            value={newPositionName}
+                            onChange={(e) => setNewPositionName(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    handleAddPosition(e);
+                                }
+                            }}
+                            placeholder={t("admin.department.addPositionPlaceholder")}
+                            className="flex-1 rounded-xl border border-white/10 bg-white/5 py-2 px-3 text-sm text-white outline-none transition focus:border-cyan-400/50 placeholder:text-slate-600"
+                        />
+                        <datalist id={`positions-list-edit-${department.id}`}>
+                            {predefinedForDept.map((pos) => (
+                                <option key={pos} value={pos} />
+                            ))}
+                        </datalist>
+                        <button
+                            type="button"
+                            onClick={handleAddPosition}
+                            disabled={!newPositionName.trim() || creatingPos}
+                            className="flex items-center justify-center rounded-xl bg-cyan-600/20 hover:bg-cyan-600/40 text-cyan-300 border border-cyan-400/20 px-3 transition shrink-0 disabled:opacity-50"
+                        >
+                            {creatingPos ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                        </button>
+                    </div>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+                    <button
+                        type="button"
+                        onClick={onCloseModal}
+                        className="rounded-xl border border-white/10 bg-white/5 px-5 py-2 text-sm text-slate-300 hover:text-white transition"
+                    >
+                        {t("admin.department.cancel")}
+                    </button>
+                    <button
+                        type="submit"
+                        disabled={deptExists || !deptName.trim()}
+                        className="rounded-xl bg-cyan-600 px-5 py-2 text-sm font-semibold text-white hover:bg-cyan-500 disabled:opacity-50 transition"
+                    >
+                        {t("admin.department.saveChanges")}
+                    </button>
+                </div>
+            </form>
+        </div>
     );
 }
 

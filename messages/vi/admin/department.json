@@ -44,6 +44,19 @@
       "leadersUnavailable": "Không có leader",
       "selectLeader": "Chọn leader",
       "noLeadersAvailable": "Không có leader nào.",
+      "colDescription": "Mô tả",
+      "colPositionsCount": "Số lượng vị trí",
+      "positionsCount": "{count} vị trí",
+      "defaultDescription": "Phòng ban chuyên môn phụ trách phát triển & vận hành",
+      "editDepartment": "Chỉnh sửa Phòng ban",
+      "editDepartmentTitle": "Chỉnh sửa Phòng ban & Vị trí",
+      "editDepartmentDescription": "Cập nhật tên phòng ban và quản lý danh sách các vị trí công việc trực thuộc.",
+      "saveChanges": "Lưu thay đổi",
+      "updating": "Đang cập nhật...",
+      "positionName": "Tên vị trí",
+      "positionPlaceholder": "Nhập tên vị trí...",
+      "addPositionField": "Thêm vị trí mới",
+      "positionRequired": "Vui lòng nhập tên vị trí",
       "maxDepartmentsToast": "Một leader chỉ quản lý tối đa {n} phòng ban."
     }
   }

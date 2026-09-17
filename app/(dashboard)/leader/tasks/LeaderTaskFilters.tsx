@@ -44,24 +44,24 @@ export default function LeaderTaskFilters() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <div className="flex flex-col gap-3">
           <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">{t("searchCode")}</label>
-          <input type="text" placeholder={t("searchCodePlaceholder")} defaultValue={searchParams.get("code") ?? ""} onChange={(e) => updateParam("code", e.target.value)} className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted" />
+          <input type="text" placeholder={t("searchCodePlaceholder")} defaultValue={searchParams.get("code") ?? ""} onChange={(e) => updateParam("code", e.target.value)} className="w-full rounded-2xl border border-border bg-card px-5 py-3 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted" />
         </div>
 
         <div className="flex flex-col gap-3">
           <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">{t("searchTitle")}</label>
-          <input type="text" placeholder={t("searchTitlePlaceholder")} defaultValue={searchParams.get("title") ?? ""} onChange={(e) => updateParam("title", e.target.value)} className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted" />
+          <input type="text" placeholder={t("searchTitlePlaceholder")} defaultValue={searchParams.get("title") ?? ""} onChange={(e) => updateParam("title", e.target.value)} className="w-full rounded-2xl border border-border bg-card px-5 py-3 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted" />
         </div>
 
         <div className="flex flex-col gap-3">
           <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">{t("searchOwner")}</label>
-          <input type="text" placeholder={t("searchOwnerPlaceholder")} defaultValue={searchParams.get("owner") ?? ""} onChange={(e) => updateParam("owner", e.target.value)} className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted" />
+          <input type="text" placeholder={t("searchOwnerPlaceholder")} defaultValue={searchParams.get("owner") ?? ""} onChange={(e) => updateParam("owner", e.target.value)} className="w-full rounded-2xl border border-border bg-card px-5 py-3 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted" />
         </div>
 
         <FilterSelect label={t("status")} filterField="status" options={STATUS_OPTIONS} />
 
         <div className="flex flex-col gap-3">
           <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">{t("searchPhase")}</label>
-          <input type="text" placeholder={t("searchPhasePlaceholder")} defaultValue={searchParams.get("phase") ?? ""} onChange={(e) => updateParam("phase", e.target.value)} className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted" />
+          <input type="text" placeholder={t("searchPhasePlaceholder")} defaultValue={searchParams.get("phase") ?? ""} onChange={(e) => updateParam("phase", e.target.value)} className="w-full rounded-2xl border border-border bg-card px-5 py-3 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted" />
         </div>
 
         <SortSelect label={t("sort")} options={SORT_OPTIONS} />

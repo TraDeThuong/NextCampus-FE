@@ -42,7 +42,7 @@ export default function TaskImportModal({ onCloseModal }: Props) {
 
   const { data: taskGroupsData } = useQuery({
     queryKey: ["task-groups"],
-    queryFn: taskGroupService.getAll,
+    queryFn: () => taskGroupService.getAll(),
     staleTime: 60_000,
   });
 

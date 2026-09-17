@@ -143,6 +143,11 @@ export async function loadLocaleMessages(
   ).default;
   deepMerge(files, leaderTasks);
 
+  const leaderTaskGroups = (
+    await import(`../messages/${locale}/leader/task-groups.json`)
+  ).default;
+  deepMerge(files, leaderTaskGroups);
+
   const leaderDailyReports = (
     await import(`../messages/${locale}/leader/daily-reports.json`)
   ).default;

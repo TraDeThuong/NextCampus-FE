@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import { FileText, Calendar, User, Layers, Link, ChevronRight, Clock, Send, Pencil, Video, Play, Loader2, AlertTriangle, Paperclip } from "lucide-react";
+import { FileText, Calendar, User, Layers, Link, ChevronRight, Clock, Send, Pencil, Video, Play, Loader2, AlertTriangle, Paperclip, CheckCircle2 } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useTaskAssignments } from "@/hooks/task-assignment/useTaskAssignments";
-import { useUpdateTaskAssignment } from "@/hooks/task-assignment/useUpdateTaskAssignment";
+import { useStartTaskAssignment } from "@/hooks/task-assignment/useStartTaskAssignment";
+import { useBlockTaskAssignment } from "@/hooks/task-assignment/useBlockTaskAssignment";
 import { useTask } from "@/hooks/task/useTask";
 import { useTaskSubmissions } from "@/hooks/task-submission/useTaskSubmissions";
 import type { TaskAssignment } from "@/types/task-assignment";
@@ -112,7 +113,8 @@ function TaskRowButton({ assignment, isSelected, onClick }: { assignment: TaskAs
 function TaskDetailPanel({ task, assignment, onOpenSubmission, onViewSubmission, onEditSubmission }: { task: NonNullable<ReturnType<typeof useTask>["data"]>["data"] | null; assignment: TaskAssignment | undefined; onOpenSubmission: () => void; onViewSubmission: (sub: TaskSubmission) => void; onEditSubmission: (sub: TaskSubmission) => void }) {
   const t = useTranslations("intern.tasks");
   const basicTask = task ?? assignment?.task;
-  const updateAssignment = useUpdateTaskAssignment();
+  const startTaskMutation = useStartTaskAssignment();
+  const blockTaskMutation = useBlockTaskAssignment();
   const [showBlockForm, setShowBlockForm] = useState(false);
   const [blockedReason, setBlockedReason] = useState("");
   const { data: submissionsData } = useTaskSubmissions(assignment ? { assignmentId: assignment.id, limit: 20, sortBy: "attempt", order: "desc" } : undefined);
@@ -135,12 +137,19 @@ function TaskDetailPanel({ task, assignment, onOpenSubmission, onViewSubmission,
         <h3 className="text-xl font-bold tracking-tight text-white">{basicTask.title}</h3>
       </div>
 
+      {assignment?.status === "DONE" && (
+        <div className="flex items-center gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-emerald-300">
+          <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+          <span className="text-xs font-semibold">Công việc đã hoàn thành, không thể sửa đổi hoặc nộp bài thêm.</span>
+        </div>
+      )}
+
       {assignment?.status === "TODO" && (
         <div className="flex items-center gap-3 rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-3">
           <Play className="h-4 w-4 text-cyan-400" />
           <span className="text-xs text-cyan-300 flex-1">{t("readyToStart")}</span>
-          <button onClick={() => updateAssignment.mutate({ id: assignment.id, payload: { status: "IN_PROGRESS" } })} disabled={updateAssignment.isPending} className="flex items-center gap-1.5 rounded-lg bg-cyan-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-cyan-500 disabled:opacity-50">
-            {updateAssignment.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}{t("startWorking")}
+          <button onClick={() => startTaskMutation.mutate(assignment.id)} disabled={startTaskMutation.isPending} className="flex items-center gap-1.5 rounded-lg bg-cyan-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-cyan-500 disabled:opacity-50">
+            {startTaskMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}{t("startWorking")}
           </button>
         </div>
       )}
@@ -195,21 +204,21 @@ function TaskDetailPanel({ task, assignment, onOpenSubmission, onViewSubmission,
                 <button
                   type="button"
                   onClick={() => { setShowBlockForm(false); setBlockedReason(""); }}
-                  disabled={updateAssignment.isPending}
+                  disabled={blockTaskMutation.isPending}
                   className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-slate-800 disabled:opacity-50"
                 >
                   {t("cancelBlock")}
                 </button>
                 <button
                   type="button"
-                  onClick={() => updateAssignment.mutate(
-                    { id: assignment.id, payload: { status: "BLOCKED", blockedReason: blockedReason.trim() } },
+                  onClick={() => blockTaskMutation.mutate(
+                    { id: assignment.id, blockedReason: blockedReason.trim() },
                     { onSuccess: () => { setShowBlockForm(false); setBlockedReason(""); } },
                   )}
-                  disabled={updateAssignment.isPending || blockedReason.trim().length === 0}
+                  disabled={blockTaskMutation.isPending || blockedReason.trim().length === 0}
                   className="flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {updateAssignment.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  {blockTaskMutation.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                   {t("confirmBlock")}
                 </button>
               </div>

@@ -74,13 +74,14 @@ export default function WeeklyEvaluationList() {
           <span>{t("colIntern")}</span><span>{t("colWeek")}</span><span>{t("colScore")}</span><span className="text-center">{t("colAi")}</span><span className="text-center">{t("colActions")}</span>
         </Table.Header>
         <Table.Body data={evaluations} render={(item: WeeklyEvaluation) => {
-          const level = getRatingLevel(item.totalScore);
+          const scoreVal = item.score ?? item.totalScore ?? 0;
+          const level = getRatingLevel(scoreVal);
           const createdDate = new Date(item.createdAt).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
           return (
             <Table.Row key={item.id}>
               <div className="flex flex-col"><p className="font-bold text-foreground text-sm">{item.intern?.fullName || t("unknown")}</p><p className="text-xs text-muted">{item.intern?.user?.email || ""}</p></div>
               <div className="flex flex-col gap-0.5"><span className="font-semibold text-foreground text-sm">{t("week", { n: item.week })}</span><span className="text-[11px] text-muted">{createdDate}</span></div>
-              <div className="flex flex-col gap-1.5 items-start"><span className="text-sm font-extrabold text-foreground">{item.totalScore.toFixed(1)} / 10</span><span className={`inline-flex items-center justify-center text-[10px] font-semibold px-2.5 py-0.5 rounded-lg border leading-none ${RATING_COLORS[level]}`}>{tRatings(level)}</span></div>
+              <div className="flex flex-col gap-1.5 items-start"><span className="text-sm font-extrabold text-foreground">{scoreVal.toFixed(1)} / 10</span><span className={`inline-flex items-center justify-center text-[10px] font-semibold px-2.5 py-0.5 rounded-lg border leading-none ${RATING_COLORS[level]}`}>{tRatings(level)}</span></div>
               <div className="flex justify-center">
                 {item.aiComment ? <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg border text-emerald-400 border-emerald-500/30 bg-emerald-500/10"><Bot className="h-3 w-3" />{t("aiLabel")}</span> :
                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg border text-slate-500 border-white/10 bg-white/5"><Bot className="h-3 w-3" />{t("notYet")}</span>}

@@ -2,8 +2,11 @@ import api from "@/lib/axios";
 import type {
   TaskGroupListResponse,
   TaskGroupSuccessResponse,
+  TaskGroupProgressResponse,
+  TaskGroupTasksResponse,
   CreateTaskGroupPayload,
   UpdateTaskGroupPayload,
+  TaskGroupQueryParams,
 } from "@/types/task-group";
 import type {
   GroupAiRecommendationResponse,
@@ -14,8 +17,8 @@ import type { MessageSuccessResponse } from "@/types/auth";
 
 export const taskGroupService = {
   // GET /task-groups
-  getAll: async (): Promise<TaskGroupListResponse> => {
-    const response = await api.get<TaskGroupListResponse>("/task-groups");
+  getAll: async (params?: TaskGroupQueryParams): Promise<TaskGroupListResponse> => {
+    const response = await api.get<TaskGroupListResponse>("/task-groups", { params });
     return response.data;
   },
 
@@ -23,6 +26,22 @@ export const taskGroupService = {
   getById: async (id: string): Promise<TaskGroupSuccessResponse> => {
     const response = await api.get<TaskGroupSuccessResponse>(
       `/task-groups/${id}`,
+    );
+    return response.data;
+  },
+
+  // GET /task-groups/:id/progress
+  getProgress: async (id: string): Promise<TaskGroupProgressResponse> => {
+    const response = await api.get<TaskGroupProgressResponse>(
+      `/task-groups/${id}/progress`,
+    );
+    return response.data;
+  },
+
+  // GET /task-groups/:id/tasks
+  getTasks: async (id: string): Promise<TaskGroupTasksResponse> => {
+    const response = await api.get<TaskGroupTasksResponse>(
+      `/task-groups/${id}/tasks`,
     );
     return response.data;
   },

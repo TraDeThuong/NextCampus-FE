@@ -87,9 +87,43 @@ export const taskAssignmentService = {
   // PATCH /task-assignments/:id/reject
   rejectAssignment: async (
     id: string,
+    reason?: string,
   ): Promise<TaskAssignmentDeleteResponse> => {
     const response = await api.patch<TaskAssignmentDeleteResponse>(
       `/task-assignments/${id}/reject`,
+      { reason: reason || "" },
+    );
+    return response.data;
+  },
+
+  // POST /task-assignments/:id/start
+  startTask: async (
+    id: string,
+  ): Promise<TaskAssignmentSuccessResponse> => {
+    const response = await api.post<TaskAssignmentSuccessResponse>(
+      `/task-assignments/${id}/start`,
+    );
+    return response.data;
+  },
+
+  // POST /task-assignments/:id/block
+  blockTask: async (
+    id: string,
+    blockedReason: string,
+  ): Promise<TaskAssignmentSuccessResponse> => {
+    const response = await api.post<TaskAssignmentSuccessResponse>(
+      `/task-assignments/${id}/block`,
+      { blockedReason },
+    );
+    return response.data;
+  },
+
+  // POST /task-assignments/:id/unblock
+  unblockTask: async (
+    id: string,
+  ): Promise<TaskAssignmentSuccessResponse> => {
+    const response = await api.post<TaskAssignmentSuccessResponse>(
+      `/task-assignments/${id}/unblock`,
     );
     return response.data;
   },

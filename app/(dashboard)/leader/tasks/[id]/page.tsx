@@ -6,7 +6,7 @@ import { ArrowLeft, Layers, GitBranch, Paperclip, FileText, Film, FileArchive, I
 import { useTranslations } from "next-intl";
 import { useTask } from "@/hooks/task/useTask";
 import { useTaskSubmissions } from "@/hooks/task-submission/useTaskSubmissions";
-import { useUpdateTaskAssignment } from "@/hooks/task-assignment/useUpdateTaskAssignment";
+import { useUnblockTaskAssignment } from "@/hooks/task-assignment/useUnblockTaskAssignment";
 import Spinner from "@/components/ui/Spinner";
 import MetalCard from "@/components/ui/MetalCard";
 import TaskAiRecommendationModal from "../TaskAiRecommendationModal";
@@ -50,7 +50,7 @@ export default function TaskDetailPage() {
   const { data, isLoading } = useTask(id);
   const task = data?.data;
   const [showAi, setShowAi] = useState(false);
-  const updateAssignment = useUpdateTaskAssignment();
+  const unblockAssignment = useUnblockTaskAssignment();
 
   const { data: submissionsData } = useTaskSubmissions(
     task?.assignment?.id ? { assignmentId: task.assignment.id, sortBy: "attempt", order: "asc", limit: 50 } : undefined,
@@ -234,12 +234,12 @@ export default function TaskDetailPage() {
                       onClick={() => {
                         const assignment = task.assignment;
                         if (!assignment) return;
-                        updateAssignment.mutate({ id: assignment.id, payload: { status: "IN_PROGRESS" } });
+                        unblockAssignment.mutate(assignment.id);
                       }}
-                      disabled={updateAssignment.isPending}
+                      disabled={unblockAssignment.isPending}
                       className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-sky-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      {updateAssignment.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
+                      {unblockAssignment.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
                       {td("resumeBlockedTask")}
                     </button>
                   </div>

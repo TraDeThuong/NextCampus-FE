@@ -98,4 +98,64 @@ export const dailyReportService = {
     );
     return response.data;
   },
+
+  // POST /daily-reports/upload-url (Cloudflare R2 presigned PUT url for reports/)
+  getUploadUrl: async (input: {
+    fileName: string;
+    mimeType: string;
+  }): Promise<{ success: boolean; data: { uploadUrl: string; fileUrl: string; filePath: string } }> => {
+    const response = await api.post("/daily-reports/upload-url", input);
+    return response.data;
+  },
+
+  // GET /daily-reports/calendar
+  getCalendar: async (params: {
+    month: number;
+    year: number;
+    internId?: string;
+  }): Promise<{
+    success: boolean;
+    data: {
+      internId: string;
+      month: number;
+      year: number;
+      totalWorkingDays: number;
+      reportedDays: number;
+      missingDays: number;
+      submissionRate: number;
+      days: Array<{
+        date: string;
+        dayOfWeek: number;
+        status: "REPORTED" | "MISSING" | "FUTURE" | "WEEKEND" | "OUT_OF_RANGE";
+        reportId?: string;
+        hoursWorked?: number;
+        hasFeedback?: boolean;
+      }>;
+    };
+  }> => {
+    const response = await api.get("/daily-reports/calendar", { params });
+    return response.data;
+  },
+
+  // POST /daily-reports/:id/feedback
+  addFeedback: async (
+    id: string,
+    feedback: string,
+  ): Promise<DailyReportSuccessResponse> => {
+    const response = await api.post<DailyReportSuccessResponse>(
+      `/daily-reports/${id}/feedback`,
+      { feedback },
+    );
+    return response.data;
+  },
+
+  // DELETE /daily-reports/attachments/:attachmentId
+  deleteAttachment: async (
+    attachmentId: string,
+  ): Promise<MessageSuccessResponse> => {
+    const response = await api.delete<MessageSuccessResponse>(
+      `/daily-reports/attachments/${attachmentId}`,
+    );
+    return response.data;
+  },
 };

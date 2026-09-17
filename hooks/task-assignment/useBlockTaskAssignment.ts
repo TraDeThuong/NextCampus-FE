@@ -2,30 +2,36 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import axios from "axios";
 import { taskAssignmentService } from "@/services/task-assignment.service";
 
-export function useRejectTaskAssignment() {
+export function useBlockTaskAssignment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (param: string | { id: string; reason?: string }) => {
-      const id = typeof param === "string" ? param : param.id;
-      const reason = typeof param === "string" ? undefined : param.reason;
-      return taskAssignmentService.rejectAssignment(id, reason);
-    },
+    mutationFn: ({
+      id,
+      blockedReason,
+    }: {
+      id: string;
+      blockedReason: string;
+    }) => taskAssignmentService.blockTask(id, blockedReason),
 
     onSuccess: (_data, variables) => {
-      const id = typeof variables === "string" ? variables : variables.id;
-      toast.success("Đã từ chối phân công công việc.");
+      toast.success("Đã ghi nhận báo cáo bị chặn.");
       queryClient.invalidateQueries({ queryKey: ["task-assignments"], exact: false });
       queryClient.invalidateQueries({ queryKey: ["task"], exact: false });
       queryClient.invalidateQueries({ queryKey: ["tasks"], exact: false });
       queryClient.invalidateQueries({ queryKey: ["stats"], exact: false });
-      queryClient.invalidateQueries({ queryKey: ["task-assignment", id] });
+      queryClient.invalidateQueries({ queryKey: ["task-assignment", variables.id] });
     },
 
-    onError: () => {
-      toast.error("Không thể từ chối phân công.");
+    onError: (error) => {
+      const message =
+        axios.isAxiosError(error) && error.response?.data?.message
+          ? error.response.data.message
+          : "Không thể gửi báo cáo bị chặn.";
+      toast.error(message);
     },
   });
 }
