@@ -41,6 +41,10 @@ Chỉ lưu các quyết định kiến trúc và UI/UX đã được xác nhận
   - Form validation: Viền đỏ + icon cảnh báo + thông báo lỗi, placeholder tương phản rõ với value, dấu sao đỏ `*` bắt buộc, nút ẩn/hiện mật khẩu.
   - Chi tiết quy chuẩn được quy định tại `.agents/rules/ui-ux-checklist.md`.
 
+- **2026-09-17 — Tối ưu Chiều rộng Sidebar Bên Phải (Borderless Right Sidebar / Panel)**:
+  - **Quy tắc**: Toàn bộ các thành phần sidebar bên phải (Right Sidebar, panel chi tiết bên phải, cột hành động/thông tin phụ) **tuyệt đối không sử dụng viền bao quanh (outer border / border bao ngoài container)** nhằm tối đa hóa diện tích và chiều rộng hiển thị nội dung.
+  - **Pattern chuẩn**: Thiết kế bố cục liền mạch (borderless / seamless layout), không bọc bên ngoài bằng các khung viền hộp (`border`, `border-white/10`, `border-slate-200`) gây lãng phí không gian hiển thị; ưu tiên dùng khoảng cách tự nhiên (`gap-6`), padding hợp lý hoặc nền mờ tinh tế để phân chia khu vực.
+
 
 ---
 

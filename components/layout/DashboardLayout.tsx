@@ -71,7 +71,7 @@ export default function DashboardLayout({ children, sidebar }: Props) {
 
           {/* Scrollable Content */}
           <main className="mt-20 min-w-0 flex-1 overflow-y-auto p-4 md:p-8">
-            <div className="min-h-full min-w-0 rounded-2xl md:rounded-3xl border border-white/10 bg-white/5 p-4 md:p-6 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
+            <div className="min-h-full min-w-0">
               {children}
             </div>
           </main>

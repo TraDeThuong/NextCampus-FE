@@ -38,6 +38,8 @@
 - **Khả năng tiếp cận (Accessibility - a11y)**:
   - Nút chỉ chứa icon bắt buộc phải có thuộc tính `aria-label`.
   - Tuyệt đối không gắn sự kiện `onClick` lên thẻ `<div>` hoặc `<span>` thuần túy nếu không có `role="button"` và `tabIndex={0}`. Ưu tiên dùng thẻ `<button type="button">`.
+- **Sidebar Bên Phải Không Viền (Borderless Right Sidebar / Panel)**:
+  - Các khu vực sidebar hoặc cột phụ/panel chi tiết bên phải **tuyệt đối không dùng viền bao quanh (`border` ngoài)** để tối ưu tối đa chiều rộng không gian hiển thị. Ưu tiên phân cách tự nhiên bằng khoảng cách `gap` hoặc lớp nền mờ tối giản.
 
 ---
 

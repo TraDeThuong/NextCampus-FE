@@ -103,6 +103,9 @@ Table là thành phần dễ bị "vỡ" giao diện nhất khi lên code. Phả
      * Bố cục lưới 4 cột chuyển thành 2 cột trên tablet (`grid-cols-1 md:grid-cols-2 lg:grid-cols-4`).
      * Các form 2 cột chuyển thành 1 cột xếp dọc trên mobile (`grid-cols-1 md:grid-cols-2`).
      * Nút thao tác nhóm (Action bar) từ hàng ngang chuyển thành menu thả xuống ba chấm `...` (MoreHorizontal) trên mobile.
+3. **Quy chuẩn Sidebar Bên Phải (Right Sidebar / Cột phụ / Panel chi tiết)**:
+   - **Không có viền bao quanh (Borderless Container)**: Bỏ hoàn toàn viền bao quanh (`border`, `border-white/10`, `border-slate-200` ở container ngoài cùng) cho khu vực sidebar/panel bên phải để tối ưu tối đa chiều rộng (width) hiển thị nội dung, tránh hiện tượng khung lồng trong khung gây chật chội.
+   - **Phân tách không gian**: Phân tách với vùng nội dung chính bằng khoảng cách layout tự nhiên (`gap-6` / `gap-8`) hoặc lớp phủ nền nhẹ/mờ, giữ cho giao diện thoáng đãng, hiện đại.
 
 ---
 
