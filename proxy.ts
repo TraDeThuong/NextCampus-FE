@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { getPortalName, getDashboardPath } from "@/lib/portal";
 
 interface JwtPayload {
   id?: string;
@@ -52,23 +53,8 @@ export function proxy(request: NextRequest) {
   }
 
   const isAuthenticated = !!payload && !!payload.role;
-  const rawRole = payload?.role?.toLowerCase();
-
-  /**
-   * Xác định Portal cơ sở cho vai trò:
-   * - leader -> leader
-   * - intern -> intern
-   * - admin hoặc các custom role quản trị/vận hành (HR, MANAGER, COORDINATOR...) -> admin
-   */
-  const getPortalName = (role?: string) => {
-    const r = role?.toLowerCase();
-    if (r === "leader") return "leader";
-    if (r === "intern") return "intern";
-    return "admin";
-  };
-
-  const portal = getPortalName(rawRole);
-  const targetDashboard = `/${portal}/dashboard`;
+  const portal = getPortalName(payload?.role);
+  const targetDashboard = getDashboardPath(payload?.role);
 
   const isAuthRoute =
     pathname.startsWith("/login") ||

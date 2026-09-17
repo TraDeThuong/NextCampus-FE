@@ -10,7 +10,7 @@ export interface ApiError {
 
 export interface UserRole {
   id: string;
-  name: "ADMIN" | "LEADER" | "INTERN" | string;
+  name: string;
 }
 
 export interface User {

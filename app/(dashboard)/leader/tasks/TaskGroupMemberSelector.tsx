@@ -1,7 +1,7 @@
 "use client";
 
 import { Users } from "lucide-react";
-import { useAuth } from "@/hooks/auth/useAuth";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 import { useInterns } from "@/hooks/intern/useInterns";
 
 interface Props {
@@ -15,11 +15,12 @@ export default function TaskGroupMemberSelector({
   selectedIds,
   onChange,
 }: Props) {
-  const { state } = useAuth();
+  const { user, can } = useRBAC();
+  const hasGlobalInternManage = can("INTERN_DELETE") || can("USER_ROLE_ASSIGN");
   const { data, isLoading } = useInterns({
     status: "ACTIVE",
     departmentId: departmentId || undefined,
-    leaderId: state.user?.role === "LEADER" ? state.user.id : undefined,
+    leaderId: hasGlobalInternManage ? undefined : user?.id,
     sortBy: "fullName",
     order: "asc",
     limit: 100,

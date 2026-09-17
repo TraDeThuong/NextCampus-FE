@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { Link } from "@/i18n/navigation";
 import {
   LayoutDashboard,
@@ -20,27 +21,43 @@ import { usePathname } from "@/i18n/navigation";
 import { MdOutlineMailOutline } from "react-icons/md";
 import { useTranslations } from "next-intl";
 import { useSidebarPrefetch } from "@/hooks/useSidebarPrefetch";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
+
+type MenuItem = {
+  name: string;
+  href: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  permissions?: string[];
+};
 
 export default function AdminSidebar() {
   const pathname = usePathname();
   const t = useTranslations();
   const { getPrefetchHandler } = useSidebarPrefetch();
+  const { canAny } = useRBAC();
 
-  const menus = [
-    { name: t("admin.nav.dashboard"),     href: "/admin/dashboard",     icon: LayoutDashboard },
-    { name: t("admin.nav.adminTeam"),     href: "/admin/admin-team",    icon: MdManageAccounts },
-    { name: t("admin.nav.roles"),         href: "/admin/roles",         icon: ShieldCheck },
-    { name: t("admin.nav.leaders"),       href: "/admin/leaders",       icon: UserCheck },
-    { name: t("admin.nav.interns"),       href: "/admin/interns",       icon: Users },
-    { name: t("admin.nav.department"),    href: "/admin/department",    icon: PiBuildingOfficeLight },
-    { name: t("admin.nav.onboarding"),    href: "/admin/onboarding",    icon: Rocket },
-    { name: t("admin.nav.mails"),         href: "/admin/emails",        icon: MdOutlineMailOutline },
-    { name: t("admin.nav.meetings"),      href: "/admin/meetings",      icon: LuAlarmClock },
-    { name: t("admin.nav.policies"),      href: "/admin/regulations",   icon: FileText },
-    { name: t("admin.nav.settings"),      href: "/admin/settings",      icon: Settings },
-    { name: t("admin.nav.activityLogs"), href: "/admin/activity-logs", icon: History },
-    { name: t("admin.nav.profile"),       href: "/admin/profile",       icon: UserRoundPen },
-  ];
+  const menus = useMemo(() => {
+    const items: MenuItem[] = [
+      { name: t("admin.nav.dashboard"),     href: "/admin/dashboard",     icon: LayoutDashboard },
+      { name: t("admin.nav.adminTeam"),     href: "/admin/admin-team",    icon: MdManageAccounts, permissions: ["USER_READ", "USER_ROLE_ASSIGN"] },
+      { name: t("admin.nav.roles"),         href: "/admin/roles",         icon: ShieldCheck,      permissions: ["ROLE_READ", "PERMISSION_READ"] },
+      { name: t("admin.nav.leaders"),       href: "/admin/leaders",       icon: UserCheck,        permissions: ["LEADER_READ"] },
+      { name: t("admin.nav.interns"),       href: "/admin/interns",       icon: Users,            permissions: ["INTERN_READ"] },
+      { name: t("admin.nav.department"),    href: "/admin/department",    icon: PiBuildingOfficeLight, permissions: ["DEPARTMENT_READ"] },
+      { name: t("admin.nav.onboarding"),    href: "/admin/onboarding",    icon: Rocket,           permissions: ["APPLICATION_READ", "APPLICATION_INVITE_READ"] },
+      { name: t("admin.nav.mails"),         href: "/admin/emails",        icon: MdOutlineMailOutline,  permissions: ["NOTIFICATION_TEMPLATE_READ", "NOTIFICATION_TEMPLATE_MANAGE", "NOTIFICATION_READ"] },
+      { name: t("admin.nav.meetings"),      href: "/admin/meetings",      icon: LuAlarmClock,     permissions: ["MEETING_READ"] },
+      { name: t("admin.nav.policies"),      href: "/admin/regulations",   icon: FileText,         permissions: ["REGULATION_READ"] },
+      { name: t("admin.nav.settings"),      href: "/admin/settings",      icon: Settings,         permissions: ["SYSTEM_CONFIG_READ", "SYSTEM_CONFIG_MANAGE"] },
+      { name: t("admin.nav.activityLogs"), href: "/admin/activity-logs", icon: History,          permissions: ["AUDIT_LOG_READ"] },
+      { name: t("admin.nav.profile"),       href: "/admin/profile",       icon: UserRoundPen },
+    ];
+
+    return items.filter((item) => {
+      if (!item.permissions || item.permissions.length === 0) return true;
+      return canAny(item.permissions);
+    });
+  }, [t, canAny]);
 
   return (
     <aside

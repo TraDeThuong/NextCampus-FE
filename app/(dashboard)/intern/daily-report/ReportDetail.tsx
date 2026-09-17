@@ -21,6 +21,7 @@ import { useTranslations } from "next-intl";
 import MetalCard from "@/components/ui/MetalCard";
 import Button from "@/components/ui/Button";
 import { useAuth } from "@/hooks/auth/useAuth";
+import { hasAnyPermission } from "@/lib/portal";
 import { useReportAttachments } from "@/hooks/report-attachment/useReportAttachments";
 import { useDailyReportFeedback } from "@/hooks/daily-report/useDailyReportFeedback";
 import type { DailyReport } from "@/types/daily-report";
@@ -104,7 +105,7 @@ export default function ReportDetail({
   const isLeader =
     allowFeedback !== undefined
       ? allowFeedback
-      : user?.role === "LEADER" || user?.role === "ADMIN";
+      : hasAnyPermission(user?.permissions, ["DAILY_REPORT_FEEDBACK", "DAILY_REPORT_UPDATE"]);
 
   const { data: attachmentsData } = useReportAttachments(report?.id);
   const attachments =

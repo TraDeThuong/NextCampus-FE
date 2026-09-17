@@ -8,9 +8,10 @@ import { departmentService } from "@/services/department.service";
 import { useAdminPrefetchQueries } from "@/hooks/useAdminPrefetchQueries";
 import { useLeaderPrefetchQueries } from "@/hooks/useLeaderPrefetchQueries";
 import { useInternPrefetchQueries } from "@/hooks/useInternPrefetchQueries";
+import { getPortalName } from "@/lib/portal";
 
 interface PrefetchProviderProps {
-  role: "ADMIN" | "LEADER" | "INTERN";
+  role: string;
 }
 
 function LeaderBackgroundPrefetch() {
@@ -125,14 +126,14 @@ function InternPrefetch() {
 }
 
 export default function PrefetchProvider({ role }: PrefetchProviderProps) {
-  switch (role) {
-    case "LEADER":
+  const portal = getPortalName(role);
+  switch (portal) {
+    case "leader":
       return <LeaderPrefetch />;
-    case "ADMIN":
-      return <AdminPrefetch />;
-    case "INTERN":
+    case "intern":
       return <InternPrefetch />;
+    case "admin":
     default:
-      return null;
+      return <AdminPrefetch />;
   }
 }

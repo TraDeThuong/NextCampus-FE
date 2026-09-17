@@ -1,10 +1,12 @@
 "use client";
 
+import { useMemo } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import FilterSelect from "@/components/ui/FilterSelect";
 import MetalCard from "@/components/ui/MetalCard";
+import { useRoles } from "@/hooks/rbac/useRoles";
 
 const STATUS_OPTIONS = [
     { value: "true", label: "Active" },
@@ -16,6 +18,16 @@ export default function AdminTeamFilter() {
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();
+
+    const { data: rolesRes } = useRoles();
+    const roles = rolesRes?.data ?? [];
+
+    const roleOptions = useMemo(() => {
+        return roles.map((r) => ({
+            value: r.name,
+            label: `${r.name} ${r.isSystem ? "(Hệ thống)" : "(Tùy chỉnh)"}`,
+        }));
+    }, [roles]);
 
     function updateParam(key: string, value: string) {
         const params = new URLSearchParams(searchParams.toString());
@@ -30,7 +42,7 @@ export default function AdminTeamFilter() {
 
     return (
         <MetalCard className="px-6 py-5">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div className="flex flex-col gap-3">
                     <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">
                         {t("admin.adminTeam.search")}
@@ -47,6 +59,13 @@ export default function AdminTeamFilter() {
                         />
                     </div>
                 </div>
+
+                <FilterSelect
+                    label="Vai trò"
+                    filterField="roleName"
+                    options={roleOptions}
+                    placeholder="Tất cả vai trò"
+                />
 
                 <FilterSelect
                     label={t("admin.adminTeam.filterStatus")}

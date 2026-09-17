@@ -69,3 +69,11 @@ Chỉ lưu các quyết định kiến trúc và UI/UX đã được xác nhận
   - Dữ liệu dịch thuật được tổ chức theo Mô-đun/Tính năng chuẩn hóa (`messages/${locale}/*.json`): `roles.json`, `departments.json`, `tasks.json`, `task-groups.json`, `meetings.json`, `daily-reports.json`, `weekly-evaluations.json`, `users.json`, `onboarding.json`, `emails.json`, `regulations.json`, `dashboards.json`, `activity-logs.json`, `profile.json`, `settings.json`.
   - Bộ nạp `loadLocaleMessages()` trong `i18n/load-messages.ts` hợp nhất tự động và bảo lưu tương thích ngược 100% với các namespace portal cũ.
 
+- **2026-09-17 — Loại Bỏ 3 Roles Cố Định & Triển Khai Dynamic RBAC Toàn Diện**:
+  - **Portal & Dashboard Resolution**: Xóa bỏ hoàn toàn việc tính toán URL dashboard theo tên role (`/${role}/dashboard`). Sử dụng hàm chuẩn hóa `getPortalName(role)` và `getDashboardPath(role)` tại `lib/portal.ts`. Các vai trò ngoài `LEADER` và `INTERN` (như `ADMIN`, `HR_MANAGER`, `COORDINATOR`...) tự động ánh xạ an toàn vào portal `/admin/*`.
+  - **Kiểm soát Truy cập Tuyến đường (ProtectedRoute)**: Nâng cấp `ProtectedRoute` hỗ trợ thuộc tính `portal` (`"admin" | "leader" | "intern"`) và `requiredPermissions?: string[]`. Tài khoản Superadmin (`ADMIN`) luôn sở hữu toàn quyền bypass.
+  - **Hook Phân Quyền UI (useRBAC)**: Cung cấp `{ user, role, permissions, isAdmin, portal, can, canAny, canAll }` tại `hooks/rbac/useRBAC.ts` để kiểm tra phân quyền hạt nhân trên mọi component.
+  - **Hiển thị Menu Động theo Permissions**: `AdminSidebar` tự động lọc và chỉ hiển thị các menu tương ứng với permissions thực tế của người dùng, ngoại trừ `ADMIN` hệ thống luôn xem được 100% menu.
+  - **Quản Trị Nhân Sự & Form Động**: `AdminTeamFilter` & `AdminTeamTable` tích hợp bộ lọc vai trò động qua `useRoles()`. `CreateUserForm` nạp danh sách vai trò thực tế từ backend thay vì hardcode 2 options.
+
+

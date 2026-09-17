@@ -11,6 +11,7 @@ import { authService } from "@/services/auth.service";
 import { ApiErrorResponse } from "@/types/auth";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { getRememberedEmail, saveRememberedEmail, clearRememberedEmail } from "@/lib/token";
+import { getDashboardPath } from "@/lib/portal";
 
 export interface LoginFormValues {
     email: string;
@@ -73,7 +74,7 @@ export function useLogin() {
 
             toast.success(`Welcome back, ${user.fullName}!`);
 
-            const targetDashboard = `/${user.role.toLowerCase()}/dashboard`;
+            const targetDashboard = getDashboardPath(user.role);
             router.push(targetDashboard);
         },
 

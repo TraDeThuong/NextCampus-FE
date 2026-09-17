@@ -10,6 +10,7 @@ import { meetingService } from "@/services/meeting.service";
 import { regulationService } from "@/services/regulation.service";
 import { activityLogService } from "@/services/activity-log.service";
 import { authService } from "@/services/auth.service";
+import { getRolesService } from "@/services/rbac.service";
 import api from "@/lib/axios";
 
 type PrefetchBatch = {
@@ -30,6 +31,9 @@ const PAGE_PREFETCH_MAP: Record<string, PrefetchBatch[]> = {
     { queryKey: ["users", { roleName: "ADMIN", limit: 1 }], queryFn: () => getUsersService({ roleName: "ADMIN", limit: 1 }) },
     { queryKey: ["users", { roleName: "ADMIN", isActive: true, limit: 1 }], queryFn: () => getUsersService({ roleName: "ADMIN", isActive: true, limit: 1 }) },
     { queryKey: ["users", { roleName: "ADMIN", isActive: false, limit: 1 }], queryFn: () => getUsersService({ roleName: "ADMIN", isActive: false, limit: 1 }) },
+  ],
+  roles: [
+    { queryKey: ["roles", {}], queryFn: () => getRolesService({}) },
   ],
   onboarding: [
     { queryKey: ["application-invites", {}], queryFn: () => getApplicationInvitesService({}) },
@@ -64,7 +68,7 @@ const PAGE_PREFETCH_MAP: Record<string, PrefetchBatch[]> = {
 };
 
 const STAGGERED_BATCHES: string[][] = [
-  ["leaders", "admin-team"],
+  ["leaders", "admin-team", "roles"],
   ["onboarding", "meetings", "policies"],
   ["emails", "activity-logs", "profile"],
 ];

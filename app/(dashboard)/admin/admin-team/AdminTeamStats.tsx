@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Users, Circle, XCircle, AlertTriangle } from "lucide-react";
 
@@ -10,22 +11,25 @@ import Spinner from "@/components/ui/Spinner";
 
 export default function AdminTeamStats() {
     const t = useTranslations();
+    const searchParams = useSearchParams();
+    const roleNameParam = searchParams.get("roleName");
+    const roleFilter = roleNameParam && roleNameParam !== "all" ? roleNameParam : undefined;
 
     const { data: allData, isPending: allLoading, isError } = useQuery({
-        queryKey: ["users", { roleName: "ADMIN", limit: 1 }],
-        queryFn: () => getUsersService({ roleName: "ADMIN", limit: 1 }),
+        queryKey: ["users", { roleName: roleFilter, limit: 1 }],
+        queryFn: () => getUsersService({ roleName: roleFilter, limit: 1 }),
     });
 
     const { data: activeData, isPending: activeLoading } = useQuery({
-        queryKey: ["users", { roleName: "ADMIN", isActive: true, limit: 1 }],
+        queryKey: ["users", { roleName: roleFilter, isActive: true, limit: 1 }],
         queryFn: () =>
-            getUsersService({ roleName: "ADMIN", isActive: true, limit: 1 }),
+            getUsersService({ roleName: roleFilter, isActive: true, limit: 1 }),
     });
 
     const { data: inactiveData, isPending: inactiveLoading } = useQuery({
-        queryKey: ["users", { roleName: "ADMIN", isActive: false, limit: 1 }],
+        queryKey: ["users", { roleName: roleFilter, isActive: false, limit: 1 }],
         queryFn: () =>
-            getUsersService({ roleName: "ADMIN", isActive: false, limit: 1 }),
+            getUsersService({ roleName: roleFilter, isActive: false, limit: 1 }),
     });
 
     const isPending = allLoading || activeLoading || inactiveLoading;

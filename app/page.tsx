@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/auth/useAuth";
+import { getDashboardPath } from "@/lib/portal";
 import Spinner from "@/components/ui/Spinner";
 
 export default function RootPage() {
@@ -12,7 +13,7 @@ export default function RootPage() {
   useEffect(() => {
     if (!state.isLoading) {
       if (state.isAuthenticated && state.user) {
-        const dashboardPath = `/${state.user.role.toLowerCase()}/dashboard`;
+        const dashboardPath = getDashboardPath(state.user.role);
         router.replace(dashboardPath);
       } else {
         router.replace("/login");

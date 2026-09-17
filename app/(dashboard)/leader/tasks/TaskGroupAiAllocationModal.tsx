@@ -20,6 +20,7 @@ import {
 } from "@/hooks/task-group/useGroupAiAllocation";
 import { useTaskGroup } from "@/hooks/task-group/useTaskGroup";
 import { useAuth } from "@/hooks/auth/useAuth";
+import { hasPermission } from "@/lib/portal";
 import axios from "axios";
 
 interface Props {
@@ -57,12 +58,16 @@ export default function TaskGroupAiAllocationModal({
     }
     return error.message;
   }, [error]);
+  const hasGlobalAccess =
+    hasPermission(state.user?.permissions, "INTERN_DELETE") ||
+    hasPermission(state.user?.permissions, "USER_ROLE_ASSIGN");
+
   const interns = (groupData?.data.members ?? [])
     .map((member) => member.intern)
     .filter(
       (intern) =>
         intern.status === "ACTIVE" &&
-        (state.user?.role !== "LEADER" || intern.leaderId === state.user.id),
+        (hasGlobalAccess || intern.leaderId === state.user?.id),
     );
 
   const [draftOverrides, setDraftOverrides] = useState<

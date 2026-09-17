@@ -9,8 +9,8 @@ export default function Layout({
     children: React.ReactNode;
 }) {
     return (
-        <ProtectedRoute allowedRoles={["ADMIN"]}>
-            <DashboardLayout sidebar={<AdminSidebar/>}>
+        <ProtectedRoute portal="admin">
+            <DashboardLayout sidebar={<AdminSidebar />}>
                 <PrefetchProvider role="ADMIN" />
                 {children}
             </DashboardLayout>

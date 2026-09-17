@@ -25,13 +25,15 @@ export default function AdminTeamTable() {
     const router = useRouter();
 
     const params: UserQueryParams = useMemo(() => {
-        const p: UserQueryParams = { roleName: "ADMIN" };
+        const p: UserQueryParams = {};
 
+        const roleName = searchParams.get("roleName");
         const fullName = searchParams.get("fullName");
         const isActive = searchParams.get("isActive");
         const page = searchParams.get("page");
         const limit = searchParams.get("limit");
 
+        if (roleName && roleName !== "all") p.roleName = roleName;
         if (fullName) p.fullName = fullName;
         if (isActive) p.isActive = isActive === "true";
         if (page) p.page = Number(page);
