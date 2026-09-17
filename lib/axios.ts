@@ -127,7 +127,13 @@ api.interceptors.response.use(
 
             try {
                 const accessToken = await executeTokenRefresh();
-                originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+                if (originalRequest.headers) {
+                    if (typeof originalRequest.headers.set === "function") {
+                        originalRequest.headers.set("Authorization", `Bearer ${accessToken}`);
+                    } else {
+                        originalRequest.headers["Authorization"] = `Bearer ${accessToken}`;
+                    }
+                }
                 return api(originalRequest);
             } catch (refreshError) {
                 clearAccessToken();
@@ -152,7 +158,8 @@ api.interceptors.response.use(
             const isUserInactive =
                 errorCode === "USER_INACTIVE" ||
                 errorMessage.includes("inactive") ||
-                errorMessage.includes("vô hiệu hóa");
+                errorMessage.includes("vô hiệu hóa") ||
+                errorMessage.includes("tài khoản của bạn đã bị vô hiệu hóa");
 
             if (isUserInactive && !originalRequest.url?.includes("/auth/login")) {
                 // Case 2.1: Account is deactivated/inactive -> clear token and redirect to login
@@ -164,7 +171,11 @@ api.interceptors.response.use(
                 // Case 2.2: Cross-resource violation / Forbidden action (e.g. cross-department stats, uninvited meeting, TASK_ALREADY_COMPLETED)
                 // NEVER automatically logout (session and token are valid). Show polite error toast.
                 if (typeof window !== "undefined") {
-                    toast.error("Bạn không có quyền thực hiện thao tác hoặc truy cập tài nguyên này.", {
+                    const customMessage =
+                        typeof errorData?.message === "string" && errorData.message.trim().length > 0
+                            ? errorData.message
+                            : "Bạn không có quyền thực hiện thao tác hoặc truy cập tài nguyên này.";
+                    toast.error(customMessage, {
                         id: "forbidden-access-error",
                     });
                 }

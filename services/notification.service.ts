@@ -37,7 +37,7 @@ export const notificationService = {
   },
 
   getTicket: async (): Promise<{ success: boolean; ticket: string }> => {
-    const response = await api.get<{ success: boolean; ticket: string }>(
+    const response = await api.post<{ success: boolean; ticket: string }>(
       "/notifications/ticket",
     );
     return response.data;

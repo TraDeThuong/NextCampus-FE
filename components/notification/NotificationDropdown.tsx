@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Check, BellOff, Info, AlertTriangle, CheckCircle2, ShieldAlert, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, BellOff, Info, AlertTriangle, CheckCircle2, ShieldAlert, Trash2, Clock } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useNotifications } from "@/hooks/notification/useNotifications";
 import { useMarkAsRead } from "@/hooks/notification/useMarkAsRead";
@@ -18,9 +18,9 @@ export default function NotificationDropdown() {
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const { data, isLoading } = useNotifications({ limit: 10, sortBy: "createdAt", order: "desc" });
   const { mutate: markAsRead } = useMarkAsRead();
-  const { mutate: markAllAsRead } = useMarkAllAsRead();
+  const { mutate: markAllAsRead, isPending: isMarkingAllRead } = useMarkAllAsRead();
   const { mutate: deleteNotification } = useDeleteNotification();
-  const { mutate: clearReadNotifications } = useClearReadNotifications();
+  const { mutate: clearReadNotifications, isPending: isClearingRead } = useClearReadNotifications();
 
   const notifications = data?.data ?? [];
   const unreadNotifications = notifications.filter((n) => !n.isRead);
@@ -45,14 +45,20 @@ export default function NotificationDropdown() {
   };
 
   const getIconForType = (type: string) => {
-    switch (type.toUpperCase()) {
+    switch (type?.toUpperCase()) {
       case "SYSTEM":
         return <Info className="h-4 w-4 text-cyan-400" />;
       case "REGULATION":
       case "POLICY":
         return <ShieldAlert className="h-4 w-4 text-amber-400" />;
       case "TASK":
+      case "TASK_ASSIGNED":
         return <CheckCircle2 className="h-4 w-4 text-emerald-400" />;
+      case "SUBMISSION_REVIEWED":
+        return <Check className="h-4 w-4 text-purple-400" />;
+      case "REPORT_REMINDER":
+      case "DAILY_REPORT_REMINDER":
+        return <Clock className="h-4 w-4 text-amber-400" />;
       default:
         return <AlertTriangle className="h-4 w-4 text-blue-400" />;
     }
@@ -105,10 +111,11 @@ export default function NotificationDropdown() {
           {unreadNotifications.length > 0 && (
             <button
               onClick={handleMarkAllRead}
-              className="flex items-center gap-1 text-xs text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer"
+              disabled={isMarkingAllRead}
+              className="flex items-center gap-1 text-xs text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               title={t("markAllReadTitle")}
             >
-              <Check size={14} />
+              <Check size={14} className={isMarkingAllRead ? "animate-spin" : ""} />
               <span>{t("markAllRead")}</span>
             </button>
           )}
@@ -116,10 +123,11 @@ export default function NotificationDropdown() {
           {readNotifications.length > 0 && (
             <button
               onClick={handleClearRead}
-              className="flex items-center gap-1 text-xs text-slate-400 hover:text-red-400 transition-colors cursor-pointer"
+              disabled={isClearingRead}
+              className="flex items-center gap-1 text-xs text-slate-400 hover:text-red-400 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               title={t("clearReadTitle")}
             >
-              <Trash2 size={13} />
+              <Trash2 size={13} className={isClearingRead ? "animate-spin" : ""} />
               <span>{t("clearRead")}</span>
             </button>
           )}
@@ -127,7 +135,7 @@ export default function NotificationDropdown() {
       </div>
 
       {/* Content */}
-      <div className="mt-2 max-h-80 overflow-y-auto divide-y divide-white/5 pr-1 scrollbar-thin scrollbar-thumb-white/10">
+      <div className="mt-2 max-h-80 overflow-y-auto scroll-smooth overscroll-contain divide-y divide-white/5 pr-1 scrollbar-thin scrollbar-thumb-white/10">
         {isLoading ? (
           <div className="flex h-32 items-center justify-center">
             <Spinner size="sm" />

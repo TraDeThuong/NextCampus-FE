@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Bell } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useUnreadCount } from "@/hooks/notification/useUnreadCount";
-import { useNotificationSocket } from "@/hooks/notification/useNotificationSocket";
+import { useNotificationSSE } from "@/hooks/notification/useNotificationSSE";
 import useOutsideClick from "@/hooks/useOutsideClick";
 import NotificationDropdown from "./NotificationDropdown";
 
@@ -13,7 +13,7 @@ export default function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useOutsideClick<HTMLDivElement>(() => setIsOpen(false));
 
-  useNotificationSocket();
+  useNotificationSSE();
 
   const { data: unreadCount = 0 } = useUnreadCount();
 
