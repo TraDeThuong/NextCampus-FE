@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ShieldAlert, ShieldCheck, Lock, AlertTriangle, ArrowRight } from "lucide-react";
 import { authService } from "@/services/auth.service";
@@ -11,18 +11,14 @@ import Button from "@/components/ui/Button";
 
 function SecurityAlertContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const token = searchParams.get("token");
-
-  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
-  const [message, setMessage] = useState<string>("");
+  const [status, setStatus] = useState<"loading" | "success" | "error">(token ? "loading" : "error");
+  const [message, setMessage] = useState<string>(
+    token ? "" : "Liên kết khóa phiên không hợp lệ hoặc đã thiếu thông tin xác thực."
+  );
 
   useEffect(() => {
-    if (!token) {
-      setStatus("error");
-      setMessage("Liên kết khóa phiên không hợp lệ hoặc đã thiếu thông tin xác thực.");
-      return;
-    }
+    if (!token) return;
 
     let isMounted = true;
 

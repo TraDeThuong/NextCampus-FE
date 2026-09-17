@@ -9,7 +9,42 @@
     "noLimit": "Không giới hạn",
     "priority": "Ưu tiên: {priority}",
     "overdue": "⚠ Đã Quá Hạn",
-    "onTrack": "✓ Đúng tiến độ"
+    "onTrack": "✓ Đúng tiến độ",
+    "close": "Đóng",
+    "cancel": "Hủy",
+    "save": "Lưu",
+    "processing": "Đang xử lý..."
+  },
+  "stats": {
+    "riskHealthy": "An toàn",
+    "riskWarning": "Cảnh báo",
+    "riskDanger": "Nguy hiểm (Quá tải)",
+    "retentionRate": "Tỷ lệ hoàn thành thực tập",
+    "reportStreak": "Chuỗi {streak} ngày liên tiếp",
+    "activeWorkloadDays": "Khối lượng ngày công việc"
+  },
+  "pdfExport": {
+    "generating": "Đang khởi tạo file PDF...",
+    "downloadWeeklyEvaluation": "Tải phiếu đánh giá tuần (PDF)",
+    "downloadInternshipSummary": "Tải chứng nhận thực tập",
+    "exportSuccess": "Xuất báo cáo PDF thành công",
+    "exportFailed": "Lỗi xuất file PDF, vui lòng thử lại"
+  },
+  "regulations": {
+    "title": "Nội quy & Chính sách thực tập",
+    "effectiveVersion": "Phiên bản áp dụng",
+    "agreeAndCommit": "Tôi đã đọc và cam kết tuân thủ nội quy",
+    "acknowledgedAt": "Đã xác nhận cam kết lúc {time}",
+    "actionRequired": "Bắt buộc xác nhận"
+  },
+  "systemSettings": {
+    "parametersTitle": "Tham số vận hành hệ thống",
+    "dailyReportDeadline": "Hạn chốt nộp báo cáo ngày",
+    "maxActiveTasks": "Số task active tối đa",
+    "maxWorkloadDays": "Hạn mức ngày công việc tối đa",
+    "maxFileSize": "Dung lượng tệp tối đa",
+    "saveChanges": "Lưu thay đổi",
+    "updateSuccess": "Cập nhật cài đặt thành công"
   },
   "header": {
     "logout": "Đăng xuất",

@@ -29,10 +29,10 @@ function toLocalDatetimeString(d: Date) {
 const createMeetingFormSchema = z
   .object({
     title: z.string().min(1, "Title is required").max(200, "Title is too long"),
-    description: z.string().optional().default(""),
+    description: z.string().optional(),
     meetingType: z.enum(["ONLINE", "OFFLINE", "HYBRID"]),
-    location: z.string().optional().default(""),
-    meetingLink: z.string().optional().default(""),
+    location: z.string().optional(),
+    meetingLink: z.string().optional(),
     startTime: z.string().min(1, "Start time is required"),
     endTime: z.string().min(1, "End time is required"),
     visibility: z.enum(["PRIVATE", "TEAM"]),
@@ -65,18 +65,7 @@ const createMeetingFormSchema = z
     }
   });
 
-// Use explicit FormValues for react-hook-form compatibility
-interface FormValues {
-  title: string;
-  description?: string;
-  meetingType: "ONLINE" | "OFFLINE" | "HYBRID";
-  location?: string;
-  meetingLink?: string;
-  startTime: string;
-  endTime: string;
-  visibility: "PRIVATE" | "TEAM";
-  status: "DRAFT" | "SCHEDULED";
-}
+type FormValues = z.infer<typeof createMeetingFormSchema>;
 
 export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props) {
   const t = useTranslations();
@@ -99,7 +88,7 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
     watch,
     formState: { errors },
   } = useForm<FormValues>({
-    resolver: zodResolver(createMeetingFormSchema) as any,
+    resolver: zodResolver(createMeetingFormSchema),
     defaultValues: {
       meetingType: "ONLINE",
       visibility: "TEAM",

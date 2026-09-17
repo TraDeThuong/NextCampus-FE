@@ -2,6 +2,7 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import { useTranslations } from "next-intl";
 import { pdfExportService } from "@/services/pdf-export.service";
 
 export function triggerDownload(fileUrl: string, defaultName = "bao-cao-danh-gia-tuan.pdf") {
@@ -24,6 +25,8 @@ export function triggerDownload(fileUrl: string, defaultName = "bao-cao-danh-gia
 }
 
 export function useExportWeeklyEvaluation() {
+  const t = useTranslations("pdfExport");
+
   return useMutation({
     mutationFn: (id: string) => pdfExportService.exportWeeklyEvaluation(id),
 
@@ -31,14 +34,14 @@ export function useExportWeeklyEvaluation() {
       const fileUrl = response.data?.fileUrl;
       if (fileUrl) {
         triggerDownload(fileUrl, "bao-cao-danh-gia-tuan.pdf");
-        toast.success("Báo cáo PDF đã được khởi tạo thành công! Đang tiến hành tải xuống...");
+        toast.success(t("exportSuccess"));
       } else {
-        toast.error("Không tìm thấy đường dẫn file PDF.");
+        toast.error(t("exportFailed"));
       }
     },
 
     onError: () => {
-      toast.error("Xuất báo cáo thất bại. Vui lòng thử lại.");
+      toast.error(t("exportFailed"));
     },
   });
 }

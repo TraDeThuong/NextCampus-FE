@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import axios from "axios";
 import { departmentService } from "@/services/department.service";
 
 export function useDeletePosition() {
@@ -19,9 +20,11 @@ export function useDeletePosition() {
             });
         },
 
-        onError: (err: any) => {
-            const msg = err?.response?.data?.message || "Failed to delete position.";
-            toast.error(msg);
+        onError: (err: unknown) => {
+            const msg = axios.isAxiosError<{ message?: string }>(err)
+                ? err.response?.data?.message
+                : undefined;
+            toast.error(msg || "Failed to delete position.");
         },
     });
 }

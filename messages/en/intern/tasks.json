@@ -89,7 +89,8 @@
         "attachmentSizeError": "{name} must not exceed {limit} MB.",
         "maxAttachments": "A submission can contain up to {max} attachments.",
         "attachmentLimitReached": "Attachment limit reached ({max} maximum). Remove a file to add another.",
-        "deleteAttachment": "Delete attachment {name}"
+        "deleteAttachment": "Delete attachment {name}",
+        "uploadNotAllowed": "Only the assigned intern or support member is allowed to upload files."
       }
     }
   }

@@ -49,7 +49,10 @@
         "weekendOnly": "Current week evaluation is only available from Saturday (after 11:00 AM) to Sunday.",
         "weekAlreadyExists": "Week {week} has already been evaluated for this intern.",
         "aiSuggestionReceived": "AI suggestion received!",
-        "criteriaCount": "({count} criteria)"
+        "criteriaCount": "({count} criteria)",
+        "draftPreviewNotice": "12-criteria ratings and feedback from AI are in Draft Preview. You can freely adjust them before saving.",
+        "draftBadge": "AI Draft",
+        "aiSuggestedBadge": "AI Suggested"
       },
 
       "detail": {

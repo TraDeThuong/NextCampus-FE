@@ -38,7 +38,15 @@
       "clickToSeeOverdue": "Click to see the overdue list",
       "droppedInterns": "{n} Dropped / discontinued interns",
       "droppedList": "List of discontinued interns",
-      "overdueModalTitle": "All Overdue Tasks System-Wide ({n})"
+      "overdueModalTitle": "All Overdue Tasks System-Wide ({n})",
+      "departmentDistribution": "Department Personnel Distribution",
+      "departmentDistributionSubtitle": "Intern and mentor headcounts across company departments",
+      "colDeptName": "Department",
+      "colDeptInterns": "Interns",
+      "colDeptLeaders": "Leaders",
+      "missingLeaderAlert": "Warning: No leader assigned!",
+      "leaderAssigned": "{n} Leader(s)",
+      "noDeptDistribution": "No department distribution data available."
     },
     "taskModal": {
       "showingItems": "Showing detailed task list, assigned interns and deadlines ({n} items)",

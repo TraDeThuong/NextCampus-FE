@@ -98,8 +98,8 @@ function AddDepartmentForm({
         ? PREDEFINED_POSITIONS[deptName] || GENERAL_POSITIONS
         : GENERAL_POSITIONS;
 
-    const handleAddPosition = (e: React.MouseEvent) => {
-        e.preventDefault();
+    const handleAddPosition = (e?: React.SyntheticEvent) => {
+        e?.preventDefault();
         const trimmed = posInput.trim();
         if (!trimmed) return;
         setAddedPositions([...addedPositions, trimmed]);
@@ -161,7 +161,7 @@ function AddDepartmentForm({
             }
         } else if (e.key === "Enter") {
             e.preventDefault();
-            handleAddPosition(e as any);
+            handleAddPosition(e);
         }
     };
 

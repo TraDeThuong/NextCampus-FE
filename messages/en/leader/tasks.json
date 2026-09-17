@@ -150,6 +150,7 @@
 
       "detail": {
         "taskNotFound": "Task not found.",
+        "completedTaskReadOnly": "Task is completed and cannot be modified.",
         "goBack": "Go back",
         "backToTasks": "Back to Tasks",
         "aiAssign": "AI Assign",

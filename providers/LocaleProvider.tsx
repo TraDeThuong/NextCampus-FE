@@ -50,24 +50,9 @@ export default function LocaleProvider({
       document.documentElement.lang = newLocale;
       setLocaleState(newLocale);
 
-      // Update URL without full navigation
-      const pathname = window.location.pathname;
-      const url = new URL(window.location.href);
-
-      // Remove existing locale prefix if present
-      const segments = pathname.split("/").filter(Boolean);
-      const knownLocales = ["vi", "en"];
-      if (knownLocales.includes(segments[0])) {
-        segments.shift();
-      }
-
-      // Build new path with the new locale prefix
-      let newPath = `/${newLocale}`;
-      if (segments.length > 0) {
-        newPath += `/${segments.join("/")}`;
-      }
-
-      window.history.replaceState(null, "", newPath + url.search + url.hash);
+      // Save to cookies for SSR / server components persistence
+      document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
+      document.cookie = `locale=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
     },
     [locale],
   );

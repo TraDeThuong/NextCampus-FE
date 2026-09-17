@@ -94,6 +94,13 @@ export default function TaskDetailPage() {
         <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white bg-clip-text">{task.title}</h1>
       </div>
 
+      {task.assignment?.status === "DONE" && (
+        <div className="flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-300">
+          <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-400" />
+          <p className="text-sm font-semibold">{td("completedTaskReadOnly")}</p>
+        </div>
+      )}
+
       {showAi && <TaskAiRecommendationModal taskId={task.id} taskTitle={task.title} isAssigned={!!task.assignment?.internId} onClose={() => setShowAi(false)} />}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">

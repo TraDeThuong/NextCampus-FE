@@ -2,8 +2,8 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import axios from "axios";
 import { departmentService } from "@/services/department.service";
-import { useCreatePosition } from "./useCreatePosition";
 
 export function useCreateDepartment() {
     const queryClient = useQueryClient();
@@ -17,9 +17,11 @@ export function useCreateDepartment() {
             queryClient.invalidateQueries({ queryKey: ["departments"] });
         },
 
-        onError: (err: any) => {
-            const msg = err?.response?.data?.message || "Failed to create department.";
-            toast.error(msg);
+        onError: (err: unknown) => {
+            const msg = axios.isAxiosError<{ message?: string }>(err)
+                ? err.response?.data?.message
+                : undefined;
+            toast.error(msg || "Failed to create department.");
         },
     });
 }

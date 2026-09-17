@@ -6,7 +6,7 @@ import { toast } from "react-hot-toast";
 import { deleteApplicationService } from "@/services/application.service";
 import type { ApplicationInviteRow } from "@/types/application";
 
-type InviteListData = { data: ApplicationInviteRow[]; meta: any };
+type InviteListData = { data: ApplicationInviteRow[]; meta: unknown };
 
 export function useDeleteApplication() {
   const queryClient = useQueryClient();

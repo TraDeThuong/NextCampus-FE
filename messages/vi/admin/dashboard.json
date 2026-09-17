@@ -38,7 +38,15 @@
       "clickToSeeOverdue": "Bấm để soi danh sách ai bị quá hạn",
       "droppedInterns": "{n} Thực tập sinh đã huỷ / thôi học",
       "droppedList": "Danh sách thực tập sinh dừng chương trình",
-      "overdueModalTitle": "Danh Sách Tất Cả Task Quá Hạn Toàn Hệ Thống ({n})"
+      "overdueModalTitle": "Danh Sách Tất Cả Task Quá Hạn Toàn Hệ Thống ({n})",
+      "departmentDistribution": "Phân Bổ Nhân Sự Theo Phòng Ban",
+      "departmentDistributionSubtitle": "Thống kê số lượng thực tập sinh và người hướng dẫn theo từng bộ phận",
+      "colDeptName": "Phòng Ban",
+      "colDeptInterns": "Thực Tập Sinh",
+      "colDeptLeaders": "Người Hướng Dẫn",
+      "missingLeaderAlert": "Cảnh báo: Thiếu Leader phụ trách!",
+      "leaderAssigned": "{n} Leader",
+      "noDeptDistribution": "Chưa có dữ liệu phân bổ phòng ban."
     },
     "taskModal": {
       "showingItems": "Hiển thị danh sách chi tiết công việc, thực tập sinh phụ trách và hạn chót ({n} mục)",

@@ -337,10 +337,12 @@ function ManagePositions({
 
     return (
         <div className="px-2 py-4 text-left">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-4">
-                <Briefcase className="h-5 w-5 text-cyan-400" />
-                {t("admin.department.positionsOf", { name: department.name })}
-            </h3>
+            <div className="flex items-center gap-2 mb-4">
+                <Briefcase className="h-5 w-5 text-cyan-400 shrink-0" />
+                <h3 className="text-lg font-bold text-white">
+                    {t("admin.department.positionsOf", { name: department.name })}
+                </h3>
+            </div>
 
             {/* List existing positions */}
             <div className="space-y-2 max-h-60 overflow-y-auto mb-6 pr-1 custom-scrollbar">

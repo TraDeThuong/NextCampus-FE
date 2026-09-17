@@ -6,8 +6,8 @@ import { Loader2, FileText, Users, FileCheck, AlertCircle, CalendarDays } from "
 import { useTranslations } from "next-intl";
 import MetalCard from "@/components/ui/MetalCard";
 import StatsCard from "@/components/stats/StatsCard";
-import InternCalendar from "@/app/[locale]/(dashboard)/intern/daily-report/InternCalendar";
-import ReportDetail from "@/app/[locale]/(dashboard)/intern/daily-report/ReportDetail";
+import InternCalendar from "@/app/(dashboard)/intern/daily-report/InternCalendar";
+import ReportDetail from "@/app/(dashboard)/intern/daily-report/ReportDetail";
 import LeaderInternList from "./LeaderInternList";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { useInterns } from "@/hooks/intern/useInterns";

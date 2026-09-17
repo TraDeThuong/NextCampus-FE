@@ -7,8 +7,20 @@ import StatsCard from "./StatsCard";
 import Spinner from "../ui/Spinner";
 import MetalCard from "../ui/MetalCard";
 import RejectedSubmissionsCard from "./RejectedSubmissionsCard";
+import InternRegulationModal from "../regulation/InternRegulationModal";
 import Table from "../ui/Table";
-import { ClipboardList, CheckCircle2, Calendar, Award, ExternalLink, Clock, FileCheck, AlertTriangle } from "lucide-react";
+import {
+  ClipboardList,
+  CheckCircle2,
+  Calendar,
+  Award,
+  ExternalLink,
+  Clock,
+  FileCheck,
+  AlertTriangle,
+  Flame,
+  AlertCircle,
+} from "lucide-react";
 
 export default function InternStatsOverview() {
   const t = useTranslations("intern.dashboard");
@@ -27,9 +39,69 @@ export default function InternStatsOverview() {
 
   const stats = response.data;
   const todaysTasks = stats.todaysTasks ?? [];
+  const streakCount = stats.reportStreak ?? 0;
 
   return (
-    <div className="space-y-8 animate-fadeIn">
+    <div className="space-y-6 animate-fadeIn">
+      {/* Regulation Acknowledgment Alert / Status */}
+      <InternRegulationModal />
+
+      {/* Daily Report Deadline Banner */}
+      <div
+        className={`flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-2xl border p-4 transition-all duration-300 ${
+          stats.dailyReportTodaySubmitted
+            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+            : "border-amber-500/30 bg-amber-500/10 text-amber-300 shadow-[0_0_24px_rgba(245,158,11,0.1)]"
+        }`}
+      >
+        <div className="flex items-center gap-3">
+          <div
+            className={`flex h-10 w-10 items-center justify-center rounded-xl shrink-0 ${
+              stats.dailyReportTodaySubmitted
+                ? "bg-emerald-500/20 text-emerald-400"
+                : "bg-amber-500/20 text-amber-400"
+            }`}
+          >
+            {stats.dailyReportTodaySubmitted ? (
+              <CheckCircle2 className="h-5 w-5" />
+            ) : (
+              <AlertCircle className="h-5 w-5" />
+            )}
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span
+                className={`text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${
+                  stats.dailyReportTodaySubmitted
+                    ? "border-emerald-500/30 bg-emerald-500/20 text-emerald-300"
+                    : "border-amber-500/30 bg-amber-500/20 text-amber-300"
+                }`}
+              >
+                {stats.dailyReportTodaySubmitted
+                  ? t("reportSubmittedBadge")
+                  : t("reportNotSubmittedBadge")}
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm font-medium mt-0.5 text-foreground">
+              {stats.dailyReportTodaySubmitted
+                ? t("reportSubmittedMsg")
+                : t("deadlineNotice")}
+            </p>
+          </div>
+        </div>
+
+        {!stats.dailyReportTodaySubmitted && (
+          <Link
+            href="/intern/daily-report"
+            className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold text-xs shadow-soft hover:opacity-95 transition-all"
+          >
+            <Calendar className="h-3.5 w-3.5" />
+            <span>{t("submitNow")}</span>
+          </Link>
+        )}
+      </div>
+
+      {/* Greeting Header */}
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-extrabold text-foreground metal-text">{t("greeting", { name: stats.internName })}</h1>
@@ -40,7 +112,8 @@ export default function InternStatsOverview() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      {/* KPI Stats Grid - 6 Cards including Report Streak */}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <StatsCard title={t("tasksInProgress")} value={stats.tasksInProgress} subtitle={t("totalTasks", { n: stats.totalTasks })} icon={<ClipboardList className="h-6 w-6 text-cyan-400" />} href="/intern/task"
           trend={{ text: t("completionRate", { n: stats.completionRate }), positive: true }} />
         <StatsCard title={t("tasksCompleted")} value={stats.tasksCompleted} subtitle={t("completedOf", { done: stats.tasksCompleted, total: stats.totalTasks })} icon={<CheckCircle2 className="h-6 w-6 text-emerald-400" />} href="/intern/task?status=DONE"
@@ -50,6 +123,14 @@ export default function InternStatsOverview() {
         <StatsCard title={t("todaysReport")} value={stats.dailyReportTodaySubmitted ? t("submitted") : t("notSubmitted")}
           subtitle={stats.dailyReportTodaySubmitted ? t("onTime") : t("submitByEvening")} icon={<FileCheck className="h-6 w-6 text-amber-400" />} href="/intern/daily-report"
           trend={{ text: stats.dailyReportTodaySubmitted ? t("completeStatus") : t("submitNowStatus"), positive: stats.dailyReportTodaySubmitted }} />
+        <StatsCard
+          title={t("reportStreak")}
+          value={t("reportStreakCount", { n: streakCount })}
+          subtitle={t("reportStreakSubtitle")}
+          icon={<Flame className="h-6 w-6 text-orange-400 animate-pulse" />}
+          href="/intern/daily-report"
+          trend={{ text: streakCount > 0 ? "🔥 Streak active" : "Start today", positive: streakCount > 0 }}
+        />
         <StatsCard title={t("weeklyScore")} value={typeof stats.lastWeekScore === "number" ? `${stats.lastWeekScore.toFixed(1)}/10` : `${stats.avgScore.toFixed(1)}/10`}
           subtitle={t("avgScore", { score: stats.avgScore.toFixed(1) })} icon={<Award className="h-6 w-6 text-indigo-400" />} href="/intern/weekly-evaluation"
           trend={{ text: t("scoreResults"), positive: stats.avgScore >= 7 }} />
@@ -60,7 +141,10 @@ export default function InternStatsOverview() {
 
         <MetalCard className="p-6 lg:col-span-3">
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
-            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2"><Clock className="h-5 w-5 text-amber-400" />{t("tasksToDos")}</h3>
+            <div className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-amber-400 shrink-0" />
+              <h3 className="text-lg font-semibold text-foreground">{t("tasksToDos")}</h3>
+            </div>
             <Link href="/intern/task" className="text-xs font-medium text-primary-light hover:underline flex items-center gap-1">{t("viewAllTasks")} <ExternalLink className="h-3.5 w-3.5" /></Link>
           </div>
 
@@ -94,7 +178,12 @@ export default function InternStatsOverview() {
 
         <MetalCard className="p-6 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between border-b border-white/10 pb-4"><h3 className="text-lg font-semibold text-foreground flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-emerald-400" />{t("internshipProgress")}</h3></div>
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
+                <h3 className="text-lg font-semibold text-foreground">{t("internshipProgress")}</h3>
+              </div>
+            </div>
             <div className="mt-6 text-center space-y-4">
               <div className="inline-flex h-32 w-32 items-center justify-center rounded-full border-4 border-primary-light/30 bg-primary-light/5 p-4 shadow-glass"><div><span className="text-3xl font-extrabold text-foreground metal-text">{stats.completionRate}%</span><span className="block text-[10px] text-muted uppercase font-semibold">{t("completed")}</span></div></div>
               <p className="text-xs text-muted">

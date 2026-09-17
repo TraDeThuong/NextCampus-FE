@@ -132,11 +132,13 @@ export default function InternWeeklyEvaluationDetailPage() {
             <div className="flex items-center gap-4">
               <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-main to-primary-light text-2xl font-bold text-white shadow-lg">{evaluation.intern?.fullName?.charAt(0).toUpperCase() || "I"}</div>
               <div>
-                <h1 className="text-xl font-bold text-white flex flex-wrap items-center gap-2">
-                  <span>{td("yourEvaluation")}</span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="text-xl font-bold text-white">
+                    {td("yourEvaluation")}
+                  </h1>
                   <span className="text-sm font-normal px-2.5 py-0.5 rounded-full border border-primary-light/30 bg-primary-light/10 text-primary-light">{td("week", { n: evaluation.week })}</span>
                   {hasRatings && <span className="text-xs font-normal px-2 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 flex items-center gap-1"><ClipboardList className="h-3 w-3" />{td("criteria12")}</span>}
-                </h1>
+                </div>
                 <p className="mt-1 text-sm text-slate-400 flex items-center gap-1"><User className="h-4 w-4 text-slate-500" /><span>{td("evaluatedBy", { name: evaluation.leader?.fullName || evaluation.leader?.email || td("leader") })}</span><span className="text-slate-600 mx-2">|</span><Calendar className="h-4 w-4 text-slate-500" /><span>{new Date(evaluation.createdAt).toLocaleDateString("vi-VN")}</span></p>
               </div>
             </div>
@@ -157,7 +159,12 @@ export default function InternWeeklyEvaluationDetailPage() {
           <MetalCard>
             <div className="rounded-3xl p-6 space-y-6">
               <div className="flex items-center justify-between border-b border-border/40 pb-4">
-                <h2 className="text-lg font-semibold flex items-center gap-2"><BookOpen className="h-5 w-5 text-primary-light shrink-0" /><span className="metal-text">{hasRatings ? td("criteriaTable") : td("scoreDetail")}</span></h2>
+                <div className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5 text-primary-light shrink-0" />
+                  <h2 className="text-lg font-semibold">
+                    <span className="metal-text">{hasRatings ? td("criteriaTable") : td("scoreDetail")}</span>
+                  </h2>
+                </div>
                 {evaluation.leaderEdited && <span className="text-xs px-2.5 py-1 rounded-full border border-amber-500/20 bg-amber-500/5 text-amber-400 flex items-center gap-1"><Sparkles className="h-3 w-3" />{td("adjustedAfterAi")}</span>}
               </div>
               {hasRatings && ratings ? <CriteriaTable ratings={ratings} aiRatings={evaluation.aiRatings} /> : <LegacyScoreBars communication={evaluation.communication} attitude={evaluation.attitude} learning={evaluation.learning} coding={evaluation.coding} />}
@@ -166,17 +173,36 @@ export default function InternWeeklyEvaluationDetailPage() {
 
           <MetalCard>
             <div className="rounded-3xl p-6 space-y-4">
-              <h2 className="text-lg font-semibold flex items-center gap-2 border-b border-border/40 pb-4"><MessageSquare className="h-5 w-5 text-primary-light shrink-0" /><span className="metal-text">{td("leadersReview")}</span></h2>
+              <div className="flex items-center gap-2 border-b border-border/40 pb-4">
+                <MessageSquare className="h-5 w-5 text-primary-light shrink-0" />
+                <h2 className="text-lg font-semibold">
+                  <span className="metal-text">{td("leadersReview")}</span>
+                </h2>
+              </div>
               <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5"><p className="text-slate-300 text-sm whitespace-pre-wrap leading-relaxed">{evaluation.comment || td("noLeaderComment")}</p></div>
               {evaluation.aiComment && evaluation.leaderEdited && (
-                <div className="space-y-2 mt-4"><h3 className="text-xs font-semibold text-muted flex items-center gap-1"><Sparkles className="h-3.5 w-3.5 text-primary-light" />{td("originalAiComment")}</h3><div className="bg-primary-main/5 border border-primary-light/10 rounded-2xl p-4"><p className="text-slate-400 text-xs whitespace-pre-wrap leading-relaxed italic">{evaluation.aiComment}</p></div></div>
+                <div className="space-y-2 mt-4">
+                  <div className="flex items-center gap-1">
+                    <Sparkles className="h-3.5 w-3.5 text-primary-light shrink-0" />
+                    <h3 className="text-xs font-semibold text-muted">{td("originalAiComment")}</h3>
+                  </div>
+                  <div className="bg-primary-main/5 border border-primary-light/10 rounded-2xl p-4"><p className="text-slate-400 text-xs whitespace-pre-wrap leading-relaxed italic">{evaluation.aiComment}</p></div>
+                </div>
               )}
             </div>
           </MetalCard>
 
           {allEvaluations.length >= 2 && (
             <MetalCard>
-              <div className="rounded-3xl p-6 space-y-4"><h2 className="text-lg font-semibold flex items-center gap-2 border-b border-border/40 pb-4"><TrendingUp className="h-5 w-5 text-primary-light shrink-0" /><span className="metal-text">{td("progressChart")}</span></h2><ProgressChart currentWeek={evaluation.week} allEvaluations={allEvaluations.map((e) => ({ week: e.week, communication: e.communication, attitude: e.attitude, learning: e.learning, coding: e.coding, totalScore: e.totalScore }))} /></div>
+              <div className="rounded-3xl p-6 space-y-4">
+                <div className="flex items-center gap-2 border-b border-border/40 pb-4">
+                  <TrendingUp className="h-5 w-5 text-primary-light shrink-0" />
+                  <h2 className="text-lg font-semibold">
+                    <span className="metal-text">{td("progressChart")}</span>
+                  </h2>
+                </div>
+                <ProgressChart currentWeek={evaluation.week} allEvaluations={allEvaluations.map((e) => ({ week: e.week, communication: e.communication, attitude: e.attitude, learning: e.learning, coding: e.coding, totalScore: e.totalScore }))} />
+              </div>
             </MetalCard>
           )}
         </div>
@@ -184,7 +210,12 @@ export default function InternWeeklyEvaluationDetailPage() {
         <div className="space-y-6 lg:sticky lg:top-6 self-start">
           <MetalCard>
             <div className="rounded-3xl p-6 text-center space-y-6">
-              <h2 className="text-lg font-semibold border-b border-border/40 pb-4 flex items-center justify-center gap-2"><Star className="h-5 w-5 text-yellow-400 shrink-0" /><span className="metal-text">{td("overallScore")}</span></h2>
+              <div className="border-b border-border/40 pb-4 flex items-center justify-center gap-2">
+                <Star className="h-5 w-5 text-yellow-400 shrink-0" />
+                <h2 className="text-lg font-semibold">
+                  <span className="metal-text">{td("overallScore")}</span>
+                </h2>
+              </div>
               <div className="space-y-2"><div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-primary-light">{finalScore.toFixed(2)}</div><div className="text-sm text-muted">{td("outOf")}</div></div>
               <div className="pt-4 border-t border-border/40 space-y-2 text-xs">
                 {[{ label: td("communication"), value: evaluation.communication }, { label: td("attitude"), value: evaluation.attitude }, { label: td("learning"), value: evaluation.learning }, { label: td("coding"), value: evaluation.coding }].map(({ label, value }) => <div key={label} className="flex justify-between items-center"><span className="text-muted">{label}:</span><div className="flex items-center gap-2"><div className="w-20 h-1.5 bg-white/5 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-primary-main to-primary-light rounded-full" style={{ width: `${value * 10}%` }} /></div><span className="font-semibold text-foreground w-8 text-right">{value.toFixed(1)}</span></div></div>)}

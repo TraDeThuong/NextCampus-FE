@@ -57,9 +57,19 @@
       "pendingModalTitle": "Pending Task Assignment Requests",
       "pendingModalDesc": "{count} requests from other leaders awaiting your approval",
       "requestedBy": "Requested by:",
-      "approve": "Approve",
-      "reject": "Reject",
-      "pendingModalEmpty": "No pending task assignment requests."
+      "pendingModalEmpty": "No pending task assignment requests.",
+      "activeWorkloadDays": "Active Workload",
+      "workloadDaysCount": "{n} Workload Days",
+      "workloadDaysSubtitle": "Total active workload days across the team",
+      "dailyReportRate": "Today's Daily Report Rate",
+      "dailyReportRateSubtitle": "{submitted}/{total} interns submitted ({pct}%)",
+      "riskLevelHealthy": "Healthy",
+      "riskLevelWarning": "Warning",
+      "riskLevelDanger": "Danger",
+      "colTodayReport": "Today's Report",
+      "reportSubmittedToday": "Submitted",
+      "reportNotSubmittedToday": "Missing",
+      "completedTaskReadOnly": "Task is completed and cannot be modified."
     }
   }
 }

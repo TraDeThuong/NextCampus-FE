@@ -20,8 +20,8 @@ import {
 import Button from "@/components/ui/Button";
 import { useAiRecommendation } from "@/hooks/task/useAiRecommendation";
 import { useAssignTask } from "@/hooks/task-assignment/useAssignTask";
-import type { AiRecommendation, CandidateSummary } from "@/types/task-allocation";
-import { useState, useEffect } from "react";
+import type { CandidateSummary } from "@/types/task-allocation";
+import { useState } from "react";
 
 // ─── Props ────────────────────────────────────────────────────────────────
 

@@ -57,8 +57,26 @@ export default function PolicyRow({ policy }: PolicyRowProps) {
         <div className="text-sm font-medium text-slate-400">v{policy.version}</div>
         <div className="text-sm text-slate-400 flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5 text-slate-500" />{formattedCreatedDate}</div>
         <div className="text-sm text-slate-400 flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5 text-slate-500" />{formattedUpdatedDate}</div>
-        <div>
-          <span className={`inline-flex rounded-lg border px-2.5 py-1 text-xs font-semibold ${policy.isActive ? "border-emerald-400/20 bg-emerald-500/10 text-emerald-300" : "border-slate-700 bg-slate-800/40 text-slate-400"}`}>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={policy.isActive}
+            disabled={activating || policy.isActive}
+            onClick={() => !policy.isActive && activatePolicy(policy.id)}
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-light focus:ring-offset-2 focus:ring-offset-background disabled:cursor-not-allowed disabled:opacity-60 ${
+              policy.isActive ? "bg-emerald-500" : "bg-slate-700 hover:bg-slate-600"
+            }`}
+            title={policy.isActive ? t("admin.policies.active") : t("admin.policies.setActive")}
+          >
+            <span
+              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                policy.isActive ? "translate-x-4" : "translate-x-0"
+              }`}
+            />
+          </button>
+          <span className={`inline-flex items-center rounded-lg border px-2 py-0.5 text-xs font-semibold ${policy.isActive ? "border-emerald-400/20 bg-emerald-500/10 text-emerald-300" : "border-slate-700 bg-slate-800/40 text-slate-400"}`}>
+            {activating ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
             {policy.isActive ? t("admin.policies.active") : t("admin.policies.draftInactive")}
           </span>
         </div>

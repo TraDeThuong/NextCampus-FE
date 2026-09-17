@@ -4,6 +4,9 @@ export interface Regulation {
   content: string;
   version: number;
   isActive: boolean;
+  isAcknowledged?: boolean;
+  acknowledgedAt?: string | null;
+  totalAcknowledged?: number;
   createdAt: string;
   updatedAt: string;
 }

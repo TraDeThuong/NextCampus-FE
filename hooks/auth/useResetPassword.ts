@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
+import axios from "axios";
 import { authService } from "@/services/auth.service";
 
 type ResetPasswordFormValues = {
@@ -32,9 +33,12 @@ export function useResetPassword() {
             toast.success("Password reset successfully. You can now sign in.");
             router.push("/login");
         },
-        onError: (error: any) => {
+        onError: (error: unknown) => {
+            const msg = axios.isAxiosError<{ message?: string }>(error)
+                ? error.response?.data?.message
+                : undefined;
             toast.error(
-                error.response?.data?.message ?? "Failed to reset password. The link may have expired."
+                msg ?? "Failed to reset password. The link may have expired."
             );
         },
     });

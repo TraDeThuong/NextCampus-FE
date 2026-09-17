@@ -9,7 +9,42 @@
     "noLimit": "No limit",
     "priority": "Priority: {priority}",
     "overdue": "⚠ Overdue",
-    "onTrack": "✓ On Track"
+    "onTrack": "✓ On Track",
+    "close": "Close",
+    "cancel": "Cancel",
+    "save": "Save",
+    "processing": "Processing..."
+  },
+  "stats": {
+    "riskHealthy": "Healthy",
+    "riskWarning": "Warning",
+    "riskDanger": "Danger (Overload)",
+    "retentionRate": "Internship Retention Rate",
+    "reportStreak": "{streak}-Day Report Streak",
+    "activeWorkloadDays": "Active Workload Days"
+  },
+  "pdfExport": {
+    "generating": "Generating PDF report...",
+    "downloadWeeklyEvaluation": "Download Weekly Evaluation (PDF)",
+    "downloadInternshipSummary": "Download Internship Certificate",
+    "exportSuccess": "PDF exported successfully",
+    "exportFailed": "Failed to export PDF, please try again"
+  },
+  "regulations": {
+    "title": "Internship Regulations & Policies",
+    "effectiveVersion": "Effective Version",
+    "agreeAndCommit": "I have read and agree to comply with regulations",
+    "acknowledgedAt": "Acknowledged on {time}",
+    "actionRequired": "Action Required"
+  },
+  "systemSettings": {
+    "parametersTitle": "System Operating Parameters",
+    "dailyReportDeadline": "Daily Report Deadline",
+    "maxActiveTasks": "Max Active Tasks",
+    "maxWorkloadDays": "Max Workload Days",
+    "maxFileSize": "Max File Size Limit",
+    "saveChanges": "Save Changes",
+    "updateSuccess": "Settings updated successfully"
   },
   "header": {
     "logout": "Logout",

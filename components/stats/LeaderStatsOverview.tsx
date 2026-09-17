@@ -11,10 +11,11 @@ import MetalCard from "../ui/MetalCard";
 import TaskAssignmentModal from "./TaskAssignmentModal";
 import PendingApprovalCard from "./PendingApprovalCard";
 import PendingApprovalModal from "./PendingApprovalModal";
+import Image from "next/image";
 import Table from "../ui/Table";
-import { AssignmentDetail } from "@/types/stats";
+import type { AssignmentDetail } from "@/types/stats";
 import type { AssignmentStatus } from "@/types/task-assignment";
-import { Users, CheckCircle2, FileCheck, Award, ShieldAlert } from "lucide-react";
+import { Users, CheckCircle2, FileCheck, Award, ShieldAlert, Clock, FileText } from "lucide-react";
 
 const STATUS_MODAL_PAGE_SIZE = 10;
 
@@ -207,7 +208,7 @@ export default function LeaderStatsOverview() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
         <StatsCard
           title={t("activeInterns")}
           value={stats.interns.active}
@@ -217,6 +218,29 @@ export default function LeaderStatsOverview() {
           trend={{
             text: t("completedCount", { count: stats.interns.completed }),
             positive: true,
+          }}
+        />
+
+        <StatsCard
+          title={t("activeWorkloadDays")}
+          value={t("workloadDaysCount", { n: stats.activeWorkloadDays ?? 0 })}
+          subtitle={t("workloadDaysSubtitle")}
+          icon={<Clock className="h-6 w-6 text-cyan-400" />}
+          trend={{
+            text: (stats.activeWorkloadDays ?? 0) > 10 ? t("riskLevelDanger") : (stats.activeWorkloadDays ?? 0) > 7 ? t("riskLevelWarning") : t("riskLevelHealthy"),
+            positive: (stats.activeWorkloadDays ?? 0) <= 7,
+          }}
+        />
+
+        <StatsCard
+          title={t("dailyReportRate")}
+          value={stats.dailyReportRate ? `${stats.dailyReportRate.percentage}%` : "—"}
+          subtitle={stats.dailyReportRate ? t("dailyReportRateSubtitle", { submitted: stats.dailyReportRate.todaySubmitted, total: stats.dailyReportRate.totalInterns, pct: stats.dailyReportRate.percentage }) : t("dailyReportRateSubtitle", { submitted: 0, total: 0, pct: 0 })}
+          icon={<FileText className="h-6 w-6 text-indigo-400" />}
+          href="/leader/daily-reports"
+          trend={{
+            text: (stats.dailyReportRate?.percentage ?? 0) >= 80 ? t("riskLevelHealthy") : (stats.dailyReportRate?.percentage ?? 0) >= 50 ? t("riskLevelWarning") : t("riskLevelDanger"),
+            positive: (stats.dailyReportRate?.percentage ?? 0) >= 80,
           }}
         />
 
@@ -262,20 +286,23 @@ export default function LeaderStatsOverview() {
       <MetalCard className="p-6">
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <div>
-            <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <Users className="h-6 w-6 text-primary-light shrink-0" />
-              <span className="metal-text">{t("internProgressTitle")}</span>
-            </h3>
+              <h3 className="text-xl font-bold text-foreground">
+                <span className="metal-text">{t("internProgressTitle")}</span>
+              </h3>
+            </div>
             <p className="text-xs text-muted mt-1">{t("internProgressDesc")}</p>
           </div>
         </div>
 
         <div className="mt-6">
-          <Table columns="1.8fr 1.8fr 1.2fr 1.5fr">
+          <Table columns="2fr 1.8fr 1fr 1.2fr 1.2fr">
             <Table.Header>
               <span>{t("colIntern")}</span>
               <span>{t("colTaskProgress")}</span>
               <span>{t("colAvgScore")}</span>
+              <span>{t("colTodayReport")}</span>
               <span>{t("colHealthStatus")}</span>
             </Table.Header>
 
@@ -284,12 +311,22 @@ export default function LeaderStatsOverview() {
               render={(intern) => {
                 const total = intern.totalTasks || 1;
                 const percent = Math.round((intern.completedTasks / total) * 100);
+                const isTodayReport = intern.lastReportDate ? new Date(intern.lastReportDate).toDateString() === new Date().toDateString() : false;
 
                 return (
                   <Table.Row key={intern.internId}>
-                    <div>
-                      <p className="font-bold text-foreground text-sm">{intern.internName}</p>
-                      <p className="text-xs text-muted">{intern.internEmail}</p>
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs font-bold text-foreground overflow-hidden">
+                        {intern.avatarUrl ? (
+                          <Image src={intern.avatarUrl} alt={intern.internName} width={36} height={36} className="h-full w-full object-cover" unoptimized />
+                        ) : (
+                          <span>{intern.internName ? intern.internName.charAt(0).toUpperCase() : "U"}</span>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-foreground text-sm truncate">{intern.internName}</p>
+                        <p className="text-xs text-muted truncate">{intern.internEmail}</p>
+                      </div>
                     </div>
 
                     <div>
@@ -311,6 +348,20 @@ export default function LeaderStatsOverview() {
                       <span className="text-sm font-extrabold text-foreground">
                         {intern.avgScore > 0 ? `${intern.avgScore}/10` : t("notGraded")}
                       </span>
+                    </div>
+
+                    <div>
+                      {isTodayReport ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold leading-none text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1.5 rounded-lg">
+                          <CheckCircle2 className="h-3 w-3 shrink-0" />
+                          {t("reportSubmittedToday")}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold leading-none text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1.5 rounded-lg">
+                          <Clock className="h-3 w-3 shrink-0" />
+                          {t("reportNotSubmittedToday")}
+                        </span>
+                      )}
                     </div>
 
                     <div>
@@ -340,10 +391,12 @@ export default function LeaderStatsOverview() {
 
       <MetalCard className="p-6">
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
-          <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-            <CheckCircle2 className="h-5 w-5 text-primary-light" />
-            {t("taskStatusTitle")}
-          </h3>
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-primary-light shrink-0" />
+            <h3 className="text-lg font-semibold text-foreground">
+              {t("taskStatusTitle")}
+            </h3>
+          </div>
           <span className="text-xs text-muted">{t("taskStatusSubtitle")}</span>
         </div>
 

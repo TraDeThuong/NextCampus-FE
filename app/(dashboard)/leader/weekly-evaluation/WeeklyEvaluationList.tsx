@@ -53,7 +53,12 @@ export default function WeeklyEvaluationList() {
     <MetalCard className="p-6">
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between border-b border-white/10 pb-5 mb-6">
         <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2"><Sparkles className="h-6 w-6 text-primary-light shrink-0" /><span className="metal-text">{t("title")}</span></h2>
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-6 w-6 text-primary-light shrink-0" />
+            <h2 className="text-2xl font-bold">
+              <span className="metal-text">{t("title")}</span>
+            </h2>
+          </div>
           <p className="mt-1 text-sm text-slate-500">{t("description")}</p>
         </div>
         <div className="flex items-center gap-3">

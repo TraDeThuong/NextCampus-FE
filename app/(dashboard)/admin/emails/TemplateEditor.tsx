@@ -125,16 +125,21 @@ type Props = {
 };
 
 export default function TemplateEditor({ type, template }: Props) {
+  const meta = TEMPLATE_CATALOG.find((t) => t.type === type);
+  if (!meta) return null;
+  return <TemplateEditorInner type={type} template={template} meta={meta} />;
+}
+
+function TemplateEditorInner({
+  type,
+  template,
+  meta,
+}: Props & { meta: (typeof TEMPLATE_CATALOG)[number] }) {
   const t = useTranslations();
   const { mutate: upsert, isPending: saving } = useUpsertNotificationTemplate();
   const { mutate: reset, isPending: resetting } = useResetNotificationTemplate();
 
   const [channel, setChannel] = useState<Channel>("web");
-
-  // Find catalog meta for the current type
-  const meta = TEMPLATE_CATALOG.find((t) => t.type === type);
-
-  if (!meta) return null;
 
   // Helper to determine effective email content (fallback to catalog if old DB template lacks new variables)
   const getEffectiveEmailContent = (t: NotificationTemplate | null, m: typeof meta) => {

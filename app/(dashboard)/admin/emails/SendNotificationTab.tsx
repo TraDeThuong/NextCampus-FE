@@ -46,15 +46,15 @@ export default function SendNotificationTab() {
 
   // Debounced search recipient on email input change
   useEffect(() => {
-    const trimmed = email.trim();
-    const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
-    if (!isValid) {
-      setRecipient(null);
-      setSearchError("");
-      return;
-    }
-
     const timer = setTimeout(async () => {
+      const trimmed = email.trim();
+      const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+      if (!isValid) {
+        setRecipient(null);
+        setSearchError("");
+        return;
+      }
+
       setSearching(true);
       setSearchError("");
       try {
@@ -64,18 +64,18 @@ export default function SendNotificationTab() {
           setRecipient(user);
         } else {
           setRecipient(null);
-          setSearchError(t("admin.emails.noUserFound"));;
+          setSearchError(t("admin.emails.noUserFound"));
         }
-      } catch (err) {
+      } catch {
         setRecipient(null);
-        setSearchError(t("admin.emails.verifyEmailFailed"));;
+        setSearchError(t("admin.emails.verifyEmailFailed"));
       } finally {
         setSearching(false);
       }
     }, 600);
 
     return () => clearTimeout(timer);
-  }, [email]);
+  }, [email, t]);
 
   // Handle template selection to prefill form
   function handleSelectTemplate(type: string) {
@@ -158,8 +158,9 @@ export default function SendNotificationTab() {
       setSelectedTemplateType("");
       setEmail("");
       setRecipient(null);
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || t("admin.emails.notifFailed"));;
+    } catch (err: unknown) {
+      const errMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || t("admin.emails.notifFailed");
+      toast.error(errMsg);
     } finally {
       isSubmittingRef.current = false;
       setSending(false);

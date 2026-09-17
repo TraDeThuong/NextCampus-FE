@@ -150,6 +150,7 @@
 
       "detail": {
         "taskNotFound": "Không tìm thấy công việc.",
+        "completedTaskReadOnly": "Công việc đã hoàn thành, không thể sửa đổi.",
         "goBack": "Quay lại",
         "backToTasks": "Quay lại danh sách",
         "aiAssign": "AI Phân công",

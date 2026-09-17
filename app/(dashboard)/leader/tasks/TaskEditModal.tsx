@@ -267,7 +267,21 @@ export default function TaskEditModal({ taskId, onClose, onCloseModal }: Props) 
   if (isLoading) return <div className="flex justify-center py-12"><Spinner size="md" /></div>;
   if (!task) return <p className="py-8 text-center text-sm text-muted">{tm("taskNotFound")}</p>;
   if (task.assignment?.status === "DONE") {
-    return <p className="py-8 text-center text-sm text-muted">{tm("completedTaskReadOnly")}</p>;
+    return (
+      <div className="space-y-4 py-8 text-center">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/20">
+          <CheckCircle2 className="h-6 w-6 text-emerald-400" />
+        </div>
+        <p className="text-sm font-semibold text-emerald-300">
+          {tm("completedTaskReadOnly")}
+        </p>
+        <div className="pt-2">
+          <Button variant="glass" onClick={() => (onCloseModal ? onCloseModal() : onClose ? onClose() : null)}>
+            {tm("cancel")}
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   const isPending = updateTask.isPending || isUploading;

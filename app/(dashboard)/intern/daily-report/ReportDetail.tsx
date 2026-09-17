@@ -74,10 +74,12 @@ export default function ReportDetail({ report, isLoading, missingDate, onEdit }:
       <div className="rounded-3xl p-6">
         <div className="flex items-start justify-between mb-6">
           <div>
-            <h3 className="text-lg font-bold flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-cyan-400 shrink-0" />
-              <span className="metal-text">{t("reportTitle")}</span>
-            </h3>
+              <h3 className="text-lg font-bold">
+                <span className="metal-text">{t("reportTitle")}</span>
+              </h3>
+            </div>
             <p className="mt-1 text-sm text-slate-500">{createdDate} at {createdTime}</p>
           </div>
           {onEdit && (

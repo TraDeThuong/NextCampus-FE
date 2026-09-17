@@ -75,7 +75,15 @@ export default function CreateDailyReportModal({ onClose }: Props) {
         <div className="absolute -left-24 -top-24 h-64 w-64 rounded-full bg-cyan-400/10 blur-3xl" /><div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent" />
         <div className="relative p-6">
           <div className="mb-6 flex items-start justify-between">
-            <div><h2 className="text-xl font-bold flex items-center gap-2"><FileText className="h-5 w-5 text-cyan-400 shrink-0" /><span className="metal-text">{tm("title")}</span></h2><p className="mt-1 text-sm text-muted">{tm("description")}</p></div>
+            <div>
+              <div className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-cyan-400 shrink-0" />
+                <h2 className="text-xl font-bold">
+                  <span className="metal-text">{tm("title")}</span>
+                </h2>
+              </div>
+              <p className="mt-1 text-sm text-muted">{tm("description")}</p>
+            </div>
             <button onClick={onClose} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 transition-all hover:rotate-90 hover:border-white/20 hover:bg-white/10"><X className="h-5 w-5 text-white" /></button>
           </div>
 

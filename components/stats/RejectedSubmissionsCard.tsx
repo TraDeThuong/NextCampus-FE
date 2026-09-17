@@ -28,14 +28,27 @@ export default function RejectedSubmissionsCard() {
         </div>
         <div className="p-3 rounded-2xl bg-red-500/20 text-red-300"><RotateCcw className="h-6 w-6" /></div>
       </div>
-      <div className="mt-4 space-y-2">
-        {rejected.slice(0, 3).map((s) => (
-          <div key={s.id} className="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2 text-xs">
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-foreground font-medium">{s.assignment.task.title}</p>
-              <p className="text-muted">Attempt #{s.attempt}{s.reviewComment && <span className="ml-2 italic">— &quot;{s.reviewComment.slice(0, 60)}{s.reviewComment.length > 60 ? "..." : ""}&quot;</span>}</p>
+      <div className="mt-4 space-y-2.5">
+        {rejected.slice(0, 5).map((s) => (
+          <div key={s.id} className="rounded-xl border border-white/5 bg-white/[0.03] p-3 text-xs space-y-2">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-foreground font-semibold">{s.assignment.task.title}</p>
+                <span className="text-[11px] text-muted">Lần nộp #{s.attempt}</span>
+              </div>
+              <Link
+                href={`/intern/task?assignmentId=${s.assignmentId}`}
+                className="shrink-0 inline-flex items-center gap-1 rounded-lg bg-red-500/20 px-2.5 py-1 text-[11px] font-bold text-red-300 hover:bg-red-500/30 transition-colors"
+              >
+                {t("editAndResubmit")} <ExternalLink className="h-3 w-3" />
+              </Link>
             </div>
-            <Link href={`/intern/task?assignmentId=${s.assignmentId}`} className="ml-3 shrink-0 flex items-center gap-1 text-xs font-medium text-red-400 hover:underline">{t("resubmit")} <ExternalLink className="h-3 w-3" /></Link>
+            {s.reviewComment && (
+              <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-2.5 py-1.5 text-[11px] text-red-200">
+                <span className="font-semibold text-red-300">{t("rejectedReasonLabel")}: </span>
+                <span className="italic">{s.reviewComment}</span>
+              </div>
+            )}
           </div>
         ))}
       </div>

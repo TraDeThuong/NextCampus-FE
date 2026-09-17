@@ -1,9 +1,30 @@
-import { redirect } from 'next/navigation';
-import { routing } from '@/i18n/routing';
+"use client";
 
-export default function Home() {
-  const loginPath = routing.localePrefix === 'as-needed'
-    ? '/login'
-    : `/${routing.defaultLocale}/login`;
-  redirect(loginPath);
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/auth/useAuth";
+import Spinner from "@/components/ui/Spinner";
+
+export default function RootPage() {
+  const { state } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!state.isLoading) {
+      if (state.isAuthenticated && state.user) {
+        const dashboardPath = `/${state.user.role.toLowerCase()}/dashboard`;
+        router.replace(dashboardPath);
+      } else {
+        router.replace("/login");
+      }
+    }
+  }, [state.isLoading, state.isAuthenticated, state.user, router]);
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-slate-950">
+      <div className="flex flex-col items-center gap-4">
+        <Spinner size="lg" />
+      </div>
+    </div>
+  );
 }

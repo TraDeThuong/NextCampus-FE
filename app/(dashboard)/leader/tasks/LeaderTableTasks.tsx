@@ -197,12 +197,14 @@ export default function LeaderTableTasks() {
         <MetalCard className="min-h-[240px] min-w-0">
           <div className="min-w-0 p-4 pb-24">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-sm font-semibold flex items-center">
-                <span className="metal-text">{t("tasks")}</span>
-                {taskGroupId && groups.find((g) => g.id === taskGroupId) && (
-                  <span className="ml-2 font-normal text-muted">— {groups.find((g) => g.id === taskGroupId)!.name}</span>
-                )}
-              </h3>
+              <div className="flex items-center">
+                <h3 className="text-sm font-semibold">
+                  <span className="metal-text">{t("tasks")}</span>
+                  {taskGroupId && groups.find((g) => g.id === taskGroupId) && (
+                    <span className="ml-2 font-normal text-muted">— {groups.find((g) => g.id === taskGroupId)!.name}</span>
+                  )}
+                </h3>
+              </div>
               {taskGroupId && (
                 <Button
                   variant="glass"
@@ -275,7 +277,9 @@ export default function LeaderTableTasks() {
                             </button>
                             <button
                               onClick={() => openTaskAction({ type: "delete", taskId: task.id, taskTitle: task.title })}
-                              className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-red-400 hover:bg-red-500/10"
+                              disabled={task.assignment?.status === "DONE"}
+                              title={task.assignment?.status === "DONE" ? t("completedTaskReadOnly") : undefined}
+                              className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-red-400 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-red-400"
                             >
                               <Trash2 className="h-3 w-3" />{t("delete")}
                             </button>

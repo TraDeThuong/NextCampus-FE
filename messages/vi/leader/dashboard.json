@@ -57,9 +57,19 @@
       "pendingModalTitle": "Yêu Cầu Giao Việc Chờ Phê Duyệt",
       "pendingModalDesc": "{count} yêu cầu từ các leader khác đang chờ bạn phê duyệt",
       "requestedBy": "Yêu cầu bởi:",
-      "approve": "Phê duyệt",
-      "reject": "Từ chối",
-      "pendingModalEmpty": "Không có yêu cầu giao việc nào đang chờ."
+      "pendingModalEmpty": "Không có yêu cầu giao việc nào đang chờ.",
+      "activeWorkloadDays": "Tải Công Việc Đang Gánh",
+      "workloadDaysCount": "{n} ngày công",
+      "workloadDaysSubtitle": "Tổng khối lượng ngày công việc nhóm đang gánh",
+      "dailyReportRate": "Tỷ Lệ Báo Cáo Hôm Nay",
+      "dailyReportRateSubtitle": "{submitted}/{total} TTS đã nộp ({pct}%)",
+      "riskLevelHealthy": "An toàn",
+      "riskLevelWarning": "Cảnh báo",
+      "riskLevelDanger": "Quá tải",
+      "colTodayReport": "Báo Cáo Hôm Nay",
+      "reportSubmittedToday": "Đã nộp",
+      "reportNotSubmittedToday": "Chưa nộp",
+      "completedTaskReadOnly": "Công việc đã hoàn thành, không thể sửa đổi."
     }
   }
 }

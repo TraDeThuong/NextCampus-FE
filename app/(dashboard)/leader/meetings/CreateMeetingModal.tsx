@@ -52,7 +52,7 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
 
   const schema = useCreateMeetingSchema(t);
   const { register, handleSubmit, watch, formState: { errors } } = useForm<FormValues>({
-    resolver: zodResolver(schema) as any,
+    resolver: zodResolver(schema),
     defaultValues: { meetingType: "ONLINE", status: "SCHEDULED", startTime: defaultDate ? toLocalDatetimeString(defaultDate) : "", endTime: defaultDate ? toLocalDatetimeString(new Date(defaultDate.getTime() + 3600000)) : "", title: "", description: "", location: "", meetingLink: "" },
   });
 

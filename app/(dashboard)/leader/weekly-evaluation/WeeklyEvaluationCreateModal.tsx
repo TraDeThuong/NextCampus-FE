@@ -187,6 +187,18 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
           </div>
         </div>
 
+        {aiRatings && (
+          <div className="flex items-center justify-between rounded-xl border border-sky-400/30 bg-sky-500/10 px-4 py-2.5 text-xs text-sky-300 animate-fadeIn">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 shrink-0 text-sky-400" />
+              <span>{t("draftPreviewNotice")}</span>
+            </div>
+            <span className="rounded-md border border-sky-400/40 bg-sky-500/20 px-2 py-0.5 font-bold uppercase text-[10px]">
+              {t("draftBadge")}
+            </span>
+          </div>
+        )}
+
         <div className="flex justify-between items-center">
           <p className="text-xs text-muted">{t("selectRatings")}</p>
           <Button type="button" variant="glass" size="sm" onClick={handleGetAiSuggestion} isLoading={aiSuggestion.isPending} disabled={aiSuggestion.isPending || !internId}><Sparkles className="h-3.5 w-3.5 mr-1" />{t("getAiSuggestion")}</Button>
@@ -216,7 +228,16 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
                 <div className="divide-y divide-border/30">
                   {section.criteria.map((criterion, idx) => (
                     <div key={criterion.key} className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-white/[0.02] transition-colors">
-                      <div className="flex items-center gap-2 min-w-0 flex-1"><span className="text-xs text-muted font-mono shrink-0">{idx + 1}.</span><span className="text-sm text-slate-300 truncate">{tCriteria(criterion.key)}</span></div>
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <span className="text-xs text-muted font-mono shrink-0">{idx + 1}.</span>
+                        <span className="text-sm text-slate-300 truncate">{tCriteria(criterion.key)}</span>
+                        {aiRatings?.[criterion.key] && (
+                          <span className="inline-flex items-center gap-1 rounded-md border border-sky-400/30 bg-sky-500/10 px-1.5 py-0.5 text-[10px] font-medium text-sky-300 shrink-0">
+                            <Sparkles className="h-2.5 w-2.5" />
+                            {t("aiSuggestedBadge")}
+                          </span>
+                        )}
+                      </div>
                       <div className="shrink-0"><RatingSelector value={ratings[criterion.key]} onChange={(v) => setRating(criterion.key, v)} aiValue={aiRatings?.[criterion.key]} /></div>
                     </div>
                   ))}

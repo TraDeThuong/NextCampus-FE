@@ -8,7 +8,8 @@ import {
   Rocket,
   FileText,
   UserRoundPen,
-  History
+  History,
+  Settings,
 } from "lucide-react";
 
 import { LuAlarmClock } from "react-icons/lu";
@@ -34,6 +35,7 @@ export default function AdminSidebar() {
     { name: t("admin.nav.mails"),         href: "/admin/emails",        icon: MdOutlineMailOutline },
     { name: t("admin.nav.meetings"),      href: "/admin/mettings",      icon: LuAlarmClock },
     { name: t("admin.nav.policies"),      href: "/admin/policies",      icon: FileText },
+    { name: t("admin.nav.settings"),      href: "/admin/settings",      icon: Settings },
     { name: t("admin.nav.activityLogs"), href: "/admin/activity-logs", icon: History },
     { name: t("admin.nav.profile"),       href: "/admin/profile",       icon: UserRoundPen },
   ];

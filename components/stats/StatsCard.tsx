@@ -66,8 +66,8 @@ export default function StatsCard({
           <span
             className={`inline-flex items-center justify-center gap-1.5 rounded-full px-2.5 py-1 leading-none ${
               trend.positive
-                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                ? "bg-emerald-50 text-emerald-700 border-emerald-600/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20"
+                : "bg-amber-50 text-amber-700 border-amber-600/20 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20"
             }`}
           >
             {trend.text}

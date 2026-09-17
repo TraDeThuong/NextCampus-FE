@@ -49,7 +49,24 @@
       "needsRework": "Cần Làm Lại",
       "submissionsReworked": "{n} Bài Nộp Cần Làm Lại",
       "resubmitHint": "Leader đã yêu cầu chỉnh sửa và nộp lại các công việc sau",
-      "resubmit": "Nộp lại"
+      "resubmit": "Nộp lại",
+      "editAndResubmit": "Sửa & Nộp lại",
+      "rejectedReasonLabel": "Lý do từ chối",
+      "deadlineNotice": "Hạn chốt nộp báo cáo hôm nay là trước 17:30",
+      "reportSubmittedBadge": "Đã nộp báo cáo hôm nay",
+      "reportNotSubmittedBadge": "Chưa nộp báo cáo hôm nay",
+      "reportStreak": "Chuỗi nộp báo cáo",
+      "reportStreakCount": "Chuỗi {n} ngày nộp liên tiếp",
+      "reportStreakSubtitle": "Duy trì thói quen nộp báo cáo đúng hạn mỗi ngày",
+      "regulationAcknowledgeTitle": "Yêu cầu đọc và cam kết tuân thủ nội quy thực tập",
+      "regulationAcknowledgeDesc": "Vui lòng đọc kỹ nội quy cơ quan và xác nhận cam kết tuân thủ trước khi tiếp tục các hoạt động thực tập.",
+      "regulationAcknowledged": "Bạn đã cam kết tuân thủ nội quy cơ quan",
+      "acknowledgeRegulationBtn": "Tôi cam kết tuân thủ nội quy",
+      "acknowledging": "Đang xác nhận...",
+      "readAndAcknowledgeNow": "Đọc & Cam kết ngay",
+      "agreeTermsCheckbox": "Tôi đã đọc kỹ, hiểu rõ và tự nguyện cam kết tuân thủ nghiêm túc toàn bộ nội quy và quy định thực tập nêu trên.",
+      "regulationVersionUpdated": "Phiên bản {version} · Cập nhật ngày {date}",
+      "close": "Đóng"
     }
   }
 }

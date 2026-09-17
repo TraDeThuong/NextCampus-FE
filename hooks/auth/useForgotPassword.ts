@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import axios from "axios";
 import { authService } from "@/services/auth.service";
 import type { ForgotPasswordPayload } from "@/types/auth";
 
@@ -21,10 +22,11 @@ export function useForgotPassword() {
         onSuccess: () => {
             toast.success("If an account with that email exists, a reset link has been sent.");
         },
-        onError: (error: any) => {
-            toast.error(
-                error?.response?.data?.message || "Something went wrong"
-            );
+        onError: (error: unknown) => {
+            const msg = axios.isAxiosError<{ message?: string }>(error)
+                ? error.response?.data?.message
+                : undefined;
+            toast.error(msg || "Something went wrong");
         },
     });
 

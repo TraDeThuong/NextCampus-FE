@@ -8,7 +8,6 @@ import { useTranslations } from "next-intl";
 
 import { useUploadAvatar } from "@/hooks/profile/useUploadAvatar";
 import { exceedsUploadLimit, IMAGE_MIME_TYPES, UPLOAD_LIMITS_MB } from "@/lib/upload-policy";
-import MetalCard from "../ui/MetalCard";
 import { MeUser } from "@/types/auth";
 
 type ProfileHeaderProps = {

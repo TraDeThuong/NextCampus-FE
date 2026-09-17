@@ -15,10 +15,12 @@ export default function WeeklyEvaluationHeader() {
       <div className="rounded-3xl p-6">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-2xl font-bold flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <Sparkles className="h-6 w-6 text-primary-light shrink-0" />
-              <span className="metal-text">{t("title")}</span>
-            </h2>
+              <h2 className="text-2xl font-bold">
+                <span className="metal-text">{t("title")}</span>
+              </h2>
+            </div>
             <p className="mt-1 text-sm text-slate-500">{t("description")}</p>
           </div>
           <div className="flex items-center gap-3">

@@ -11,22 +11,34 @@ import { useSystemSettings } from "@/hooks/system-setting/useSystemSettings";
 import { useSubmissionAttachments } from "@/hooks/task-attachment/useSubmissionAttachments";
 import { useUploadSubmissionAttachment } from "@/hooks/task-attachment/useUploadSubmissionAttachment";
 import { useDeleteSubmissionAttachment } from "@/hooks/task-attachment/useDeleteSubmissionAttachment";
+import { useAuth } from "@/hooks/auth/useAuth";
+import type { TaskAssignment } from "@/types/task-assignment";
 import type { TaskSubmission } from "@/types/task-submission";
 import { toast } from "react-hot-toast";
 import { ATTACHMENT_MIME_TYPES, exceedsUploadLimit, UPLOAD_LIMITS_MB, UPLOAD_MAX_FILES, VIDEO_MIME_TYPES } from "@/lib/upload-policy";
 
 const MAX_SUBMISSION_ATTACHMENTS = UPLOAD_MAX_FILES.submissionAttachment;
 
-type Props = { assignmentId: string; submission?: TaskSubmission; readOnly?: boolean; onClose: () => void };
+type Props = { assignmentId: string; assignment?: TaskAssignment; submission?: TaskSubmission; readOnly?: boolean; onClose: () => void };
 
-export default function TaskSubmissionModal({ assignmentId, submission, readOnly, onClose }: Props) {
+export default function TaskSubmissionModal({ assignmentId, assignment, submission, readOnly, onClose }: Props) {
   const tm = useTranslations("intern.tasks.submissionModal");
+  const { state: { user } } = useAuth();
   const createSubmission = useCreateTaskSubmission(); const updateSubmission = useUpdateTaskSubmission();
   const uploadVideo = useUploadSubmissionVideo(); const isView = !!submission && !!readOnly; const isEdit = !!submission && !readOnly;
   const uploadAttachment = useUploadSubmissionAttachment(); const deleteAttachment = useDeleteSubmissionAttachment();
   const { data: settingsResponse } = useSystemSettings(!readOnly);
   const submissionVideoLimitMb = settingsResponse?.data.SUBMISSION_MAX_FILE_SIZE_MB ?? UPLOAD_LIMITS_MB.submissionVideo;
   const submissionAttachmentLimitMb = settingsResponse?.data.SUBMISSION_ATTACHMENT_MAX_FILE_SIZE_MB ?? UPLOAD_LIMITS_MB.submissionAttachment;
+
+  const canUploadAttachments = !assignment || (
+    user != null && (
+      user.id === assignment.intern?.userId ||
+      user.id === assignment.intern?.user?.id ||
+      user.id === assignment.internId ||
+      (assignment.support && (user.id === assignment.support.user?.id || user.id === assignment.support.id || user.id === assignment.supportId))
+    )
+  );
 
   const [prLink, setPrLink] = useState(submission?.prLink ?? "");
   const [videoLink, setVideoLink] = useState(submission?.videoDemo ?? "");
@@ -116,7 +128,10 @@ export default function TaskSubmissionModal({ assignmentId, submission, readOnly
         <div className="relative p-6">
           <div className="mb-6 flex items-start justify-between">
             <div>
-              <h2 className="text-xl font-bold flex items-center gap-2">{isView ? <FileText className="h-5 w-5 shrink-0 text-cyan-400" /> : isEdit ? <Pencil className="h-5 w-5 text-amber-400 shrink-0" /> : <Send className="h-5 w-5 text-cyan-400 shrink-0" />}<span className="metal-text">{isView ? tm("viewTitle") : isEdit ? tm("editTitle") : tm("submitTitle")}</span></h2>
+              <div className="flex items-center gap-2">
+                {isView ? <FileText className="h-5 w-5 shrink-0 text-cyan-400" /> : isEdit ? <Pencil className="h-5 w-5 shrink-0 text-amber-400" /> : <Send className="h-5 w-5 shrink-0 text-cyan-400" />}
+                <h2 className="text-xl font-bold"><span className="metal-text">{isView ? tm("viewTitle") : isEdit ? tm("editTitle") : tm("submitTitle")}</span></h2>
+              </div>
               <p className="mt-1 text-sm text-muted">{isView ? tm("viewDesc") : isEdit ? tm("editDesc") : tm("submitDesc")}</p>
             </div>
             <button onClick={onClose} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 transition-all hover:rotate-90 hover:border-white/20 hover:bg-white/10"><X className="h-5 w-5 text-white" /></button>
@@ -140,19 +155,29 @@ export default function TaskSubmissionModal({ assignmentId, submission, readOnly
               <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-200"><Video className="h-4 w-4 text-cyan-400" />{tm("videoDemo")}</label>
               <div className="space-y-2">
                 <input type="url" value={videoLink} onChange={(e) => setVideoLink(e.target.value)} placeholder={tm("videoPlaceholder")} disabled={isPending || !!videoFile} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-cyan-400/50 disabled:opacity-50" />
-                <div className="flex items-center gap-2 text-xs text-slate-500"><span className="h-px flex-1 bg-white/5" /><span>{tm("or")}</span><span className="h-px flex-1 bg-white/5" /></div>
-                  {videoFile ? <div className="flex items-center justify-between rounded-xl border border-emerald-400/20 bg-emerald-500/5 px-4 py-2.5"><span className="text-sm text-emerald-300 truncate">{videoFile.name}</span><button type="button" onClick={() => setVideoFile(null)} disabled={isPending} className="text-xs text-slate-400 hover:text-red-400">{tm("remove")}</button></div> :
-                   <input type="file" accept="video/mp4,video/webm,video/quicktime,video/x-matroska,video/x-msvideo,.mp4,.webm,.mov,.mkv,.avi" disabled={isPending || !!videoLink.trim()} onChange={(e) => handleVideoFileChange(e.target.files?.[0])} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-400 file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 file:cursor-pointer outline-none disabled:opacity-50" />}
-                <p className="text-xs text-slate-500">{tm("videoFileHint", { limit: submissionVideoLimitMb })}</p>
+                {canUploadAttachments ? (
+                  <>
+                    <div className="flex items-center gap-2 text-xs text-slate-500"><span className="h-px flex-1 bg-white/5" /><span>{tm("or")}</span><span className="h-px flex-1 bg-white/5" /></div>
+                    {videoFile ? <div className="flex items-center justify-between rounded-xl border border-emerald-400/20 bg-emerald-500/5 px-4 py-2.5"><span className="text-sm text-emerald-300 truncate">{videoFile.name}</span><button type="button" onClick={() => setVideoFile(null)} disabled={isPending} className="text-xs text-slate-400 hover:text-red-400">{tm("remove")}</button></div> :
+                     <input type="file" accept="video/mp4,video/webm,video/quicktime,video/x-matroska,video/x-msvideo,.mp4,.webm,.mov,.mkv,.avi" disabled={isPending || !!videoLink.trim()} onChange={(e) => handleVideoFileChange(e.target.files?.[0])} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-400 file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 file:cursor-pointer outline-none disabled:opacity-50" />}
+                    <p className="text-xs text-slate-500">{tm("videoFileHint", { limit: submissionVideoLimitMb })}</p>
+                  </>
+                ) : null}
               </div>
             </div>
             <div>
               <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-200"><Paperclip className="h-4 w-4 text-cyan-400" />{tm("attachments")}</label>
               <div className="space-y-2">
-                {existingAttachments.map((attachment) => <div key={attachment.id} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-2"><a href={attachment.fileUrl} target="_blank" rel="noopener noreferrer" className="flex min-w-0 items-center gap-2 text-sm text-slate-300 transition hover:text-cyan-300"><Download className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{attachment.fileName}</span></a><button type="button" onClick={() => activeSubmissionId && deleteAttachment.mutate({ submissionId: activeSubmissionId, attachmentId: attachment.id })} disabled={isPending || !activeSubmissionId} className="ml-2 shrink-0 text-slate-400 transition hover:text-red-400 disabled:opacity-50" aria-label={tm("deleteAttachment", { name: attachment.fileName })}><Trash2 className="h-3.5 w-3.5" /></button></div>)}
+                {existingAttachments.map((attachment) => <div key={attachment.id} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-2"><a href={attachment.fileUrl} target="_blank" rel="noopener noreferrer" className="flex min-w-0 items-center gap-2 text-sm text-slate-300 transition hover:text-cyan-300"><Download className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{attachment.fileName}</span></a>{canUploadAttachments && <button type="button" onClick={() => activeSubmissionId && deleteAttachment.mutate({ submissionId: activeSubmissionId, attachmentId: attachment.id })} disabled={isPending || !activeSubmissionId} className="ml-2 shrink-0 text-slate-400 transition hover:text-red-400 disabled:opacity-50" aria-label={tm("deleteAttachment", { name: attachment.fileName })}><Trash2 className="h-3.5 w-3.5" /></button>}</div>)}
                 {attachmentFiles.map((file, index) => <div key={`${file.name}-${file.lastModified}-${index}`} className="flex items-center justify-between rounded-xl border border-emerald-400/20 bg-emerald-500/5 px-4 py-2"><span className="truncate text-sm text-emerald-300">{file.name}</span><button type="button" onClick={() => setAttachmentFiles((current) => current.filter((_, itemIndex) => itemIndex !== index))} disabled={isPending} className="ml-2 shrink-0 text-xs text-slate-400 transition hover:text-red-400 disabled:opacity-50">{tm("remove")}</button></div>)}
-                {existingAttachments.length + attachmentFiles.length < MAX_SUBMISSION_ATTACHMENTS ? <input type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,.pdf,.doc,.docx,.zip,.rar,.7z" disabled={isPending} onChange={(e) => { handleAttachmentFilesChange(Array.from(e.target.files ?? [])); e.target.value = ""; }} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-400 file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 outline-none disabled:opacity-50" /> : <p className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-2.5 text-xs text-amber-300">{tm("attachmentLimitReached", { max: MAX_SUBMISSION_ATTACHMENTS })}</p>}
-                <p className="text-xs text-slate-500">{tm("attachmentsHint", { max: MAX_SUBMISSION_ATTACHMENTS, limit: submissionAttachmentLimitMb })}</p>
+                {canUploadAttachments ? (
+                  <>
+                    {existingAttachments.length + attachmentFiles.length < MAX_SUBMISSION_ATTACHMENTS ? <input type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,.pdf,.doc,.docx,.zip,.rar,.7z" disabled={isPending} onChange={(e) => { handleAttachmentFilesChange(Array.from(e.target.files ?? [])); e.target.value = ""; }} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-400 file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 outline-none disabled:opacity-50" /> : <p className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-2.5 text-xs text-amber-300">{tm("attachmentLimitReached", { max: MAX_SUBMISSION_ATTACHMENTS })}</p>}
+                    <p className="text-xs text-slate-500">{tm("attachmentsHint", { max: MAX_SUBMISSION_ATTACHMENTS, limit: submissionAttachmentLimitMb })}</p>
+                  </>
+                ) : (
+                  <p className="rounded-xl border border-white/5 bg-white/5 px-4 py-2.5 text-xs text-slate-400 italic">{tm("uploadNotAllowed")}</p>
+                )}
               </div>
             </div>
             <div><label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-200"><FileText className="h-4 w-4 text-cyan-400" />{tm("note")}</label><textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder={tm("notePlaceholder")} rows={3} disabled={isPending} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-cyan-400/50 disabled:opacity-50 resize-none" /></div>

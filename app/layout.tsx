@@ -1,5 +1,11 @@
 import { Be_Vietnam_Pro, Black_Ops_One, Saira_Stencil_One, Ubuntu } from "next/font/google";
 import "./globals.css";
+import { cookies } from "next/headers";
+import { loadLocaleMessages } from "@/i18n/load-messages";
+import ReactQueryProvider from "@/providers/ReactQueryProvider";
+import ToastProvider from "@/providers/ToastProvider";
+import { AuthProvider } from "@/contexts/AuthContext";
+import LocaleProvider from "@/providers/LocaleProvider";
 import { ReactNode } from "react";
 import type { Metadata } from "next";
 
@@ -40,14 +46,35 @@ const bodyFontVi = Be_Vietnam_Pro({
   variable: "--font-body-vi",
 });
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const cookieStore = await cookies();
+  const rawLocale = cookieStore.get("NEXT_LOCALE")?.value || cookieStore.get("locale")?.value || "vi";
+  const initialLocale = rawLocale === "en" ? "en" : "vi";
+
+  const [viMessages, enMessages] = await Promise.all([
+    loadLocaleMessages("vi"),
+    loadLocaleMessages("en"),
+  ]);
+
   return (
     <html
-      lang="vi"
+      lang={initialLocale}
       className={`${headingFont.variable} ${headingFontVi.variable} ${bodyFont.variable} ${bodyFontVi.variable}`}
       suppressHydrationWarning
     >
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        <LocaleProvider
+          initialLocale={initialLocale}
+          allMessages={{ vi: viMessages, en: enMessages }}
+        >
+          <ReactQueryProvider>
+            <AuthProvider>
+              {children}
+              <ToastProvider />
+            </AuthProvider>
+          </ReactQueryProvider>
+        </LocaleProvider>
+      </body>
     </html>
   );
 }

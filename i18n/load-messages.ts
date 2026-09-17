@@ -113,6 +113,11 @@ export async function loadLocaleMessages(
   ).default;
   deepMerge(files, adminActivityLogs);
 
+  const adminSettings = (
+    await import(`../messages/${locale}/admin/settings.json`)
+  ).default;
+  deepMerge(files, adminSettings);
+
   // Leader
   const leaderNav = (await import(`../messages/${locale}/leader/nav.json`))
     .default;

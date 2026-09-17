@@ -90,7 +90,7 @@ export default function InternTaskTable() {
       </div>
     </div>
 
-    {showSubmissionModal && selectedAssignment && <TaskSubmissionModal assignmentId={selectedAssignment.id} submission={editingSubmission} readOnly={isSubmissionReadOnly} onClose={() => { setShowSubmissionModal(false); setEditingSubmission(undefined); setIsSubmissionReadOnly(false); }} />}
+    {showSubmissionModal && selectedAssignment && <TaskSubmissionModal assignmentId={selectedAssignment.id} assignment={selectedAssignment} submission={editingSubmission} readOnly={isSubmissionReadOnly} onClose={() => { setShowSubmissionModal(false); setEditingSubmission(undefined); setIsSubmissionReadOnly(false); }} />}
     </>);
 }
 

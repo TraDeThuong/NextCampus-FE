@@ -89,7 +89,8 @@
         "attachmentSizeError": "{name} không được vượt quá {limit} MB.",
         "maxAttachments": "Mỗi bài nộp được đính kèm tối đa {max} tệp.",
         "attachmentLimitReached": "Đã đạt giới hạn {max} tệp. Hãy xoá một tệp để thêm tệp khác.",
-        "deleteAttachment": "Xoá tệp đính kèm {name}"
+        "deleteAttachment": "Xoá tệp đính kèm {name}",
+        "uploadNotAllowed": "Chỉ thực tập sinh được giao việc hoặc người hỗ trợ mới có quyền tải file đính kèm."
       }
     }
   }

@@ -1,0 +1,28 @@
+{
+  "admin": {
+    "settings": {
+      "metaTitle": "Cấu hình hệ thống",
+      "title": "Cấu Hình Hệ Thống & Tham Số Vận Hành",
+      "subtitle": "Quản lý toàn bộ hạn mức công việc, thời gian biểu và chính sách dung lượng tệp trên NexCampus",
+      "saveSettings": "Lưu Cấu Hình",
+      "saving": "Đang lưu...",
+      "saveSuccess": "Đã cập nhật cấu hình hệ thống thành công!",
+      "saveError": "Lỗi khi cập nhật cấu hình hệ thống. Vui lòng thử lại.",
+      "loadError": "Không thể tải cấu hình hệ thống.",
+      "dailyReportDeadlineTitle": "Giờ Chốt Nộp Báo Cáo Ngày",
+      "dailyReportDeadlineDesc": "Hạn chốt nộp báo cáo hằng ngày của thực tập sinh (Định dạng HH:mm, ví dụ: 17:30)",
+      "maxActiveTasksTitle": "Số Task Đang Xử Lý Tối Đa",
+      "maxActiveTasksDesc": "Số lượng công việc đang làm (IN_PROGRESS) tối đa mà mỗi TTS được nhận cùng lúc",
+      "maxWorkloadDaysTitle": "Hạn Mức Ngày Công Tối Đa",
+      "maxWorkloadDaysDesc": "Tổng số ngày công việc tối đa được phép giao cho một TTS trong cùng thời điểm",
+      "submissionMaxFileSizeTitle": "Dung Lượng Tệp Nộp Bài Tối Đa",
+      "submissionMaxFileSizeDesc": "Dung lượng tối đa (MB) cho tệp/video demo bài nộp nhiệm vụ",
+      "reportAttachmentMaxSizeTitle": "Dung Lượng Đính Kèm Báo Cáo Tối Đa",
+      "reportAttachmentMaxSizeDesc": "Dung lượng tối đa (MB) cho tệp đính kèm trong báo cáo hằng ngày",
+      "tasksUnit": "task",
+      "daysUnit": "ngày",
+      "mbUnit": "MB",
+      "resetDefaults": "Khôi phục mặc định"
+    }
+  }
+}

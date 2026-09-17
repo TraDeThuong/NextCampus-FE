@@ -21,11 +21,11 @@ export const RATING_SCORES: Record<RatingLevel, number> = {
 };
 
 export const RATING_COLORS: Record<RatingLevel, string> = {
-  TOT: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
-  KHA: "text-blue-400 border-blue-500/30 bg-blue-500/10",
-  TB: "text-amber-400 border-amber-500/30 bg-amber-500/10",
-  TBY: "text-orange-400 border-orange-500/30 bg-orange-500/10",
-  YEU: "text-red-400 border-red-500/30 bg-red-500/10",
+  TOT: "text-emerald-700 dark:text-emerald-400 border-emerald-600/30 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10",
+  KHA: "text-blue-700 dark:text-blue-400 border-blue-600/30 dark:border-blue-500/30 bg-blue-50 dark:bg-blue-500/10",
+  TB: "text-amber-700 dark:text-amber-400 border-amber-600/30 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10",
+  TBY: "text-orange-700 dark:text-orange-400 border-orange-600/30 dark:border-orange-500/30 bg-orange-50 dark:bg-orange-500/10",
+  YEU: "text-rose-700 dark:text-red-400 border-rose-600/30 dark:border-red-500/30 bg-rose-50 dark:bg-red-500/10",
 };
 
 /**
