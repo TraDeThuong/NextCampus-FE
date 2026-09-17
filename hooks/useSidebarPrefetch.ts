@@ -8,8 +8,10 @@ const PATH_TO_PAGE_KEY: Record<string, string> = {
   "/admin/admin-team": "admin-team",
   "/admin/onboarding": "onboarding",
   "/admin/emails": "emails",
+  "/admin/meetings": "meetings",
   "/admin/mettings": "meetings",
   "/admin/policies": "policies",
+  "/admin/regulations": "policies",
   "/admin/activity-logs": "activity-logs",
   "/admin/profile": "profile",
 };

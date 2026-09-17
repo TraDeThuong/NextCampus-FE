@@ -14,6 +14,7 @@ import { useCreateMeeting } from "@/hooks/meeting/useCreateMeeting";
 import { internService } from "@/services/intern.service";
 import { leaderService } from "@/services/leader.service";
 import { meetingService } from "@/services/meeting.service";
+import { departmentService } from "@/services/department.service";
 import type { CreateMeetingPayload, MeetingType } from "@/types/meeting";
 
 interface Props { onCloseModal?: () => void; defaultDate?: Date; }
@@ -24,6 +25,7 @@ function useCreateMeetingSchema(t: ReturnType<typeof useTranslations>) {
   return z.object({
     title: z.string().min(1, t("titleRequired")).max(200, t("titleTooLong")),
     description: z.string().optional().default(""),
+    departmentId: z.string().optional(),
     meetingType: z.enum(["ONLINE", "OFFLINE", "HYBRID"]),
     location: z.string().optional().default(""),
     meetingLink: z.string().optional().default(""),
@@ -37,7 +39,7 @@ function useCreateMeetingSchema(t: ReturnType<typeof useTranslations>) {
   });
 }
 
-interface FormValues { title: string; description?: string; meetingType: "ONLINE" | "OFFLINE" | "HYBRID"; location?: string; meetingLink?: string; startTime: string; endTime: string; status: "DRAFT" | "SCHEDULED"; }
+interface FormValues { title: string; description?: string; departmentId?: string; meetingType: "ONLINE" | "OFFLINE" | "HYBRID"; location?: string; meetingLink?: string; startTime: string; endTime: string; status: "DRAFT" | "SCHEDULED"; }
 
 export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props) {
   const t = useTranslations("leader.meetings.createModal");
@@ -47,8 +49,10 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
 
   const { data: internsData } = useQuery({ queryKey: ["interns", { leaderId: currentUser?.id }], queryFn: () => internService.getInterns({ leaderId: currentUser!.id, limit: 100 }), enabled: !!currentUser, staleTime: 1000 * 60 * 5 });
   const { data: leadersData } = useQuery({ queryKey: ["leaders", { limit: 100 }], queryFn: () => leaderService.getLeaders({ limit: 100 }), staleTime: 1000 * 60 * 5 });
+  const { data: departmentsData } = useQuery({ queryKey: ["departments"], queryFn: () => departmentService.getDepartments(), staleTime: 1000 * 60 * 5 });
   const interns = internsData?.data ?? [];
   const leaders = (leadersData?.data ?? []).filter((l) => l.userId !== currentUser?.id).map((l) => ({ id: l.userId, fullName: l.user.fullName || l.user.email }));
+  const departments = departmentsData?.data ?? [];
 
   const schema = useCreateMeetingSchema(t);
   const { register, handleSubmit, watch, formState: { errors } } = useForm<FormValues>({
@@ -100,7 +104,7 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
   function onSubmit(data: FormValues) {
     if (!currentUser) return;
     if (selectedParticipantIds.length === 0) { toast.error(t("selectOneParticipant")); return; }
-    const payload: CreateMeetingPayload = { title: data.title, description: data.description || undefined, hostId: currentUser.id, meetingType: data.meetingType, location: data.location || undefined, meetingLink: data.meetingLink || undefined, startTime: new Date(data.startTime).toISOString(), endTime: new Date(data.endTime).toISOString(), visibility: "PRIVATE", status: data.status, participantIds: selectedParticipantIds };
+    const payload: CreateMeetingPayload = { title: data.title, description: data.description || undefined, departmentId: data.departmentId || undefined, hostId: currentUser.id, meetingType: data.meetingType, location: data.location || undefined, meetingLink: data.meetingLink || undefined, startTime: new Date(data.startTime).toISOString(), endTime: new Date(data.endTime).toISOString(), visibility: "PRIVATE", status: data.status, participantIds: selectedParticipantIds };
     createMeeting.mutate(payload, { onSuccess: () => onCloseModal?.() });
   }
 
@@ -138,6 +142,15 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
           {errors.meetingType && <p className="mt-1 text-xs text-red-400">{errors.meetingType.message}</p>}
         </div>
         <div><label className={labelClass}>{t("location")}</label><input type="text" placeholder={t("locationPlaceholder")} {...register("location")} className={`${inputClass} mt-1`} /></div>
+        <div>
+          <label className={labelClass}>Phòng ban</label>
+          <select {...register("departmentId")} className={`${inputClass} mt-1`}>
+            <option value="" className="bg-slate-900 text-slate-400">-- Chọn phòng ban (Tùy chọn) --</option>
+            {departments.map((dept) => (
+              <option key={dept.id} value={dept.id} className="bg-slate-900 text-white">{dept.name}</option>
+            ))}
+          </select>
+        </div>
         {(watchMeetingType === "ONLINE" || watchMeetingType === "HYBRID") && (
           <div><label className={labelClass}>{t("meetingLink")} *</label><input type="url" placeholder={t("meetingLinkPlaceholder")} {...register("meetingLink")} className={`${inputClass} mt-1`} />{errors.meetingLink && <p className="mt-1 text-xs text-red-400">{errors.meetingLink.message}</p>}</div>
         )}

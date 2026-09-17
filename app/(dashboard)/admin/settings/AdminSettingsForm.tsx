@@ -91,8 +91,32 @@ function AdminSettingsFields({ initialData }: { initialData: SystemSettings }) {
     setFormValues({ ...DEFAULT_SETTINGS });
   };
 
+  // Validation rules
+  const errors: Partial<Record<keyof typeof formValues, string>> = {};
+  if (!formValues.DAILY_REPORT_DEADLINE_TIME || !/^([01]\d|2[0-3]):[0-5]\d$/.test(formValues.DAILY_REPORT_DEADLINE_TIME)) {
+    errors.DAILY_REPORT_DEADLINE_TIME = "Giờ chốt phải theo định dạng HH:mm (VD: 17:30)";
+  }
+  const tasksNum = Number(formValues.MAX_ACTIVE_TASKS);
+  if (isNaN(tasksNum) || tasksNum < 1 || tasksNum > 30) {
+    errors.MAX_ACTIVE_TASKS = "Số task tối đa phải từ 1 đến 30";
+  }
+  const workloadNum = Number(formValues.MAX_WORKLOAD_DAYS);
+  if (isNaN(workloadNum) || workloadNum < 1 || workloadNum > 90) {
+    errors.MAX_WORKLOAD_DAYS = "Hạn mức ngày công phải từ 1 đến 90 ngày";
+  }
+  const submitFileNum = Number(formValues.SUBMISSION_MAX_FILE_SIZE_MB);
+  if (isNaN(submitFileNum) || submitFileNum < 1 || submitFileNum > 500) {
+    errors.SUBMISSION_MAX_FILE_SIZE_MB = "Dung lượng nộp bài phải từ 1 đến 500 MB";
+  }
+  const reportFileNum = Number(formValues.REPORT_ATTACHMENT_MAX_SIZE_MB);
+  if (isNaN(reportFileNum) || reportFileNum < 1 || reportFileNum > 100) {
+    errors.REPORT_ATTACHMENT_MAX_SIZE_MB = "Dung lượng đính kèm phải từ 1 đến 100 MB";
+  }
+  const hasErrors = Object.keys(errors).length > 0;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (hasErrors) return;
     batchUpdate.mutate(formValues);
   };
 
@@ -128,7 +152,7 @@ function AdminSettingsFields({ initialData }: { initialData: SystemSettings }) {
             type="submit"
             variant="primary"
             size="md"
-            disabled={isPending}
+            disabled={isPending || hasErrors}
             className="flex items-center gap-2"
           >
             {isPending ? (
@@ -165,8 +189,15 @@ function AdminSettingsFields({ initialData }: { initialData: SystemSettings }) {
               onChange={(e) => handleChange("DAILY_REPORT_DEADLINE_TIME", e.target.value)}
               disabled={isPending}
               required
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-base font-mono font-bold text-white outline-none transition focus:border-amber-400/50 focus:ring-1 focus:ring-amber-400/30 disabled:opacity-50"
+              className={`w-full rounded-xl border bg-white/5 px-4 py-3 text-base font-mono font-bold text-white outline-none transition disabled:opacity-50 ${
+                errors.DAILY_REPORT_DEADLINE_TIME
+                  ? "border-rose-500/70 focus:border-rose-500 focus:ring-1 focus:ring-rose-500/30 text-rose-300"
+                  : "border-white/10 focus:border-amber-400/50 focus:ring-1 focus:ring-amber-400/30"
+              }`}
             />
+            {errors.DAILY_REPORT_DEADLINE_TIME && (
+              <p className="mt-1 text-xs text-rose-400 font-medium">{errors.DAILY_REPORT_DEADLINE_TIME}</p>
+            )}
           </div>
         </MetalCard>
 
@@ -195,11 +226,18 @@ function AdminSettingsFields({ initialData }: { initialData: SystemSettings }) {
               onChange={(e) => handleChange("MAX_ACTIVE_TASKS", e.target.value)}
               disabled={isPending}
               required
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 pr-16 text-base font-mono font-bold text-white outline-none transition focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/30 disabled:opacity-50"
+              className={`w-full rounded-xl border bg-white/5 px-4 py-3 pr-16 text-base font-mono font-bold text-white outline-none transition disabled:opacity-50 ${
+                errors.MAX_ACTIVE_TASKS
+                  ? "border-rose-500/70 focus:border-rose-500 focus:ring-1 focus:ring-rose-500/30 text-rose-300"
+                  : "border-white/10 focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/30"
+              }`}
             />
             <span className="pointer-events-none absolute right-4 top-5 text-xs font-mono font-semibold uppercase text-slate-400">
               {t("tasksUnit")}
             </span>
+            {errors.MAX_ACTIVE_TASKS && (
+              <p className="mt-1 text-xs text-rose-400 font-medium">{errors.MAX_ACTIVE_TASKS}</p>
+            )}
           </div>
         </MetalCard>
 
@@ -228,11 +266,18 @@ function AdminSettingsFields({ initialData }: { initialData: SystemSettings }) {
               onChange={(e) => handleChange("MAX_WORKLOAD_DAYS", e.target.value)}
               disabled={isPending}
               required
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 pr-16 text-base font-mono font-bold text-white outline-none transition focus:border-indigo-400/50 focus:ring-1 focus:ring-indigo-400/30 disabled:opacity-50"
+              className={`w-full rounded-xl border bg-white/5 px-4 py-3 pr-16 text-base font-mono font-bold text-white outline-none transition disabled:opacity-50 ${
+                errors.MAX_WORKLOAD_DAYS
+                  ? "border-rose-500/70 focus:border-rose-500 focus:ring-1 focus:ring-rose-500/30 text-rose-300"
+                  : "border-white/10 focus:border-indigo-400/50 focus:ring-1 focus:ring-indigo-400/30"
+              }`}
             />
             <span className="pointer-events-none absolute right-4 top-5 text-xs font-mono font-semibold uppercase text-slate-400">
               {t("daysUnit")}
             </span>
+            {errors.MAX_WORKLOAD_DAYS && (
+              <p className="mt-1 text-xs text-rose-400 font-medium">{errors.MAX_WORKLOAD_DAYS}</p>
+            )}
           </div>
         </MetalCard>
 
@@ -261,11 +306,18 @@ function AdminSettingsFields({ initialData }: { initialData: SystemSettings }) {
               onChange={(e) => handleChange("SUBMISSION_MAX_FILE_SIZE_MB", e.target.value)}
               disabled={isPending}
               required
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 pr-16 text-base font-mono font-bold text-white outline-none transition focus:border-emerald-400/50 focus:ring-1 focus:ring-emerald-400/30 disabled:opacity-50"
+              className={`w-full rounded-xl border bg-white/5 px-4 py-3 pr-16 text-base font-mono font-bold text-white outline-none transition disabled:opacity-50 ${
+                errors.SUBMISSION_MAX_FILE_SIZE_MB
+                  ? "border-rose-500/70 focus:border-rose-500 focus:ring-1 focus:ring-rose-500/30 text-rose-300"
+                  : "border-white/10 focus:border-emerald-400/50 focus:ring-1 focus:ring-emerald-400/30"
+              }`}
             />
             <span className="pointer-events-none absolute right-4 top-5 text-xs font-mono font-semibold uppercase text-slate-400">
               {t("mbUnit")}
             </span>
+            {errors.SUBMISSION_MAX_FILE_SIZE_MB && (
+              <p className="mt-1 text-xs text-rose-400 font-medium">{errors.SUBMISSION_MAX_FILE_SIZE_MB}</p>
+            )}
           </div>
         </MetalCard>
 
@@ -294,11 +346,18 @@ function AdminSettingsFields({ initialData }: { initialData: SystemSettings }) {
               onChange={(e) => handleChange("REPORT_ATTACHMENT_MAX_SIZE_MB", e.target.value)}
               disabled={isPending}
               required
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 pr-16 text-base font-mono font-bold text-white outline-none transition focus:border-purple-400/50 focus:ring-1 focus:ring-purple-400/30 disabled:opacity-50"
+              className={`w-full rounded-xl border bg-white/5 px-4 py-3 pr-16 text-base font-mono font-bold text-white outline-none transition disabled:opacity-50 ${
+                errors.REPORT_ATTACHMENT_MAX_SIZE_MB
+                  ? "border-rose-500/70 focus:border-rose-500 focus:ring-1 focus:ring-rose-500/30 text-rose-300"
+                  : "border-white/10 focus:border-purple-400/50 focus:ring-1 focus:ring-purple-400/30"
+              }`}
             />
             <span className="pointer-events-none absolute right-4 top-5 text-xs font-mono font-semibold uppercase text-slate-400">
               {t("mbUnit")}
             </span>
+            {errors.REPORT_ATTACHMENT_MAX_SIZE_MB && (
+              <p className="mt-1 text-xs text-rose-400 font-medium">{errors.REPORT_ATTACHMENT_MAX_SIZE_MB}</p>
+            )}
           </div>
         </MetalCard>
       </div>
@@ -308,7 +367,7 @@ function AdminSettingsFields({ initialData }: { initialData: SystemSettings }) {
           type="submit"
           variant="primary"
           size="lg"
-          disabled={isPending}
+          disabled={isPending || hasErrors}
           className="flex items-center gap-2 px-8"
         >
           {isPending ? (

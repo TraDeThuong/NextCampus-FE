@@ -76,10 +76,35 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
             </div>
           ) : (
             <div className="flex items-center justify-between">
-              <p className="text-sm text-slate-400">{myStatus === "ACCEPTED" ? t("youAccepted") : t("youInvited")}</p>
+              <p className="text-sm text-slate-400">
+                {myStatus === "ACCEPTED"
+                  ? t("youAccepted")
+                  : myStatus === "DECLINED"
+                  ? "Bạn đã báo vắng mặt"
+                  : t("youInvited")}
+              </p>
               <div className="flex items-center gap-2">
-                {myStatus === "PENDING" && <button type="button" onClick={handleAccept} disabled={rsvpMeeting.isPending} className="flex items-center gap-1.5 rounded-lg bg-emerald-500/20 px-3 py-1.5 text-xs font-medium text-emerald-300 transition hover:bg-emerald-500/30 disabled:opacity-50"><CheckCircle2 className="h-3.5 w-3.5" />{t("accept")}</button>}
-                <button type="button" onClick={() => setShowLeaveForm(true)} className="flex items-center gap-1.5 rounded-lg bg-red-500/20 px-3 py-1.5 text-xs font-medium text-red-300 transition hover:bg-red-500/30"><XCircle className="h-3.5 w-3.5" />{myStatus === "ACCEPTED" ? t("leave") : t("decline")}</button>
+                {myStatus !== "ACCEPTED" && (
+                  <button
+                    type="button"
+                    onClick={handleAccept}
+                    disabled={rsvpMeeting.isPending}
+                    className="flex items-center gap-1.5 rounded-lg bg-emerald-500/20 px-3 py-1.5 text-xs font-medium text-emerald-300 transition hover:bg-emerald-500/30 disabled:opacity-50"
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    {t("accept")}
+                  </button>
+                )}
+                {myStatus !== "DECLINED" && (
+                  <button
+                    type="button"
+                    onClick={() => setShowLeaveForm(true)}
+                    className="flex items-center gap-1.5 rounded-lg bg-red-500/20 px-3 py-1.5 text-xs font-medium text-red-300 transition hover:bg-red-500/30"
+                  >
+                    <XCircle className="h-3.5 w-3.5" />
+                    {myStatus === "ACCEPTED" ? t("leave") : t("decline")}
+                  </button>
+                )}
               </div>
             </div>
           )}

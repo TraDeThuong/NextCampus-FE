@@ -109,48 +109,99 @@ export interface LeaderTeamProgress {
 
 export interface InternTeamProgress {
   internId: string;
-  internName: string;
+  internName?: string;
+  fullName?: string;
   internEmail?: string;
+  email?: string;
   avatarUrl?: string | null;
   completedTasks: number;
   totalTasks: number;
   avgScore: number;
   averageScore?: number | null;
-  overdueCount: number;
+  overdueCount?: number;
+  overdueTasks?: number;
+  completionRate?: number;
   lastReportDate?: string | null;
   healthStatus?: "HEALTHY" | "WARNING" | "DANGER";
 }
 
 export interface DailyReportRate {
   todaySubmitted: number;
-  totalInterns: number;
-  percentage: number;
-  weeklySubmissionRate: number;
+  totalInterns?: number;
+  totalActiveInterns?: number;
+  percentage?: number;
+  todayRate?: number;
+  weeklySubmissionRate?: number;
+  weeklyRate?: number;
+  riskLevel?: "HEALTHY" | "WARNING" | "DANGER";
+}
+
+export interface ActionAlertsCount {
+  pendingApplicationsCount: number;
+  overdueTasksCount: number;
+  droppedInternsCount: number;
+}
+
+export interface LeaderWorkload {
+  activeWorkloadDays: number;
+  activeTasksCount?: number;
+  totalAssignmentsCount?: number;
+}
+
+export interface InternTaskStats {
+  totalTasks: number;
+  inProgressTasks: number;
+  completedTasks: number;
+  overdueTasks: number;
+  blockedTasks: number;
+  completionRate: number;
+}
+
+export interface InternReportStats {
+  dailyReportTodaySubmitted: boolean;
+  reportStreak: number;
+  weeklyReportsSubmitted: number;
+  workingDaysCount: number;
+}
+
+export interface InternEvaluationStats {
+  lastWeekScore: number | null;
+  avgScore: number;
+  totalEvaluations: number;
 }
 
 export interface NeedsReworkItem {
   taskId: string;
   taskTitle: string;
   submissionId: string;
-  rejectedReason: string | null;
+  attempt?: number;
+  reviewComment?: string | null;
+  rejectedReason?: string | null;
   submittedAt: string;
 }
 
 export interface InternPersonalStatsData {
+  internId?: string;
   internName: string;
   internCode?: string | null;
   departmentName?: string;
-  tasksInProgress: number;
-  tasksCompleted: number;
-  tasksOverdue: number;
-  totalTasks: number;
-  completionRate: number;
+  internshipDays?: number;
+  totalDays?: number;
+  tasksInProgress?: number;
+  tasksCompleted?: number;
+  tasksOverdue?: number;
+  totalTasks?: number;
+  completionRate?: number;
   reportStreak?: number;
-  dailyReportTodaySubmitted: boolean;
-  lastWeekScore: number | null;
-  avgScore: number;
+  dailyReportTodaySubmitted?: boolean;
+  lastWeekScore?: number | null;
+  avgScore?: number;
   needsRework?: NeedsReworkItem[];
-  todaysTasks: AssignmentDetail[];
+  todaysTasks?: AssignmentDetail[];
+  tasks?: InternTaskStats;
+  reports?: InternReportStats;
+  evaluations?: InternEvaluationStats;
+  recentTasks?: unknown[];
 }
 
 export interface ActivityLog {
@@ -162,19 +213,43 @@ export interface ActivityLog {
 }
 
 export interface AdminStatsData {
-  system: SystemStats;
-  interns: InternStats;
-  applications: ApplicationStats;
-  tasks: TaskStats;
-  assignments: AssignmentStats;
-  submissions: SubmissionStats;
-  dailyReports: DailyReportStats;
-  weeklyEvaluations: WeeklyEvaluationStats;
-  notifications: NotificationStats;
+  system: SystemStats & {
+    activeInterns?: number;
+    totalInterns?: number;
+    completedInterns?: number;
+    droppedInterns?: number;
+    activeLeaders?: number;
+    activeDepartments?: number;
+    retentionRate?: number;
+  };
+  interns?: InternStats;
+  applications?: ApplicationStats & {
+    pendingApplications?: number;
+    approvedApplications?: number;
+    rejectedApplications?: number;
+    totalApplications?: number;
+  };
+  tasks?: TaskStats & {
+    activeTasks?: number;
+    completedTasks?: number;
+    overdueTasks?: number;
+    totalTasks?: number;
+    systemCompletionRate?: number;
+  };
+  assignments?: AssignmentStats;
+  submissions?: SubmissionStats & {
+    pendingSubmissions?: number;
+    approvedSubmissions?: number;
+    rejectedSubmissions?: number;
+    totalSubmissions?: number;
+  };
+  dailyReports?: DailyReportStats;
+  weeklyEvaluations?: WeeklyEvaluationStats;
+  notifications?: NotificationStats;
   retentionRate?: number;
   departmentDistribution?: DepartmentDistribution[];
   leaderTeams?: LeaderTeamProgress[];
-  actionAlerts?: ActionAlert[];
+  actionAlerts?: ActionAlert[] | ActionAlertsCount;
   recentAssignments?: AssignmentDetail[];
   overdueAssignments?: AssignmentDetail[];
   systemCompletionRate?: number;
@@ -182,11 +257,21 @@ export interface AdminStatsData {
 }
 
 export interface LeaderStatsData {
-  interns: InternStats;
-  assignments: AssignmentStats;
-  submissions: SubmissionStats;
-  dailyReports: DailyReportStats;
-  weeklyEvaluations: WeeklyEvaluationStats;
+  interns: InternStats | { totalInterns: number; activeInterns: number };
+  workload?: LeaderWorkload;
+  assignments?: AssignmentStats;
+  submissions?: SubmissionStats | {
+    pendingSubmissionsCount?: number;
+    approvedSubmissionsCount?: number;
+    rejectedSubmissionsCount?: number;
+    pending?: number;
+    approved?: number;
+    rejected?: number;
+  };
+  dailyReports?: DailyReportStats;
+  weeklyEvaluations?: WeeklyEvaluationStats;
+  evaluations?: { totalEvaluations: number; avgScore: number };
+  tasksByStatus?: Record<string, number>;
   activeWorkloadDays?: number;
   dailyReportRate?: DailyReportRate;
   recentAssignments?: AssignmentDetail[];
@@ -216,3 +301,4 @@ export interface InternStatsResponse {
   message?: string;
   code?: string;
 }
+

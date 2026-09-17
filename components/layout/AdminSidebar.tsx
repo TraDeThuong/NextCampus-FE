@@ -33,8 +33,8 @@ export default function AdminSidebar() {
     { name: t("admin.nav.department"),    href: "/admin/department",    icon: PiBuildingOfficeLight },
     { name: t("admin.nav.onboarding"),    href: "/admin/onboarding",    icon: Rocket },
     { name: t("admin.nav.mails"),         href: "/admin/emails",        icon: MdOutlineMailOutline },
-    { name: t("admin.nav.meetings"),      href: "/admin/mettings",      icon: LuAlarmClock },
-    { name: t("admin.nav.policies"),      href: "/admin/policies",      icon: FileText },
+    { name: t("admin.nav.meetings"),      href: "/admin/meetings",      icon: LuAlarmClock },
+    { name: t("admin.nav.policies"),      href: "/admin/regulations",   icon: FileText },
     { name: t("admin.nav.settings"),      href: "/admin/settings",      icon: Settings },
     { name: t("admin.nav.activityLogs"), href: "/admin/activity-logs", icon: History },
     { name: t("admin.nav.profile"),       href: "/admin/profile",       icon: UserRoundPen },
@@ -47,7 +47,10 @@ export default function AdminSidebar() {
       <ul className="flex flex-col items-center gap-6">
         {menus.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href;
+          const isActive =
+            pathname === item.href ||
+            (item.href === "/admin/regulations" && pathname === "/admin/policies") ||
+            (item.href === "/admin/meetings" && pathname === "/admin/mettings");
 
           return (
             <li key={item.href} className="relative group">

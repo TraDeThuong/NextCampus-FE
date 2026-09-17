@@ -32,7 +32,19 @@ import {
   ChevronUp,
   Calendar,
   Building2,
+  CheckSquare,
+  TrendingUp,
 } from "lucide-react";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  CartesianGrid,
+} from "recharts";
 
 export default function AdminStatsOverview() {
   const t = useTranslations();
@@ -79,7 +91,6 @@ export default function AdminStatsOverview() {
   const leaderTeams = stats?.leaderTeams ?? [];
   const recentActivities = stats?.recentActivities ?? [];
   const departmentDistribution = stats?.departmentDistribution ?? [];
-  const actionAlerts = stats?.actionAlerts ?? [];
   const missingLeaderDepts = departmentDistribution.filter(
     (d) => d.leaderCount === 0,
   );
@@ -87,6 +98,39 @@ export default function AdminStatsOverview() {
   const displayedLeaderTeams = showAllLeaders
     ? leaderTeams
     : leaderTeams.slice(0, 5);
+
+  const totalInterns = stats?.system?.totalInterns ?? stats?.interns?.total ?? 0;
+  const activeInterns = stats?.system?.activeInterns ?? stats?.interns?.active ?? 0;
+  const totalLeaders = stats?.system?.activeLeaders ?? stats?.system?.leaders ?? 0;
+  const activeTasks = stats?.tasks?.activeTasks ?? stats?.assignments?.byStatus?.inProgress ?? 0;
+  const totalTasks = stats?.tasks?.totalTasks ?? stats?.tasks?.total ?? 0;
+  const completedTasks = stats?.tasks?.completedTasks ?? 0;
+  const systemCompletionRate = stats?.tasks?.systemCompletionRate ?? stats?.systemCompletionRate ?? 0;
+
+  const actionAlertsObj =
+    typeof stats?.actionAlerts === "object" && !Array.isArray(stats?.actionAlerts)
+      ? stats?.actionAlerts
+      : undefined;
+
+  const pendingAppsCount =
+    actionAlertsObj?.pendingApplicationsCount ??
+    stats?.applications?.pendingApplications ??
+    stats?.applications?.pending ??
+    0;
+
+  const overdueTasksCount =
+    actionAlertsObj?.overdueTasksCount ??
+    stats?.tasks?.overdueTasks ??
+    stats?.tasks?.overdue ??
+    0;
+
+  const droppedInternsCount =
+    actionAlertsObj?.droppedInternsCount ??
+    stats?.system?.droppedInterns ??
+    stats?.interns?.dropped ??
+    0;
+
+  const dynamicAlerts = Array.isArray(stats?.actionAlerts) ? stats?.actionAlerts : [];
 
   const handleOpenOverdueModal = () => {
     setModalConfig({
@@ -125,33 +169,27 @@ export default function AdminStatsOverview() {
         </div>
       </div>
 
-      {/* Level 1: Health & Performance KPI Cards (KPIs "Sống") */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {/* Level 1: 4 Headline KPI Cards (Total Interns, Total Leaders, Active Tasks, System Completion Rate) */}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <StatsCard
-          title={t("admin.dashboard.activeInterns")}
-          value={stats?.interns?.active ?? 0}
-          subtitle={t("admin.dashboard.retentionRate", {
-            pct: Math.round(
-              ((stats?.interns?.active ?? 0) /
-                (stats?.interns?.total || 1)) *
-                100,
-            ),
-          })}
+          title={t("admin.dashboard.totalInterns")}
+          value={totalInterns}
+          subtitle={t("admin.dashboard.activeInternsSubtitle", { active: activeInterns })}
           icon={<Users className="h-6 w-6 text-primary-light" />}
-          href="/admin/interns?status=ACTIVE"
+          href="/admin/interns"
           trend={{
             text: t("admin.dashboard.completed", {
-              n: stats?.interns?.completed ?? 0,
+              n: stats?.system?.completedInterns ?? stats?.interns?.completed ?? 0,
             }),
             positive: true,
           }}
         />
 
         <StatsCard
-          title={t("admin.dashboard.leaderTeam")}
-          value={stats?.system?.leaders ?? 0}
+          title={t("admin.dashboard.totalLeaders")}
+          value={totalLeaders}
           subtitle={t("admin.dashboard.managingDepts", {
-            n: stats?.system?.departments ?? 0,
+            n: stats?.system?.activeDepartments ?? stats?.system?.departments ?? 0,
           })}
           icon={<UserCheck className="h-6 w-6 text-indigo-400" />}
           href="/admin/leaders"
@@ -162,19 +200,25 @@ export default function AdminStatsOverview() {
         />
 
         <StatsCard
-          title={t("admin.dashboard.pendingApps")}
-          value={stats?.applications?.pending ?? 0}
-          subtitle={t("admin.dashboard.totalApps", {
-            n: stats?.applications?.total ?? 0,
-          })}
-          icon={<FileText className="h-6 w-6 text-amber-400" />}
-          href="/admin/onboarding?inviteStatus=USED&applicationStatus=PENDING"
+          title={t("admin.dashboard.activeTasks")}
+          value={activeTasks}
+          subtitle={`Tổng số: ${totalTasks} task`}
+          icon={<CheckSquare className="h-6 w-6 text-cyan-400" />}
+          href="/admin/interns"
           trend={{
-            text:
-              (stats?.applications?.pending ?? 0) > 0
-                ? t("admin.dashboard.needReview")
-                : t("admin.dashboard.allDone"),
-            positive: (stats?.applications?.pending ?? 0) === 0,
+            text: `${completedTasks} hoàn thành`,
+            positive: true,
+          }}
+        />
+
+        <StatsCard
+          title={t("admin.dashboard.systemCompletionRate")}
+          value={`${systemCompletionRate}%`}
+          subtitle="Tiến độ toàn hệ thống"
+          icon={<TrendingUp className="h-6 w-6 text-emerald-400" />}
+          trend={{
+            text: systemCompletionRate >= 70 ? "Mục tiêu đạt chuẩn" : "Cần đẩy mạnh",
+            positive: systemCompletionRate >= 70,
           }}
         />
       </div>
@@ -337,7 +381,7 @@ export default function AdminStatsOverview() {
         </div>
       </MetalCard>
 
-      {/* Level 3: Department Distribution Card */}
+      {/* Level 3: Department Distribution Card with Recharts BarChart & Breakdown */}
       <MetalCard className="p-6">
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <div>
@@ -362,51 +406,107 @@ export default function AdminStatsOverview() {
 
         <div className="mt-6">
           {departmentDistribution.length > 0 ? (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {departmentDistribution.map((dept: DepartmentDistribution) => {
-                const isMissingLeader = dept.leaderCount === 0;
-                return (
-                  <div
-                    key={dept.departmentId}
-                    className={`p-4 rounded-2xl border transition-all ${
-                      isMissingLeader
-                        ? "border-rose-500/30 bg-rose-500/5 hover:border-rose-500/50"
-                        : "border-white/10 bg-white/[0.02] hover:bg-white/[0.05]"
-                    }`}
+            <div className="space-y-6">
+              {/* Recharts BarChart with ResponsiveContainer */}
+              <div className="h-72 w-full pt-2">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={departmentDistribution}
+                    margin={{ top: 10, right: 10, left: -15, bottom: 5 }}
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="text-sm font-bold text-foreground truncate">
-                        {dept.departmentName}
-                      </p>
-                      {isMissingLeader ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-400 bg-rose-500/10 border border-rose-500/30 px-2 py-0.5 rounded-md shrink-0">
-                          <AlertTriangle className="h-3 w-3" />
-                          {t("admin.dashboard.missingLeaderAlert")}
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md shrink-0">
-                          <CheckCircle2 className="h-3 w-3" />
-                          {t("admin.dashboard.leaderAssigned", { n: dept.leaderCount })}
-                        </span>
-                      )}
-                    </div>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.06)" />
+                    <XAxis
+                      dataKey="departmentName"
+                      stroke="#94a3b8"
+                      fontSize={12}
+                      tickLine={false}
+                      tickFormatter={(val) =>
+                        typeof val === "string" && val.length > 18
+                          ? `${val.substring(0, 18)}...`
+                          : String(val)
+                      }
+                    />
+                    <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} allowDecimals={false} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "rgba(15, 23, 42, 0.95)",
+                        borderColor: "rgba(255, 255, 255, 0.12)",
+                        borderRadius: "0.75rem",
+                        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.6)",
+                        color: "#f8fafc",
+                        backdropFilter: "blur(8px)",
+                      }}
+                      cursor={{ fill: "rgba(255, 255, 255, 0.05)" }}
+                    />
+                    <Legend
+                      verticalAlign="top"
+                      align="right"
+                      iconType="circle"
+                      wrapperStyle={{ paddingBottom: "12px", fontSize: "12px" }}
+                    />
+                    <Bar
+                      dataKey="internCount"
+                      name={t("admin.dashboard.colDeptInterns")}
+                      fill="#38bdf8"
+                      radius={[6, 6, 0, 0]}
+                    />
+                    <Bar
+                      dataKey="leaderCount"
+                      name={t("admin.dashboard.colDeptLeaders")}
+                      fill="#818cf8"
+                      radius={[6, 6, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
 
-                    <div className="mt-4 flex items-center justify-between text-xs">
-                      <span className="text-muted">{t("admin.dashboard.colDeptInterns")}</span>
-                      <span className="font-bold text-foreground">
-                        {t("admin.dashboard.internCount", { n: dept.internCount })}
-                      </span>
-                    </div>
+              {/* Department Cards Breakdown */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {departmentDistribution.map((dept: DepartmentDistribution) => {
+                  const isMissingLeader = dept.leaderCount === 0;
+                  return (
+                    <div
+                      key={dept.departmentId}
+                      className={`p-4 rounded-2xl border transition-all ${
+                        isMissingLeader
+                          ? "border-rose-500/30 bg-rose-500/5 hover:border-rose-500/50"
+                          : "border-white/10 bg-white/[0.02] hover:bg-white/[0.05]"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-sm font-bold text-foreground truncate">
+                          {dept.departmentName}
+                        </p>
+                        {isMissingLeader ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-400 bg-rose-500/10 border border-rose-500/30 px-2 py-0.5 rounded-md shrink-0">
+                            <AlertTriangle className="h-3 w-3" />
+                            {t("admin.dashboard.missingLeaderAlert")}
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md shrink-0">
+                            <CheckCircle2 className="h-3 w-3" />
+                            {t("admin.dashboard.leaderAssigned", { n: dept.leaderCount })}
+                          </span>
+                        )}
+                      </div>
 
-                    <div className="mt-2 flex items-center justify-between text-xs">
-                      <span className="text-muted">{t("admin.dashboard.colDeptLeaders")}</span>
-                      <span className={`font-semibold ${isMissingLeader ? "text-rose-400" : "text-slate-300"}`}>
-                        {dept.leaderCount}
-                      </span>
+                      <div className="mt-4 flex items-center justify-between text-xs">
+                        <span className="text-muted">{t("admin.dashboard.colDeptInterns")}</span>
+                        <span className="font-bold text-foreground">
+                          {t("admin.dashboard.internCount", { n: dept.internCount })}
+                        </span>
+                      </div>
+
+                      <div className="mt-2 flex items-center justify-between text-xs">
+                        <span className="text-muted">{t("admin.dashboard.colDeptLeaders")}</span>
+                        <span className={`font-semibold ${isMissingLeader ? "text-rose-400" : "text-slate-300"}`}>
+                          {dept.leaderCount}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           ) : (
             <p className="text-xs text-muted text-center py-6">
@@ -418,7 +518,7 @@ export default function AdminStatsOverview() {
 
       {/* Level 4: Recent Activity Log & System Alerts (Grid 2 cột) */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Recent Activity Log (Nhật ký hoạt động gần đây) */}
+        {/* Recent Activity Log */}
         <MetalCard className="p-6">
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
             <div className="flex items-center gap-2">
@@ -492,8 +592,8 @@ export default function AdminStatsOverview() {
           </div>
 
           <div className="mt-5 space-y-3.5">
-            {/* Dynamic action alerts from backend */}
-            {actionAlerts.map((alert: ActionAlert) => (
+            {/* Dynamic action alerts from backend if array */}
+            {dynamicAlerts.map((alert: ActionAlert) => (
               <div
                 key={alert.id}
                 className="flex items-center justify-between p-3.5 rounded-2xl border border-rose-500/30 bg-rose-500/10"
@@ -524,7 +624,7 @@ export default function AdminStatsOverview() {
                 <div>
                   <p className="text-xs font-bold text-foreground group-hover:text-amber-300 transition-colors">
                     {t("admin.dashboard.pendingAppsCount", {
-                      n: stats?.applications?.pending ?? 0,
+                      n: pendingAppsCount,
                     })}
                   </p>
                   <p className="text-[11px] text-muted">{t("admin.dashboard.needApproveReject")}</p>
@@ -548,7 +648,7 @@ export default function AdminStatsOverview() {
                 <div>
                   <p className="text-xs font-bold text-foreground group-hover:text-rose-300 transition-colors">
                     {t("admin.dashboard.overdueTasksCount", {
-                      n: stats?.tasks?.overdue ?? 0,
+                      n: overdueTasksCount,
                     })}
                   </p>
                   <p className="text-[11px] text-muted">{t("admin.dashboard.clickToSeeOverdue")}</p>
@@ -596,7 +696,7 @@ export default function AdminStatsOverview() {
                 <div>
                   <p className="text-xs font-bold text-foreground">
                     {t("admin.dashboard.droppedInterns", {
-                      n: stats?.interns?.dropped ?? 0,
+                      n: droppedInternsCount,
                     })}
                   </p>
                   <p className="text-[11px] text-muted">{t("admin.dashboard.droppedList")}</p>

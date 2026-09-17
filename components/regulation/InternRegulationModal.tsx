@@ -14,9 +14,12 @@ export default function InternRegulationModal() {
   const acknowledgeMutation = useAcknowledgeRegulation();
 
   const [hasAgreed, setHasAgreed] = useState(false);
-  const [showFullModal, setShowFullModal] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
+  const [isManuallyOpened, setIsManuallyOpened] = useState(false);
 
   const regulation = response?.data;
+  const isUnacknowledged = Boolean(regulation && regulation.isActive && !regulation.isAcknowledged);
+  const showFullModal = (!isDismissed && isUnacknowledged) || isManuallyOpened;
 
   if (isLoading || !regulation || !regulation.isActive) {
     return null;
@@ -48,7 +51,8 @@ export default function InternRegulationModal() {
     if (!hasAgreed) return;
     acknowledgeMutation.mutate(regulation.id, {
       onSuccess: () => {
-        setShowFullModal(false);
+        setIsDismissed(true);
+        setIsManuallyOpened(false);
       },
     });
   };
@@ -81,7 +85,10 @@ export default function InternRegulationModal() {
             <Button
               variant="primary"
               size="sm"
-              onClick={() => setShowFullModal(true)}
+              onClick={() => {
+                setIsManuallyOpened(true);
+                setIsDismissed(false);
+              }}
               className="flex items-center gap-1.5"
             >
               <FileText className="h-4 w-4" />
@@ -140,7 +147,10 @@ export default function InternRegulationModal() {
               <Button
                 variant="glass"
                 size="sm"
-                onClick={() => setShowFullModal(false)}
+                onClick={() => {
+                  setIsDismissed(true);
+                  setIsManuallyOpened(false);
+                }}
                 disabled={acknowledgeMutation.isPending}
               >
                 {t("close")}

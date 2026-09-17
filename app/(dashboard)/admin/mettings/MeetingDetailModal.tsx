@@ -10,6 +10,9 @@ import { useMeetingAbsences } from "@/hooks/meeting/useMeetingAbsences";
 import { useUpdateMeeting } from "@/hooks/meeting/useUpdateMeeting";
 import { useDeleteMeeting } from "@/hooks/meeting/useDeleteMeeting";
 import { useReviewAbsence } from "@/hooks/meeting/useReviewAbsence";
+import { useAuth } from "@/hooks/auth/useAuth";
+import { useRsvpMeeting } from "@/hooks/meeting/useRsvpMeeting";
+import { useSubmitAbsence } from "@/hooks/meeting/useSubmitAbsence";
 
 interface Props {
   meetingId: string;
@@ -48,12 +51,18 @@ function formatTime(iso: string) {
 
 export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
   const t = useTranslations();
+  const { state } = useAuth();
+  const currentUser = state.user;
   const { data: meetingData, isPending, isError } = useMeeting(meetingId);
   const { data: absencesData } = useMeetingAbsences(meetingId);
   const updateMeeting = useUpdateMeeting();
   const deleteMeeting = useDeleteMeeting();
   const reviewAbsence = useReviewAbsence();
+  const rsvpMeeting = useRsvpMeeting();
+  const submitAbsence = useSubmitAbsence();
   const [confirmAction, setConfirmAction] = useState<"cancel" | "delete" | null>(null);
+  const [showLeaveForm, setShowLeaveForm] = useState(false);
+  const [leaveReason, setLeaveReason] = useState("");
 
   if (isPending) {
     return (
@@ -80,6 +89,11 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
   ).length;
   const pendingAbsences = absences.filter((a) => a.status === "PENDING");
 
+  const myParticipant = meeting?.participants.find(
+    (p) => p.userId === currentUser?.id,
+  );
+  const myStatus = myParticipant?.invitationStatus;
+
   function handleCancel() {
     updateMeeting.mutate(
       { id: meeting.id, payload: { status: "CANCELLED" } },
@@ -95,6 +109,21 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
 
   function handleReview(absenceId: string, status: "APPROVED" | "REJECTED") {
     reviewAbsence.mutate({ absenceId, payload: { status } });
+  }
+
+  function handleAccept() {
+    rsvpMeeting.mutate({ id: meeting.id, payload: { status: "ACCEPTED" } });
+  }
+
+  function handleDecline() {
+    if (!leaveReason.trim()) return;
+    rsvpMeeting.mutate({ id: meeting.id, payload: { status: "DECLINED" } });
+    submitAbsence.mutate({
+      meetingId: meeting.id,
+      payload: { reason: leaveReason },
+    });
+    setShowLeaveForm(false);
+    setLeaveReason("");
   }
 
   return (
@@ -156,6 +185,81 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
           </span>
         </div>
       </div>
+
+      {/* RSVP Section */}
+      {myParticipant && meeting.status !== "COMPLETED" && meeting.status !== "CANCELLED" && (
+        <div className="rounded-2xl border border-white/5 bg-white/[0.03] p-4">
+          {showLeaveForm ? (
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-slate-200">
+                {myStatus === "ACCEPTED" ? "Báo vắng mặt / Hủy tham gia" : "Từ chối tham gia"}
+              </p>
+              <textarea
+                rows={2}
+                placeholder="Nhập lý do vắng mặt..."
+                value={leaveReason}
+                onChange={(e) => setLeaveReason(e.target.value)}
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white outline-none transition focus:border-primary-main/50 placeholder:text-slate-600 resize-none"
+              />
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => { setShowLeaveForm(false); setLeaveReason(""); }}
+                  className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:text-white"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDecline}
+                  disabled={!leaveReason.trim() || rsvpMeeting.isPending || submitAbsence.isPending}
+                  className="rounded-lg bg-red-500/20 px-3 py-1.5 text-xs font-medium text-red-300 transition hover:bg-red-500/30 disabled:opacity-50"
+                >
+                  Xác nhận báo vắng
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-slate-300">Phản hồi của bạn:</span>
+                <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                  myStatus === "ACCEPTED"
+                    ? "bg-emerald-500/20 text-emerald-300"
+                    : myStatus === "DECLINED"
+                    ? "bg-red-500/20 text-red-300"
+                    : "bg-amber-500/20 text-amber-300"
+                }`}>
+                  {myStatus === "ACCEPTED" ? "Đã tham gia" : myStatus === "DECLINED" ? "Vắng mặt" : "Chưa phản hồi"}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                {myStatus !== "ACCEPTED" && (
+                  <button
+                    type="button"
+                    onClick={handleAccept}
+                    disabled={rsvpMeeting.isPending}
+                    className="flex items-center gap-1.5 rounded-lg bg-emerald-500/20 px-3 py-1.5 text-xs font-medium text-emerald-300 transition hover:bg-emerald-500/30 disabled:opacity-50"
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    Tham gia
+                  </button>
+                )}
+                {myStatus !== "DECLINED" && (
+                  <button
+                    type="button"
+                    onClick={() => setShowLeaveForm(true)}
+                    className="flex items-center gap-1.5 rounded-lg bg-red-500/20 px-3 py-1.5 text-xs font-medium text-red-300 transition hover:bg-red-500/30"
+                  >
+                    <XCircle className="h-3.5 w-3.5" />
+                    Báo vắng mặt
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Host + Creator */}
       <div className="flex flex-wrap gap-x-8 gap-y-1 text-xs text-slate-500">

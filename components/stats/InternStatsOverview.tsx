@@ -9,6 +9,7 @@ import MetalCard from "../ui/MetalCard";
 import RejectedSubmissionsCard from "./RejectedSubmissionsCard";
 import InternRegulationModal from "../regulation/InternRegulationModal";
 import Table from "../ui/Table";
+import InternshipSummaryExportButton from "../pdf/InternshipSummaryExportButton";
 import {
   ClipboardList,
   CheckCircle2,
@@ -20,6 +21,7 @@ import {
   AlertTriangle,
   Flame,
   AlertCircle,
+  AlertOctagon,
 } from "lucide-react";
 
 export default function InternStatsOverview() {
@@ -39,7 +41,26 @@ export default function InternStatsOverview() {
 
   const stats = response.data;
   const todaysTasks = stats.todaysTasks ?? [];
-  const streakCount = stats.reportStreak ?? 0;
+
+  const tasksCompleted = stats.tasks?.completedTasks ?? stats.tasksCompleted ?? 0;
+  const tasksBlocked = stats.tasks?.blockedTasks ?? 0;
+  const tasksOverdue = stats.tasks?.overdueTasks ?? stats.tasksOverdue ?? 0;
+  const tasksInProgress = stats.tasks?.inProgressTasks ?? stats.tasksInProgress ?? 0;
+  const totalTasks =
+    stats.tasks?.totalTasks ??
+    stats.totalTasks ??
+    (tasksCompleted + tasksInProgress + tasksBlocked + tasksOverdue);
+  const completionRate =
+    stats.tasks?.completionRate ??
+    stats.completionRate ??
+    (totalTasks > 0 ? Math.round((tasksCompleted / totalTasks) * 100) : 0);
+
+  const streakCount = stats.reports?.reportStreak ?? stats.reportStreak ?? 0;
+  const isTodayReportSubmitted =
+    stats.reports?.dailyReportTodaySubmitted ?? stats.dailyReportTodaySubmitted ?? false;
+  const avgScore = stats.evaluations?.avgScore ?? stats.avgScore ?? 0;
+  const lastWeekScore = stats.evaluations?.lastWeekScore ?? stats.lastWeekScore ?? null;
+  const needsReworkItems = stats.needsRework ?? [];
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -49,7 +70,7 @@ export default function InternStatsOverview() {
       {/* Daily Report Deadline Banner */}
       <div
         className={`flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-2xl border p-4 transition-all duration-300 ${
-          stats.dailyReportTodaySubmitted
+          isTodayReportSubmitted
             ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
             : "border-amber-500/30 bg-amber-500/10 text-amber-300 shadow-[0_0_24px_rgba(245,158,11,0.1)]"
         }`}
@@ -57,12 +78,12 @@ export default function InternStatsOverview() {
         <div className="flex items-center gap-3">
           <div
             className={`flex h-10 w-10 items-center justify-center rounded-xl shrink-0 ${
-              stats.dailyReportTodaySubmitted
+              isTodayReportSubmitted
                 ? "bg-emerald-500/20 text-emerald-400"
                 : "bg-amber-500/20 text-amber-400"
             }`}
           >
-            {stats.dailyReportTodaySubmitted ? (
+            {isTodayReportSubmitted ? (
               <CheckCircle2 className="h-5 w-5" />
             ) : (
               <AlertCircle className="h-5 w-5" />
@@ -72,25 +93,25 @@ export default function InternStatsOverview() {
             <div className="flex items-center gap-2">
               <span
                 className={`text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${
-                  stats.dailyReportTodaySubmitted
+                  isTodayReportSubmitted
                     ? "border-emerald-500/30 bg-emerald-500/20 text-emerald-300"
                     : "border-amber-500/30 bg-amber-500/20 text-amber-300"
                 }`}
               >
-                {stats.dailyReportTodaySubmitted
+                {isTodayReportSubmitted
                   ? t("reportSubmittedBadge")
                   : t("reportNotSubmittedBadge")}
               </span>
             </div>
             <p className="text-xs sm:text-sm font-medium mt-0.5 text-foreground">
-              {stats.dailyReportTodaySubmitted
+              {isTodayReportSubmitted
                 ? t("reportSubmittedMsg")
                 : t("deadlineNotice")}
             </p>
           </div>
         </div>
 
-        {!stats.dailyReportTodaySubmitted && (
+        {!isTodayReportSubmitted && (
           <Link
             href="/intern/daily-report"
             className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold text-xs shadow-soft hover:opacity-95 transition-all"
@@ -107,22 +128,61 @@ export default function InternStatsOverview() {
           <h1 className="text-3xl font-extrabold text-foreground metal-text">{t("greeting", { name: stats.internName })}</h1>
           <p className="text-sm text-muted">{t("welcome")}</p>
         </div>
-        <Link href="/intern/daily-report" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-primary-main to-primary-light text-white font-semibold shadow-soft hover:opacity-90 transition-all text-sm">
-          <Calendar className="h-4 w-4" />{t("submitTodayReport")}
-        </Link>
+        <div className="flex flex-wrap items-center gap-3">
+          {stats.internId && (
+            <InternshipSummaryExportButton
+              internId={stats.internId}
+              label={t("exportSummaryPdf")}
+            />
+          )}
+          <Link href="/intern/daily-report" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-primary-main to-primary-light text-white font-semibold shadow-soft hover:opacity-90 transition-all text-sm">
+            <Calendar className="h-4 w-4" />{t("submitTodayReport")}
+          </Link>
+        </div>
       </div>
 
-      {/* KPI Stats Grid - 6 Cards including Report Streak */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <StatsCard title={t("tasksInProgress")} value={stats.tasksInProgress} subtitle={t("totalTasks", { n: stats.totalTasks })} icon={<ClipboardList className="h-6 w-6 text-cyan-400" />} href="/intern/task"
-          trend={{ text: t("completionRate", { n: stats.completionRate }), positive: true }} />
-        <StatsCard title={t("tasksCompleted")} value={stats.tasksCompleted} subtitle={t("completedOf", { done: stats.tasksCompleted, total: stats.totalTasks })} icon={<CheckCircle2 className="h-6 w-6 text-emerald-400" />} href="/intern/task?status=DONE"
-          trend={{ text: t("updateProgress"), positive: true }} />
-        <StatsCard title={t("tasksOverdue")} value={stats.tasksOverdue} subtitle={t("overdueHint")} icon={<AlertTriangle className="h-6 w-6 text-rose-400" />} href="/intern/task"
-          trend={{ text: stats.tasksOverdue > 0 ? t("overdueNeedsAttention") : t("noOverdueTasks"), positive: stats.tasksOverdue === 0 }} />
-        <StatsCard title={t("todaysReport")} value={stats.dailyReportTodaySubmitted ? t("submitted") : t("notSubmitted")}
-          subtitle={stats.dailyReportTodaySubmitted ? t("onTime") : t("submitByEvening")} icon={<FileCheck className="h-6 w-6 text-amber-400" />} href="/intern/daily-report"
-          trend={{ text: stats.dailyReportTodaySubmitted ? t("completeStatus") : t("submitNowStatus"), positive: stats.dailyReportTodaySubmitted }} />
+      {/* KPI Stats Grid - 7 Cards including Report Streak and Blocked Tasks */}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
+        <StatsCard
+          title={t("tasksInProgress")}
+          value={tasksInProgress}
+          subtitle={t("totalTasks", { n: totalTasks })}
+          icon={<ClipboardList className="h-6 w-6 text-cyan-400" />}
+          href="/intern/task"
+          trend={{ text: t("completionRate", { n: completionRate }), positive: true }}
+        />
+        <StatsCard
+          title={t("tasksCompleted")}
+          value={tasksCompleted}
+          subtitle={t("completedOf", { done: tasksCompleted, total: totalTasks })}
+          icon={<CheckCircle2 className="h-6 w-6 text-emerald-400" />}
+          href="/intern/task?status=DONE"
+          trend={{ text: t("updateProgress"), positive: true }}
+        />
+        <StatsCard
+          title={t("tasksBlocked")}
+          value={tasksBlocked}
+          subtitle={t("tasksBlockedHint")}
+          icon={<AlertOctagon className="h-6 w-6 text-amber-500" />}
+          href="/intern/task"
+          trend={{ text: tasksBlocked > 0 ? "Cần hỗ trợ gỡ" : "Thông suốt", positive: tasksBlocked === 0 }}
+        />
+        <StatsCard
+          title={t("tasksOverdue")}
+          value={tasksOverdue}
+          subtitle={t("overdueHint")}
+          icon={<AlertTriangle className="h-6 w-6 text-rose-400" />}
+          href="/intern/task"
+          trend={{ text: tasksOverdue > 0 ? t("overdueNeedsAttention") : t("noOverdueTasks"), positive: tasksOverdue === 0 }}
+        />
+        <StatsCard
+          title={t("todaysReport")}
+          value={isTodayReportSubmitted ? t("submitted") : t("notSubmitted")}
+          subtitle={isTodayReportSubmitted ? t("onTime") : t("submitByEvening")}
+          icon={<FileCheck className="h-6 w-6 text-indigo-400" />}
+          href="/intern/daily-report"
+          trend={{ text: isTodayReportSubmitted ? t("completeStatus") : t("submitNowStatus"), positive: isTodayReportSubmitted }}
+        />
         <StatsCard
           title={t("reportStreak")}
           value={t("reportStreakCount", { n: streakCount })}
@@ -131,13 +191,18 @@ export default function InternStatsOverview() {
           href="/intern/daily-report"
           trend={{ text: streakCount > 0 ? "🔥 Streak active" : "Start today", positive: streakCount > 0 }}
         />
-        <StatsCard title={t("weeklyScore")} value={typeof stats.lastWeekScore === "number" ? `${stats.lastWeekScore.toFixed(1)}/10` : `${stats.avgScore.toFixed(1)}/10`}
-          subtitle={t("avgScore", { score: stats.avgScore.toFixed(1) })} icon={<Award className="h-6 w-6 text-indigo-400" />} href="/intern/weekly-evaluation"
-          trend={{ text: t("scoreResults"), positive: stats.avgScore >= 7 }} />
+        <StatsCard
+          title={t("weeklyScore")}
+          value={typeof lastWeekScore === "number" ? `${lastWeekScore.toFixed(1)}/10` : `${avgScore.toFixed(1)}/10`}
+          subtitle={t("avgScore", { score: avgScore.toFixed(1) })}
+          icon={<Award className="h-6 w-6 text-purple-400" />}
+          href="/intern/weekly-evaluation"
+          trend={{ text: t("scoreResults"), positive: avgScore >= 7 }}
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
-        <RejectedSubmissionsCard />
+        <RejectedSubmissionsCard needsReworkItems={needsReworkItems} />
 
         <MetalCard className="p-6 lg:col-span-3">
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
@@ -188,8 +253,8 @@ export default function InternStatsOverview() {
               <div className="inline-flex h-32 w-32 items-center justify-center rounded-full border-4 border-primary-light/30 bg-primary-light/5 p-4 shadow-glass"><div><span className="text-3xl font-extrabold text-foreground metal-text">{stats.completionRate}%</span><span className="block text-[10px] text-muted uppercase font-semibold">{t("completed")}</span></div></div>
               <p className="text-xs text-muted">
                 {t.rich("completedTasksMsg", {
-                  done: stats.tasksCompleted,
-                  total: stats.totalTasks,
+                  done: tasksCompleted,
+                  total: totalTasks,
                   strong: (chunks) => <strong>{chunks}</strong>,
                 })}
               </p>

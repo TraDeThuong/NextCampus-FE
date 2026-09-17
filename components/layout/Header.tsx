@@ -10,6 +10,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { useLocaleSwitcher } from "@/providers/LocaleProvider";
 import Spinner from "../ui/Spinner";
 import NotificationBell from "../notification/NotificationBell";
+import ThemeToggle from "../theme/ThemeToggle";
 
 type HeaderProps = {
   role: string;
@@ -60,7 +61,10 @@ export default function Header({ role, onMenuClick }: HeaderProps) {
         </div>
 
         {/* Right actions */}
-        <div className="flex items-center gap-3 md:gap-6">
+        <div className="flex items-center gap-3 md:gap-4">
+          {/* Theme Switcher */}
+          <ThemeToggle />
+
           {/* Language Switch */}
           <button
             onClick={toggleLanguage}

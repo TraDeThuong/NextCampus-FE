@@ -9,6 +9,7 @@ import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
 import Button from "@/components/ui/Button";
 import Table from "@/components/ui/Table";
+import WeeklyEvaluationExportButton from "@/components/pdf/WeeklyEvaluationExportButton";
 import { useWeeklyEvaluations } from "@/hooks/weekly-evaluation/useWeeklyEvaluations";
 import { RATING_COLORS, type RatingLevel, type WeeklyEvaluation, type WeeklyEvaluationQueryParams } from "@/types/weekly-evaluation";
 
@@ -43,15 +44,46 @@ export default function InternWeeklyEvaluationList() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary-main to-primary-light"><Sparkles className="h-5 w-5 text-white" /></div>
-        <div><h1 className="text-2xl font-bold metal-text">{t("title")}</h1><p className="text-sm text-muted mt-0.5">{t("description")}</p></div>
+        <Sparkles className="h-6 w-6 text-primary-light" />
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("title")}</h1>
+          <p className="text-sm text-muted">{t("description")}</p>
+        </div>
       </div>
 
-      {evaluations.length > 0 && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <MetalCard className="p-5"><div className="flex items-start justify-between"><div><p className="text-xs text-muted font-medium uppercase tracking-wide">{t("latestWeek")}</p><p className="mt-1.5 text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-primary-light">{latestScore !== null ? latestScore.toFixed(1) : "—"}</p><p className="text-xs text-muted mt-1">{t("weekOf", { n: latestEval?.week })}</p></div><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/20"><TrendingUp className="h-5 w-5 text-emerald-400" /></div></div></MetalCard>
-          <MetalCard className="p-5"><div className="flex items-start justify-between"><div><p className="text-xs text-muted font-medium uppercase tracking-wide">{t("avgScore")}</p><p className="mt-1.5 text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-primary-light">{avgScore !== null ? avgScore.toFixed(1) : "—"}</p><p className="text-xs text-muted mt-1">{t("overWeeks", { n: evaluations.length })}</p></div><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 border border-blue-500/20"><Sparkles className="h-5 w-5 text-blue-400" /></div></div></MetalCard>
-          <MetalCard className="p-5"><div className="flex items-start justify-between"><div><p className="text-xs text-muted font-medium uppercase tracking-wide">{t("reviewedCount")}</p><p className="mt-1.5 text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400">{reviewedCount}/{evaluations.length}</p><p className="text-xs text-muted mt-1">{t("weeks")}</p></div><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/20"><CheckCircle2 className="h-5 w-5 text-amber-400" /></div></div></MetalCard>
+      {latestEval && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <MetalCard className="p-4 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
+              <Sparkles className="h-5 w-5 text-primary-light" />
+            </div>
+            <div>
+              <p className="text-xs text-muted">{t("latestScore")}</p>
+              <p className="text-lg font-bold text-foreground">
+                {latestScore !== null ? `${latestScore.toFixed(1)} / 10` : "—"}
+              </p>
+            </div>
+          </MetalCard>
+          <MetalCard className="p-4 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+              <TrendingUp className="h-5 w-5 text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-xs text-muted">{t("avgScore")}</p>
+              <p className="text-lg font-bold text-foreground">
+                {avgScore !== null ? `${avgScore.toFixed(1)} / 10` : "—"}
+              </p>
+            </div>
+          </MetalCard>
+          <MetalCard className="p-4 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 border border-violet-500/20">
+              <CheckCircle2 className="h-5 w-5 text-violet-400" />
+            </div>
+            <div>
+              <p className="text-xs text-muted">{t("reviewedCount")}</p>
+              <p className="text-lg font-bold text-foreground">{reviewedCount}</p>
+            </div>
+          </MetalCard>
         </div>
       )}
 
@@ -61,7 +93,7 @@ export default function InternWeeklyEvaluationList() {
         {evaluations.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center space-y-3"><div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 border border-white/10"><Sparkles className="h-8 w-8 text-muted" /></div><p className="text-sm text-muted">{t("noEvaluations")}</p></div>
         ) : (
-          <Table columns="1.5fr 1.5fr 1fr 1fr">
+          <Table columns="1.5fr 1.5fr 1fr 1.5fr">
             <Table.Header><span>{t("colWeek")}</span><span>{t("colScore")}</span><span className="text-center">{t("colStatus")}</span><span className="text-center">{t("colDetail")}</span></Table.Header>
             <Table.Body data={evaluations} render={(item: WeeklyEvaluation) => {
               const scoreVal = item.score ?? item.totalScore ?? 0;
@@ -72,7 +104,15 @@ export default function InternWeeklyEvaluationList() {
                   <div className="flex flex-col gap-0.5"><span className="font-bold text-foreground text-sm">{t("week", { n: item.week })}</span><span className="text-[11px] text-muted">{new Date(item.createdAt).toLocaleDateString("vi-VN")}</span></div>
                   <div className="flex flex-col gap-1 items-start"><span className="text-sm font-extrabold text-foreground">{scoreVal.toFixed(1)} / 10</span><span className={`inline-flex items-center text-[10px] font-semibold px-2 py-0.5 rounded-lg border leading-none w-fit ${RATING_COLORS[level]}`}>{tRatings(level)}</span></div>
                   <div className="flex justify-center">{isReviewed ? <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg border text-emerald-400 border-emerald-500/30 bg-emerald-500/10"><CheckCircle2 className="h-3 w-3" />{t("reviewed")}</span> : <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg border text-amber-400 border-amber-500/30 bg-amber-500/10"><Clock className="h-3 w-3" />{t("notReviewed")}</span>}</div>
-                  <div className="flex justify-center"><Link href={`/intern/weekly-evaluation/${item.id}`}><Button variant="glass" size="sm" className="flex items-center gap-1"><Eye className="h-3.5 w-3.5 mr-1" /><span>{t("view")}</span></Button></Link></div>
+                  <div className="flex items-center justify-center gap-2">
+                    <WeeklyEvaluationExportButton id={item.id} label="PDF" className="flex items-center gap-1 px-2.5 py-1 text-xs" />
+                    <Link href={`/intern/weekly-evaluation/${item.id}`}>
+                      <Button variant="glass" size="sm" className="flex items-center gap-1">
+                        <Eye className="h-3.5 w-3.5 mr-1" />
+                        <span>{t("view")}</span>
+                      </Button>
+                    </Link>
+                  </div>
                 </Table.Row>
               );
             }} />

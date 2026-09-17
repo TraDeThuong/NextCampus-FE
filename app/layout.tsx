@@ -59,9 +59,28 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html
       lang={initialLocale}
-      className={`${headingFont.variable} ${headingFontVi.variable} ${bodyFont.variable} ${bodyFontVi.variable}`}
+      className={`dark ${headingFont.variable} ${headingFontVi.variable} ${bodyFont.variable} ${bodyFontVi.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('nexcampus-theme') || localStorage.getItem('theme') || 'system';
+                  var isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                  if (isDark) {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body suppressHydrationWarning>
         <LocaleProvider
           initialLocale={initialLocale}

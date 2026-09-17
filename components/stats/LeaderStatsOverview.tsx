@@ -79,6 +79,43 @@ export default function LeaderStatsOverview() {
   const overdueAssignments = rawOverdue.filter((a) => a.isOverdue);
   const internProgress = stats.internProgress ?? [];
 
+  const activeWorkloadDays = stats.workload?.activeWorkloadDays ?? stats.activeWorkloadDays ?? 0;
+
+  const todaySubmitted = stats.dailyReportRate?.todaySubmitted ?? 0;
+  const totalActiveInterns =
+    stats.dailyReportRate?.totalActiveInterns ??
+    stats.dailyReportRate?.totalInterns ??
+    ("activeInterns" in stats.interns ? stats.interns.activeInterns : stats.interns.active) ??
+    0;
+  const todayRate =
+    stats.dailyReportRate?.todayRate ??
+    stats.dailyReportRate?.percentage ??
+    (totalActiveInterns > 0 ? Math.round((todaySubmitted / totalActiveInterns) * 100) : 0);
+  const weeklyRate = stats.dailyReportRate?.weeklyRate ?? stats.dailyReportRate?.weeklySubmissionRate ?? 0;
+
+  const reportRateRisk: "HEALTHY" | "WARNING" | "DANGER" =
+    todayRate >= 80 ? "HEALTHY" : todayRate >= 50 ? "WARNING" : "DANGER";
+
+  const pendingSubmissions =
+    (typeof stats.submissions === "object" && "pendingSubmissionsCount" in stats.submissions
+      ? stats.submissions.pendingSubmissionsCount
+      : stats.submissions?.pending) ?? 0;
+
+  const approvedSubmissions =
+    (typeof stats.submissions === "object" && "approvedSubmissionsCount" in stats.submissions
+      ? stats.submissions.approvedSubmissionsCount
+      : stats.submissions?.approved) ?? 0;
+
+  const activeInternsCount =
+    ("activeInterns" in stats.interns ? stats.interns.activeInterns : stats.interns.active) ?? 0;
+  const totalInternsCount =
+    ("totalInterns" in stats.interns ? stats.interns.totalInterns : stats.interns.total) ?? 0;
+  const completedInternsCount =
+    ("completed" in stats.interns ? stats.interns.completed : 0) ?? 0;
+
+  const avgEvalScore = stats.evaluations?.avgScore ?? stats.weeklyEvaluations?.avgScore ?? 0;
+  const totalEvals = stats.evaluations?.totalEvaluations ?? stats.weeklyEvaluations?.total ?? 0;
+
   const statusAssignments: AssignmentDetail[] =
     statusAssignmentsQuery.data?.data.map((assignment) => ({
       id: assignment.id,
@@ -134,7 +171,7 @@ export default function LeaderStatsOverview() {
     },
   };
 
-  const statusKeyToStatsKey: Record<string, keyof typeof stats.assignments.byStatus> = {
+  const statusKeyToStatsKey: Record<string, string> = {
     PENDING_APPROVAL: "pendingApproval",
     TODO: "todo",
     IN_PROGRESS: "inProgress",
@@ -144,7 +181,10 @@ export default function LeaderStatsOverview() {
   };
 
   const selectedStatusTotal = modalConfig.status
-    ? stats.assignments.byStatus[statusKeyToStatsKey[modalConfig.status]]
+    ? (stats.assignments?.byStatus as Record<string, number> | undefined)?.[statusKeyToStatsKey[modalConfig.status]] ??
+      stats.tasksByStatus?.[statusKeyToStatsKey[modalConfig.status]] ??
+      stats.tasksByStatus?.[modalConfig.status] ??
+      0
     : modalAssignments.length;
 
   const handleOpenStatusModal = (statusKey: AssignmentStatus) => {
@@ -211,48 +251,48 @@ export default function LeaderStatsOverview() {
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
         <StatsCard
           title={t("activeInterns")}
-          value={stats.interns.active}
-          subtitle={t("activeInternsSubtitle", { total: stats.interns.total })}
+          value={activeInternsCount}
+          subtitle={t("activeInternsSubtitle", { total: totalInternsCount })}
           icon={<Users className="h-6 w-6 text-primary-light" />}
           href="/leader/interns?status=ACTIVE"
           trend={{
-            text: t("completedCount", { count: stats.interns.completed }),
+            text: t("completedCount", { count: completedInternsCount }),
             positive: true,
           }}
         />
 
         <StatsCard
           title={t("activeWorkloadDays")}
-          value={t("workloadDaysCount", { n: stats.activeWorkloadDays ?? 0 })}
+          value={t("workloadDaysCount", { n: activeWorkloadDays })}
           subtitle={t("workloadDaysSubtitle")}
           icon={<Clock className="h-6 w-6 text-cyan-400" />}
           trend={{
-            text: (stats.activeWorkloadDays ?? 0) > 10 ? t("riskLevelDanger") : (stats.activeWorkloadDays ?? 0) > 7 ? t("riskLevelWarning") : t("riskLevelHealthy"),
-            positive: (stats.activeWorkloadDays ?? 0) <= 7,
+            text: activeWorkloadDays > 10 ? t("riskLevelDanger") : activeWorkloadDays > 7 ? t("riskLevelWarning") : t("riskLevelHealthy"),
+            positive: activeWorkloadDays <= 7,
           }}
         />
 
         <StatsCard
           title={t("dailyReportRate")}
-          value={stats.dailyReportRate ? `${stats.dailyReportRate.percentage}%` : "—"}
-          subtitle={stats.dailyReportRate ? t("dailyReportRateSubtitle", { submitted: stats.dailyReportRate.todaySubmitted, total: stats.dailyReportRate.totalInterns, pct: stats.dailyReportRate.percentage }) : t("dailyReportRateSubtitle", { submitted: 0, total: 0, pct: 0 })}
+          value={`${todayRate}%`}
+          subtitle={`Hôm nay: ${todaySubmitted}/${totalActiveInterns} • Tuần: ${weeklyRate}%`}
           icon={<FileText className="h-6 w-6 text-indigo-400" />}
           href="/leader/daily-reports"
           trend={{
-            text: (stats.dailyReportRate?.percentage ?? 0) >= 80 ? t("riskLevelHealthy") : (stats.dailyReportRate?.percentage ?? 0) >= 50 ? t("riskLevelWarning") : t("riskLevelDanger"),
-            positive: (stats.dailyReportRate?.percentage ?? 0) >= 80,
+            text: reportRateRisk === "HEALTHY" ? t("riskLevelHealthy") : reportRateRisk === "WARNING" ? t("riskLevelWarning") : t("riskLevelDanger"),
+            positive: reportRateRisk === "HEALTHY",
           }}
         />
 
         <StatsCard
           title={t("pendingSubmissions")}
-          value={stats.submissions.pending}
-          subtitle={t("approvedSubmissions", { count: stats.submissions.approved })}
+          value={pendingSubmissions}
+          subtitle={t("approvedSubmissions", { count: approvedSubmissions })}
           icon={<FileCheck className="h-6 w-6 text-amber-400" />}
           href="/leader/tasks?status=REVIEW"
           trend={{
-            text: stats.submissions.pending > 0 ? t("needsApproval") : t("approvalDone"),
-            positive: stats.submissions.pending === 0,
+            text: pendingSubmissions > 0 ? t("needsApproval") : t("approvalDone"),
+            positive: pendingSubmissions === 0,
           }}
         />
 
@@ -270,13 +310,13 @@ export default function LeaderStatsOverview() {
 
         <StatsCard
           title={t("avgScore")}
-          value={`${stats.weeklyEvaluations.avgScore}/10`}
-          subtitle={t("avgScoreSubtitle", { count: stats.weeklyEvaluations.total })}
+          value={`${avgEvalScore}/10`}
+          subtitle={t("avgScoreSubtitle", { count: totalEvals })}
           icon={<Award className="h-6 w-6 text-emerald-400" />}
           href="/leader/weekly-evaluation"
           trend={{
             text: t("avgScoreLabel"),
-            positive: stats.weeklyEvaluations.avgScore >= 7,
+            positive: avgEvalScore >= 7,
           }}
         />
 
@@ -309,8 +349,11 @@ export default function LeaderStatsOverview() {
             <Table.Body
               data={internProgress}
               render={(intern) => {
+                const internName = intern.fullName || intern.internName || "Thực tập sinh";
+                const internEmail = intern.email || intern.internEmail || "";
+                const overdueCount = intern.overdueTasks ?? intern.overdueCount ?? 0;
                 const total = intern.totalTasks || 1;
-                const percent = Math.round((intern.completedTasks / total) * 100);
+                const percent = intern.completionRate ?? Math.round((intern.completedTasks / total) * 100);
                 const isTodayReport = intern.lastReportDate ? new Date(intern.lastReportDate).toDateString() === new Date().toDateString() : false;
 
                 return (
@@ -318,14 +361,14 @@ export default function LeaderStatsOverview() {
                     <div className="flex items-center gap-3">
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs font-bold text-foreground overflow-hidden">
                         {intern.avatarUrl ? (
-                          <Image src={intern.avatarUrl} alt={intern.internName} width={36} height={36} className="h-full w-full object-cover" unoptimized />
+                          <Image src={intern.avatarUrl} alt={internName} width={36} height={36} className="h-full w-full object-cover" unoptimized />
                         ) : (
-                          <span>{intern.internName ? intern.internName.charAt(0).toUpperCase() : "U"}</span>
+                          <span>{internName.charAt(0).toUpperCase()}</span>
                         )}
                       </div>
                       <div className="min-w-0">
-                        <p className="font-bold text-foreground text-sm truncate">{intern.internName}</p>
-                        <p className="text-xs text-muted truncate">{intern.internEmail}</p>
+                        <p className="font-bold text-foreground text-sm truncate">{internName}</p>
+                        <p className="text-xs text-muted truncate">{internEmail}</p>
                       </div>
                     </div>
 
@@ -372,12 +415,12 @@ export default function LeaderStatsOverview() {
                       )}
                       {intern.healthStatus === "WARNING" && (
                         <span className="inline-flex items-center justify-center text-xs font-semibold leading-none text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1.5 rounded-lg">
-                          {t("warning", { count: intern.overdueCount })}
+                          {t("warning", { count: overdueCount })}
                         </span>
                       )}
                       {intern.healthStatus === "DANGER" && (
                         <span className="inline-flex items-center justify-center text-xs font-semibold leading-none text-rose-400 bg-rose-500/10 border border-rose-500/30 px-2.5 py-1.5 rounded-lg">
-                          {t("danger", { count: intern.overdueCount })}
+                          {t("danger", { count: overdueCount })}
                         </span>
                       )}
                     </div>
@@ -412,7 +455,10 @@ export default function LeaderStatsOverview() {
                 {statusLabels[key]}
               </p>
               <p className={`text-xl font-bold ${color.textBold} mt-1`}>
-                {stats.assignments.byStatus[statusKeyToStatsKey[key]] ?? 0}
+                {(stats.assignments?.byStatus as Record<string, number> | undefined)?.[statusKeyToStatsKey[key]] ??
+                  stats.tasksByStatus?.[statusKeyToStatsKey[key]] ??
+                  stats.tasksByStatus?.[key] ??
+                  0}
               </p>
             </button>
           ))}

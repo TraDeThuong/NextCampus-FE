@@ -62,6 +62,12 @@
       "deleteTitle": "Xóa thông báo này",
       "details": "Chi tiết thông báo",
       "back": "Quay lại danh sách thông báo"
+    },
+    "theme": {
+      "toggle": "Chuyển giao diện",
+      "light": "Sáng",
+      "dark": "Tối",
+      "system": "Hệ thống"
     }
   }
 }

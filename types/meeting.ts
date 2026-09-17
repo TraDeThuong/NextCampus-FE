@@ -48,6 +48,7 @@ export interface Meeting {
   description: string | null;
   createdBy: string;
   hostId: string;
+  departmentId?: string | null;
   location: string | null;
   meetingType: MeetingType;
   meetingLink: string | null;
@@ -60,6 +61,7 @@ export interface Meeting {
   updatedAt: string;
   creator: UserBrief;
   host: UserBrief;
+  department?: { id: string; name: string } | null;
   participants: MeetingParticipant[];
   _count: { participants: number; absences: number };
 }
@@ -130,6 +132,7 @@ export interface MeetingQueryParams {
   status?: MeetingStatus;
   meetingType?: MeetingType;
   visibility?: MeetingVisibility;
+  departmentId?: string;
   createdBy?: string;
   hostId?: string;
   participantId?: string;
@@ -145,10 +148,16 @@ export interface MeetingQueryParams {
 
 // ─── Payloads ─────────────────────────────────────────────────────────────
 
+export interface ParticipantInput {
+  userId: string;
+  participantRole?: ParticipantRole;
+}
+
 export interface CreateMeetingPayload {
   title: string;
   description?: string;
   hostId: string;
+  departmentId?: string;
   location?: string;
   meetingType: MeetingType;
   meetingLink?: string;
@@ -157,12 +166,14 @@ export interface CreateMeetingPayload {
   status?: "DRAFT" | "SCHEDULED";
   visibility?: MeetingVisibility;
   participantIds?: string[];
+  participants?: ParticipantInput[];
 }
 
 export interface UpdateMeetingPayload {
   title?: string;
   description?: string | null;
   hostId?: string;
+  departmentId?: string | null;
   location?: string | null;
   meetingType?: MeetingType;
   meetingLink?: string | null;

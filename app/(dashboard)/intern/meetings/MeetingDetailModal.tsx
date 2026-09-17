@@ -62,10 +62,38 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
             <div className="space-y-3"><p className="text-sm font-medium text-slate-200">{myStatus === "ACCEPTED" ? t("leaveMeeting") : t("declineInvitation")}</p><textarea rows={2} placeholder={t("reasonPlaceholder")} value={leaveReason} onChange={(e) => setLeaveReason(e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white outline-none transition focus:border-primary-main/50 placeholder:text-slate-600 resize-none" />
               <div className="flex items-center gap-2"><button type="button" onClick={() => { setShowLeaveForm(false); setLeaveReason(""); }} className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:text-white">{t("cancel")}</button><button type="button" onClick={handleDecline} disabled={!leaveReason.trim() || rsvpMeeting.isPending || submitAbsence.isPending} className="rounded-lg bg-red-500/20 px-3 py-1.5 text-xs font-medium text-red-300 transition hover:bg-red-500/30 disabled:opacity-50">{t("confirm")}</button></div></div>
           ) : (
-            <div className="flex items-center justify-between"><p className="text-sm text-slate-400">{myStatus === "ACCEPTED" ? t("youAccepted") : t("youInvited")}</p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-slate-400">
+                {myStatus === "ACCEPTED"
+                  ? t("youAccepted")
+                  : myStatus === "DECLINED"
+                  ? "Bạn đã báo vắng mặt"
+                  : t("youInvited")}
+              </p>
               <div className="flex items-center gap-2">
-                {myStatus === "PENDING" && <button type="button" onClick={handleAccept} disabled={rsvpMeeting.isPending} className="flex items-center gap-1.5 rounded-lg bg-emerald-500/20 px-3 py-1.5 text-xs font-medium text-emerald-300 transition hover:bg-emerald-500/30 disabled:opacity-50"><CheckCircle2 className="h-3.5 w-3.5" />{t("accept")}</button>}
-                <button type="button" onClick={() => setShowLeaveForm(true)} className="flex items-center gap-1.5 rounded-lg bg-red-500/20 px-3 py-1.5 text-xs font-medium text-red-300 transition hover:bg-red-500/30"><XCircle className="h-3.5 w-3.5" />{myStatus === "ACCEPTED" ? t("leave") : t("decline")}</button></div></div>
+                {myStatus !== "ACCEPTED" && (
+                  <button
+                    type="button"
+                    onClick={handleAccept}
+                    disabled={rsvpMeeting.isPending}
+                    className="flex items-center gap-1.5 rounded-lg bg-emerald-500/20 px-3 py-1.5 text-xs font-medium text-emerald-300 transition hover:bg-emerald-500/30 disabled:opacity-50"
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    {t("accept")}
+                  </button>
+                )}
+                {myStatus !== "DECLINED" && (
+                  <button
+                    type="button"
+                    onClick={() => setShowLeaveForm(true)}
+                    className="flex items-center gap-1.5 rounded-lg bg-red-500/20 px-3 py-1.5 text-xs font-medium text-red-300 transition hover:bg-red-500/30"
+                  >
+                    <XCircle className="h-3.5 w-3.5" />
+                    {myStatus === "ACCEPTED" ? t("leave") : t("decline")}
+                  </button>
+                )}
+              </div>
+            </div>
           )}
         </div>
       )}

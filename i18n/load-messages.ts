@@ -102,6 +102,12 @@ export async function loadLocaleMessages(
     await import(`../messages/${locale}/admin/policies.json`)
   ).default;
   deepMerge(files, adminPolicies);
+  if (adminPolicies && typeof adminPolicies === "object" && "admin" in adminPolicies) {
+    const adminObj = (adminPolicies as { admin: { policies: Record<string, unknown> } }).admin;
+    if (adminObj?.policies) {
+      deepMerge(files, { admin: { regulations: adminObj.policies } });
+    }
+  }
 
   const adminProfile = (
     await import(`../messages/${locale}/admin/profile.json`)

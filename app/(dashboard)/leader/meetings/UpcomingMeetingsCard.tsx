@@ -6,6 +6,8 @@ import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
 import { useMeetings } from "@/hooks/meeting/useMeetings";
 
+import { useAuth } from "@/hooks/auth/useAuth";
+
 const STATUS: Record<string, { dot: string; badge: string }> = {
   SCHEDULED: { dot: "bg-sky-400", badge: "bg-sky-500/10 text-sky-300" },
   ONGOING: { dot: "bg-emerald-400", badge: "bg-emerald-500/10 text-emerald-300" },
@@ -16,6 +18,7 @@ function formatDate(iso: string) { return new Date(iso).toLocaleDateString("en-U
 
 export default function UpcomingMeetingsCard({ onMeetingClick }: { onMeetingClick?: (id: string) => void }) {
   const t = useTranslations("leader.meetings");
+  const { state } = useAuth();
   const today = new Date();
   const start = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
   const end = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59).toISOString();
@@ -45,6 +48,15 @@ export default function UpcomingMeetingsCard({ onMeetingClick }: { onMeetingClic
           <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
             {meetings.map((m) => {
               const status = STATUS[m.status] || { dot: "bg-slate-400", badge: "bg-slate-500/10 text-slate-300" };
+              const myParticipant = m.participants?.find((p) => p.userId === state.user?.id);
+              const rsvpBadge = myParticipant
+                ? myParticipant.invitationStatus === "ACCEPTED"
+                  ? { text: "Tham gia", cls: "bg-emerald-500/15 border-emerald-500/30 text-emerald-300" }
+                  : myParticipant.invitationStatus === "DECLINED"
+                  ? { text: "Vắng mặt", cls: "bg-rose-500/15 border-rose-500/30 text-rose-300" }
+                  : { text: "Chờ RSVP", cls: "bg-amber-500/15 border-amber-500/30 text-amber-300" }
+                : null;
+
               return (
                 <button key={m.id} type="button" onClick={() => onMeetingClick?.(m.id)} className="group w-full rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2 transition-all hover:border-primary/30 hover:bg-white/[0.06]">
                   <div className="flex items-center gap-3">
@@ -52,7 +64,14 @@ export default function UpcomingMeetingsCard({ onMeetingClick }: { onMeetingClic
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-3">
                         <p className="truncate text-sm font-medium text-slate-200">{m.title}</p>
-                        <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${status.badge}`}>{m.status}</span>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {rsvpBadge && (
+                            <span className={`rounded-md border px-1.5 py-0.5 text-[10px] font-medium ${rsvpBadge.cls}`}>
+                              {rsvpBadge.text}
+                            </span>
+                          )}
+                          <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${status.badge}`}>{m.status}</span>
+                        </div>
                       </div>
                       <div className="mt-0.5 flex items-center gap-2 text-[11px] text-slate-500">
                         <span className="shrink-0">{formatTime(m.startTime)}</span><span>•</span>

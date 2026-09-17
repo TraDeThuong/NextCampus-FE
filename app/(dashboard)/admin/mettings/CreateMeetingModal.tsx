@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/auth/useAuth";
 import { useCreateMeeting } from "@/hooks/meeting/useCreateMeeting";
 import { getUsersService } from "@/services/user.service";
 import { meetingService } from "@/services/meeting.service";
+import { departmentService } from "@/services/department.service";
 import type { CreateMeetingPayload, MeetingType, MeetingVisibility } from "@/types/meeting";
 
 interface Props {
@@ -30,6 +31,7 @@ const createMeetingFormSchema = z
   .object({
     title: z.string().min(1, "Title is required").max(200, "Title is too long"),
     description: z.string().optional(),
+    departmentId: z.string().optional(),
     meetingType: z.enum(["ONLINE", "OFFLINE", "HYBRID"]),
     location: z.string().optional(),
     meetingLink: z.string().optional(),
@@ -80,7 +82,14 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
     staleTime: 1000 * 60 * 5,
   });
 
+  const { data: departmentsData } = useQuery({
+    queryKey: ["departments"],
+    queryFn: () => departmentService.getDepartments(),
+    staleTime: 1000 * 60 * 5,
+  });
+
   const leaders = leadersData?.data ?? [];
+  const departments = departmentsData?.data ?? [];
 
   const {
     register,
@@ -157,6 +166,7 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
     const payload: CreateMeetingPayload = {
       title: data.title,
       description: data.description || undefined,
+      departmentId: data.departmentId || undefined,
       hostId: currentUser.id,
       meetingType: data.meetingType,
       location: data.location || undefined,
@@ -277,6 +287,24 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
             {...register("location")}
             className={`${inputClass} mt-1`}
           />
+        </div>
+
+        {/* Department */}
+        <div>
+          <label className={labelClass}>{t("admin.meetings.formDepartment") || "Phòng ban"}</label>
+          <select
+            {...register("departmentId")}
+            className={`${inputClass} mt-1`}
+          >
+            <option value="" className="bg-slate-900 text-slate-400">
+              -- Chọn phòng ban (Tùy chọn) --
+            </option>
+            {departments.map((dept) => (
+              <option key={dept.id} value={dept.id} className="bg-slate-900 text-white">
+                {dept.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Meeting Link */}

@@ -15,6 +15,8 @@
       "tasksCompleted": "Công Việc Hoàn Thành",
       "completedOf": "Hoàn thành {done}/{total}",
       "updateProgress": "Cập nhật tiến độ",
+      "tasksBlocked": "Công Việc Bị Chặn",
+      "tasksBlockedHint": "Cần hỗ trợ gỡ vướng",
       "tasksOverdue": "Công Việc Quá Hạn",
       "overdueHint": "Quá hạn và chưa hoàn thành",
       "overdueNeedsAttention": "Cần xử lý ngay",
@@ -66,6 +68,7 @@
       "readAndAcknowledgeNow": "Đọc & Cam kết ngay",
       "agreeTermsCheckbox": "Tôi đã đọc kỹ, hiểu rõ và tự nguyện cam kết tuân thủ nghiêm túc toàn bộ nội quy và quy định thực tập nêu trên.",
       "regulationVersionUpdated": "Phiên bản {version} · Cập nhật ngày {date}",
+      "exportSummaryPdf": "Xuất chứng chỉ (PDF)",
       "close": "Đóng"
     }
   }

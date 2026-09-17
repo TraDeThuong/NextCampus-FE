@@ -15,6 +15,8 @@
       "tasksCompleted": "Tasks Completed",
       "completedOf": "Completed {done}/{total}",
       "updateProgress": "Update work progress",
+      "tasksBlocked": "Blocked Tasks",
+      "tasksBlockedHint": "Needs unblocking support",
       "tasksOverdue": "Overdue Tasks",
       "overdueHint": "Past deadline and not completed",
       "overdueNeedsAttention": "Needs attention",
@@ -66,6 +68,7 @@
       "readAndAcknowledgeNow": "Read & Agree Now",
       "agreeTermsCheckbox": "I have carefully read, fully understood, and voluntarily agree to strictly comply with all the internship regulations and policies stated above.",
       "regulationVersionUpdated": "Version {version} · Updated on {date}",
+      "exportSummaryPdf": "Export Certificate (PDF)",
       "close": "Close"
     }
   }

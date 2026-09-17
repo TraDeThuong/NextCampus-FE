@@ -62,6 +62,12 @@
       "deleteTitle": "Delete this notification",
       "details": "Notification details",
       "back": "Back to notifications"
+    },
+    "theme": {
+      "toggle": "Toggle theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
     }
   }
 }
