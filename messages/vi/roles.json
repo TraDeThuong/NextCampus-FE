@@ -24,6 +24,7 @@
         "noRolesDesc": "Thử tìm kiếm với từ khóa khác hoặc tạo một vai trò mới.",
         "editBtn": "Chỉnh sửa",
         "permissionsBtn": "Phân quyền",
+        "usersBtn": "Thành viên",
         "deleteBtn": "Xóa",
         "deleteDisabledSystem": "Không thể xóa vai trò mặc định của hệ thống",
         "deleteDisabledUsers": "Vai trò đang có {count} người dùng, hãy chuyển người dùng sang vai trò khác trước khi xóa",
@@ -62,6 +63,20 @@
         "deselectAllGroup": "Bỏ chọn nhóm này",
         "saveBtn": "Lưu phân quyền",
         "cancelBtn": "Đóng"
+      },
+      "usersModal": {
+        "title": "Quản lý thành viên vai trò: \"{name}\"",
+        "description": "Xem danh sách người dùng đang thuộc vai trò này hoặc gán thành viên mới.",
+        "searchPlaceholder": "Tìm kiếm theo tên hoặc email người dùng...",
+        "currentUsers": "Thành viên hiện tại ({count})",
+        "noUsers": "Chưa có người dùng nào được gán vai trò này.",
+        "assignNewUser": "Gán thành viên vào vai trò",
+        "selectUser": "Chọn người dùng để gán...",
+        "assignBtn": "Gán vai trò",
+        "assignSuccess": "Đã gán vai trò thành công cho {name}",
+        "assignError": "Gán vai trò thất bại.",
+        "changeRoleConfirm": "Người dùng đang thuộc vai trò \"{oldRole}\". Bạn có muốn chuyển sang \"{newRole}\"?",
+        "closeBtn": "Đóng"
       },
       "resources": {
         "USER": "Quản lý Người dùng",

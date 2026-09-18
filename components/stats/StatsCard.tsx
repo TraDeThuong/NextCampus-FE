@@ -32,12 +32,12 @@ export default function StatsCard({
 }: StatsCardProps) {
   const t = useTranslations();
   const content = (
-    <MetalCard className={`p-6 h-full flex flex-col ${href ? "cursor-pointer group/card" : ""} ${className}`}>
+    <MetalCard className={`p-4 sm:p-6 h-full flex flex-col ${href ? "cursor-pointer group/card" : ""} ${className}`}>
       <div className="flex-1">
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
+        <div className="flex items-start justify-between gap-2">
+          <div className="space-y-1 min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted group-hover/card:text-primary-light transition-colors">
+              <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted group-hover/card:text-primary-light transition-colors truncate">
                 {title}
               </p>
               {href && (
@@ -46,15 +46,15 @@ export default function StatsCard({
                 </span>
               )}
             </div>
-            <h3 className="text-3xl font-extrabold text-foreground metal-text tracking-tight">
+            <h3 className="text-2xl sm:text-3xl font-extrabold text-foreground metal-text tracking-tight truncate">
               {value}
             </h3>
             {subtitle && (
-              <p className="text-xs text-muted/80 pt-0.5">{subtitle}</p>
+              <p className="text-[11px] sm:text-xs text-muted/80 pt-0.5 line-clamp-1">{subtitle}</p>
             )}
           </div>
           {icon && (
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-primary-light backdrop-blur-md shadow-inner group-hover/card:border-primary-light/40 group-hover/card:bg-primary-light/10 transition-all">
+            <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 text-primary-light backdrop-blur-md shadow-inner group-hover/card:border-primary-light/40 group-hover/card:bg-primary-light/10 transition-all">
               {icon}
             </div>
           )}
@@ -62,7 +62,7 @@ export default function StatsCard({
       </div>
 
       {trend && (
-        <div className="mt-4 flex items-center justify-between gap-1.5 text-xs font-medium">
+        <div className="mt-3 sm:mt-4 flex items-center justify-between gap-1.5 text-xs font-medium">
           <span
             className={`inline-flex items-center justify-center gap-1.5 rounded-full px-2.5 py-1 leading-none ${
               trend.positive

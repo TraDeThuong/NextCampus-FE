@@ -151,7 +151,7 @@ export default function LeaderInternDetailPage() {
       {intern.discordUsername && <DiscordCard intern={intern} />}
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-        <StatsCard title={td("totalTasks")} value={totalTasks} icon={<ListTodo className="h-5 w-5 text-sky-400" />} />
+        <StatsCard className="col-span-2 sm:col-span-1" title={td("totalTasks")} value={totalTasks} icon={<ListTodo className="h-5 w-5 text-sky-400" />} />
         <StatsCard title={t("completed")} value={completedTasks} icon={<CheckCircle2 className="h-5 w-5 text-emerald-400" />} />
         <StatsCard title={td("inProgress")} value={inProgressTasks} icon={<Play className="h-5 w-5 text-blue-400" />} />
         <StatsCard title={td("overdue")} value={overdueTasks} icon={<AlertTriangle className="h-5 w-5 text-red-400" />} />

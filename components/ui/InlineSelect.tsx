@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect, useId } from "react";
+import { useState, useRef, useEffect, useCallback, useId } from "react";
+import { createPortal } from "react-dom";
 import { ChevronDown, Check, Loader2 } from "lucide-react";
 
 type Option = {
@@ -33,14 +34,54 @@ export default function InlineSelect({
 }: InlineSelectProps) {
     const [open, setOpen] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
+    const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
     const ref = useRef<HTMLDivElement>(null);
     const triggerRef = useRef<HTMLButtonElement>(null);
+    const dropdownRef = useRef<HTMLDivElement>(null);
     const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
     const listboxId = useId();
 
+    const updatePosition = useCallback(() => {
+        if (triggerRef.current) {
+            const rect = triggerRef.current.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const openUpward = spaceBelow < 240 && rect.top > 240;
+
+            setDropdownStyle({
+                position: "fixed",
+                top: openUpward ? undefined : rect.bottom + 6,
+                bottom: openUpward
+                    ? window.innerHeight - rect.top + 6
+                    : undefined,
+                left: Math.max(8, Math.min(rect.left, window.innerWidth - 290)),
+                minWidth: Math.max(rect.width, 180),
+                maxWidth: 280,
+                zIndex: 9999,
+            });
+        }
+    }, []);
+
+    useEffect(() => {
+        if (open) {
+            updatePosition();
+            window.addEventListener("scroll", updatePosition, true);
+            window.addEventListener("resize", updatePosition);
+        }
+        return () => {
+            window.removeEventListener("scroll", updatePosition, true);
+            window.removeEventListener("resize", updatePosition);
+        };
+    }, [open, updatePosition]);
+
     useEffect(() => {
         function handleClick(e: MouseEvent) {
-            if (ref.current && !ref.current.contains(e.target as Node)) {
+            const target = e.target as Node;
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(target) &&
+                triggerRef.current &&
+                !triggerRef.current.contains(target)
+            ) {
                 setOpen(false);
             }
         }
@@ -125,62 +166,67 @@ export default function InlineSelect({
                 )}
             </button>
 
-            {open && (
-                <div
-                    id={listboxId}
-                    role="listbox"
-                    aria-label={ariaLabel}
-                    onKeyDown={(event) => {
-                        if (event.key === "Escape") {
-                            event.preventDefault();
-                            closeDropdown();
-                        } else if (event.key === "ArrowDown") {
-                            event.preventDefault();
-                            focusOption(activeIndex + 1);
-                        } else if (event.key === "ArrowUp") {
-                            event.preventDefault();
-                            focusOption(activeIndex - 1);
-                        }
-                    }}
-                    className="absolute left-0 top-full z-50 mt-1 min-w-[180px] max-w-[280px] rounded-xl border border-white/10 bg-[#0f172a] p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl"
-                >
-                    <div className="max-h-[220px] overflow-y-auto">
-                        {options.map((opt, index) => {
-                            const isSelected =
-                                opt.value === value ||
-                                (opt.value === null && value === null);
-                            return (
-                                <button
-                                    ref={(element) => {
-                                        optionRefs.current[index] = element;
-                                    }}
-                                    key={String(opt.value)}
-                                    type="button"
-                                    role="option"
-                                    aria-selected={isSelected}
-                                    tabIndex={index === activeIndex ? 0 : -1}
-                                    onClick={() => {
-                                        onChange(opt.value);
-                                        closeDropdown();
-                                    }}
-                                    className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
-                                        isSelected
-                                            ? "text-cyan-400 bg-cyan-400/10"
-                                            : "text-slate-300 hover:bg-white/5 hover:text-white"
-                                    }`}
-                                >
-                                    <span className="flex-1 truncate text-left">
-                                        {opt.label}
-                                    </span>
-                                    {isSelected && (
-                                        <Check className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
-                                    )}
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
-            )}
+            {open &&
+                typeof document !== "undefined" &&
+                createPortal(
+                    <div
+                        id={listboxId}
+                        ref={dropdownRef}
+                        role="listbox"
+                        aria-label={ariaLabel}
+                        style={dropdownStyle}
+                        onKeyDown={(event) => {
+                            if (event.key === "Escape") {
+                                event.preventDefault();
+                                closeDropdown();
+                            } else if (event.key === "ArrowDown") {
+                                event.preventDefault();
+                                focusOption(activeIndex + 1);
+                            } else if (event.key === "ArrowUp") {
+                                event.preventDefault();
+                                focusOption(activeIndex - 1);
+                            }
+                        }}
+                        className="rounded-xl border border-white/10 bg-[#0f172a] p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl"
+                    >
+                        <div className="max-h-[220px] overflow-y-auto">
+                            {options.map((opt, index) => {
+                                const isSelected =
+                                    opt.value === value ||
+                                    (opt.value === null && value === null);
+                                return (
+                                    <button
+                                        ref={(element) => {
+                                            optionRefs.current[index] = element;
+                                        }}
+                                        key={String(opt.value)}
+                                        type="button"
+                                        role="option"
+                                        aria-selected={isSelected}
+                                        tabIndex={index === activeIndex ? 0 : -1}
+                                        onClick={() => {
+                                            onChange(opt.value);
+                                            closeDropdown();
+                                        }}
+                                        className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
+                                            isSelected
+                                                ? "text-cyan-400 bg-cyan-400/10"
+                                                : "text-slate-300 hover:bg-white/5 hover:text-white"
+                                        }`}
+                                    >
+                                        <span className="flex-1 truncate text-left">
+                                            {opt.label}
+                                        </span>
+                                        {isSelected && (
+                                            <Check className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
+                                        )}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>,
+                    document.body,
+                )}
         </div>
     );
 }

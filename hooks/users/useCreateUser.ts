@@ -1,8 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createUserService } from "./../../services/user.service";
-import { CreateUserPayload } from "@/types/user";
-
-import axios from "axios";
+import { createUserService } from "@/services/user.service";
+import type { CreateUserPayload } from "@/types/user";
 
 export const useCreateUser = () => {
   const queryClient = useQueryClient();
@@ -10,14 +8,7 @@ export const useCreateUser = () => {
   return useMutation({
     mutationFn: (payload: CreateUserPayload) => createUserService(payload),
     onSuccess: () => {
-      alert("Tạo tài khoản thành công! Hệ thống đã gửi email.");
       queryClient.invalidateQueries({ queryKey: ["users"] });
-    },
-    onError: (error: unknown) => {
-      const errorMsg = axios.isAxiosError<{ message?: string }>(error)
-        ? error.response?.data?.message
-        : "Đã có lỗi xảy ra";
-      alert(`Thất bại: ${errorMsg}`);
     },
   });
 };

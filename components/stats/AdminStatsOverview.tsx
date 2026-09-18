@@ -170,7 +170,7 @@ export default function AdminStatsOverview() {
       </div>
 
       {/* Level 1: 4 Headline KPI Cards (Total Interns, Total Leaders, Active Tasks, System Completion Rate) */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
         <StatsCard
           title={t("admin.dashboard.totalInterns")}
           value={totalInterns}

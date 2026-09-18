@@ -47,8 +47,12 @@ Table là thành phần dễ bị "vỡ" giao diện nhất khi lên code. Phả
    - Icon sắp xếp (mũi tên tăng/giảm `ArrowUpDown`, `ArrowUp`, `ArrowDown`) đặt ngay cạnh tiêu đề cột cho phép sort.
    - Khi bộ lọc (Filter) được áp dụng: Phải hiển thị huy hiệu (Badge) số lượng filter đang active, nút "Xóa tất cả bộ lọc", và highlight trạng thái đang lọc trên giao diện.
 5. **Phân trang (Pagination) & Trạng thái rỗng (Empty state)**:
-   - Phân trang: Hiển thị rõ số dòng đang xem (VD: "Hiển thị 1-10 trên 120 kết quả"), nút Previous/Next tự động disable khi ở trang đầu/trang cuối, hiển thị nút số trang gọn gàng.
-   - Trạng thái rỗng (**Empty State**): Khi bảng không có dữ liệu, hiển thị hình minh họa hoặc icon trang trống kèm thông điệp rõ ràng (VD: *"Chưa có công việc nào"*) cùng nút kêu gọi hành động (Call To Action - CTA) như *"Tạo công việc mới"*.
+   - **Phân trang chuẩn (`<Table.Footer>`)**:
+     * Luôn đồng bộ URL params: `?page=1&limit=10`. Reset về `page=1` khi tìm kiếm hoặc lọc.
+     * Đặt trong `<Table.Footer>`, bọc điều kiện `{meta && meta.totalPages > 1 && (` (ẩn footer khi chỉ có 1 trang để bảng gọn gàng, tự động hiện khi `totalPages > 1`).
+     * Bên trái: Hiển thị chuỗi bản địa hóa `t("...pagination", { page: meta.page, totalPages: meta.totalPages, total: meta.total })` (*"Trang X / Y (Tổng Z bản ghi)"*).
+     * Bên phải: Nút `ChevronLeft` (`disabled={meta.page <= 1}`) và `ChevronRight` (`disabled={meta.page >= meta.totalPages}`) kèm style Cyberpunk viền `border-white/10 bg-white/[0.03]`.
+   - **Trạng thái rỗng (Empty State)**: Khi bảng không có dữ liệu, hiển thị hình minh họa hoặc icon trang trống kèm thông điệp rõ ràng (VD: *"Chưa có công việc nào"*) cùng nút kêu gọi hành động (Call To Action - CTA) như *"Tạo công việc mới"*.
 6. **Cố định hàng/cột (Sticky Head/Column)**:
    - Dòng tiêu đề bảng luôn giữ cố định khi cuộn nội dung dài: `<thead className="sticky top-0 bg-background z-10 shadow-sm">`.
    - Cột đầu tiên (Tên/ID) hoặc cột cuối (Thao tác) có thể dùng `sticky left-0` / `sticky right-0` kèm nền màu để không bị chồng chữ khi cuộn ngang.
@@ -129,3 +133,18 @@ Table là thành phần dễ bị "vỡ" giao diện nhất khi lên code. Phả
    - Sử dụng thống nhất bộ icon vector SVG từ thư viện **`lucide-react`**, kích thước chuẩn `w-4 h-4` (nút/inline) hoặc `w-5 h-5` (heading/card header).
    - Thêm `shrink-0` cho icon khi đặt cạnh text để tránh bị co méo.
    - Hình ảnh minh họa (Illustrations / Avatars) có placeholder loading, tỉ lệ khung hình cố định (`aspect-video`, `aspect-square`) và xử lý fallback nếu link ảnh hỏng.
+4. **Thẻ Thống Kê & Hiệu Ứng Hover (Stat Cards & Micro-interactions)**:
+   - Toàn bộ thẻ thống kê dùng `<MetalCard>` (dashboard, admin-team, leaders, interns, onboarding...) bắt buộc có hiệu ứng micro-interaction đồng bộ khi hover.
+   - Khung chứa icon BẮT BUỘC có các lớp: `transition-all duration-500 group-hover:rotate-6 group-hover:scale-110`.
+   - Kết hợp với hiệu ứng nâng nhẹ (`hover:-translate-y-1`) và dải sáng kim loại quét qua (`group-hover:left-[130%]`) của `MetalCard` để tạo cảm giác sống động, thống nhất toàn hệ thống.
+   - **Bố cục Mobile (Tối thiểu 2 thẻ / hàng & Xử lý số lượng lẻ)**:
+     * Trên màn hình di động (`< md`), lưới thống kê **BẮT BUỘC hiển thị tối thiểu 2 thẻ trên một hàng**: `grid grid-cols-2 gap-3 sm:gap-4 md:...` thay vì chỉ để `grid` mặc định rơi về 1 cột dọc làm chiếm diện tích màn hình.
+     * **Xử lý số lượng thẻ lẻ (`cards.length % 2 !== 0`)**: Khi tổng số thẻ là số lẻ (3, 5, 7 thẻ...), **thẻ đầu tiên BẮT BUỘC chiếm trọn vẹn toàn bộ hàng đầu tiên trên mobile (`col-span-2 md:col-span-1`)** để làm thẻ Headline KPI, các thẻ còn lại ghép đôi 2 thẻ / hàng đều đặn.
+     * **Sizing responsive tối ưu cho 2 cột trên mobile**:
+       - Padding thẻ: `p-4 sm:p-5 lg:p-6`
+       - Kích thước số hiển thị: `text-2xl sm:text-4xl lg:text-5xl font-bold leading-none`
+       - Khung chứa icon: `h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14 rounded-xl sm:rounded-2xl` kèm `shrink-0`
+       - Kích thước icon: `h-5 w-5 sm:h-6 sm:w-6`
+       - Tiêu đề card: `text-[11px] sm:text-xs font-medium uppercase tracking-[0.1em] sm:tracking-[0.2em] text-muted truncate` (hoặc `line-clamp-2`)
+       - Đường line phân cách: `mt-3 sm:mt-4 h-[2px] w-10 sm:w-16 rounded-full`
+

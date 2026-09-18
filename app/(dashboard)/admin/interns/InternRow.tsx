@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { MoreVertical, Eye, Trash2, Circle, Loader2 } from "lucide-react";
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { toast } from "react-hot-toast";
 
 import type { Intern } from "@/types/intern";
@@ -22,6 +22,7 @@ type InternRowProps = {
 
 export default function InternRow({ intern }: InternRowProps) {
     const t = useTranslations();
+    const locale = useLocale();
     const router = useRouter();
     const { mutate: deleteIntern } = useDeleteIntern();
     const { data: leadersData } = useLeaders();
@@ -62,7 +63,10 @@ export default function InternRow({ intern }: InternRowProps) {
     endDate.setMonth(endDate.getMonth() + intern.duration);
 
     const fmtDate = (d: Date) =>
-        d.toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+        d.toLocaleDateString(locale === "vi" ? "vi-VN" : "en-GB", {
+            month: "short",
+            year: "numeric",
+        });
 
     const statusBadge: Record<string, string> = {
         ACTIVE: "border-emerald-400/20 bg-emerald-500/10 text-emerald-300",

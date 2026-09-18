@@ -1,15 +1,17 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { UserPlus, Mail, Loader2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { useTranslations } from "next-intl";
+import { useMemo, useEffect } from "react";
 
 import { createUserService } from "@/services/user.service";
 import MetalCard from "@/components/ui/MetalCard";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
+import Select from "@/components/ui/Select";
 
 import { useRoles } from "@/hooks/rbac/useRoles";
 
@@ -82,17 +84,38 @@ function InviteAdminForm({
     const t = useTranslations();
     const { data: rolesRes } = useRoles();
     const roles = rolesRes?.data ?? [];
-    const defaultRole = roles.find((r) => r.name === "ADMIN");
+
+    const adminRoles = useMemo(() => {
+        return roles.filter((r) => r.name !== "LEADER" && r.name !== "INTERN");
+    }, [roles]);
+
+    const defaultRole = adminRoles.find((r) => r.name === "ADMIN") ?? adminRoles[0];
+
+    const roleOptions = useMemo(() => {
+        return adminRoles.map((r) => ({
+            value: r.id,
+            label: `${r.name} ${r.isSystem ? t("admin.adminTeam.systemRole") : t("admin.adminTeam.customRole")}`,
+        }));
+    }, [adminRoles, t]);
 
     const {
         register,
         handleSubmit,
+        control,
+        setValue,
         formState: { errors },
     } = useForm<FormValues>({
         defaultValues: {
-            roleId: defaultRole?.id,
+            email: "",
+            roleId: defaultRole?.id ?? "",
         },
     });
+
+    useEffect(() => {
+        if (defaultRole?.id) {
+            setValue("roleId", defaultRole.id);
+        }
+    }, [defaultRole?.id, setValue]);
 
     return (
         <div className="px-2 py-8 text-center">
@@ -107,12 +130,15 @@ function InviteAdminForm({
             </p>
 
             <form
-                onSubmit={handleSubmit((data) => onSubmit(data))}
+                onSubmit={handleSubmit((data) => {
+                    onSubmit(data);
+                    onCloseModal?.();
+                })}
                 className="mt-6 space-y-4 text-left"
             >
                 <div>
                     <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
-                        Email thành viên <span className="text-rose-500">*</span>
+                        {t("admin.adminTeam.emailLabel")} <span className="text-rose-500">*</span>
                     </label>
                     <div className="relative">
                         <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -137,19 +163,19 @@ function InviteAdminForm({
                 </div>
 
                 <div>
-                    <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
-                        Vai trò được gán
-                    </label>
-                    <select
-                        {...register("roleId")}
-                        className="w-full rounded-xl border border-white/10 bg-slate-900 py-3 px-4 text-sm text-white outline-none focus:border-cyan-400/50 cursor-pointer"
-                    >
-                        {roles.map((r) => (
-                            <option key={r.id} value={r.id}>
-                                {r.name} {r.isSystem ? "(Hệ thống)" : "(Tùy chỉnh)"}
-                            </option>
-                        ))}
-                    </select>
+                    <Controller
+                        control={control}
+                        name="roleId"
+                        render={({ field }) => (
+                            <Select
+                                label={t("admin.adminTeam.roleLabel")}
+                                placeholder={t("admin.adminTeam.selectRole")}
+                                value={field.value}
+                                onChange={field.onChange}
+                                options={roleOptions}
+                            />
+                        )}
+                    />
                 </div>
 
                 <div className="flex justify-center gap-3 pt-2">

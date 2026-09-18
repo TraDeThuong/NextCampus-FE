@@ -248,8 +248,9 @@ export default function LeaderStatsOverview() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
+      <div className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
         <StatsCard
+          className="col-span-2 md:col-span-1"
           title={t("activeInterns")}
           value={activeInternsCount}
           subtitle={t("activeInternsSubtitle", { total: totalInternsCount })}

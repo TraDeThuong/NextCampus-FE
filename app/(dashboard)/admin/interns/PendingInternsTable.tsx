@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, X, AlertTriangle } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 import { useApplications } from "@/hooks/application/useApplications";
 import { useReviewApplication } from "@/hooks/application/useReviewApplication";
@@ -12,6 +12,7 @@ import Modal from "@/components/ui/Modal";
 
 export default function PendingInternsTable() {
     const t = useTranslations();
+    const locale = useLocale();
     const { data, isLoading, isError } = useApplications({ status: "PENDING" });
     const { mutate: review, isPending: reviewing } = useReviewApplication();
 
@@ -88,7 +89,7 @@ export default function PendingInternsTable() {
                                     </td>
                                     <td className="px-6 py-4 text-slate-400">
                                         {new Date(app.createdAt).toLocaleDateString(
-                                            "en-GB",
+                                            locale === "vi" ? "vi-VN" : "en-GB",
                                             {
                                                 day: "2-digit",
                                                 month: "short",

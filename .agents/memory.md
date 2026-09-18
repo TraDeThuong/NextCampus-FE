@@ -45,6 +45,32 @@ Chỉ lưu các quyết định kiến trúc và UI/UX đã được xác nhận
   - **Quy tắc**: Toàn bộ các thành phần sidebar bên phải (Right Sidebar, panel chi tiết bên phải, cột hành động/thông tin phụ) **tuyệt đối không sử dụng viền bao quanh (outer border / border bao ngoài container)** nhằm tối đa hóa diện tích và chiều rộng hiển thị nội dung.
   - **Pattern chuẩn**: Thiết kế bố cục liền mạch (borderless / seamless layout), không bọc bên ngoài bằng các khung viền hộp (`border`, `border-white/10`, `border-slate-200`) gây lãng phí không gian hiển thị; ưu tiên dùng khoảng cách tự nhiên (`gap-6`), padding hợp lý hoặc nền mờ tinh tế để phân chia khu vực.
 
+- **2026-09-18 — Chuẩn Hóa Dropdown, Portal Chống Cắt Xén & Đa Ngôn Ngữ Placeholder**:
+  - **Cấm `<select>` native**: Tuyệt đối không dùng thẻ `<select>` native mặc định thô cứng của trình duyệt trong bảng và form. Luôn dùng `InlineSelect` (cho ô dữ liệu bảng) hoặc `Select` (cho Form/Modal).
+  - **Đủ 6 trạng thái + Mutation lock**: `InlineSelect` khi mutate phải nhận `loading={isPending}` và `disabled={isPending}` kèm spinner để ngăn race condition và double click.
+  - **Portal & Flip Placement**: `InlineSelect` bắt buộc render qua `createPortal(..., document.body)` với fixed coordinate và tự động mở lật lên trên (`openUpward` khi `spaceBelow < 240px`), triệt tiêu 100% lỗi bị cắt xén (clipping) do `overflow-hidden` trên `<Table>`.
+  - **Đa ngôn ngữ cho Placeholder Filter**: `FilterSelect` tự động phân giải placeholder theo ngôn ngữ (`placeholder ?? (locale === "vi" ? "Tất cả" : "All")`), tuyệt đối không hardcode text tiếng Anh `"All"`. Khi gọi `FilterSelect`, luôn truyền `placeholder={t("...allStatus")}` hoặc key tương ứng.
+
+- **2026-09-18 — Hiệu Ứng Hover & Bố Cục Mobile Thẻ Thống Kê (Stat Cards Micro-interactions & Mobile Grid)**:
+  - **Hiệu ứng Micro-interaction**: Toàn bộ thẻ thống kê sử dụng `<MetalCard>` (tại `/admin/admin-team`, `/admin/leaders`, `/admin/interns`, `/admin/onboarding`, `MeetingStats`, `InternTaskStats`...) bắt buộc có hiệu ứng tương tác vi mô đồng bộ khi hover. Hộp chứa Icon BẮT BUỘC có các lớp: `transition-all duration-500 group-hover:rotate-6 group-hover:scale-110`. Khi hover thẻ, icon xoay nhẹ 6 độ và phóng to 1.1x kết hợp dải sáng kim loại quét qua (`group-hover:left-[130%]`) của `MetalCard`.
+  - **Bố cục Mobile (Tối thiểu 2 thẻ / hàng & Xử lý số lượng thẻ lẻ)**:
+    * Trên màn hình di động (`< md`), lưới thống kê **BẮT BUỘC hiển thị tối thiểu 2 thẻ trên một hàng** (`grid grid-cols-2 gap-3 sm:gap-4 md:...`). Tuyệt đối KHÔNG để `grid` mặc định rơi về 1 cột đơn dọc làm chiếm chiều dài trang.
+    * **Xử lý số lượng lẻ (`cards.length % 2 !== 0`)**: Nếu tổng số thẻ là số lẻ (ví dụ 3, 5, 7 thẻ), **thẻ đầu tiên BẮT BUỘC chiếm toàn bộ hàng đầu tiên trên giao diện mobile (`col-span-2 md:col-span-1`)** để làm thẻ Headline KPI chủ đạo. Các thẻ còn lại tự động ghép thành từng cặp 2 thẻ / hàng đều đặn, không để lại khoảng trống khuyết lẻ ở hàng cuối.
+  - **Responsive Sizing chuẩn cho Thẻ Thống kê 2 cột mobile**:
+    * Padding thẻ: `p-4 sm:p-5 lg:p-6`
+    * Kích thước số: `text-2xl sm:text-4xl lg:text-5xl font-bold leading-none`
+    * Khung chứa Icon: `h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14 rounded-xl sm:rounded-2xl` kèm `shrink-0`
+    * Icon SVG: `h-5 w-5 sm:h-6 sm:w-6`
+    * Tiêu đề: `text-[11px] sm:text-xs font-medium uppercase tracking-[0.1em] sm:tracking-[0.2em] text-muted truncate`
+    * Thanh kẻ ngang: `mt-3 sm:mt-4 h-[2px] w-10 sm:w-16 rounded-full`
+
+- **2026-09-18 — Quy Chuẩn Phân Trang Đồng Bộ Cho Bảng Dữ Liệu (Standardized Table Pagination)**:
+  - **Đồng bộ URL (URL-first State)**: Tham số `page` và `limit` bắt buộc đồng bộ hai chiều với URL search query (`?page=1&limit=10`) qua `useSearchParams()` và `router.push()`. Khi người dùng gõ tìm kiếm hoặc đổi filter, bắt buộc tự động reset về `page=1`.
+  - **Vị trí Footer `<Table.Footer>`**: Toàn bộ bảng dữ liệu đặt cụm điều khiển phân trang bên trong `<Table.Footer>`.
+  - **Điều kiện hiển thị `{meta && meta.totalPages > 1 && (`**: Tự động ẩn thanh footer khi dữ liệu chỉ có 1 trang (`meta.totalPages <= 1`, tức số dòng ≤ limit mặc định 10) để giữ giao diện bảng tinh gọn; tự động xuất hiện khi dữ liệu sang trang thứ 2 trở lên.
+  - **Hiển thị thông tin & Nút bấm chuẩn**:
+    * Bên trái: Chuỗi định dạng `next-intl` động: `t("...pagination", { page: meta.page, totalPages: meta.totalPages, total: meta.total })` (*"Trang X / Y (Tổng Z nhân sự/bản ghi)"*). Tuyệt đối không hardcode text.
+    * Bên phải: Nút `ChevronLeft` (`disabled={meta.page <= 1}`) và `ChevronRight` (`disabled={meta.page >= meta.totalPages}`) kèm style Cyberpunk viền `border-white/10 bg-white/[0.03] text-muted hover:border-white/20 hover:text-foreground disabled:opacity-30`.
 
 ---
 
@@ -79,5 +105,10 @@ Chỉ lưu các quyết định kiến trúc và UI/UX đã được xác nhận
   - **Hook Phân Quyền UI (useRBAC)**: Cung cấp `{ user, role, permissions, isAdmin, portal, can, canAny, canAll }` tại `hooks/rbac/useRBAC.ts` để kiểm tra phân quyền hạt nhân trên mọi component.
   - **Hiển thị Menu Động theo Permissions**: `AdminSidebar` tự động lọc và chỉ hiển thị các menu tương ứng với permissions thực tế của người dùng, ngoại trừ `ADMIN` hệ thống luôn xem được 100% menu.
   - **Quản Trị Nhân Sự & Form Động**: `AdminTeamFilter` & `AdminTeamTable` tích hợp bộ lọc vai trò động qua `useRoles()`. `CreateUserForm` nạp danh sách vai trò thực tế từ backend thay vì hardcode 2 options.
+
+- **2026-09-18 — Tách Biệt Nhân Sự Ban Quản Trị & Tập Trung Hóa Gán Vai Trò (Role Assignment Centralization)**:
+  - **Phân hệ `/admin/admin-team`**: Chỉ quản lý đội ngũ Ban Quản Trị (những vai trò quản trị hệ thống). Không hiển thị nhân sự `LEADER` và `INTERN` tại đây. Luôn tự động gắn `excludeRoles="LEADER,INTERN"` vào query params và truy vấn thống kê.
+  - **Bỏ cột vai trò & Bỏ lọc vai trò ở `/admin/admin-team`**: Vì trang này chỉ dành cho Ban Quản Trị, cột vai trò và bộ lọc vai trò bị loại bỏ để bảng thoáng rộng và tập trung.
+  - **Tập trung hóa đổi vai trò về `/admin/roles`**: Thao tác gán vai trò người dùng được quy tụ 100% về trang `/admin/roles` qua modal `RoleUsersModal` mở từ cột/nút "Thành viên" của từng vai trò. Xóa bỏ nút "Đổi vai trò" phân tán ở từng hàng `AdminTeamRow`.
 
 

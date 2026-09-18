@@ -24,6 +24,7 @@ import { useDeleteRole } from "@/hooks/rbac/useDeleteRole";
 import type { Role } from "@/types/rbac";
 import EditRoleModal from "./EditRoleModal";
 import RolePermissionsModal from "./RolePermissionsModal";
+import RoleUsersModal from "./RoleUsersModal";
 
 export default function RolesTable() {
   const t = useTranslations();
@@ -52,6 +53,7 @@ export default function RolesTable() {
   // Modals state
   const [editingRole, setEditingRole] = useState<Role | null>(null);
   const [permissionsRole, setPermissionsRole] = useState<Role | null>(null);
+  const [usersRole, setUsersRole] = useState<Role | null>(null);
   const [deletingRole, setDeletingRole] = useState<Role | null>(null);
 
   const { mutate: deleteRole, isPending: isDeleting } = useDeleteRole({
@@ -161,14 +163,19 @@ export default function RolesTable() {
 
                       {/* Users Count */}
                       <td className="py-4 px-4">
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                          <Users className="h-4 w-4 shrink-0 text-muted" />
-                          <span className="font-medium text-foreground">
+                        <button
+                          type="button"
+                          onClick={() => setUsersRole(role)}
+                          title={t("admin.roles.table.usersBtn")}
+                          className="flex items-center gap-1.5 text-xs text-muted-foreground transition hover:text-cyan-400 group/u"
+                        >
+                          <Users className="h-4 w-4 shrink-0 text-muted group-hover/u:text-cyan-400" />
+                          <span className="font-medium text-foreground group-hover/u:text-cyan-400 underline-offset-2 hover:underline cursor-pointer">
                             {t("admin.roles.table.usersCountLabel", {
                               count: role.userCount,
                             })}
                           </span>
-                        </div>
+                        </button>
                       </td>
 
                       {/* Permissions Count */}
@@ -186,6 +193,19 @@ export default function RolesTable() {
                       {/* Actions */}
                       <td className="py-4 px-6 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          {/* Users Action Button */}
+                          <button
+                            type="button"
+                            onClick={() => setUsersRole(role)}
+                            title={t("admin.roles.table.usersBtn")}
+                            className="flex items-center gap-1.5 rounded-xl border border-indigo-400/30 bg-indigo-500/10 px-3 py-1.5 text-xs font-medium text-indigo-300 transition hover:bg-indigo-500/20 hover:border-indigo-400/50"
+                          >
+                            <Users className="h-3.5 w-3.5 shrink-0" />
+                            <span className="hidden sm:inline">
+                              {t("admin.roles.table.usersBtn")}
+                            </span>
+                          </button>
+
                           {/* Permissions Action Button */}
                           <button
                             type="button"
@@ -251,9 +271,15 @@ export default function RolesTable() {
 
       {/* Permissions Matrix Modal */}
       <RolePermissionsModal
-        isOpen={!!permissionsRole}
+        isOpen={Boolean(permissionsRole)}
         onClose={() => setPermissionsRole(null)}
         role={permissionsRole}
+      />
+
+      <RoleUsersModal
+        isOpen={Boolean(usersRole)}
+        onClose={() => setUsersRole(null)}
+        role={usersRole}
       />
 
       {/* Delete Confirmation Modal */}

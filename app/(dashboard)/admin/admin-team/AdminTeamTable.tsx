@@ -5,8 +5,7 @@ import { useMemo } from "react";
 import { ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 
-import { getUsersService } from "@/services/user.service";
-import { useQuery } from "@tanstack/react-query";
+import { useUsers } from "@/hooks/user/useUsers";
 import type { UserQueryParams } from "@/types/user";
 
 import Table from "@/components/ui/Table";
@@ -16,7 +15,7 @@ import Spinner from "@/components/ui/Spinner";
 import AdminTeamRow from "./AdminTeamRow";
 
 const COLUMNS =
-    "minmax(240px, 2.5fr) minmax(100px, 1fr) minmax(140px, 1.2fr) minmax(140px, 1.2fr) 40px";
+    "minmax(280px, 3fr) minmax(140px, 1.2fr) minmax(140px, 1.2fr) 40px";
 
 export default function AdminTeamTable() {
     const t = useTranslations();
@@ -25,15 +24,15 @@ export default function AdminTeamTable() {
     const router = useRouter();
 
     const params: UserQueryParams = useMemo(() => {
-        const p: UserQueryParams = {};
+        const p: UserQueryParams = {
+            excludeRoles: "LEADER,INTERN",
+        };
 
-        const roleName = searchParams.get("roleName");
         const fullName = searchParams.get("fullName");
         const isActive = searchParams.get("isActive");
         const page = searchParams.get("page");
         const limit = searchParams.get("limit");
 
-        if (roleName && roleName !== "all") p.roleName = roleName;
         if (fullName) p.fullName = fullName;
         if (isActive) p.isActive = isActive === "true";
         if (page) p.page = Number(page);
@@ -42,11 +41,7 @@ export default function AdminTeamTable() {
         return p;
     }, [searchParams]);
 
-    const { data, isPending, isError } = useQuery({
-        queryKey: ["users", params],
-        queryFn: () => getUsersService(params),
-        staleTime: 1000 * 60 * 2,
-    });
+    const { data, isPending, isError } = useUsers(params);
 
     const admins = data?.data ?? [];
     const meta = data?.meta;
@@ -97,7 +92,6 @@ export default function AdminTeamTable() {
             >
                 <Table.Header>
                     <div>{t("admin.adminTeam.colAdmin")}</div>
-                    <div>{t("admin.adminTeam.colRole")}</div>
                     <div>{t("admin.adminTeam.colStatus")}</div>
                     <div>{t("admin.adminTeam.colJoined")}</div>
                     <div />

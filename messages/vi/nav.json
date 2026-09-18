@@ -2,7 +2,7 @@
   "admin": {
     "nav": {
       "dashboard": "Tổng quan",
-      "adminTeam": "Nhóm Admin",
+      "adminTeam": "Admin",
       "leaders": "Leader",
       "interns": "Thực tập sinh",
       "department": "Phòng ban",
@@ -43,7 +43,7 @@
   "nav": {
     "admin": {
       "dashboard": "Tổng quan",
-      "adminTeam": "Nhóm Admin",
+      "adminTeam": "Admin",
       "leaders": "Leader",
       "interns": "Thực tập sinh",
       "department": "Phòng ban",

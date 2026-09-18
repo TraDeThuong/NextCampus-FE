@@ -3,19 +3,23 @@
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
+import { useMemo } from "react";
 import FilterSelect from "@/components/ui/FilterSelect";
 import MetalCard from "@/components/ui/MetalCard";
-
-const STATUS_OPTIONS = [
-    { value: "true", label: "Active" },
-    { value: "false", label: "Inactive" },
-];
 
 export default function LeaderFilter() {
     const t = useTranslations();
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();
+
+    const statusOptions = useMemo(
+        () => [
+            { value: "true", label: t("admin.leaders.active") },
+            { value: "false", label: t("admin.leaders.inactive") },
+        ],
+        [t],
+    );
 
     function updateParam(key: string, value: string) {
         const params = new URLSearchParams(searchParams.toString());
@@ -68,7 +72,8 @@ export default function LeaderFilter() {
                 <FilterSelect
                     label={t("admin.leaders.filterStatus")}
                     filterField="isActive"
-                    options={STATUS_OPTIONS}
+                    options={statusOptions}
+                    placeholder={t("admin.leaders.allStatus")}
                 />
             </div>
         </MetalCard>

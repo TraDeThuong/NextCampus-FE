@@ -24,6 +24,7 @@
         "noRolesDesc": "Try searching with different keywords or create a new role.",
         "editBtn": "Edit",
         "permissionsBtn": "Permissions",
+        "usersBtn": "Members",
         "deleteBtn": "Delete",
         "deleteDisabledSystem": "Cannot delete system-defined roles",
         "deleteDisabledUsers": "Role currently has {count} assigned users, reassign users first",
@@ -62,6 +63,20 @@
         "deselectAllGroup": "Deselect all in this group",
         "saveBtn": "Save Permissions",
         "cancelBtn": "Close"
+      },
+      "usersModal": {
+        "title": "Manage Users in Role: \"{name}\"",
+        "description": "View users assigned to this role or assign new users to it.",
+        "searchPlaceholder": "Search by user name or email...",
+        "currentUsers": "Current Members ({count})",
+        "noUsers": "No users currently assigned to this role.",
+        "assignNewUser": "Assign Member to Role",
+        "selectUser": "Select user to assign...",
+        "assignBtn": "Assign Role",
+        "assignSuccess": "Successfully assigned role to {name}",
+        "assignError": "Failed to assign role.",
+        "changeRoleConfirm": "User is currently in \"{oldRole}\". Do you want to move them to \"{newRole}\"?",
+        "closeBtn": "Close"
       },
       "resources": {
         "USER": "User Management",

@@ -3,20 +3,24 @@
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
+import { useMemo } from "react";
 import FilterSelect from "@/components/ui/FilterSelect";
 import MetalCard from "@/components/ui/MetalCard";
-
-const STATUS_OPTIONS = [
-    { value: "ACTIVE", label: "Active" },
-    { value: "COMPLETED", label: "Completed" },
-    { value: "DROPPED", label: "Dropped" },
-];
 
 export default function InternFilters() {
     const t = useTranslations();
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();
+
+    const statusOptions = useMemo(
+        () => [
+            { value: "ACTIVE", label: t("admin.interns.active") },
+            { value: "COMPLETED", label: t("admin.interns.completed") },
+            { value: "DROPPED", label: t("admin.interns.dropped") },
+        ],
+        [t],
+    );
 
     function updateParam(key: string, value: string) {
         const params = new URLSearchParams(searchParams.toString());
@@ -103,7 +107,8 @@ export default function InternFilters() {
                 <FilterSelect
                     label={t("admin.interns.filterStatus")}
                     filterField="status"
-                    options={STATUS_OPTIONS}
+                    options={statusOptions}
+                    placeholder={t("admin.interns.allStatus")}
                 />
             </div>
         </MetalCard>

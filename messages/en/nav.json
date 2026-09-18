@@ -2,7 +2,7 @@
   "admin": {
     "nav": {
       "dashboard": "Dashboard",
-      "adminTeam": "Admin Team",
+      "adminTeam": "Admin",
       "leaders": "Leaders",
       "interns": "Interns",
       "department": "Department",
@@ -43,7 +43,7 @@
   "nav": {
     "admin": {
       "dashboard": "Dashboard",
-      "adminTeam": "Admin Team",
+      "adminTeam": "Admin",
       "leaders": "Leaders",
       "interns": "Interns",
       "department": "Department",

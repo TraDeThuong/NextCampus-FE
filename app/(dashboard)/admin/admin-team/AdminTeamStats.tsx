@@ -1,7 +1,6 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Users, Circle, XCircle, AlertTriangle } from "lucide-react";
 
@@ -11,25 +10,23 @@ import Spinner from "@/components/ui/Spinner";
 
 export default function AdminTeamStats() {
     const t = useTranslations();
-    const searchParams = useSearchParams();
-    const roleNameParam = searchParams.get("roleName");
-    const roleFilter = roleNameParam && roleNameParam !== "all" ? roleNameParam : undefined;
+    const excludeRoles = "LEADER,INTERN";
 
     const { data: allData, isPending: allLoading, isError } = useQuery({
-        queryKey: ["users", { roleName: roleFilter, limit: 1 }],
-        queryFn: () => getUsersService({ roleName: roleFilter, limit: 1 }),
+        queryKey: ["users", { excludeRoles, limit: 1 }],
+        queryFn: () => getUsersService({ excludeRoles, limit: 1 }),
     });
 
     const { data: activeData, isPending: activeLoading } = useQuery({
-        queryKey: ["users", { roleName: roleFilter, isActive: true, limit: 1 }],
+        queryKey: ["users", { excludeRoles, isActive: true, limit: 1 }],
         queryFn: () =>
-            getUsersService({ roleName: roleFilter, isActive: true, limit: 1 }),
+            getUsersService({ excludeRoles, isActive: true, limit: 1 }),
     });
 
     const { data: inactiveData, isPending: inactiveLoading } = useQuery({
-        queryKey: ["users", { roleName: roleFilter, isActive: false, limit: 1 }],
+        queryKey: ["users", { excludeRoles, isActive: false, limit: 1 }],
         queryFn: () =>
-            getUsersService({ roleName: roleFilter, isActive: false, limit: 1 }),
+            getUsersService({ excludeRoles, isActive: false, limit: 1 }),
     });
 
     const isPending = allLoading || activeLoading || inactiveLoading;
@@ -74,26 +71,39 @@ export default function AdminTeamStats() {
         );
     }
 
+    const isOdd = cards.length % 2 !== 0;
+
     return (
-        <div className="grid gap-5 md:grid-cols-3">
-            {cards.map((card) => {
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 md:gap-5">
+            {cards.map((card, idx) => {
                 const Icon = card.icon;
+                const isFirstAndOdd = isOdd && idx === 0;
+
                 return (
-                    <MetalCard key={card.title} className="p-6">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted">
+                    <MetalCard
+                        key={card.title}
+                        className={`p-4 sm:p-5 lg:p-6 ${isFirstAndOdd ? "col-span-2 md:col-span-1" : ""}`}
+                    >
+                        <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0 flex-1">
+                                <p className="text-[11px] sm:text-xs font-medium uppercase tracking-[0.1em] sm:tracking-[0.2em] text-muted truncate">
                                     {card.title}
                                 </p>
-                                <h3 className="chrome-text mt-4 text-5xl font-bold leading-none">
+                                <h3 className="chrome-text mt-2 sm:mt-4 text-3xl sm:text-4xl lg:text-5xl font-bold leading-none">
                                     {card.value}
                                 </h3>
-                                <div className="mt-4 h-[2px] w-16 rounded-full bg-gradient-to-r from-primary-light/70 to-transparent" />
+                                <div className="mt-3 sm:mt-4 h-[2px] w-10 sm:w-16 rounded-full bg-gradient-to-r from-primary-light/70 to-transparent" />
                             </div>
                             <div
-                                className={`flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br ${card.iconBg} shadow-lg`}
+                                className={`
+                                    flex h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14 shrink-0 items-center justify-center
+                                    rounded-xl sm:rounded-2xl border border-white/10
+                                    bg-gradient-to-br ${card.iconBg}
+                                    shadow-lg transition-all duration-500
+                                    group-hover:rotate-6 group-hover:scale-110
+                                `}
                             >
-                                <Icon className="h-6 w-6 text-white" />
+                                <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                             </div>
                         </div>
                     </MetalCard>

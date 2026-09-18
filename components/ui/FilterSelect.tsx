@@ -9,6 +9,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import { ChevronDown, Check } from "lucide-react";
 
 interface Option {
@@ -29,10 +30,14 @@ export default function FilterSelect({
     label,
     filterField,
     options,
-    placeholder = "All",
+    placeholder,
     disabled = false,
     className = "",
 }: FilterSelectProps) {
+    const locale = useLocale();
+    const resolvedPlaceholder =
+        placeholder ?? (locale === "vi" ? "Tất cả" : "All");
+
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();
@@ -48,7 +53,7 @@ export default function FilterSelect({
     const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
     const triggerId = useId();
     const listboxId = useId();
-    const allOptions = [{ value: "", label: placeholder }, ...options];
+    const allOptions = [{ value: "", label: resolvedPlaceholder }, ...options];
     const selectedIndex = Math.max(
         0,
         allOptions.findIndex((option) => option.value === currentValue),
@@ -186,7 +191,7 @@ export default function FilterSelect({
                             selected ? "text-foreground" : "text-muted"
                         }
                     >
-                        {selected?.label ?? placeholder}
+                        {selected?.label ?? resolvedPlaceholder}
                     </span>
                     <ChevronDown
                         className={`h-4 w-4 shrink-0 text-muted transition-transform duration-300 ${
