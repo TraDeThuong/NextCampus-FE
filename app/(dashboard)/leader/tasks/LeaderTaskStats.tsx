@@ -233,7 +233,7 @@ function StatButton({ icon, color, value, label, sub, onClick }: { icon: React.R
 function TaskTable({ filters }: { filters: TaskQueryParams }) {
   const t = useTranslations("leader.tasks");
   const [page, setPage] = useState(1);
-  const { data, isLoading } = useTasks({ ...filters, page, limit: 20 });
+  const { data, isLoading, refetch, isFetching } = useTasks({ ...filters, page, limit: 20 });
   const tasks = data?.data ?? [];
   const meta = data?.meta;
   const router = useRouter();
@@ -244,8 +244,17 @@ function TaskTable({ filters }: { filters: TaskQueryParams }) {
   return (
     <>
       <p className="mb-3 text-xs text-muted">{t("tasksFound", { count: meta?.total ?? tasks.length, plural: (meta?.total ?? tasks.length) !== 1 ? "s" : "" })}</p>
-      <Table columns="80px 1fr 100px 70px 100px">
-        <Table.Header><div>{t("colCode")}</div><div>{t("colTitle")}</div><div>{t("colOwner")}</div><div>{t("colPriority")}</div><div>{t("colDeadline")}</div></Table.Header>
+      <Table columns="80px 1fr 100px 70px 120px">
+        <Table.Header>
+          <div>{t("colCode")}</div>
+          <div>{t("colTitle")}</div>
+          <div>{t("colOwner")}</div>
+          <div>{t("colPriority")}</div>
+          <div className="flex items-center justify-between">
+            <span>{t("colDeadline")}</span>
+            <Table.ReloadButton onReload={refetch} isReloading={isFetching} />
+          </div>
+        </Table.Header>
         <Table.Body data={tasks} render={(task) => (
           <Table.Row key={task.id} onClick={() => router.push(`/leader/tasks/${task.id}`)}>
             <div className="font-mono text-sm text-muted">{task.code ?? "—"}</div>
@@ -268,7 +277,7 @@ function TaskTable({ filters }: { filters: TaskQueryParams }) {
 function DoneTaskTable({ filters }: { filters: TaskQueryParams }) {
   const t = useTranslations("leader.tasks");
   const [page, setPage] = useState(1);
-  const { data, isLoading } = useTasks({ ...filters, page, limit: 20 });
+  const { data, isLoading, refetch, isFetching } = useTasks({ ...filters, page, limit: 20 });
   const tasks = data?.data ?? [];
   const meta = data?.meta;
   const router = useRouter();
@@ -279,8 +288,18 @@ function DoneTaskTable({ filters }: { filters: TaskQueryParams }) {
   return (
     <>
       <p className="mb-3 text-xs text-muted">{t("doneTasksFound", { count: meta?.total ?? tasks.length, plural: (meta?.total ?? tasks.length) !== 1 ? "s" : "" })}</p>
-      <Table columns="80px 1fr 100px 100px 70px 100px">
-        <Table.Header><div>{t("colCode")}</div><div>{t("colTitle")}</div><div>{t("colOwner")}</div><div>{t("colPhase")}</div><div>{t("colPriority")}</div><div>{t("colDeadline")}</div></Table.Header>
+      <Table columns="80px 1fr 100px 100px 70px 120px">
+        <Table.Header>
+          <div>{t("colCode")}</div>
+          <div>{t("colTitle")}</div>
+          <div>{t("colOwner")}</div>
+          <div>{t("colPhase")}</div>
+          <div>{t("colPriority")}</div>
+          <div className="flex items-center justify-between">
+            <span>{t("colDeadline")}</span>
+            <Table.ReloadButton onReload={refetch} isReloading={isFetching} />
+          </div>
+        </Table.Header>
         <Table.Body data={tasks} render={(task) => (
           <Table.Row key={task.id} onClick={() => router.push(`/leader/tasks/${task.id}`)}>
             <div className="font-mono text-sm text-muted">{task.code ?? "—"}</div>

@@ -45,11 +45,11 @@ Chỉ lưu các quyết định kiến trúc và UI/UX đã được xác nhận
   - **Quy tắc**: Toàn bộ các thành phần sidebar bên phải (Right Sidebar, panel chi tiết bên phải, cột hành động/thông tin phụ) **tuyệt đối không sử dụng viền bao quanh (outer border / border bao ngoài container)** nhằm tối đa hóa diện tích và chiều rộng hiển thị nội dung.
   - **Pattern chuẩn**: Thiết kế bố cục liền mạch (borderless / seamless layout), không bọc bên ngoài bằng các khung viền hộp (`border`, `border-white/10`, `border-slate-200`) gây lãng phí không gian hiển thị; ưu tiên dùng khoảng cách tự nhiên (`gap-6`), padding hợp lý hoặc nền mờ tinh tế để phân chia khu vực.
 
-- **2026-09-18 — Chuẩn Hóa Dropdown, Portal Chống Cắt Xén & Đa Ngôn Ngữ Placeholder**:
-  - **Cấm `<select>` native**: Tuyệt đối không dùng thẻ `<select>` native mặc định thô cứng của trình duyệt trong bảng và form. Luôn dùng `InlineSelect` (cho ô dữ liệu bảng) hoặc `Select` (cho Form/Modal).
-  - **Đủ 6 trạng thái + Mutation lock**: `InlineSelect` khi mutate phải nhận `loading={isPending}` và `disabled={isPending}` kèm spinner để ngăn race condition và double click.
-  - **Portal & Flip Placement**: `InlineSelect` bắt buộc render qua `createPortal(..., document.body)` với fixed coordinate và tự động mở lật lên trên (`openUpward` khi `spaceBelow < 240px`), triệt tiêu 100% lỗi bị cắt xén (clipping) do `overflow-hidden` trên `<Table>`.
-  - **Đa ngôn ngữ cho Placeholder Filter**: `FilterSelect` tự động phân giải placeholder theo ngôn ngữ (`placeholder ?? (locale === "vi" ? "Tất cả" : "All")`), tuyệt đối không hardcode text tiếng Anh `"All"`. Khi gọi `FilterSelect`, luôn truyền `placeholder={t("...allStatus")}` hoặc key tương ứng.
+  - **Đa ngôn ngữ & Quy chuẩn Placeholder cho Dropdown ("Tất cả" / "All")**: 
+    * Mọi dropdown bộ lọc (`FilterSelect`) chỉ cần hiển thị duy nhất **"Tất cả"** (đối với tiếng Việt) hoặc **"All"** (đối với tiếng Anh) làm placeholder / option mặc định khi chưa chọn.
+    * **Tuyệt đối KHÔNG nối thêm tên trường** (như *"Tất cả phòng ban"*, *"Tất cả vị trí"*, *"Tất cả trạng thái"*, *"Tất cả vai trò"*...) vì nhãn (`label`) phía trên ô đã thể hiện rõ ngữ cảnh trường dữ liệu.
+    * **Tinh giản nhãn bộ lọc (Concise Filter Labels)**: Nhãn (`label`) của các ô lọc phải thật ngắn gọn, súc tích, loại bỏ các từ dư thừa như *"Trạng thái"*, *"được gán"* (ví dụ: dùng *"Lời mời"*, *"Đơn"*, *"Phòng ban"*, *"Vị trí"* thay vì *"Trạng thái lời mời"*, *"Trạng thái đơn"*...).
+    * `FilterSelect` tự động phân giải: `placeholder ?? (locale === "vi" ? "Tất cả" : "All")`. Khi gọi `FilterSelect`, không cần truyền prop `placeholder` phức tạp trừ trường hợp đặc biệt.
 
 - **2026-09-18 — Hiệu Ứng Hover & Bố Cục Mobile Thẻ Thống Kê (Stat Cards Micro-interactions & Mobile Grid)**:
   - **Hiệu ứng Micro-interaction**: Toàn bộ thẻ thống kê sử dụng `<MetalCard>` (tại `/admin/admin-team`, `/admin/leaders`, `/admin/interns`, `/admin/onboarding`, `MeetingStats`, `InternTaskStats`...) bắt buộc có hiệu ứng tương tác vi mô đồng bộ khi hover. Hộp chứa Icon BẮT BUỘC có các lớp: `transition-all duration-500 group-hover:rotate-6 group-hover:scale-110`. Khi hover thẻ, icon xoay nhẹ 6 độ và phóng to 1.1x kết hợp dải sáng kim loại quét qua (`group-hover:left-[130%]`) của `MetalCard`.
@@ -71,6 +71,17 @@ Chỉ lưu các quyết định kiến trúc và UI/UX đã được xác nhận
   - **Hiển thị thông tin & Nút bấm chuẩn**:
     * Bên trái: Chuỗi định dạng `next-intl` động: `t("...pagination", { page: meta.page, totalPages: meta.totalPages, total: meta.total })` (*"Trang X / Y (Tổng Z nhân sự/bản ghi)"*). Tuyệt đối không hardcode text.
     * Bên phải: Nút `ChevronLeft` (`disabled={meta.page <= 1}`) và `ChevronRight` (`disabled={meta.page >= meta.totalPages}`) kèm style Cyberpunk viền `border-white/10 bg-white/[0.03] text-muted hover:border-white/20 hover:text-foreground disabled:opacity-30`.
+
+- **2026-09-18 — Nút Làm Mới Dữ Liệu Bảng (Standardized Table Reload Button - `Table.ReloadButton`)**:
+  - **Mục đích**: Cung cấp nút làm mới dữ liệu cục bộ cho toàn bộ bảng dữ liệu mà **tuyệt đối KHÔNG tải lại toàn trang (không F5, không `window.location.reload()`)**, bảo toàn nguyên vẹn URL search params, trạng thái mở modal và phiên làm việc.
+  - **Cơ chế hoạt động**: Sử dụng trực tiếp hàm `refetch()` và cờ `isFetching` từ hook TanStack Query (e.g., `useApplicationInvites`, `useLeaders`, `useUsers`, `useInterns`, `useDepartments`, `useRegulations`, `useActivityLogs`, `useTasks`, `useWeeklyEvaluations`).
+  - **Thành phần dùng chung**: `<Table.ReloadButton onReload={refetch} isReloading={isFetching} />` (tích hợp sẵn trong compound component `<Table>`: `Table.ReloadButton`).
+  - **Vị trí chuẩn hóa**: Đặt tại ô tiêu đề cột cuối cùng của `<Table.Header>` (cột thao tác / Actions column header ở góc trên bên phải của bảng).
+    * Lý do: Vị trí góc trên cùng bên phải là chuẩn UX quen thuộc nhất, thẳng hàng tự nhiên với các icon thao tác của từng dòng bên dưới, luôn hiển thị cố định khi cuộn bảng nhờ sticky header (`sticky top-0`), không chiếm dụng diện tích của thanh công cụ/filter phía trên.
+  - **Giao diện & Trạng thái**:
+    * Kích thước nhỏ gọn `h-7 w-7`, bo góc `rounded-lg`, hiệu ứng hover phát sáng cyan `hover:bg-white/5 hover:text-cyan-400`, micro-interaction nhấn `active:scale-90`.
+    * Icon `RotateCw` tự động xoay tròn liên tục khi dữ liệu đang được tải ngầm (`animate-spin text-cyan-400` khi `isReloading={true}`), đồng thời tự động vô hiệu hóa (`disabled`) để chống spam request.
+    * Tích hợp tooltip và `aria-label` tự động theo ngôn ngữ: *"Làm mới dữ liệu"* (vi) / *"Refresh data"* (en).
 
 ---
 

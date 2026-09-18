@@ -33,7 +33,8 @@ export default function PolicyTable() {
     return p;
   }, [searchParams]);
 
-  const { data, isPending, isError } = useRegulations(params);
+  const { data, isPending, isError, refetch, isFetching } =
+    useRegulations(params);
 
   const regulations = data?.items ?? [];
 
@@ -79,7 +80,7 @@ export default function PolicyTable() {
           <div>{t("admin.policies.colCreated")}</div>
           <div>{t("admin.policies.colUpdated")}</div>
           <div>{t("admin.policies.colStatus")}</div>
-          <div />
+          <Table.ReloadButton onReload={refetch} isReloading={isFetching} />
         </Table.Header>
 
         <Table.Body

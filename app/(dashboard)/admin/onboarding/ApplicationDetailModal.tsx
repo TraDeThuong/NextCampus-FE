@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations, useLocale } from "next-intl";
+import { toast } from "react-hot-toast";
 import {
   Mail,
   Phone,
@@ -11,6 +13,8 @@ import {
   AlertTriangle,
   Paperclip,
   Download,
+  Loader2,
+  User,
 } from "lucide-react";
 
 import { useInviteDetail } from "@/hooks/application/useInviteDetail";
@@ -20,16 +24,6 @@ import { useDeleteApplication } from "@/hooks/application/useDeleteApplication";
 import MetalCard from "@/components/ui/MetalCard";
 import Button from "@/components/ui/Button";
 import Spinner from "@/components/ui/Spinner";
-
-function statusBadge(status: string, colors: Record<string, string>) {
-  return (
-    <span
-      className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wider ${colors[status] ?? "border-zinc-700 text-zinc-400"}`}
-    >
-      {status}
-    </span>
-  );
-}
 
 const INVITE_COLORS: Record<string, string> = {
   ACTIVE: "border-sky-500/30 text-sky-400 bg-sky-500/10",
@@ -44,16 +38,16 @@ const APP_COLORS: Record<string, string> = {
   REJECTED: "border-red-500/30 text-red-400 bg-red-500/10",
 };
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("en-US", {
+function formatDate(dateStr: string, locale: string) {
+  return new Date(dateStr).toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
 }
 
-function formatDateTime(dateStr: string) {
-  return new Date(dateStr).toLocaleString("en-US", {
+function formatDateTime(dateStr: string, locale: string) {
+  return new Date(dateStr).toLocaleString(locale === "vi" ? "vi-VN" : "en-US", {
     month: "short",
     day: "numeric",
     hour: "2-digit",
@@ -78,11 +72,11 @@ function DetailRow({
 }) {
   return (
     <div className="flex items-start gap-4">
-      <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03]">
-        <Icon className="h-4 w-4 text-[var(--primary-light)]" />
+      <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border dark:border-white/10 bg-card/60 dark:bg-white/[0.03]">
+        <Icon className="h-4 w-4 text-cyan-400" />
       </div>
       <div className="min-w-0">
-        <p className="text-xs uppercase tracking-wider text-muted">{label}</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted">{label}</p>
         <p className="mt-1 text-sm font-medium text-foreground">{value}</p>
       </div>
     </div>
@@ -94,7 +88,10 @@ interface Props {
 }
 
 export default function ApplicationDetail({ id }: Props) {
+  const t = useTranslations();
+  const locale = useLocale();
   const router = useRouter();
+
   const { data, isPending, isError } = useInviteDetail(id);
   const { mutate: reviewApp, isPending: reviewing } = useReviewApplication();
   const { mutate: revokeInvite, isPending: revoking } = useRevokeInvite();
@@ -113,9 +110,11 @@ export default function ApplicationDetail({ id }: Props) {
 
   if (isError || !invite) {
     return (
-      <div className="flex flex-col items-center gap-3 py-20">
-        <AlertTriangle className="h-8 w-8 text-red-400" />
-        <p className="text-sm text-red-300">Failed to load invite details.</p>
+      <div className="flex flex-col items-center gap-3 py-20 text-center">
+        <AlertTriangle className="h-8 w-8 text-rose-400" />
+        <p className="text-sm text-rose-300">
+          {t("admin.onboarding.loadDetailError")}
+        </p>
       </div>
     );
   }
@@ -125,45 +124,66 @@ export default function ApplicationDetail({ id }: Props) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">
-            {app ? app.fullName : invite.email}
-          </h1>
-          <p className="mt-1 text-sm text-muted">{invite.email}</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex items-center gap-3.5">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-400 border border-cyan-400/20">
+            <User className="h-6 w-6 shrink-0" />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground">
+              {app ? app.fullName : invite.email}
+            </h1>
+            <p className="mt-0.5 text-xs sm:text-sm text-muted">{invite.email}</p>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          {statusBadge(invite.status, INVITE_COLORS)}
-          {app && statusBadge(app.status, APP_COLORS)}
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold tracking-wider ${
+              INVITE_COLORS[invite.status] ?? "border-zinc-700 text-zinc-400"
+            }`}
+          >
+            {t(`admin.onboarding.inviteStatus_${invite.status}`)}
+          </span>
+
+          {app && (
+            <span
+              className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold tracking-wider ${
+                APP_COLORS[app.status] ?? "border-zinc-700 text-zinc-400"
+              }`}
+            >
+              {t(`admin.onboarding.appStatus_${app.status}`)}
+            </span>
+          )}
         </div>
       </div>
 
       {/* Invite Info */}
-      <MetalCard className="p-6">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-[0.15em] text-[var(--primary-light)]">
-          Invitation Details
+      <MetalCard className="p-5 sm:p-6">
+        <h2 className="mb-4 text-xs sm:text-sm font-semibold uppercase tracking-[0.15em] text-cyan-400">
+          {t("admin.onboarding.invitationDetails")}
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <DetailRow
             icon={Mail}
-            label="Email"
+            label={t("admin.onboarding.detailEmail")}
             value={invite.email}
           />
           <DetailRow
             icon={Clock}
-            label="Created"
-            value={formatDateTime(invite.createdAt)}
+            label={t("admin.onboarding.detailCreated")}
+            value={formatDateTime(invite.createdAt, locale)}
           />
           <DetailRow
             icon={Calendar}
-            label="Expires"
-            value={formatDateTime(invite.expiresAt)}
+            label={t("admin.onboarding.detailExpires")}
+            value={formatDateTime(invite.expiresAt, locale)}
           />
           {invite.usedAt && (
             <DetailRow
               icon={Calendar}
-              label="Used At"
-              value={formatDateTime(invite.usedAt)}
+              label={t("admin.onboarding.detailUsedAt")}
+              value={formatDateTime(invite.usedAt, locale)}
             />
           )}
         </div>
@@ -171,59 +191,72 @@ export default function ApplicationDetail({ id }: Props) {
 
       {/* Application Info */}
       {app && (
-        <MetalCard className="p-6">
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-[0.15em] text-[var(--primary-light)]">
-            Application Details
+        <MetalCard className="p-5 sm:p-6">
+          <h2 className="mb-4 text-xs sm:text-sm font-semibold uppercase tracking-[0.15em] text-cyan-400">
+            {t("admin.onboarding.applicationDetails")}
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
-            <DetailRow icon={Mail} label="Full Name" value={app.fullName} />
-            <DetailRow icon={Mail} label="Email" value={app.email} />
-            <DetailRow icon={Phone} label="Phone" value={app.phone} />
+            <DetailRow
+              icon={User}
+              label={t("admin.onboarding.detailFullName")}
+              value={app.fullName}
+            />
+            <DetailRow
+              icon={Mail}
+              label={t("admin.onboarding.detailEmail")}
+              value={app.email}
+            />
+            <DetailRow
+              icon={Phone}
+              label={t("admin.onboarding.detailPhone")}
+              value={app.phone}
+            />
             <DetailRow
               icon={Building2}
-              label="Preferred Department"
+              label={t("admin.onboarding.detailPreferredDept")}
               value={app.preferredDepartment ?? "—"}
             />
             <DetailRow
               icon={Briefcase}
-              label="Preferred Position"
+              label={t("admin.onboarding.detailPreferredPos")}
               value={app.preferredPosition ?? "—"}
             />
             <DetailRow
               icon={Building2}
-              label="Assigned Department"
+              label={t("admin.onboarding.detailAssignedDept")}
               value={app.department?.name ?? "—"}
             />
             <DetailRow
               icon={Briefcase}
-              label="Assigned Position"
+              label={t("admin.onboarding.detailAssignedPos")}
               value={app.position?.name ?? "—"}
             />
             <DetailRow
               icon={Calendar}
-              label="Start Date"
-              value={formatDate(app.startDate)}
+              label={t("admin.onboarding.detailStartDate")}
+              value={formatDate(app.startDate, locale)}
             />
             <DetailRow
               icon={Clock}
-              label="Duration"
-              value={`${app.duration} months`}
+              label={t("admin.onboarding.detailDuration")}
+              value={t("admin.onboarding.durationMonths", { count: app.duration })}
             />
             <DetailRow
               icon={Calendar}
-              label="Submitted"
-              value={formatDateTime(app.createdAt)}
+              label={t("admin.onboarding.detailSubmitted")}
+              value={formatDateTime(app.createdAt, locale)}
             />
           </div>
         </MetalCard>
       )}
 
+      {/* Attachments */}
       {app && app.attachments && app.attachments.length > 0 && (
-        <MetalCard className="p-6">
+        <MetalCard className="p-5 sm:p-6">
           <div className="mb-4 flex items-center gap-2">
             <Paperclip className="h-4 w-4 shrink-0 text-cyan-400" />
-            <h2 className="text-sm font-semibold uppercase tracking-[0.15em] text-[var(--primary-light)]">
-              Attachments ({app.attachments.length})
+            <h2 className="text-xs sm:text-sm font-semibold uppercase tracking-[0.15em] text-cyan-400">
+              {t("admin.onboarding.attachments", { count: app.attachments.length })}
             </h2>
           </div>
 
@@ -234,20 +267,20 @@ export default function ApplicationDetail({ id }: Props) {
                 href={attachment.fileUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 transition hover:border-cyan-400/20 hover:bg-white/10"
+                className="group flex items-center gap-3 rounded-xl border border-border dark:border-white/10 bg-card/60 dark:bg-white/5 px-4 py-3 transition hover:border-cyan-400/30 hover:bg-card active:scale-[0.99]"
               >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cyan-500/10">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cyan-500/10 border border-cyan-400/20">
                   <Paperclip className="h-4 w-4 text-cyan-400" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-foreground transition group-hover:text-cyan-300">
+                  <p className="truncate text-sm font-medium text-foreground transition group-hover:text-cyan-400">
                     {attachment.fileName}
                   </p>
                   <p className="mt-0.5 text-xs text-muted">
                     {formatFileSize(attachment.fileSize)} · {attachment.mimeType}
                   </p>
                 </div>
-                <Download className="h-4 w-4 shrink-0 text-slate-500 transition group-hover:text-cyan-400" />
+                <Download className="h-4 w-4 shrink-0 text-muted transition group-hover:text-cyan-400" />
               </a>
             ))}
           </div>
@@ -255,18 +288,29 @@ export default function ApplicationDetail({ id }: Props) {
       )}
 
       {/* Actions */}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-3 pt-2">
         {invite.status === "ACTIVE" && (
           <Button
             variant="danger"
             disabled={isBusy}
             onClick={() => {
               revokeInvite(invite.id, {
-                onSuccess: () => router.back(),
+                onSuccess: () => {
+                  toast.success(t("admin.onboarding.revokeSuccess"));
+                  router.back();
+                },
+                onError: () => toast.error(t("admin.onboarding.revokeError")),
               });
             }}
           >
-            {revoking ? "Revoking..." : "Revoke Invite"}
+            {revoking ? (
+              <span className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {t("admin.onboarding.revoking")}
+              </span>
+            ) : (
+              t("admin.onboarding.revoke")
+            )}
           </Button>
         )}
 
@@ -277,29 +321,58 @@ export default function ApplicationDetail({ id }: Props) {
               disabled={isBusy || !app.department || !app.position}
               title={
                 !app.department || !app.position
-                  ? "Assign a department and position in the onboarding table first"
+                  ? t("admin.onboarding.assignDeptPositionFirst")
                   : undefined
               }
               onClick={() => {
                 reviewApp(
                   { id: app.id, payload: { status: "APPROVED" } },
-                  { onSuccess: () => router.back() },
+                  {
+                    onSuccess: () => {
+                      toast.success(t("admin.onboarding.approveSuccess"));
+                      router.back();
+                    },
+                    onError: () =>
+                      toast.error(t("admin.onboarding.approveError")),
+                  },
                 );
               }}
             >
-              {reviewing ? "Approving..." : "Approve"}
+              {reviewing ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {t("admin.onboarding.approving")}
+                </span>
+              ) : (
+                t("admin.onboarding.approve")
+              )}
             </Button>
+
             <Button
               variant="danger"
               disabled={isBusy}
               onClick={() => {
                 reviewApp(
                   { id: app.id, payload: { status: "REJECTED" } },
-                  { onSuccess: () => router.back() },
+                  {
+                    onSuccess: () => {
+                      toast.success(t("admin.onboarding.rejectSuccess"));
+                      router.back();
+                    },
+                    onError: () =>
+                      toast.error(t("admin.onboarding.rejectError")),
+                  },
                 );
               }}
             >
-              {reviewing ? "Rejecting..." : "Reject"}
+              {reviewing ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {t("admin.onboarding.rejecting")}
+                </span>
+              ) : (
+                t("admin.onboarding.reject")
+              )}
             </Button>
           </>
         )}
@@ -310,11 +383,22 @@ export default function ApplicationDetail({ id }: Props) {
             disabled={isBusy}
             onClick={() => {
               deleteApp(app.id, {
-                onSuccess: () => router.back(),
+                onSuccess: () => {
+                  toast.success(t("admin.onboarding.deleteSuccess"));
+                  router.back();
+                },
+                onError: () => toast.error(t("admin.onboarding.deleteError")),
               });
             }}
           >
-            {deleting ? "Deleting..." : "Delete Application"}
+            {deleting ? (
+              <span className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {t("admin.onboarding.deleting")}
+              </span>
+            ) : (
+              t("admin.onboarding.delete")
+            )}
           </Button>
         )}
       </div>

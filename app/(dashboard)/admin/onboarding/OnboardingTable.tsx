@@ -1,33 +1,7 @@
-// | Cột                | Ý nghĩa                                |
-// | ------------------ | -------------------------------------- |
-// | Candidate          | Họ tên hoặc email                      |
-// | Department         | Phòng ban ứng tuyển                    |
-// | Position           | Vị trí ứng tuyển                       |
-// | Invite Status      | `ACTIVE`, `USED`, `EXPIRED`, `REVOKED` |
-// | Application Status | `PENDING`, `APPROVED`, `REJECTED`      |
-// | Start Date         | Ngày bắt đầu thực tập                  |
-// | Submitted At       | Ngày nộp đơn                           |
-// | Actions            | Menu ba chấm                           |
-
-
-// | Trạng thái        | Action                  | Mô tả                                                       |
-// | ----------------- | ----------------------- | ----------------------------------------------------------- |
-// | `ACTIVE`          | **View details**        | Xem thông tin lời mời: email, ngày tạo, ngày hết hạn.       |
-// |                   | **Revoke invite**       | Thu hồi lời mời, chuyển trạng thái sang `REVOKED`.          |
-// | `USED + PENDING`  | **View application**    | Xem chi tiết đơn ứng tuyển của intern.                      |
-// |                   | **Approve application** | Duyệt đơn, tạo tài khoản `INTERN` và hồ sơ intern.          |
-// |                   | **Reject application**  | Từ chối đơn ứng tuyển.                                      |
-// | `USED + APPROVED` | **View application**    | Xem thông tin đơn đã được duyệt và tài khoản intern đã tạo. |
-// | `USED + REJECTED` | **View application**    | Xem lại đơn đã bị từ chối.                                  |
-// |                   | **Delete application**  | Xóa mềm đơn ứng tuyển đã bị từ chối.                        |
-// | `EXPIRED`         | **View details**        | Xem thông tin lời mời đã hết hạn.                           |
-// | `REVOKED`         | **View details**        | Xem thông tin lời mời đã bị admin thu hồi.                  |
-
-
 "use client";
 
 import { useMemo } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, AlertTriangle, Mail, UserPlus, RotateCcw } from "lucide-react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
@@ -41,7 +15,7 @@ import Spinner from "@/components/ui/Spinner";
 import OnboardingRow from "./OnboardingRow";
 
 const COLUMNS =
-  "minmax(180px,2fr) minmax(110px,1fr) minmax(110px,1fr) 110px 100px 100px 40px";
+  "minmax(200px,2fr) minmax(130px,1.2fr) minmax(130px,1.2fr) 115px 110px 105px 44px";
 
 export default function OnboardingTable() {
   const t = useTranslations();
@@ -78,10 +52,21 @@ export default function OnboardingTable() {
     return p;
   }, [searchParams]);
 
-  const { data, isPending } = useApplicationInvites(params);
+  const { data, isPending, isError, refetch, isFetching } =
+    useApplicationInvites(params);
 
   const invites = data?.data ?? [];
   const meta = data?.meta;
+
+  const hasFilters = Boolean(
+    searchParams.get("email") ||
+    searchParams.get("inviteStatus") ||
+    searchParams.get("applicationStatus") ||
+    searchParams.get("departmentId") ||
+    searchParams.get("positionId") ||
+    searchParams.get("createdFrom") ||
+    searchParams.get("createdTo"),
+  );
 
   function goToPage(page: number) {
     const p = new URLSearchParams(searchParams.toString());
@@ -89,10 +74,72 @@ export default function OnboardingTable() {
     router.push(`${pathname}?${p.toString()}`);
   }
 
+  function clearAllFilters() {
+    const p = new URLSearchParams(searchParams.toString());
+    p.delete("email");
+    p.delete("inviteStatus");
+    p.delete("applicationStatus");
+    p.delete("departmentId");
+    p.delete("positionId");
+    p.delete("createdFrom");
+    p.delete("createdTo");
+    p.set("page", "1");
+    router.push(`${pathname}?${p.toString()}`);
+  }
+
   if (isPending) {
     return (
       <MetalCard className="flex items-center justify-center py-20">
         <Spinner size="lg" />
+      </MetalCard>
+    );
+  }
+
+  if (isError) {
+    return (
+      <MetalCard className="flex flex-col items-center justify-center gap-3 py-20">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-400">
+          <AlertTriangle className="h-6 w-6" />
+        </div>
+        <p className="text-sm text-rose-300">
+          {t("admin.onboarding.loadTableError")}
+        </p>
+      </MetalCard>
+    );
+  }
+
+  if (invites.length === 0) {
+    return (
+      <MetalCard className="flex flex-col items-center justify-center gap-3 py-20 text-center px-4">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-400">
+          <Mail className="h-6 w-6" />
+        </div>
+        <p className="text-base font-medium text-foreground">
+          {t("admin.onboarding.noInvites")}
+        </p>
+        <p className="text-xs sm:text-sm text-muted max-w-md">
+          {t("admin.onboarding.noInvitesDescription")}
+        </p>
+        {hasFilters ? (
+          <button
+            type="button"
+            onClick={clearAllFilters}
+            className="mt-2 inline-flex items-center gap-2 rounded-xl border border-border dark:border-white/10 bg-card/60 px-4 py-2 text-xs font-medium text-muted transition hover:bg-card hover:text-foreground active:scale-95"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            {t("admin.onboarding.clearFilters")}
+          </button>
+        ) : (
+          <Modal.Open opens="invite-intern">
+            <button
+              type="button"
+              className="mt-2 inline-flex items-center gap-2 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-xs font-medium text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20 active:scale-95"
+            >
+              <UserPlus className="h-3.5 w-3.5" />
+              {t("admin.onboarding.inviteIntern")}
+            </button>
+          </Modal.Open>
+        )}
       </MetalCard>
     );
   }
@@ -115,7 +162,7 @@ export default function OnboardingTable() {
           <div>{t("admin.onboarding.colInvite")}</div>
           <div>{t("admin.onboarding.colApp")}</div>
           <div>{t("admin.onboarding.colSent")}</div>
-          <div />
+          <Table.ReloadButton onReload={refetch} isReloading={isFetching} />
         </Table.Header>
 
         <Table.Body
@@ -129,22 +176,30 @@ export default function OnboardingTable() {
           <Table.Footer>
             <div className="flex w-full items-center justify-between gap-4 text-sm">
               <p className="text-muted">
-                {t("admin.onboarding.pagination", { page: meta.page, totalPages: meta.totalPages, total: meta.total })}
+                {t("admin.onboarding.pagination", {
+                  page: meta.page,
+                  totalPages: meta.totalPages,
+                  total: meta.total,
+                })}
               </p>
 
               <div className="flex items-center gap-2">
                 <button
+                  type="button"
                   disabled={meta.page <= 1}
                   onClick={() => goToPage(meta.page - 1)}
-                  className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:opacity-30"
+                  aria-label="Previous page"
+                  className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
 
                 <button
+                  type="button"
                   disabled={meta.page >= meta.totalPages}
                   onClick={() => goToPage(meta.page + 1)}
-                  className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:opacity-30"
+                  aria-label="Next page"
+                  className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>

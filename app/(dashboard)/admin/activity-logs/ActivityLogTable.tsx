@@ -90,7 +90,8 @@ export default function ActivityLogTable() {
     return p;
   }, [searchParams]);
 
-  const { data, isPending, isError } = useActivityLogs(params);
+  const { data, isPending, isError, refetch, isFetching } =
+    useActivityLogs(params);
 
   const logs = data?.data ?? [];
   const meta = data?.meta;
@@ -141,7 +142,10 @@ export default function ActivityLogTable() {
         <div>{t("admin.activityLogs.actor")}</div>
         <div>{t("admin.activityLogs.action")}</div>
         <div>{t("admin.activityLogs.target")}</div>
-        <div>{t("admin.activityLogs.description_col")}</div>
+        <div className="flex items-center justify-between">
+          <span>{t("admin.activityLogs.description_col")}</span>
+          <Table.ReloadButton onReload={refetch} isReloading={isFetching} />
+        </div>
       </Table.Header>
 
       <Table.Body

@@ -29,7 +29,7 @@ export default function WeeklyEvaluationList() {
     return { page: page ? Number(page) : 1, limit: 10, sortBy: "createdAt", order: "desc", leaderId: currentUserId || undefined };
   }, [searchParams, currentUserId]);
 
-  const { data: response, isLoading } = useWeeklyEvaluations(params);
+  const { data: response, isLoading, refetch, isFetching } = useWeeklyEvaluations(params);
   const evaluations = response?.data ?? []; const meta = response?.meta;
   const totalPages = meta?.totalPages ?? 1; const currentPage = meta?.page ?? 1;
 
@@ -71,7 +71,11 @@ export default function WeeklyEvaluationList() {
 
       <Table columns="2.5fr 1fr 1.5fr 1fr 2fr">
         <Table.Header>
-          <span>{t("colIntern")}</span><span>{t("colWeek")}</span><span>{t("colScore")}</span><span className="text-center">{t("colAi")}</span><span className="text-center">{t("colActions")}</span>
+          <span>{t("colIntern")}</span><span>{t("colWeek")}</span><span>{t("colScore")}</span><span className="text-center">{t("colAi")}</span>
+          <div className="flex items-center justify-end gap-2">
+            <span className="flex-1 text-center">{t("colActions")}</span>
+            <Table.ReloadButton onReload={refetch} isReloading={isFetching} />
+          </div>
         </Table.Header>
         <Table.Body data={evaluations} render={(item: WeeklyEvaluation) => {
           const scoreVal = item.score ?? item.totalScore ?? 0;

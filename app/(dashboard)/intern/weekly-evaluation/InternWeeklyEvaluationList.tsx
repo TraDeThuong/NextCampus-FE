@@ -26,7 +26,7 @@ export default function InternWeeklyEvaluationList() {
     const page = searchParams.get("page"); return { page: page ? Number(page) : 1, limit: 10, sortBy: "week", order: "desc" };
   }, [searchParams]);
 
-  const { data: response, isLoading } = useWeeklyEvaluations(params);
+  const { data: response, isLoading, refetch, isFetching } = useWeeklyEvaluations(params);
   const evaluations = response?.data ?? []; const meta = response?.meta;
   const totalPages = meta?.totalPages ?? 1; const currentPage = meta?.page ?? 1;
 
@@ -94,7 +94,15 @@ export default function InternWeeklyEvaluationList() {
           <div className="flex flex-col items-center justify-center py-16 text-center space-y-3"><div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 border border-white/10"><Sparkles className="h-8 w-8 text-muted" /></div><p className="text-sm text-muted">{t("noEvaluations")}</p></div>
         ) : (
           <Table columns="1.5fr 1.5fr 1fr 1.5fr">
-            <Table.Header><span>{t("colWeek")}</span><span>{t("colScore")}</span><span className="text-center">{t("colStatus")}</span><span className="text-center">{t("colDetail")}</span></Table.Header>
+            <Table.Header>
+              <span>{t("colWeek")}</span>
+              <span>{t("colScore")}</span>
+              <span className="text-center">{t("colStatus")}</span>
+              <div className="flex items-center justify-end gap-2">
+                <span className="flex-1 text-center">{t("colDetail")}</span>
+                <Table.ReloadButton onReload={refetch} isReloading={isFetching} />
+              </div>
+            </Table.Header>
             <Table.Body data={evaluations} render={(item: WeeklyEvaluation) => {
               const scoreVal = item.score ?? item.totalScore ?? 0;
               const level = getRatingLevel(scoreVal);

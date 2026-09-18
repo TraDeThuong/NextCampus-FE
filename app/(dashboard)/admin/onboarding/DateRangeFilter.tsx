@@ -2,8 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import { Calendar } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 type Range = "this-week" | "this-month" | "custom" | null;
 
@@ -31,12 +30,16 @@ function fmtDateInput(d: Date) {
     return d.toISOString().slice(0, 10);
 }
 
-function fmtDisplay(d: Date) {
-    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+function fmtDisplay(d: Date, locale: string) {
+    return d.toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US", {
+        month: "short",
+        day: "numeric",
+    });
 }
 
 export default function DateRangeFilter() {
     const t = useTranslations();
+    const locale = useLocale();
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();
@@ -91,17 +94,17 @@ export default function DateRangeFilter() {
     }
 
     const pillBase =
-        "rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200 border cursor-pointer whitespace-nowrap";
+        "rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 border cursor-pointer whitespace-nowrap active:scale-95";
     const pillActive =
         "border-primary-light/40 bg-primary-light/15 text-primary-light shadow-[0_0_16px_rgba(21,174,245,0.15)]";
     const pillInactive =
-        "border-transparent text-slate-400 hover:text-slate-200 hover:border-white/10 hover:bg-white/5";
+        "border-transparent text-muted hover:text-foreground hover:border-border dark:hover:border-white/10 hover:bg-card/60";
 
     const activeLabel =
         activeRange === "this-week"
-            ? `${fmtDisplay(week.from)} – ${fmtDisplay(week.to)}`
+            ? `${fmtDisplay(week.from, locale)} – ${fmtDisplay(week.to, locale)}`
             : activeRange === "this-month"
-              ? `${fmtDisplay(month.from)} – ${fmtDisplay(month.to)}`
+              ? `${fmtDisplay(month.from, locale)} – ${fmtDisplay(month.to, locale)}`
               : activeRange === "custom"
                 ? `${currentFrom} – ${currentTo}`
                 : null;
@@ -136,32 +139,36 @@ export default function DateRangeFilter() {
             </div>
 
             {activeLabel && (
-                <p className="text-xs text-slate-500 font-medium tracking-wide pl-1">
+                <p className="text-xs text-muted font-medium tracking-wide pl-1">
                     {activeLabel}
                 </p>
             )}
 
             {range === "custom" && (
                 <div className="flex items-center gap-2 pt-1">
-                    <div className="relative">
-                        <Calendar className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
-                        <input
-                            type="date"
-                            value={currentFrom}
-                            onChange={(e) => applyCustom(e.target.value, currentTo)}
-                            className="w-36 rounded-xl border border-white/10 bg-white/[0.04] py-2 pl-9 pr-3 text-xs text-foreground outline-none transition-all hover:border-white/20 focus:border-primary-light/40 focus:shadow-[0_0_16px_rgba(21,174,245,0.1)]"
-                        />
-                    </div>
-                    <span className="text-xs text-slate-500">–</span>
-                    <div className="relative">
-                        <Calendar className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
-                        <input
-                            type="date"
-                            value={currentTo}
-                            onChange={(e) => applyCustom(currentFrom, e.target.value)}
-                            className="w-36 rounded-xl border border-white/10 bg-white/[0.04] py-2 pl-9 pr-3 text-xs text-foreground outline-none transition-all hover:border-white/20 focus:border-primary-light/40 focus:shadow-[0_0_16px_rgba(21,174,245,0.1)]"
-                        />
-                    </div>
+                    <input
+                        type="date"
+                        value={currentFrom}
+                        onChange={(e) => applyCustom(e.target.value, currentTo)}
+                        onClick={(e) => {
+                            try {
+                                e.currentTarget.showPicker?.();
+                            } catch {}
+                        }}
+                        className="w-[144px] rounded-xl border border-border dark:border-white/10 bg-card/60 dark:bg-white/[0.04] py-1.5 px-3 [font-family:var(--font-body),sans-serif] text-xs text-foreground outline-none transition-all cursor-pointer hover:border-border-strong focus:border-primary-light/50 focus:shadow-[0_0_16px_rgba(21,174,245,0.1)] [color-scheme:light] dark:[color-scheme:dark]"
+                    />
+                    <span className="text-xs text-muted">–</span>
+                    <input
+                        type="date"
+                        value={currentTo}
+                        onChange={(e) => applyCustom(currentFrom, e.target.value)}
+                        onClick={(e) => {
+                            try {
+                                e.currentTarget.showPicker?.();
+                            } catch {}
+                        }}
+                        className="w-[144px] rounded-xl border border-border dark:border-white/10 bg-card/60 dark:bg-white/[0.04] py-1.5 px-3 [font-family:var(--font-body),sans-serif] text-xs text-foreground outline-none transition-all cursor-pointer hover:border-border-strong focus:border-primary-light/50 focus:shadow-[0_0_16px_rgba(21,174,245,0.1)] [color-scheme:light] dark:[color-scheme:dark]"
+                    />
                 </div>
             )}
         </div>

@@ -112,7 +112,7 @@ export default function OnboardingStats() {
                   {card.title}
                 </p>
 
-                <h3 className="chrome-text mt-2 sm:mt-4 text-3xl sm:text-4xl lg:text-5xl font-bold leading-none">
+                <h3 className="chrome-text mt-2 sm:mt-4 text-2xl sm:text-4xl lg:text-5xl font-bold leading-none">
                   {card.value}
                 </h3>
 

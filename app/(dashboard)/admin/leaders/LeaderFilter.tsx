@@ -118,7 +118,6 @@ export default function LeaderFilter() {
                         label={t("admin.leaders.filterDepartment")}
                         filterField="department"
                         options={departmentOptions}
-                        placeholder={t("admin.leaders.allDepartments")}
                     />
 
                     {/* Filter Status */}
@@ -126,7 +125,6 @@ export default function LeaderFilter() {
                         label={t("admin.leaders.filterStatus")}
                         filterField="isActive"
                         options={statusOptions}
-                        placeholder={t("admin.leaders.allStatus")}
                     />
                 </div>
 

@@ -349,7 +349,7 @@ function InternsCard({ leader }: { leader: Leader }) {
 
     const page = Number(searchParams.get("page") ?? "1");
 
-    const { data, isLoading } = useInterns({
+    const { data, isLoading, refetch, isFetching } = useInterns({
         leaderId: leader.userId,
         page,
         limit: 10,
@@ -390,7 +390,7 @@ function InternsCard({ leader }: { leader: Leader }) {
                     <div>{t("admin.leaders.details.colDept")}</div>
                     <div>{t("admin.leaders.details.colPosition")}</div>
                     <div>{t("admin.leaders.details.colStatus")}</div>
-                    <div />
+                    <Table.ReloadButton onReload={refetch} isReloading={isFetching} />
                 </Table.Header>
 
                 <Table.Body

@@ -18,7 +18,7 @@ export default function DepartmentTable() {
   const name = searchParams.get("name") ?? undefined;
   const leader = searchParams.get("leader") ?? undefined;
 
-  const { data, isPending, isError } = useDepartments({ name, leader });
+  const { data, isPending, isError, refetch, isFetching } = useDepartments({ name, leader });
   const departments = data?.data ?? [];
 
   if (isPending) {
@@ -52,7 +52,7 @@ export default function DepartmentTable() {
           <div>{t("colDepartment")}</div>
           <div>{t("colPositions")}</div>
           <div>{t("colLeader")}</div>
-          <div className="text-right pr-4">{t("colActions")}</div>
+          <Table.ReloadButton onReload={refetch} isReloading={isFetching} />
         </Table.Header>
 
         <Table.Body

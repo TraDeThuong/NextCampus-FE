@@ -33,11 +33,11 @@ export default function OnboardingPageContent() {
           href="/admin/onboarding"
           className="inline-flex items-center gap-2 text-sm text-muted transition-colors hover:text-foreground"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 shrink-0" />
           {t("admin.onboarding.backToOnboarding")}
         </Link>
 
-        <MetalCard className="p-8">
+        <MetalCard className="p-6 sm:p-8">
           <ApplicationDetail id={id} />
         </MetalCard>
       </div>
@@ -48,7 +48,7 @@ export default function OnboardingPageContent() {
   if (id && view === "modal") {
     return (
       <>
-        <div className="space-y-8">
+        <div className="space-y-6">
           <OnboardingHeader />
           <OnboardingStats />
           <OnboardingFilters />
@@ -62,7 +62,7 @@ export default function OnboardingPageContent() {
 
   // Default: list only
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <OnboardingHeader />
       <OnboardingStats />
       <OnboardingFilters />

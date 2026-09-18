@@ -27,7 +27,8 @@ export default function DepartmentTable() {
     const pageParam = Number(searchParams.get("page") ?? "1");
     const page = isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
 
-    const { data, isPending, isError } = useDepartments({ name, leader });
+    const { data, isPending, isError, refetch, isFetching } =
+        useDepartments({ name, leader });
     const {
         data: leadersData,
         isPending: leadersPending,
@@ -109,7 +110,7 @@ export default function DepartmentTable() {
                     <div>{t("admin.department.colDescription")}</div>
                     <div>{t("admin.department.colPositionsCount")}</div>
                     <div>{t("admin.department.colLeader")}</div>
-                    <div className="text-right">{t("admin.department.colActions")}</div>
+                    <Table.ReloadButton onReload={refetch} isReloading={isFetching} />
                 </Table.Header>
 
                 <Table.Body

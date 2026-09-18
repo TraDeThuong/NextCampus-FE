@@ -122,7 +122,7 @@ export default function LeaderTableTasks() {
     return p;
   }, [searchParams, taskGroupId]);
 
-  const { data: tasksData, isLoading: tasksLoading } = useTasks(params);
+  const { data: tasksData, isLoading: tasksLoading, refetch: tasksRefetch, isFetching: tasksFetching } = useTasks(params);
   const tasks = tasksData?.data ?? [];
   const meta = tasksData?.meta;
   const openAction = (a: GroupAction) => { setAction(a); triggerRef.current?.click(); };
@@ -388,7 +388,7 @@ export default function LeaderTableTasks() {
                       <div>{t("colPriority")}</div>
                       <div>{t("colStatus")}</div>
                       <div>{t("colDeadline")}</div>
-                      <div></div>
+                      <Table.ReloadButton onReload={tasksRefetch} isReloading={tasksFetching} />
                     </Table.Header>
                     <Table.Body
                       data={tasks}

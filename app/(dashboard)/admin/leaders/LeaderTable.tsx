@@ -46,7 +46,8 @@ export default function LeaderTable() {
         return p;
     }, [searchParams]);
 
-    const { data, isPending, isError } = useLeaders(params);
+    const { data, isPending, isError, refetch, isFetching } =
+        useLeaders(params);
 
     const leaders = data?.data ?? [];
     const meta = data?.meta;
@@ -145,7 +146,7 @@ export default function LeaderTable() {
                     <div>{t("admin.leaders.colPosition")}</div>
                     <div className="text-center">{t("admin.leaders.colInterns")}</div>
                     <div>{t("admin.leaders.colStatus")}</div>
-                    <div />
+                    <Table.ReloadButton onReload={refetch} isReloading={isFetching} />
                 </Table.Header>
 
                 <Table.Body

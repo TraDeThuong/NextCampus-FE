@@ -45,7 +45,7 @@ export default function LeaderInternTable() {
     return p;
   }, [searchParams, currentUserId]);
 
-  const { data, isPending, isError } = useInterns(params);
+  const { data, isPending, isError, refetch, isFetching } = useInterns(params);
   const { data: assignmentsData } = useTaskAssignments(
     currentUserId ? { leaderId: currentUserId, limit: 500 } : undefined,
   );
@@ -112,7 +112,7 @@ export default function LeaderInternTable() {
         <div>{t("colTasks")}</div>
         <div>{t("colOverdue")}</div>
         <div>{t("colStatus")}</div>
-        <div />
+        <Table.ReloadButton onReload={refetch} isReloading={isFetching} />
       </Table.Header>
 
       <Table.Body

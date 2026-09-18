@@ -1,6 +1,8 @@
 "use client";
 
 import { createContext, useContext, type JSX, type ReactNode } from "react";
+import { RotateCw } from "lucide-react";
+import { useLocale } from "next-intl";
 
 type TableContextType = {
   columns: string;
@@ -47,6 +49,13 @@ type BodyProps<T> = {
   emptyAction?: ReactNode;
 };
 
+type ReloadButtonProps = {
+  onReload: () => void;
+  isReloading?: boolean;
+  title?: string;
+  className?: string;
+};
+
 type CompoundTable = {
   ({ columns, children }: TableProps): JSX.Element;
   Header: ({ children }: HeaderProps) => JSX.Element;
@@ -58,6 +67,12 @@ type CompoundTable = {
     children?: ReactNode;
     className?: string;
   }) => JSX.Element | null;
+  ReloadButton: ({
+    onReload,
+    isReloading,
+    title,
+    className,
+  }: ReloadButtonProps) => JSX.Element;
 };
 
 const Table: CompoundTable = function Table({
@@ -239,9 +254,51 @@ function Footer({
   );
 }
 
+export function TableReloadButton({
+  onReload,
+  isReloading = false,
+  title,
+  className = "",
+}: ReloadButtonProps) {
+  const locale = useLocale();
+  const defaultTitle =
+    title ?? (locale === "vi" ? "Làm mới dữ liệu" : "Refresh data");
+
+  return (
+    <div className={`flex items-center justify-end ${className}`}>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onReload();
+        }}
+        disabled={isReloading}
+        title={defaultTitle}
+        aria-label={defaultTitle}
+        className="
+          flex h-7 w-7 items-center justify-center
+          rounded-lg border border-transparent
+          text-muted transition-all duration-200
+          hover:border-border dark:hover:border-white/10
+          hover:bg-white/5 hover:text-cyan-400
+          active:scale-90
+          disabled:opacity-50 disabled:cursor-not-allowed
+        "
+      >
+        <RotateCw
+          className={`h-3.5 w-3.5 transition-transform ${
+            isReloading ? "animate-spin text-cyan-400" : ""
+          }`}
+        />
+      </button>
+    </div>
+  );
+}
+
 Table.Header = Header;
 Table.Row = Row;
 Table.Body = Body;
 Table.Footer = Footer;
+Table.ReloadButton = TableReloadButton;
 
 export default Table;

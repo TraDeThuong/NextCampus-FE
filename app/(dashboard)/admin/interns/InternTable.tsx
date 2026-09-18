@@ -47,7 +47,8 @@ export default function InternTable() {
         return p;
     }, [searchParams]);
 
-    const { data, isPending, isError } = useInterns(params);
+    const { data, isPending, isError, refetch, isFetching } =
+        useInterns(params);
 
     const interns = data?.data ?? [];
     const meta = data?.meta;
@@ -103,7 +104,7 @@ export default function InternTable() {
                     <div>{t("admin.interns.colPosition")}</div>
                     <div>{t("admin.interns.colDuration")}</div>
                     <div>{t("admin.interns.colStatus")}</div>
-                    <div />
+                    <Table.ReloadButton onReload={refetch} isReloading={isFetching} />
                 </Table.Header>
 
                 <Table.Body

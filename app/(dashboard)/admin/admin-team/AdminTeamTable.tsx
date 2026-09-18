@@ -41,7 +41,8 @@ export default function AdminTeamTable() {
         return p;
     }, [searchParams]);
 
-    const { data, isPending, isError } = useUsers(params);
+    const { data, isPending, isError, refetch, isFetching } =
+        useUsers(params);
 
     const admins = data?.data ?? [];
     const meta = data?.meta;
@@ -94,7 +95,7 @@ export default function AdminTeamTable() {
                     <div>{t("admin.adminTeam.colAdmin")}</div>
                     <div>{t("admin.adminTeam.colStatus")}</div>
                     <div>{t("admin.adminTeam.colJoined")}</div>
-                    <div />
+                    <Table.ReloadButton onReload={refetch} isReloading={isFetching} />
                 </Table.Header>
 
                 <Table.Body
