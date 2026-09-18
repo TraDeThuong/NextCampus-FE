@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useParams, useRouter, notFound } from "next/navigation";
+import { useState, useCallback, useMemo } from "react";
+import { useParams, useRouter, useSearchParams, usePathname, notFound } from "next/navigation";
 import Image from "next/image";
 import {
     ArrowLeft,
@@ -9,23 +9,41 @@ import {
     Phone,
     Building2,
     User,
-    Circle,
+    Users,
+    Briefcase,
+    Calendar,
+    ChevronLeft,
+    ChevronRight,
+    Eye,
 } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-hot-toast";
 
 import { useLeaderDetail } from "@/hooks/leader/useLeaderDetail";
 import { useUpdateLeader } from "@/hooks/leader/useUpdateLeader";
 import { useDepartments } from "@/hooks/department/useDepartments";
 import { useInterns } from "@/hooks/intern/useInterns";
-import { useUpdateIntern } from "@/hooks/intern/useUpdateIntern";
-import { useLeaders } from "@/hooks/leader/useLeaders";
 import { updateUserService } from "@/services/user.service";
-import { useTranslations } from "next-intl";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "react-hot-toast";
 import type { Leader } from "@/types/leader";
+
 import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
+import Table from "@/components/ui/Table";
+import InlineSelect from "@/components/ui/InlineSelect";
 import LeaderDepartmentSelect from "../LeaderDepartmentSelect";
+
+function formatDate(dateStr: string, locale: string = "vi") {
+    try {
+        return new Date(dateStr).toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+        });
+    } catch {
+        return dateStr;
+    }
+}
 
 export default function LeaderDetailPage() {
     const t = useTranslations();
@@ -36,9 +54,9 @@ export default function LeaderDetailPage() {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center py-32">
+            <MetalCard className="flex items-center justify-center py-32">
                 <Spinner size="lg" />
-            </div>
+            </MetalCard>
         );
     }
 
@@ -48,21 +66,26 @@ export default function LeaderDetailPage() {
 
     return (
         <div className="space-y-6">
+            {/* Top Back Action */}
             <button
+                type="button"
                 onClick={() => router.push("/admin/leaders")}
-                className="flex items-center gap-2 text-sm text-slate-400 transition hover:text-white"
+                className="inline-flex items-center gap-2 text-sm font-medium text-muted hover:text-foreground transition-all py-2 px-3.5 rounded-xl border border-border/60 dark:border-white/10 bg-card/60 hover:bg-card active:scale-95 focus-visible:ring-2 focus-visible:ring-cyan-500/50"
             >
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-4 w-4 shrink-0" />
                 {t("admin.leaders.details.back")}
             </button>
 
+            {/* Leader Profile Header Banner */}
             <LeaderHeader leader={leader} />
 
+            {/* Information Grid: Contact & Managed Departments */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <LeaderInfo leader={leader} />
                 <DepartmentCard leader={leader} />
             </div>
 
+            {/* Managed Interns Table */}
             <InternsCard leader={leader} />
         </div>
     );
@@ -71,7 +94,7 @@ export default function LeaderDetailPage() {
 function LeaderHeader({ leader }: { leader: Leader }) {
     const t = useTranslations();
     const queryClient = useQueryClient();
-    const { mutate: toggleActive } = useMutation({
+    const { mutate: toggleActive, isPending: togglingActive } = useMutation({
         mutationFn: (isActive: boolean) =>
             updateUserService(leader.userId, { isActive }),
         onSuccess: () => {
@@ -84,54 +107,84 @@ function LeaderHeader({ leader }: { leader: Leader }) {
 
     return (
         <MetalCard>
-            <div className="rounded-3xl p-6">
+            <div className="p-6">
                 <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 min-w-0 w-full">
                         {leader.user.avatarUrl ? (
                             <Image
                                 src={leader.user.avatarUrl}
                                 alt={leader.user.fullName ?? ""}
                                 width={64}
                                 height={64}
-                                className="h-16 w-16 rounded-2xl object-cover"
+                                className="h-16 w-16 rounded-2xl object-cover shrink-0 border border-border dark:border-white/10"
                             />
                         ) : (
-                            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-600 to-blue-800 text-2xl font-bold text-slate-200">
+                            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-600 to-blue-800 text-2xl font-bold text-white shadow-sm">
                                 {(leader.user.fullName ?? leader.user.email)
                                     .charAt(0)
                                     .toUpperCase()}
                             </div>
                         )}
-                        <div>
-                            <h1 className="text-2xl font-bold text-white">
+                        <div className="min-w-0 flex-1">
+                            <h1
+                                className="text-2xl sm:text-3xl font-bold text-foreground truncate"
+                                title={leader.user.fullName ?? leader.user.email}
+                            >
                                 {leader.user.fullName ?? leader.user.email}
                             </h1>
-                            <div className="mt-1 flex items-center gap-2 text-sm text-slate-400">
-                                <Mail className="h-4 w-4" />
-                                {leader.user.email}
+                            <div className="mt-1.5 flex flex-wrap items-center gap-3 text-sm text-muted min-w-0">
+                                <div className="flex items-center gap-1.5 min-w-0 max-w-full">
+                                    <Mail className="h-4 w-4 shrink-0 text-cyan-400" />
+                                    <span className="truncate" title={leader.user.email}>
+                                        {leader.user.email}
+                                    </span>
+                                </div>
+                                {leader.phone && (
+                                    <>
+                                        <span className="text-muted/40 shrink-0">•</span>
+                                        <div className="flex items-center gap-1.5 shrink-0">
+                                            <Phone className="h-4 w-4 shrink-0 text-cyan-400" />
+                                            <span>{leader.phone}</span>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>
 
-                    <div>
-                        <select
+                    <div className="shrink-0">
+                        <InlineSelect
+                            ariaLabel={t("admin.leaders.colStatus")}
                             value={leader.user.isActive ? "true" : "false"}
-                            onChange={(e) =>
-                                toggleActive(e.target.value === "true")
-                            }
-                            className={`rounded-lg border px-2.5 py-1 text-xs font-medium outline-none cursor-pointer ${
-                                leader.user.isActive
-                                    ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-400 font-semibold"
-                                    : "border-red-400/30 bg-red-500/10 text-red-400 font-semibold"
-                            }`}
-                        >
-                            <option value="true" className="bg-[#0b1020] text-emerald-400 font-medium">
-                                {t("admin.leaders.active")}
-                            </option>
-                            <option value="false" className="bg-[#0b1020] text-red-400 font-medium">
-                                {t("admin.leaders.inactive")}
-                            </option>
-                        </select>
+                            placeholder={t("admin.leaders.colStatus")}
+                            loading={togglingActive}
+                            disabled={togglingActive}
+                            onChange={(val) => {
+                                if (val !== null) toggleActive(val === "true");
+                            }}
+                            options={[
+                                { value: "true", label: t("admin.leaders.active") },
+                                { value: "false", label: t("admin.leaders.inactive") },
+                            ]}
+                            renderTrigger={(label) => (
+                                <span
+                                    className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                                        leader.user.isActive
+                                            ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-300 hover:border-emerald-400/50"
+                                            : "border-red-400/30 bg-red-500/10 text-red-300 hover:border-red-400/50"
+                                    }`}
+                                >
+                                    <span
+                                        className={`h-1.5 w-1.5 rounded-full ${
+                                            leader.user.isActive
+                                                ? "bg-emerald-400"
+                                                : "bg-red-400"
+                                        }`}
+                                    />
+                                    {label}
+                                </span>
+                            )}
+                        />
                     </div>
                 </div>
             </div>
@@ -155,45 +208,77 @@ function LeaderInfo({ leader }: { leader: Leader }) {
                 positions.findIndex((item) => item.name === position.name) === index,
         );
 
+    const [updatingPosition, setUpdatingPosition] = useState(false);
+
+    const handlePositionChange = useCallback(
+        (posName: string | null) => {
+            if (leader.departments.length === 0) {
+                toast.error(t("admin.leaders.selectDepartmentFirst"));
+                return;
+            }
+            setUpdatingPosition(true);
+            updateLeader(
+                {
+                    id: leader.id,
+                    payload: { position: posName || null },
+                },
+                {
+                    onSettled: () => setUpdatingPosition(false),
+                },
+            );
+        },
+        [leader.id, leader.departments.length, t, updateLeader],
+    );
+
     return (
         <MetalCard>
-            <div className="rounded-3xl p-6">
-                <h2 className="text-lg font-semibold metal-text">
-                    {t("admin.leaders.details.contactInfo")}
-                </h2>
-                <div className="mt-5 space-y-4">
-                    <InfoRow icon={Mail} label={t("admin.leaders.details.email")} value={leader.user.email} />
-
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3 text-sm text-slate-400">
-                            <Phone className="h-4 w-4" />
-                            <span>{t("admin.leaders.details.phone")}</span>
-                        </div>
-                        <span className="text-sm text-white">
-                            {leader.phone ?? "—"}
-                        </span>
+            <div className="p-6">
+                <div className="flex items-center gap-2.5 mb-5">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-400/20 transition-all duration-500 group-hover:rotate-6 group-hover:scale-110">
+                        <User className="h-4 w-4 shrink-0" />
                     </div>
+                    <h2 className="text-lg font-semibold metal-text">
+                        {t("admin.leaders.details.contactInfo")}
+                    </h2>
+                </div>
 
-                    <InlineSelectRow
-                        icon={User}
-                        label={t("admin.leaders.details.position")}
-                        value={leader.position ?? t("admin.leaders.notSet")}
-                        options={availablePositions.map((pos) => ({
-                            value: pos.name,
-                            label: pos.name,
-                        }))}
-                        currentId={leader.position ?? ""}
-                        onChange={(posName) => {
-                            if (leader.departments.length === 0) {
-                                toast.error(t("admin.leaders.selectDepartmentFirst"));
-                                return;
-                            }
-                            updateLeader({
-                                id: leader.id,
-                                payload: { position: posName || null },
-                            });
-                        }}
+                <div className="divide-y divide-border/40 dark:divide-white/5">
+                    <InfoRow
+                        icon={<Mail className="h-4 w-4 shrink-0" />}
+                        label={t("admin.leaders.details.email")}
+                        value={leader.user.email}
                     />
+
+                    <InfoRow
+                        icon={<Phone className="h-4 w-4 shrink-0" />}
+                        label={t("admin.leaders.details.phone")}
+                        value={leader.phone ?? "—"}
+                    />
+
+                    <div className="flex items-center justify-between py-3.5">
+                        <div className="flex items-center gap-3 text-sm text-muted">
+                            <Briefcase className="h-4 w-4 shrink-0" />
+                            <span>{t("admin.leaders.details.position")}</span>
+                        </div>
+                        <div className="min-w-0 max-w-[220px] text-sm text-right">
+                            <InlineSelect
+                                ariaLabel={t("admin.leaders.details.position")}
+                                value={leader.position}
+                                placeholder={t("admin.leaders.notSet")}
+                                loading={updatingPosition}
+                                disabled={leader.departments.length === 0}
+                                onDisabledClick={() => toast.error(t("admin.leaders.selectDepartmentFirst"))}
+                                onChange={handlePositionChange}
+                                options={[
+                                    { value: null, label: t("admin.leaders.notSet") },
+                                    ...availablePositions.map((pos) => ({
+                                        value: pos.name,
+                                        label: pos.name,
+                                    })),
+                                ]}
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
         </MetalCard>
@@ -202,30 +287,50 @@ function LeaderInfo({ leader }: { leader: Leader }) {
 
 function DepartmentCard({ leader }: { leader: Leader }) {
     const t = useTranslations();
+    const locale = useLocale();
     const { data: deptData } = useDepartments();
     const departments = deptData?.data ?? [];
 
     return (
         <MetalCard>
-            <div className="rounded-3xl p-6">
-                <h2 className="text-lg font-semibold metal-text">{t("admin.leaders.details.colDept")}</h2>
-                <div className="mt-5 space-y-4">
-                    <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-3 text-sm text-slate-400">
-                            <Building2 className="h-4 w-4" />
+            <div className="p-6">
+                <div className="flex items-center gap-2.5 mb-5">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-400/20 transition-all duration-500 group-hover:rotate-6 group-hover:scale-110">
+                        <Building2 className="h-4 w-4 shrink-0" />
+                    </div>
+                    <h2 className="text-lg font-semibold metal-text">
+                        {t("admin.leaders.details.colDept")}
+                    </h2>
+                </div>
+
+                <div className="divide-y divide-border/40 dark:divide-white/5">
+                    <div className="flex items-center justify-between gap-4 py-3.5">
+                        <div className="flex items-center gap-3 text-sm text-muted shrink-0">
+                            <Building2 className="h-4 w-4 shrink-0" />
                             <span>{t("admin.leaders.details.departments")}</span>
                         </div>
-                        <div className="min-w-0 max-w-[240px] text-sm text-slate-400">
+                        <div className="min-w-0 max-w-[260px] text-sm">
                             <LeaderDepartmentSelect
                                 leader={leader}
                                 departments={departments}
                             />
                         </div>
                     </div>
+
                     <InfoRow
-                        icon={Circle}
+                        icon={<Users className="h-4 w-4 shrink-0" />}
                         label={t("admin.leaders.details.internsManaged")}
-                        value={String(leader.internCount ?? 0)}
+                        value={
+                            <span className="inline-flex items-center justify-center min-w-[28px] px-2.5 py-0.5 rounded-lg bg-cyan-500/10 text-cyan-400 font-semibold text-xs border border-cyan-500/20">
+                                {leader.internCount ?? 0}
+                            </span>
+                        }
+                    />
+
+                    <InfoRow
+                        icon={<Calendar className="h-4 w-4 shrink-0" />}
+                        label={t("admin.leaders.details.joinedDate")}
+                        value={formatDate(leader.createdAt, locale)}
                     />
                 </div>
             </div>
@@ -233,198 +338,206 @@ function DepartmentCard({ leader }: { leader: Leader }) {
     );
 }
 
+const INTERN_COLUMNS =
+    "minmax(260px,2.5fr) minmax(180px,1.8fr) minmax(180px,1.8fr) 140px 48px";
+
 function InternsCard({ leader }: { leader: Leader }) {
     const t = useTranslations();
-    const queryClient = useQueryClient();
-    const { data, isLoading } = useInterns({ leaderId: leader.userId });
-    const { data: leadersData } = useLeaders();
-    const allLeaders = leadersData?.data ?? [];
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
+    const page = Number(searchParams.get("page") ?? "1");
+
+    const { data, isLoading } = useInterns({
+        leaderId: leader.userId,
+        page,
+        limit: 10,
+    });
     const interns = data?.data ?? [];
+    const meta = data?.meta;
 
-    const { mutate: updateIntern } = useUpdateIntern();
+    function goToPage(newPage: number) {
+        const p = new URLSearchParams(searchParams.toString());
+        p.set("page", String(newPage));
+        router.push(`${pathname}?${p.toString()}`);
+    }
 
     return (
-        <MetalCard>
-            <div className="rounded-3xl p-6">
+        <div className="space-y-4">
+            <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-400/20 transition-all duration-500 hover:rotate-6 hover:scale-110">
+                    <Users className="h-4 w-4 shrink-0" />
+                </div>
                 <h2 className="text-lg font-semibold metal-text">
-                    {t("admin.leaders.details.managedInternsTitle", { count: interns.length })}
+                    {t("admin.leaders.details.managedInternsTitle", {
+                        count: meta?.total ?? interns.length,
+                    })}
                 </h2>
+            </div>
 
-                {isLoading ? (
-                    <div className="flex justify-center py-8">
-                        <Spinner size="sm" />
-                    </div>
-                ) : interns.length === 0 ? (
-                    <p className="mt-4 text-sm text-slate-500">
-                        {t("admin.leaders.details.noInterns")}
-                    </p>
-                ) : (
-                    <div className="mt-4 overflow-x-auto">
-                        <table className="w-full text-left text-sm">
-                            <thead>
-                                <tr className="border-b border-white/10 text-xs uppercase text-slate-400">
-                                    <th className="py-3 pr-4 font-medium">{t("admin.leaders.details.colName")}</th>
-                                    <th className="py-3 pr-4 font-medium">{t("admin.leaders.details.colEmail")}</th>
-                                    <th className="py-3 pr-4 font-medium">{t("admin.leaders.details.colDept")}</th>
-                                    <th className="py-3 pr-4 font-medium">{t("admin.leaders.details.colPosition")}</th>
-                                    <th className="py-3 pr-4 font-medium">{t("admin.leaders.details.colLeader")}</th>
-                                    <th className="py-3 font-medium">{t("admin.leaders.details.colStatus")}</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5">
-                                {interns.map((intern) => (
-                                    <tr key={intern.id}>
-                                        <td className="py-3 pr-4 text-white">
-                                            {intern.fullName}
-                                        </td>
-                                        <td className="py-3 pr-4 text-slate-400">
-                                            {intern.user.email}
-                                        </td>
-                                        <td className="py-3 pr-4 text-slate-400">
-                                            {intern.department?.name ?? "—"}
-                                        </td>
-                                        <td className="py-3 pr-4 text-slate-400">
-                                            {intern.position?.name ?? "—"}
-                                        </td>
-                                        <td className="py-3 pr-4">
-                                            <select
-                                                value={intern.leaderId ?? ""}
-                                                onChange={(e) => {
-                                                    updateIntern({
-                                                        id: intern.id,
-                                                        payload: {
-                                                            leaderId: e.target
-                                                                .value || null,
-                                                        },
-                                                    });
-                                                    setTimeout(
-                                                        () =>
-                                                            queryClient.invalidateQueries(
-                                                                {
-                                                                    queryKey: [
-                                                                        "interns",
-                                                                    ],
-                                                                },
-                                                            ),
-                                                        500,
-                                                    );
-                                                }}
-                                                className="rounded-lg border border-cyan-400/30 bg-[#0f172a] px-2 py-1 text-xs text-white outline-none"
-                                            >
-                                                <option value="">
-                                                    {t("admin.leaders.details.unassigned")}
-                                                </option>
-                                                {allLeaders.map((l) => (
-                                                    <option
-                                                        key={l.id}
-                                                        value={l.userId}
-                                                    >
-                                                        {l.user.fullName ??
-                                                            l.user.email}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </td>
-                                        <td className="py-3">
-                                            <span
-                                                className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs ${
-                                                    intern.status ===
-                                                    "ACTIVE"
-                                                        ? "border-emerald-400/20 bg-emerald-500/10 text-emerald-300"
-                                                        : intern.status ===
-                                                            "COMPLETED"
-                                                          ? "border-blue-400/20 bg-blue-500/10 text-blue-300"
-                                                          : "border-red-400/20 bg-red-500/10 text-red-300"
-                                                }`}
-                                            >
-                                                {intern.status === "ACTIVE"
-                                                    ? t("admin.interns.active")
-                                                    : intern.status === "COMPLETED"
-                                                      ? t("admin.interns.completed")
-                                                      : t("admin.interns.dropped")}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+            <Table
+                columns={INTERN_COLUMNS}
+                className="
+                    bg-[linear-gradient(145deg,#101827_0%,#1a2235_20%,#0f172a_55%,#050816_100%)]
+                    shadow-[0_12px_40px_rgba(0,0,0,.45)]
+                    hover:shadow-[0_20px_50px_rgba(21,174,245,.15)]
+                    transition-shadow duration-500
+                "
+            >
+                <Table.Header>
+                    <div>{t("admin.leaders.details.colIntern")}</div>
+                    <div>{t("admin.leaders.details.colDept")}</div>
+                    <div>{t("admin.leaders.details.colPosition")}</div>
+                    <div>{t("admin.leaders.details.colStatus")}</div>
+                    <div />
+                </Table.Header>
+
+                <Table.Body
+                    data={interns}
+                    isLoading={isLoading}
+                    emptyMessage={t("admin.leaders.details.noInterns")}
+                    emptyDescription={t("admin.leaders.details.noInternsDesc")}
+                    render={(intern) => (
+                        <Table.Row key={intern.id}>
+                            {/* Intern Info */}
+                            <div className="flex items-center gap-3 min-w-0 pr-2">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-700/80 to-blue-900/80 text-xs font-bold text-white border border-cyan-500/20 shadow-sm">
+                                    {(intern.fullName ?? intern.user.email)
+                                        .charAt(0)
+                                        .toUpperCase()}
+                                </div>
+                                <div className="min-w-0">
+                                    <p
+                                        className="truncate text-sm font-semibold text-foreground cursor-pointer hover:text-cyan-400 transition"
+                                        onClick={() => router.push(`/admin/interns/${intern.id}`)}
+                                        title={intern.fullName ?? intern.user.email}
+                                    >
+                                        {intern.fullName ?? intern.user.email}
+                                    </p>
+                                    <p
+                                        className="truncate text-xs text-muted"
+                                        title={intern.user.email}
+                                    >
+                                        {intern.user.email}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Department */}
+                            <div className="text-sm min-w-0 pr-2">
+                                <span className="truncate text-foreground font-medium" title={intern.department?.name ?? "—"}>
+                                    {intern.department?.name ?? "—"}
+                                </span>
+                            </div>
+
+                            {/* Position */}
+                            <div className="text-sm min-w-0 pr-2">
+                                <span className="truncate text-muted" title={intern.position?.name ?? "—"}>
+                                    {intern.position?.name ?? "—"}
+                                </span>
+                            </div>
+
+                            {/* Status */}
+                            <div>
+                                <span
+                                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${
+                                        intern.status === "ACTIVE"
+                                            ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-300"
+                                            : intern.status === "COMPLETED"
+                                              ? "border-sky-400/30 bg-sky-500/10 text-sky-300"
+                                              : "border-rose-400/30 bg-rose-500/10 text-rose-300"
+                                    }`}
+                                >
+                                    <span
+                                        className={`h-1.5 w-1.5 rounded-full ${
+                                            intern.status === "ACTIVE"
+                                                ? "bg-emerald-400"
+                                                : intern.status === "COMPLETED"
+                                                  ? "bg-sky-400"
+                                                  : "bg-rose-400"
+                                        }`}
+                                    />
+                                    {intern.status === "ACTIVE"
+                                        ? t("admin.interns.active")
+                                        : intern.status === "COMPLETED"
+                                          ? t("admin.interns.completed")
+                                          : t("admin.interns.dropped")}
+                                </span>
+                            </div>
+
+                            {/* Action */}
+                            <div className="flex items-center justify-end">
+                                <button
+                                    type="button"
+                                    onClick={() => router.push(`/admin/interns/${intern.id}`)}
+                                    className="flex h-8 w-8 items-center justify-center rounded-xl border border-border dark:border-white/10 bg-card/60 text-muted transition hover:border-cyan-400/40 hover:bg-cyan-500/10 hover:text-cyan-400 active:scale-95"
+                                    title={t("admin.leaders.details.actions")}
+                                    aria-label={t("admin.leaders.details.actions")}
+                                >
+                                    <Eye className="h-4 w-4 shrink-0" />
+                                </button>
+                            </div>
+                        </Table.Row>
+                    )}
+                />
+
+                {meta && meta.totalPages > 1 && (
+                    <Table.Footer>
+                        <div className="flex w-full items-center justify-between gap-4 text-sm">
+                            <p className="text-muted">
+                                {t("admin.interns.pagination", {
+                                    page: meta.page,
+                                    totalPages: meta.totalPages,
+                                    total: meta.total,
+                                })}
+                            </p>
+
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    disabled={meta.page <= 1}
+                                    onClick={() => goToPage(meta.page - 1)}
+                                    aria-label="Previous page"
+                                    className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+                                >
+                                    <ChevronLeft className="h-4 w-4" />
+                                </button>
+
+                                <button
+                                    type="button"
+                                    disabled={meta.page >= meta.totalPages}
+                                    onClick={() => goToPage(meta.page + 1)}
+                                    aria-label="Next page"
+                                    className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+                                >
+                                    <ChevronRight className="h-4 w-4" />
+                                </button>
+                            </div>
+                        </div>
+                    </Table.Footer>
                 )}
-            </div>
-        </MetalCard>
-    );
-}
-
-function InfoRow({
-    icon: Icon,
-    label,
-    value,
-}: {
-    icon: React.ComponentType<{ className?: string }>;
-    label: string;
-    value: string;
-}) {
-    return (
-        <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 text-sm text-slate-400">
-                <Icon className="h-4 w-4" />
-                <span>{label}</span>
-            </div>
-            <span className="text-sm text-white">{value}</span>
+            </Table>
         </div>
     );
 }
 
-function InlineSelectRow({
-    icon: Icon,
+function InfoRow({
+    icon,
     label,
     value,
-    options,
-    currentId,
-    onChange,
 }: {
-    icon: React.ComponentType<{ className?: string }>;
+    icon: React.ReactNode;
     label: string;
-    value: string;
-    options: { value: string; label: string }[];
-    currentId: string;
-    onChange: (id: string) => void;
+    value: React.ReactNode;
 }) {
-    const t = useTranslations();
-    const [editing, setEditing] = useState(false);
-
     return (
-        <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 text-sm text-slate-400">
-                <Icon className="h-4 w-4" />
+        <div className="flex items-center justify-between py-3.5">
+            <div className="flex items-center gap-3 text-sm text-muted">
+                {icon}
                 <span>{label}</span>
             </div>
-            {editing ? (
-                <select
-                    value={currentId}
-                    onChange={(e) => {
-                        onChange(e.target.value);
-                        setEditing(false);
-                    }}
-                    onBlur={() => setEditing(false)}
-                    autoFocus
-                    className="rounded-lg border border-cyan-400/30 bg-[#0f172a] px-2 py-1 text-sm text-white outline-none"
-                >
-                    <option value="">{t("admin.leaders.notSet")}</option>
-                    {options.map((o) => (
-                        <option key={o.value} value={o.value}>
-                            {o.label}
-                        </option>
-                    ))}
-                </select>
-            ) : (
-                <button
-                    onClick={() => setEditing(true)}
-                    className="text-sm text-white transition hover:text-cyan-400"
-                >
-                    {value}
-                </button>
-            )}
+            <span className="text-sm font-medium text-foreground">{value}</span>
         </div>
     );
 }
