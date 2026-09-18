@@ -69,7 +69,7 @@ export default function Header({ role, onMenuClick }: HeaderProps) {
           <Link
             href={`/${role.toLowerCase()}/profile`}
             title={state.user?.fullName ?? "User"}
-            className="flex items-center gap-2 md:gap-3 rounded-full border border-white/10 bg-white/5 p-1 md:px-3 md:py-2 backdrop-blur-lg transition hover:bg-white/10 cursor-pointer max-w-fit md:max-w-[260px]"
+            className="flex items-center gap-2 md:gap-3 rounded-full border border-white/10 bg-white/5 p-1 md:px-3 md:py-2 backdrop-blur-lg transition hover:bg-white/10 cursor-pointer max-w-fit md:max-w-[260px] min-w-0"
           >
             {state.user?.avatarUrl ? (
               <Image
@@ -84,9 +84,9 @@ export default function Header({ role, onMenuClick }: HeaderProps) {
                 <User className="h-4 w-4 md:h-5 md:w-5 text-white" />
               </div>
             )}
-            <span className="hidden md:inline-block min-w-0 truncate">
+            <span className="hidden md:inline-flex items-center min-w-0">
               <span
-                className="text-sm sm:text-base font-medium metal-text truncate"
+                className="max-w-[140px] md:max-w-[170px] lg:max-w-[200px] truncate text-sm sm:text-base font-medium metal-text leading-normal"
                 style={{ fontFamily: "var(--font-body-vi), sans-serif" }}
               >
                 {state.user?.fullName ?? "User"}
