@@ -1,7 +1,19 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { MoreVertical, Trash2, Edit3, X, Loader2, Settings, Briefcase, Building2, Plus } from "lucide-react";
+import { useState, useRef, useEffect, useCallback, useId } from "react";
+import { createPortal } from "react-dom";
+import {
+    MoreVertical,
+    Trash2,
+    Edit3,
+    X,
+    Loader2,
+    Settings,
+    Briefcase,
+    Building2,
+    Plus,
+    AlertCircle,
+} from "lucide-react";
 import type { Department } from "@/types/department";
 import type { Leader } from "@/types/leader";
 import { useDeleteDepartment } from "@/hooks/department/useDeleteDepartment";
@@ -14,6 +26,7 @@ import { PREDEFINED_POSITIONS, GENERAL_POSITIONS } from "@/types/department";
 import { useTranslations } from "next-intl";
 import Table from "@/components/ui/Table";
 import Modal from "@/components/ui/Modal";
+import Button from "@/components/ui/Button";
 import { toast } from "react-hot-toast";
 import DepartmentLeaderSelect from "./DepartmentLeaderSelect";
 
@@ -31,39 +44,81 @@ export default function DepartmentRow({
     leadersError,
 }: DepartmentRowProps) {
     const t = useTranslations();
-    const { mutate: deleteDepartment } = useDeleteDepartment();
-    const { mutate: updateDepartment } = useUpdateDepartment();
+    const { mutate: deleteDepartment, isPending: deletingDept } = useDeleteDepartment();
+    const { mutate: updateDepartment, isPending: updatingDept } = useUpdateDepartment();
 
     const [menuOpen, setMenuOpen] = useState(false);
+    const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
+    const triggerRef = useRef<HTMLButtonElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
+    const menuId = useId();
+
+    const updateMenuPosition = useCallback(() => {
+        if (triggerRef.current) {
+            const rect = triggerRef.current.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const openUpward = spaceBelow < 180 && rect.top > 180;
+
+            const MENU_WIDTH = 140;
+            setMenuStyle({
+                position: "fixed",
+                top: openUpward ? undefined : rect.bottom + 6,
+                bottom: openUpward ? window.innerHeight - rect.top + 6 : undefined,
+                left: Math.max(8, rect.right - MENU_WIDTH),
+                width: MENU_WIDTH,
+                zIndex: 9999,
+            });
+        }
+    }, []);
+
+    useEffect(() => {
+        if (menuOpen) {
+            updateMenuPosition();
+            window.addEventListener("scroll", updateMenuPosition, true);
+            window.addEventListener("resize", updateMenuPosition);
+        }
+        return () => {
+            window.removeEventListener("scroll", updateMenuPosition, true);
+            window.removeEventListener("resize", updateMenuPosition);
+        };
+    }, [menuOpen, updateMenuPosition]);
 
     useEffect(() => {
         function handleClick(e: MouseEvent) {
-            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+            const target = e.target as Node;
+            if (
+                menuRef.current &&
+                !menuRef.current.contains(target) &&
+                triggerRef.current &&
+                !triggerRef.current.contains(target)
+            ) {
                 setMenuOpen(false);
             }
         }
-        document.addEventListener("mousedown", handleClick);
+        if (menuOpen) document.addEventListener("mousedown", handleClick);
         return () => document.removeEventListener("mousedown", handleClick);
-    }, []);
+    }, [menuOpen]);
 
     return (
         <Modal>
             <Table.Row>
                 {/* Department Name */}
-                <div className="text-sm font-semibold text-white min-w-0 pr-4 flex items-center gap-2">
+                <div className="text-sm font-semibold text-foreground min-w-0 pr-4 flex items-center gap-2">
                     <Building2 className="h-4 w-4 text-cyan-400 shrink-0" />
                     <span className="truncate">{department.name}</span>
                 </div>
 
                 {/* Description */}
-                <div className="text-xs text-slate-400 min-w-0 pr-4 truncate" title={department.description || t("admin.department.defaultDescription")}>
+                <div
+                    className="text-xs text-muted min-w-0 pr-4 truncate"
+                    title={department.description || t("admin.department.defaultDescription")}
+                >
                     {department.description || t("admin.department.defaultDescription")}
                 </div>
 
                 {/* Positions Count */}
                 <div className="flex items-center">
-                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-cyan-400/10 px-2.5 py-1 text-xs font-medium text-cyan-300 ring-1 ring-inset ring-cyan-400/20">
+                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-cyan-500/10 px-2.5 py-1 text-xs font-medium text-cyan-400 ring-1 ring-inset ring-cyan-500/20">
                         <Briefcase className="h-3 w-3 shrink-0" />
                         {t("admin.department.positionsCount", { count: department.positions.length })}
                     </span>
@@ -80,58 +135,79 @@ export default function DepartmentRow({
                 </div>
 
                 {/* Actions Dropdown */}
-                <div className="relative text-right pr-4" ref={menuRef}>
+                <div className="relative text-right">
                     <button
+                        ref={triggerRef}
                         type="button"
+                        aria-label="Department actions"
+                        aria-haspopup="menu"
+                        aria-expanded={menuOpen}
+                        aria-controls={menuId}
                         onClick={() => setMenuOpen((prev) => !prev)}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-slate-400 transition hover:border-white/10 hover:bg-white/5 hover:text-white"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-muted transition hover:border-white/10 hover:bg-white/5 hover:text-foreground active:scale-[0.98]"
                     >
-                        <MoreVertical className="h-4 w-4" />
+                        <MoreVertical className="h-4 w-4 shrink-0" />
                     </button>
 
-                    {menuOpen && (
-                        <div className="absolute right-0 top-full z-50 mt-2 w-48 rounded-2xl border border-white/10 bg-[#0f172a] p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl text-left">
-                            <Modal.Open opens={`edit-department-${department.id}`}>
-                                <button
-                                    type="button"
-                                    onClick={() => setMenuOpen(false)}
-                                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
-                                >
-                                    <Edit3 className="h-4 w-4" />
-                                    {t("admin.department.editDepartment")}
-                                </button>
-                            </Modal.Open>
+                    {menuOpen &&
+                        typeof document !== "undefined" &&
+                        createPortal(
+                            <div
+                                id={menuId}
+                                ref={menuRef}
+                                role="menu"
+                                style={menuStyle}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Escape") setMenuOpen(false);
+                                }}
+                                className="rounded-xl border border-border dark:border-white/10 bg-card/95 p-1 shadow-[0_12px_36px_rgba(0,0,0,.45)] backdrop-blur-2xl text-left"
+                            >
+                                <Modal.Open opens={`edit-department-${department.id}`}>
+                                    <button
+                                        type="button"
+                                        role="menuitem"
+                                        onClick={() => setMenuOpen(false)}
+                                        className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-foreground transition hover:bg-white/5"
+                                    >
+                                        <Edit3 className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
+                                        {t("admin.department.editDepartment")}
+                                    </button>
+                                </Modal.Open>
 
-                            <Modal.Open opens={`manage-positions-${department.id}`}>
-                                <button
-                                    type="button"
-                                    onClick={() => setMenuOpen(false)}
-                                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
-                                >
-                                    <Settings className="h-4 w-4" />
-                                    {t("admin.department.positions")}
-                                </button>
-                            </Modal.Open>
+                                <Modal.Open opens={`manage-positions-${department.id}`}>
+                                    <button
+                                        type="button"
+                                        role="menuitem"
+                                        onClick={() => setMenuOpen(false)}
+                                        className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-foreground transition hover:bg-white/5"
+                                    >
+                                        <Settings className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                                        {t("admin.department.positions")}
+                                    </button>
+                                </Modal.Open>
 
-                            <Modal.Open opens={`delete-department-${department.id}`}>
-                                <button
-                                    type="button"
-                                    onClick={() => setMenuOpen(false)}
-                                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-red-400 transition hover:bg-red-500/10"
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                    {t("admin.department.delete")}
-                                </button>
-                            </Modal.Open>
-                        </div>
-                    )}
+                                <Modal.Open opens={`delete-department-${department.id}`}>
+                                    <button
+                                        type="button"
+                                        role="menuitem"
+                                        onClick={() => setMenuOpen(false)}
+                                        className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-rose-400 transition hover:bg-rose-500/10"
+                                    >
+                                        <Trash2 className="h-3.5 w-3.5 shrink-0" />
+                                        {t("admin.department.delete")}
+                                    </button>
+                                </Modal.Open>
+                            </div>,
+                            document.body,
+                        )}
                 </div>
             </Table.Row>
 
             <Modal.Window name={`edit-department-${department.id}`} size="md">
                 <EditDepartmentModal
                     department={department}
-                    onUpdateName={(name) => updateDepartment({ id: department.id, payload: { name } })}
+                    isUpdating={updatingDept}
+                    onUpdate={(payload) => updateDepartment({ id: department.id, payload })}
                 />
             </Modal.Window>
 
@@ -142,9 +218,11 @@ export default function DepartmentRow({
             <Modal.Window name={`delete-department-${department.id}`} size="sm">
                 <DeleteConfirm
                     name={department.name}
+                    isDeleting={deletingDept}
                     onConfirm={(onCloseModal) => {
-                        deleteDepartment(department.id);
-                        onCloseModal?.();
+                        deleteDepartment(department.id, {
+                            onSuccess: () => onCloseModal?.(),
+                        });
                     }}
                 />
             </Modal.Window>
@@ -154,11 +232,13 @@ export default function DepartmentRow({
 
 function EditDepartmentModal({
     department,
-    onUpdateName,
+    isUpdating,
+    onUpdate,
     onCloseModal,
 }: {
     department: Department;
-    onUpdateName: (name: string) => void;
+    isUpdating: boolean;
+    onUpdate: (payload: { name: string; description?: string | null }) => void;
     onCloseModal?: () => void;
 }) {
     const t = useTranslations();
@@ -170,6 +250,7 @@ function EditDepartmentModal({
     const { mutate: deletePosition } = useDeletePosition();
 
     const [deptName, setDeptName] = useState(department.name);
+    const [deptDescription, setDeptDescription] = useState(department.description || "");
     const [newPositionName, setNewPositionName] = useState("");
     const [editingPosId, setEditingPosId] = useState<string | null>(null);
     const [editingPosName, setEditingPosName] = useState("");
@@ -177,7 +258,7 @@ function EditDepartmentModal({
     const predefinedForDept = PREDEFINED_POSITIONS[deptName] || GENERAL_POSITIONS;
 
     const deptExists = departments.some(
-        (d) => d.id !== department.id && d.name.toLowerCase().trim() === deptName.toLowerCase().trim()
+        (d) => d.id !== department.id && d.name.toLowerCase().trim() === deptName.toLowerCase().trim(),
     );
 
     const handleSave = (e: React.FormEvent) => {
@@ -187,8 +268,13 @@ function EditDepartmentModal({
             toast.error(t("admin.department.deptNameExistsToast"));
             return;
         }
-        if (deptName.trim() !== department.name) {
-            onUpdateName(deptName.trim());
+        const trimmedDesc = deptDescription.trim();
+        const currentDesc = department.description || "";
+        if (deptName.trim() !== department.name || trimmedDesc !== currentDesc) {
+            onUpdate({
+                name: deptName.trim(),
+                description: trimmedDesc || null,
+            });
         }
         onCloseModal?.();
     };
@@ -198,7 +284,7 @@ function EditDepartmentModal({
         const trimmed = newPositionName.trim();
         if (!trimmed) return;
         const exists = department.positions.some(
-            (p) => p.name.toLowerCase().trim() === trimmed.toLowerCase()
+            (p) => p.name.toLowerCase().trim() === trimmed.toLowerCase(),
         );
         if (exists) {
             toast.error(t("admin.department.positionExistsWarning"));
@@ -210,7 +296,7 @@ function EditDepartmentModal({
                 onSuccess: () => {
                     setNewPositionName("");
                 },
-            }
+            },
         );
     };
 
@@ -226,51 +312,76 @@ function EditDepartmentModal({
         <div className="px-2 py-6 text-left">
             <div className="flex items-center gap-2 mb-2">
                 <Building2 className="h-5 w-5 text-cyan-400 shrink-0" />
-                <h3 className="text-lg font-bold text-white">
+                <h3 className="text-lg font-bold text-foreground">
                     {t("admin.department.editDepartmentTitle")}
                 </h3>
             </div>
-            <p className="text-sm text-slate-400 mb-6">
+            <p className="text-sm text-muted mb-6">
                 {t("admin.department.editDepartmentDescription")}
             </p>
 
             <form onSubmit={handleSave} className="space-y-6">
                 {/* Department Name */}
                 <div>
-                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
-                        {t("admin.department.departmentName")}
+                    <label className="text-xs font-semibold text-muted uppercase tracking-wider block mb-1">
+                        {t("admin.department.departmentName")}{" "}
+                        <span className="text-rose-500">*</span>
                     </label>
                     <input
                         type="text"
                         value={deptName}
                         onChange={(e) => setDeptName(e.target.value)}
                         placeholder={t("admin.department.deptNamePlaceholder")}
-                        className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 px-4 text-sm text-white outline-none transition focus:border-cyan-400/50 placeholder:text-slate-600"
+                        className={`w-full rounded-xl border bg-card/60 py-2.5 px-4 text-sm text-foreground outline-none transition focus:border-cyan-400/50 placeholder:text-muted ${
+                            deptExists || !deptName.trim()
+                                ? "border-rose-500/50"
+                                : "border-border dark:border-white/10"
+                        }`}
                     />
                     {deptExists && (
-                        <p className="text-xs text-red-400 mt-1.5">
+                        <p className="text-xs text-rose-400 mt-1.5 flex items-center gap-1">
+                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                             {t("admin.department.deptNameExistsError")}
                         </p>
                     )}
                 </div>
 
+                {/* Department Description */}
+                <div>
+                    <div className="flex items-center justify-between mb-1">
+                        <label className="text-xs font-semibold text-muted uppercase tracking-wider block">
+                            {t("admin.department.deptDescription")}
+                        </label>
+                        <span className="text-[11px] text-muted font-normal">
+                            {t("admin.department.deptDescriptionOptional")}
+                        </span>
+                    </div>
+                    <textarea
+                        rows={2}
+                        value={deptDescription}
+                        onChange={(e) => setDeptDescription(e.target.value)}
+                        placeholder={t("admin.department.deptDescriptionPlaceholder")}
+                        className="w-full rounded-xl border border-border dark:border-white/10 bg-card/60 py-2.5 px-4 text-sm text-foreground outline-none transition focus:border-cyan-400/50 placeholder:text-muted resize-none"
+                    />
+                </div>
+
                 {/* Positions Management */}
                 <div>
-                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">
+                    <label className="text-xs font-semibold text-muted uppercase tracking-wider block mb-2">
                         {t("admin.department.jobPositions")} ({department.positions.length})
                     </label>
 
                     {/* Dynamic positions list */}
                     <div className="space-y-2 max-h-52 overflow-y-auto mb-3 pr-1 custom-scrollbar">
                         {department.positions.length === 0 ? (
-                            <p className="text-xs text-slate-500 italic py-2">
+                            <p className="text-xs text-muted italic py-2">
                                 {t("admin.department.noPositionsDefined")}
                             </p>
                         ) : (
                             department.positions.map((pos) => (
                                 <div
                                     key={pos.id}
-                                    className="flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2"
+                                    className="flex items-center justify-between gap-3 rounded-xl border border-border dark:border-white/5 bg-card/40 px-3 py-2"
                                 >
                                     {editingPosId === pos.id ? (
                                         <input
@@ -287,10 +398,10 @@ function EditDepartmentModal({
                                             }}
                                             onBlur={() => handleUpdatePos(pos.id, pos.name)}
                                             autoFocus
-                                            className="flex-1 rounded-lg border border-cyan-400/30 bg-[#0f172a] px-2 py-1 text-sm text-white outline-none"
+                                            className="flex-1 rounded-lg border border-cyan-400/40 bg-card px-2 py-1 text-sm text-foreground outline-none"
                                         />
                                     ) : (
-                                        <span className="text-sm text-slate-300 font-medium">
+                                        <span className="text-sm text-foreground font-medium">
                                             {pos.name}
                                         </span>
                                     )}
@@ -300,9 +411,10 @@ function EditDepartmentModal({
                                             <button
                                                 type="button"
                                                 onClick={() => setEditingPosId(null)}
-                                                className="p-1 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white"
+                                                className="p-1 rounded-lg hover:bg-white/5 text-muted hover:text-foreground"
+                                                aria-label="Cancel editing position"
                                             >
-                                                <X className="h-4 w-4" />
+                                                <X className="h-4 w-4 shrink-0" />
                                             </button>
                                         ) : (
                                             <>
@@ -312,9 +424,10 @@ function EditDepartmentModal({
                                                         setEditingPosId(pos.id);
                                                         setEditingPosName(pos.name);
                                                     }}
-                                                    className="p-1 rounded-lg hover:bg-white/5 text-slate-400 hover:text-cyan-400 transition"
+                                                    className="p-1 rounded-lg hover:bg-white/5 text-muted hover:text-cyan-400 transition"
+                                                    aria-label={`Edit ${pos.name}`}
                                                 >
-                                                    <Edit3 className="h-4 w-4" />
+                                                    <Edit3 className="h-4 w-4 shrink-0" />
                                                 </button>
                                                 <button
                                                     type="button"
@@ -323,9 +436,10 @@ function EditDepartmentModal({
                                                             deletePosition({ id: pos.id, departmentId: department.id });
                                                         }
                                                     }}
-                                                    className="p-1 rounded-lg hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition"
+                                                    className="p-1 rounded-lg hover:bg-rose-500/10 text-muted hover:text-rose-400 transition"
+                                                    aria-label={`Delete ${pos.name}`}
                                                 >
-                                                    <Trash2 className="h-4 w-4" />
+                                                    <Trash2 className="h-4 w-4 shrink-0" />
                                                 </button>
                                             </>
                                         )}
@@ -349,7 +463,7 @@ function EditDepartmentModal({
                                 }
                             }}
                             placeholder={t("admin.department.addPositionPlaceholder")}
-                            className="flex-1 rounded-xl border border-white/10 bg-white/5 py-2 px-3 text-sm text-white outline-none transition focus:border-cyan-400/50 placeholder:text-slate-600"
+                            className="flex-1 rounded-xl border border-border dark:border-white/10 bg-card/60 py-2 px-3 text-sm text-foreground outline-none transition focus:border-cyan-400/50 placeholder:text-muted"
                         />
                         <datalist id={`positions-list-edit-${department.id}`}>
                             {predefinedForDept.map((pos) => (
@@ -360,28 +474,34 @@ function EditDepartmentModal({
                             type="button"
                             onClick={handleAddPosition}
                             disabled={!newPositionName.trim() || creatingPos}
-                            className="flex items-center justify-center rounded-xl bg-cyan-600/20 hover:bg-cyan-600/40 text-cyan-300 border border-cyan-400/20 px-3 transition shrink-0 disabled:opacity-50"
+                            className="flex items-center justify-center rounded-xl bg-cyan-600/20 hover:bg-cyan-600/40 text-cyan-300 border border-cyan-400/20 px-3 transition shrink-0 disabled:opacity-50 active:scale-[0.98]"
+                            aria-label="Add position"
                         >
-                            {creatingPos ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                            {creatingPos ? <Loader2 className="h-4 w-4 animate-spin shrink-0" /> : <Plus className="h-4 w-4 shrink-0" />}
                         </button>
                     </div>
                 </div>
 
-                <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+                <div className="flex justify-end gap-3 pt-4 border-t border-border dark:border-white/10">
                     <button
                         type="button"
                         onClick={onCloseModal}
-                        className="rounded-xl border border-white/10 bg-white/5 px-5 py-2 text-sm text-slate-300 hover:text-white transition"
+                        disabled={isUpdating}
+                        className="rounded-xl border border-border dark:border-white/10 bg-card/40 px-5 py-2 text-sm text-muted hover:text-foreground transition disabled:opacity-50"
                     >
                         {t("admin.department.cancel")}
                     </button>
-                    <button
+                    <Button
                         type="submit"
-                        disabled={deptExists || !deptName.trim()}
-                        className="rounded-xl bg-cyan-600 px-5 py-2 text-sm font-semibold text-white hover:bg-cyan-500 disabled:opacity-50 transition"
+                        disabled={deptExists || !deptName.trim() || isUpdating}
+                        variant="glass"
                     >
-                        {t("admin.department.saveChanges")}
-                    </button>
+                        {isUpdating ? (
+                            <Loader2 className="h-4 w-4 animate-spin shrink-0" />
+                        ) : (
+                            t("admin.department.saveChanges")
+                        )}
+                    </Button>
                 </div>
             </form>
         </div>
@@ -411,7 +531,7 @@ function ManagePositions({
     const [originalEditPosTyped, setOriginalEditPosTyped] = useState("");
 
     const newPosExists = department.positions.some(
-        (p) => p.name.toLowerCase().trim() === newPositionName.toLowerCase().trim()
+        (p) => p.name.toLowerCase().trim() === newPositionName.toLowerCase().trim(),
     );
 
     const addPosition = () => {
@@ -427,7 +547,7 @@ function ManagePositions({
                     setNewPositionName("");
                     setOriginalNewPosTyped("");
                 },
-            }
+            },
         );
     };
 
@@ -439,7 +559,7 @@ function ManagePositions({
     const handleAddPosKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Tab") {
             const matches = predefinedForDept.filter((p) =>
-                p.toLowerCase().includes(originalNewPosTyped.toLowerCase())
+                p.toLowerCase().includes(originalNewPosTyped.toLowerCase()),
             );
             if (matches.length > 0) {
                 e.preventDefault();
@@ -460,7 +580,7 @@ function ManagePositions({
     const handleEditPosKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, posId: string, originalName: string) => {
         if (e.key === "Tab") {
             const matches = predefinedForDept.filter((p) =>
-                p.toLowerCase().includes(originalEditPosTyped.toLowerCase())
+                p.toLowerCase().includes(originalEditPosTyped.toLowerCase()),
             );
             if (matches.length > 0) {
                 e.preventDefault();
@@ -489,7 +609,7 @@ function ManagePositions({
         <div className="px-2 py-4 text-left">
             <div className="flex items-center gap-2 mb-4">
                 <Briefcase className="h-5 w-5 text-cyan-400 shrink-0" />
-                <h3 className="text-lg font-bold text-white">
+                <h3 className="text-lg font-bold text-foreground">
                     {t("admin.department.positionsOf", { name: department.name })}
                 </h3>
             </div>
@@ -497,17 +617,17 @@ function ManagePositions({
             {/* List existing positions */}
             <div className="space-y-2 max-h-60 overflow-y-auto mb-6 pr-1 custom-scrollbar">
                 {department.positions.length === 0 ? (
-                    <p className="text-sm text-slate-500 italic py-2">{t("admin.department.noPositionsDefined")}</p>
+                    <p className="text-sm text-muted italic py-2">{t("admin.department.noPositionsDefined")}</p>
                 ) : (
                     department.positions.map((pos) => {
                         const editPosExists = department.positions.some(
-                            (p) => p.id !== pos.id && p.name.toLowerCase().trim() === editingPosName.toLowerCase().trim()
+                            (p) => p.id !== pos.id && p.name.toLowerCase().trim() === editingPosName.toLowerCase().trim(),
                         );
 
                         return (
                             <div
                                 key={pos.id}
-                                className="flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-3.5 py-2 relative"
+                                className="flex items-center justify-between gap-3 rounded-xl border border-border dark:border-white/5 bg-card/40 px-3.5 py-2 relative"
                             >
                                 {editingPosId === pos.id ? (
                                     <div className="flex-1 relative">
@@ -530,7 +650,7 @@ function ManagePositions({
                                                 }
                                                 setEditingPosId(null);
                                             }}
-                                            className="w-full rounded-lg border border-cyan-400/30 bg-[#0f172a] px-2 py-1 text-sm text-white outline-none"
+                                            className="w-full rounded-lg border border-cyan-400/40 bg-card px-2 py-1 text-sm text-foreground outline-none"
                                             autoFocus
                                         />
                                         <datalist id={`positions-list-${pos.id}`}>
@@ -539,13 +659,13 @@ function ManagePositions({
                                             ))}
                                         </datalist>
                                         {editPosExists && (
-                                            <p className="absolute left-0 top-full z-10 text-[9px] text-yellow-500 bg-[#0f172a] border border-yellow-500/20 px-1.5 py-0.5 rounded shadow-md whitespace-nowrap">
+                                            <p className="absolute left-0 top-full z-10 text-[10px] text-amber-400 bg-card border border-amber-400/20 px-1.5 py-0.5 rounded shadow-md whitespace-nowrap">
                                                 {t("admin.department.positionExistsWarning")}
                                             </p>
                                         )}
                                     </div>
                                 ) : (
-                                    <span className="text-sm text-slate-300 font-medium">
+                                    <span className="text-sm text-foreground font-medium">
                                         {pos.name}
                                     </span>
                                 )}
@@ -555,9 +675,10 @@ function ManagePositions({
                                         <button
                                             type="button"
                                             onClick={() => setEditingPosId(null)}
-                                            className="p-1 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white"
+                                            className="p-1 rounded-lg hover:bg-white/5 text-muted hover:text-foreground"
+                                            aria-label="Cancel edit"
                                         >
-                                            <X className="h-4 w-4" />
+                                            <X className="h-4 w-4 shrink-0" />
                                         </button>
                                     ) : (
                                         <>
@@ -569,9 +690,10 @@ function ManagePositions({
                                                     setOriginalEditPosTyped(pos.name);
                                                     setEditPosSuggestIdx(0);
                                                 }}
-                                                className="p-1 rounded-lg hover:bg-white/5 text-slate-400 hover:text-cyan-400 transition"
+                                                className="p-1 rounded-lg hover:bg-white/5 text-muted hover:text-cyan-400 transition"
+                                                aria-label={`Edit ${pos.name}`}
                                             >
-                                                <Edit3 className="h-4 w-4" />
+                                                <Edit3 className="h-4 w-4 shrink-0" />
                                             </button>
                                             <button
                                                 type="button"
@@ -580,9 +702,10 @@ function ManagePositions({
                                                         deletePosition({ id: pos.id, departmentId: department.id });
                                                     }
                                                 }}
-                                                className="p-1 rounded-lg hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition"
+                                                className="p-1 rounded-lg hover:bg-rose-500/10 text-muted hover:text-rose-400 transition"
+                                                aria-label={`Delete ${pos.name}`}
                                             >
-                                                <Trash2 className="h-4 w-4" />
+                                                <Trash2 className="h-4 w-4 shrink-0" />
                                             </button>
                                         </>
                                     )}
@@ -594,7 +717,7 @@ function ManagePositions({
             </div>
 
             {/* Add new position with autocomplete and warning */}
-            <form onSubmit={handleAdd} className="flex flex-col gap-2 border-t border-white/10 pt-4">
+            <form onSubmit={handleAdd} className="flex flex-col gap-2 border-t border-border dark:border-white/10 pt-4">
                 <div className="flex gap-2 relative">
                     <div className="flex-1 relative">
                         <input
@@ -602,13 +725,13 @@ function ManagePositions({
                             list={`positions-list-add-${department.id}`}
                             value={newPositionName}
                             onChange={(e) => {
-                                      setNewPositionName(e.target.value);
-                                      setOriginalNewPosTyped(e.target.value);
-                                      setAddPosSuggestIdx(0);
+                                setNewPositionName(e.target.value);
+                                setOriginalNewPosTyped(e.target.value);
+                                setAddPosSuggestIdx(0);
                             }}
                             onKeyDown={handleAddPosKeyDown}
                             placeholder={t("admin.department.addPositionPlaceholderRow")}
-                            className="w-full rounded-xl border border-white/10 bg-white/5 py-2 px-4 text-sm text-white outline-none transition focus:border-cyan-400/50 placeholder:text-slate-600"
+                            className="w-full rounded-xl border border-border dark:border-white/10 bg-card/60 py-2 px-4 text-sm text-foreground outline-none transition focus:border-cyan-400/50 placeholder:text-muted"
                             disabled={creating}
                         />
                         <datalist id={`positions-list-add-${department.id}`}>
@@ -617,18 +740,18 @@ function ManagePositions({
                             ))}
                         </datalist>
                         {newPosExists && (
-                            <p className="absolute left-0 top-full z-10 text-[9px] text-yellow-500 bg-[#0f172a] border border-yellow-500/20 px-1.5 py-0.5 rounded shadow-md whitespace-nowrap mt-0.5">
+                            <p className="absolute left-0 top-full z-10 text-[10px] text-amber-400 bg-card border border-amber-400/20 px-1.5 py-0.5 rounded shadow-md whitespace-nowrap mt-0.5">
                                 {t("admin.department.positionExistsWarning")}
                             </p>
                         )}
                     </div>
-                    <button
+                    <Button
                         type="submit"
                         disabled={creating || !newPositionName.trim()}
-                        className="flex items-center justify-center rounded-xl bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-500 disabled:opacity-50 transition shrink-0"
+                        variant="glass"
                     >
-                        {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : t("admin.department.add")}
-                    </button>
+                        {creating ? <Loader2 className="h-4 w-4 animate-spin shrink-0" /> : t("admin.department.add")}
+                    </Button>
                 </div>
             </form>
         </div>
@@ -637,38 +760,48 @@ function ManagePositions({
 
 function DeleteConfirm({
     name,
+    isDeleting,
     onConfirm,
     onCloseModal,
 }: {
     name: string;
+    isDeleting: boolean;
     onConfirm: (close?: () => void) => void;
     onCloseModal?: () => void;
 }) {
     const t = useTranslations();
     return (
         <div className="px-2 py-8 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 text-red-400">
-                <Trash2 className="h-6 w-6" />
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-rose-500/10 text-rose-400">
+                <Trash2 className="h-6 w-6 shrink-0" />
             </div>
-            <h3 className="mt-4 text-base font-semibold text-white">
+            <h3 className="mt-4 text-base font-semibold text-foreground">
                 {t("admin.department.deleteTitle")}
             </h3>
-            <p className="mt-2 text-sm text-slate-400">
+            <p className="mt-2 text-sm text-muted">
                 {t("admin.department.deleteConfirm", { name })}
             </p>
             <div className="mt-6 flex justify-center gap-3">
                 <button
+                    type="button"
                     onClick={onCloseModal}
-                    className="rounded-xl border border-white/10 bg-white/5 px-5 py-2 text-sm text-slate-300 hover:text-white"
+                    disabled={isDeleting}
+                    className="rounded-xl border border-border dark:border-white/10 bg-card/40 px-5 py-2 text-sm text-muted hover:text-foreground disabled:opacity-50 transition"
                 >
                     {t("admin.department.cancel")}
                 </button>
-                <button
+                <Button
+                    type="button"
+                    variant="danger"
+                    disabled={isDeleting}
                     onClick={() => onConfirm(onCloseModal)}
-                    className="rounded-xl bg-red-600 px-5 py-2 text-sm font-medium text-white hover:bg-red-500"
                 >
-                    {t("admin.department.delete")}
-                </button>
+                    {isDeleting ? (
+                        <Loader2 className="h-4 w-4 animate-spin shrink-0" />
+                    ) : (
+                        t("admin.department.delete")
+                    )}
+                </Button>
             </div>
         </div>
     );

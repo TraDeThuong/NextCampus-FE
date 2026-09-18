@@ -4,12 +4,13 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import axios from "axios";
 import { departmentService } from "@/services/department.service";
+import type { CreateDepartmentPayload } from "@/types/department";
 
 export function useCreateDepartment() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (payload: { name: string; positions: string[] }) =>
+        mutationFn: (payload: CreateDepartmentPayload) =>
             departmentService.createDepartment(payload),
 
         onSuccess: (data) => {

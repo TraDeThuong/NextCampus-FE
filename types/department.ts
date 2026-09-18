@@ -37,12 +37,14 @@ export interface PositionListResponse {
 
 export interface CreateDepartmentPayload {
     name: string;
+    description?: string | null;
     positions?: string[];
     leaderId?: string;
 }
 
 export interface UpdateDepartmentPayload {
     name: string;
+    description?: string | null;
 }
 
 export interface CreatePositionPayload {
