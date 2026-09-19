@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
+import ActivityLogHeader from "./ActivityLogHeader";
+import ActivityLogStats from "./ActivityLogStats";
 import ActivityLogFilter from "./ActivityLogFilter";
 import ActivityLogTable from "./ActivityLogTable";
 import MetalCard from "@/components/ui/MetalCard";
@@ -11,21 +13,11 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("admin.activityLogs.metaTitle") };
 }
 
-export default async function ActivityLogsPage() {
-  const t = await getTranslations();
+export default function ActivityLogsPage() {
   return (
     <div className="space-y-6">
-      <MetalCard>
-        <div className="rounded-3xl p-6">
-          <h2 className="text-2xl font-bold metal-text">
-            {t("admin.activityLogs.title")}
-          </h2>
-          <p className="mt-1 text-sm text-slate-500">
-            {t("admin.activityLogs.description")}
-          </p>
-        </div>
-      </MetalCard>
-
+      <ActivityLogHeader />
+      <ActivityLogStats />
       <Suspense
         fallback={
           <MetalCard className="flex items-center justify-center py-20">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
@@ -13,34 +13,41 @@ import {
   User,
   PlusCircle,
   Shield,
+  Eye,
+  Settings,
+  Bell,
+  Activity,
+  FolderSearch,
+  RotateCcw,
 } from "lucide-react";
 
 import { useActivityLogs } from "@/hooks/activity-log/useActivityLogs";
-import type { ActivityLogQuery } from "@/types/activity-log";
+import type { ActivityLog, ActivityLogQuery } from "@/types/activity-log";
+import ActivityLogDetailModal from "./ActivityLogDetailModal";
 
 import Table from "@/components/ui/Table";
 import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
 
-const COLUMNS = "170px minmax(180px, 1fr) 220px 130px 2.5fr";
+const COLUMNS = "145px minmax(150px, 1fr) 245px 185px minmax(180px, 1.4fr) 120px";
 
 function getActionBadgeStyle(action: string) {
   if (action.startsWith("CREATE")) {
-    return "bg-blue-500/10 text-blue-400 border border-blue-500/20";
+    return "bg-cyan-500/15 text-cyan-300 border border-cyan-400/30";
   }
   if (action.startsWith("UPDATE")) {
-    return "bg-amber-500/10 text-amber-400 border border-amber-500/20";
+    return "bg-amber-500/15 text-amber-300 border border-amber-400/30";
   }
   if (action.startsWith("DELETE")) {
-    return "bg-rose-500/10 text-rose-400 border border-rose-500/20";
+    return "bg-rose-500/15 text-rose-300 border border-rose-400/30";
   }
   if (action === "LOGIN") {
-    return "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+    return "bg-emerald-500/15 text-emerald-300 border border-emerald-400/30";
   }
   if (action === "LOGOUT") {
-    return "bg-slate-500/10 text-slate-400 border border-slate-500/20";
+    return "bg-slate-500/15 text-slate-300 border border-slate-400/30";
   }
-  return "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20";
+  return "bg-indigo-500/15 text-indigo-300 border border-indigo-400/30";
 }
 
 function getTargetTypeIcon(type: string | null) {
@@ -52,15 +59,30 @@ function getTargetTypeIcon(type: string | null) {
       return <Calendar className={`${iconClass} text-cyan-400`} />;
     case "USER":
       return <User className={`${iconClass} text-indigo-400`} />;
+    case "INTERN":
+      return <User className={`${iconClass} text-sky-400`} />;
     case "TASK":
       return <FileText className={`${iconClass} text-amber-400`} />;
+    case "MEETING":
+      return <Calendar className={`${iconClass} text-purple-400`} />;
     case "APPLICATION":
       return <PlusCircle className={`${iconClass} text-blue-400`} />;
     case "REGULATION":
       return <Shield className={`${iconClass} text-rose-400`} />;
+    case "NOTIFICATION_SETTING":
+      return <Bell className={`${iconClass} text-pink-400`} />;
+    case "SYSTEM_SETTING":
+      return <Settings className={`${iconClass} text-emerald-400`} />;
     default:
       return <FileText className={`${iconClass} text-slate-400`} />;
   }
+}
+
+function getInitials(name?: string | null): string {
+  if (!name) return "SY";
+  const parts = name.trim().split(" ");
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
 export default function ActivityLogTable() {
@@ -69,20 +91,22 @@ export default function ActivityLogTable() {
   const pathname = usePathname();
   const router = useRouter();
 
+  const [selectedLog, setSelectedLog] = useState<ActivityLog | null>(null);
+
   const params: ActivityLogQuery = useMemo(() => {
     const p: ActivityLogQuery = {};
 
     const action = searchParams.get("action");
     const targetType = searchParams.get("targetType");
-    const createdFrom = searchParams.get("createdFrom");
-    const createdTo = searchParams.get("createdTo");
+    const from = searchParams.get("from") ?? searchParams.get("createdFrom");
+    const to = searchParams.get("to") ?? searchParams.get("createdTo");
     const order = searchParams.get("order");
     const page = searchParams.get("page");
 
     if (action) p.action = action;
     if (targetType) p.targetType = targetType;
-    if (createdFrom) p.createdFrom = createdFrom;
-    if (createdTo) p.createdTo = createdTo;
+    if (from) p.from = from;
+    if (to) p.to = to;
     if (order) p.order = order as "asc" | "desc";
     p.page = page ? Number(page) : 1;
     p.limit = 20;
@@ -93,12 +117,51 @@ export default function ActivityLogTable() {
   const { data, isPending, isError, refetch, isFetching } =
     useActivityLogs(params);
 
-  const logs = data?.data ?? [];
-  const meta = data?.meta;
+  // Safely extract logs from data.data OR data.items
+  const rawLogs = useMemo(() => {
+    return data?.data ?? data?.items ?? [];
+  }, [data]);
+
+  // Client-side search filtering by keyword/actor/target/description
+  const logs = useMemo(() => {
+    const q = searchParams.get("search")?.toLowerCase().trim();
+    if (!q) return rawLogs;
+    return rawLogs.filter((log) => {
+      const actorName = (log.actor?.fullName || log.user?.fullName || "").toLowerCase();
+      const actorEmail = (log.actor?.email || log.user?.email || "").toLowerCase();
+      const action = (log.action || "").toLowerCase();
+      const target = (log.targetType || "").toLowerCase();
+      const desc = (log.description || "").toLowerCase();
+      return (
+        actorName.includes(q) ||
+        actorEmail.includes(q) ||
+        action.includes(q) ||
+        target.includes(q) ||
+        desc.includes(q)
+      );
+    });
+  }, [rawLogs, searchParams]);
+
+  const meta = useMemo(() => {
+    return (
+      data?.meta ?? {
+        total: data?.total ?? logs.length,
+        page: data?.page ?? 1,
+        limit: data?.limit ?? 20,
+        totalPages: data?.totalPages ?? 1,
+      }
+    );
+  }, [data, logs.length]);
 
   function goToPage(page: number) {
     const p = new URLSearchParams(searchParams.toString());
     p.set("page", String(page));
+    router.push(`${pathname}?${p.toString()}`);
+  }
+
+  function handleClearFilters() {
+    const p = new URLSearchParams();
+    p.set("page", "1");
     router.push(`${pathname}?${p.toString()}`);
   }
 
@@ -112,118 +175,212 @@ export default function ActivityLogTable() {
 
   if (isError) {
     return (
-      <MetalCard className="flex items-center justify-center gap-2 py-20">
-        <AlertTriangle className="h-5 w-5 text-red-400" />
-        <p className="text-sm text-slate-400">{t("admin.activityLogs.loadError")}</p>
+      <MetalCard className="flex flex-col items-center justify-center gap-3 py-16 px-4">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-400 border border-rose-500/20">
+          <AlertTriangle className="h-6 w-6" />
+        </div>
+        <p className="text-sm text-rose-300 font-medium">{t("admin.activityLogs.loadError")}</p>
+        <button
+          type="button"
+          onClick={() => refetch()}
+          className="mt-2 flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-semibold text-foreground transition hover:bg-white/10 hover:border-white/20 active:scale-95 cursor-pointer"
+        >
+          <RotateCcw className="h-3.5 w-3.5" />
+          <span>{t("admin.activityLogs.retry")}</span>
+        </button>
       </MetalCard>
     );
   }
 
+  const hasActiveFilters =
+    Boolean(searchParams.get("search")) ||
+    Boolean(searchParams.get("action")) ||
+    Boolean(searchParams.get("targetType")) ||
+    Boolean(searchParams.get("from")) ||
+    Boolean(searchParams.get("to")) ||
+    Boolean(searchParams.get("createdFrom")) ||
+    Boolean(searchParams.get("createdTo"));
+
   if (logs.length === 0) {
     return (
-      <MetalCard className="flex flex-col items-center justify-center gap-3 py-20">
-        <p className="text-sm text-slate-500">{t("admin.activityLogs.noLogs")}</p>
+      <MetalCard className="flex flex-col items-center justify-center gap-4 py-20 px-4 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-3xl border border-white/10 bg-white/[0.03] text-muted">
+          {hasActiveFilters ? (
+            <FolderSearch className="h-7 w-7 text-cyan-400/70" />
+          ) : (
+            <Activity className="h-7 w-7 text-muted" />
+          )}
+        </div>
+        <div>
+          <p className="text-base font-semibold text-foreground">
+            {hasActiveFilters
+              ? t("admin.activityLogs.noLogsFiltered")
+              : t("admin.activityLogs.noLogs")}
+          </p>
+          <p className="mt-1 text-xs text-muted max-w-md">
+            {hasActiveFilters
+              ? "Hãy thử điều chỉnh hoặc xóa các tiêu chí bộ lọc để xem các bản ghi khác."
+              : "Hệ thống chưa ghi nhận thao tác kiểm toán nào."}
+          </p>
+        </div>
+
+        {hasActiveFilters && (
+          <button
+            type="button"
+            onClick={handleClearFilters}
+            className="flex items-center gap-2 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-xs font-semibold text-cyan-300 transition hover:bg-cyan-500/20 active:scale-95 cursor-pointer"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            <span>{t("admin.activityLogs.clearFilters")}</span>
+          </button>
+        )}
       </MetalCard>
     );
   }
 
   return (
-    <Table
-      columns={COLUMNS}
-      className="
-        bg-[linear-gradient(145deg,#101827_0%,#1a2235_20%,#0f172a_55%,#050816_100%)]
-        shadow-[0_12px_40px_rgba(0,0,0,.45)]
-        hover:shadow-[0_20px_50px_rgba(21,174,245,.15)]
-        transition-shadow duration-500
-      "
-    >
-      <Table.Header>
-        <div>{t("admin.activityLogs.time")}</div>
-        <div>{t("admin.activityLogs.actor")}</div>
-        <div>{t("admin.activityLogs.action")}</div>
-        <div>{t("admin.activityLogs.target")}</div>
-        <div className="flex items-center justify-between">
-          <span>{t("admin.activityLogs.description_col")}</span>
-          <Table.ReloadButton onReload={refetch} isReloading={isFetching} />
-        </div>
-      </Table.Header>
-
-      <Table.Body
-        data={logs}
-        render={(log) => (
-          <Table.Row key={log.id}>
-            {/* Time */}
-            <div className="text-xs text-slate-400 font-medium">
-              {new Date(log.createdAt).toLocaleString("vi-VN", {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-              })}
-            </div>
-
-            {/* Actor */}
-            <div className="flex flex-col gap-0.5 justify-center min-w-0 pr-2">
-              <span className="text-xs font-bold text-foreground truncate">
-                {log.user?.fullName || t("admin.activityLogs.system")}
-              </span>
-              <span className="text-[10px] text-muted truncate">
-                {log.user?.email || ""}
-              </span>
-            </div>
-
-            {/* Action */}
-            <div className="flex items-center">
-              <span className={`text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider ${getActionBadgeStyle(log.action)}`}>
-                {log.action}
-              </span>
-            </div>
-
-            {/* Target Type */}
-            <div className="flex items-center gap-2">
-              {getTargetTypeIcon(log.targetType)}
-              <span className="text-xs font-medium text-slate-300">
-                {log.targetType || "-"}
-              </span>
-            </div>
-
-            {/* Description */}
-            <div className="text-xs text-slate-300 pr-2 break-words leading-relaxed font-medium">
-              {log.description}
-            </div>
-          </Table.Row>
-        )}
-      />
-
-      {meta && meta.totalPages > 1 && (
-        <Table.Footer>
-          <div className="flex w-full items-center justify-between gap-4 text-sm">
-            <p className="text-muted">
-              {t("admin.activityLogs.pagination", { page: meta.page, totalPages: meta.totalPages, total: meta.total })}
-            </p>
-
-            <div className="flex items-center gap-2">
-              <button
-                disabled={meta.page <= 1}
-                onClick={() => goToPage(meta.page - 1)}
-                className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:opacity-30"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-
-              <button
-                disabled={meta.page >= meta.totalPages}
-                onClick={() => goToPage(meta.page + 1)}
-                className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:opacity-30"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
+    <>
+      <Table
+        columns={COLUMNS}
+        className="
+          bg-[linear-gradient(145deg,#101827_0%,#1a2235_20%,#0f172a_55%,#050816_100%)]
+          shadow-[0_12px_40px_rgba(0,0,0,.45)]
+          hover:shadow-[0_20px_50px_rgba(21,174,245,.15)]
+          transition-shadow duration-500
+        "
+      >
+        <Table.Header>
+          <div>{t("admin.activityLogs.time")}</div>
+          <div>{t("admin.activityLogs.actor")}</div>
+          <div>{t("admin.activityLogs.action")}</div>
+          <div>{t("admin.activityLogs.target")}</div>
+          <div>{t("admin.activityLogs.description_col")}</div>
+          <div className="flex items-center justify-end gap-2 pr-1">
+            <span>{t("admin.activityLogs.actions")}</span>
+            <Table.ReloadButton onReload={refetch} isReloading={isFetching} />
           </div>
-        </Table.Footer>
-      )}
-    </Table>
+        </Table.Header>
+
+        <Table.Body
+          data={logs}
+          render={(log) => {
+            const actorName = log.actor?.fullName || log.user?.fullName || t("admin.activityLogs.system");
+            const actorEmail = log.actor?.email || log.user?.email || "";
+            const actorRole = log.actor?.role?.name || log.user?.role?.name || null;
+            const initials = getInitials(actorName);
+
+            return (
+              <Table.Row key={log.id}>
+                {/* Time */}
+                <div className="text-xs text-slate-400 font-mono">
+                  {new Date(log.createdAt).toLocaleString("vi-VN", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                  })}
+                </div>
+
+                {/* Actor */}
+                <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 text-xs font-bold text-cyan-300">
+                    {initials}
+                  </div>
+                  <div className="flex flex-col min-w-0 justify-center">
+                    <span className="text-xs font-bold text-foreground truncate">
+                      {actorName}
+                    </span>
+                    <span className="text-[10px] text-muted truncate">
+                      {actorEmail || (actorRole ? `Vai trò: ${actorRole}` : "—")}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Action */}
+                <div className="flex items-center min-w-0 pr-2">
+                  <span
+                    className={`text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider whitespace-nowrap inline-block ${getActionBadgeStyle(
+                      log.action,
+                    )}`}
+                    title={log.action}
+                  >
+                    {log.action}
+                  </span>
+                </div>
+
+                {/* Target Type */}
+                <div className="flex items-center gap-2 min-w-0 pr-2">
+                  {getTargetTypeIcon(log.targetType)}
+                  <span className="text-xs font-medium text-slate-300 truncate" title={log.targetType || "—"}>
+                    {log.targetType || "—"}
+                  </span>
+                </div>
+
+                {/* Changed Details / Description */}
+                <div className="text-xs text-slate-300 pr-2 break-words leading-relaxed font-medium line-clamp-2">
+                  {log.description || "—"}
+                </div>
+
+                {/* Actions: View Detail */}
+                <div className="flex items-center justify-end pr-1">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedLog(log)}
+                    className="flex items-center gap-1.5 rounded-lg border border-cyan-400/20 bg-cyan-500/10 px-2.5 py-1 text-xs font-medium text-cyan-300 transition hover:border-cyan-400/40 hover:bg-cyan-500/20 active:scale-95 cursor-pointer shadow-sm"
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                    <span>{t("admin.activityLogs.viewDetail")}</span>
+                  </button>
+                </div>
+              </Table.Row>
+            );
+          }}
+        />
+
+        {meta && meta.totalPages > 1 && (
+          <Table.Footer>
+            <div className="flex w-full items-center justify-between gap-4 text-sm">
+              <p className="text-muted text-xs sm:text-sm">
+                {t("admin.activityLogs.pagination", {
+                  page: meta.page,
+                  totalPages: meta.totalPages,
+                  total: meta.total,
+                })}
+              </p>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={meta.page <= 1}
+                  onClick={() => goToPage(meta.page - 1)}
+                  className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                  aria-label="Previous page"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+
+                <button
+                  type="button"
+                  disabled={meta.page >= meta.totalPages}
+                  onClick={() => goToPage(meta.page + 1)}
+                  className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                  aria-label="Next page"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </Table.Footer>
+        )}
+      </Table>
+
+      {/* Detail Modal */}
+      <ActivityLogDetailModal
+        log={selectedLog}
+        onClose={() => setSelectedLog(null)}
+      />
+    </>
   );
 }
