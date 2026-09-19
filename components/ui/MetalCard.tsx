@@ -37,7 +37,7 @@ export default function MetalCard({
                 group relative overflow-hidden
                 rounded-[28px]
                 border border-slate-200 dark:border-white/10
-                bg-white dark:bg-[linear-gradient(145deg,#101827_0%,#1a2235_20%,#0f172a_55%,#050816_100%)]
+                bg-white dark:bg-[#0c1322]
                 shadow-sm dark:shadow-[0_12px_40px_rgba(0,0,0,.45)]
                 transition-all duration-500
                 hover:-translate-y-1

@@ -62,6 +62,13 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
     danger: 'bg-danger/20 text-danger border border-danger/40 hover:bg-danger hover:text-white shadow-[0_0_15px_rgba(239,68,68,0.1)]',
   };
 
+  const innerGapStyles: Record<ButtonSize, string> = {
+    icon: 'gap-0',
+    sm: 'gap-1.5',
+    md: 'gap-2',
+    lg: 'gap-2.5',
+  };
+
   const widthStyle = fullWidth ? 'w-full flex' : '';
 
   return (
@@ -84,7 +91,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
           {loadingText ? <span>{loadingText}</span> : children ? <span>{children}</span> : null}
         </div>
       ) : (
-        <span className="flex items-center justify-center gap-inherit w-full h-full">
+        <span className={`flex items-center justify-center ${innerGapStyles[size]} w-full h-full`}>
           {children}
         </span>
       )}
