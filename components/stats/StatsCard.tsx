@@ -31,8 +31,8 @@ export default function StatsCard({
   onCardClick,
 }: StatsCardProps) {
   const t = useTranslations();
-  const content = (
-    <MetalCard className={`p-4 sm:p-5 lg:p-6 h-full flex flex-col group/card ${href ? "cursor-pointer" : ""} ${className}`}>
+  const cardBody = (
+    <>
       <div className="flex-1">
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-1 min-w-0 flex-1">
@@ -80,16 +80,38 @@ export default function StatsCard({
           )}
         </div>
       )}
+    </>
+  );
+
+  const cardContent = (
+    <MetalCard className={`p-4 sm:p-5 lg:p-6 h-full flex flex-col group/card ${href ? "cursor-pointer" : ""}`}>
+      {cardBody}
     </MetalCard>
   );
 
   if (href) {
-    return <Link href={href} className="block h-full">{content}</Link>;
+    return (
+      <Link href={href} className={`block h-full ${className}`}>
+        {cardContent}
+      </Link>
+    );
   }
 
   if (onCardClick) {
-    return <button type="button" onClick={onCardClick} className="block w-full h-full text-left">{content}</button>;
+    return (
+      <button
+        type="button"
+        onClick={onCardClick}
+        className={`block w-full h-full text-left cursor-pointer border-0 bg-transparent p-0 ${className}`}
+      >
+        {cardContent}
+      </button>
+    );
   }
 
-  return content;
+  return (
+    <MetalCard className={`p-4 sm:p-5 lg:p-6 h-full flex flex-col group/card ${className}`}>
+      {cardBody}
+    </MetalCard>
+  );
 }

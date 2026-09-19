@@ -9,9 +9,10 @@ import StatsCard from "./StatsCard";
 
 type Props = {
   onOpenModal: () => void;
+  className?: string;
 };
 
-export default function PendingApprovalCard({ onOpenModal }: Props) {
+export default function PendingApprovalCard({ onOpenModal, className }: Props) {
   const t = useTranslations("leader.dashboard");
   const auth = useContext(AuthContext);
   const currentUserId = auth?.state.user?.id;
@@ -22,11 +23,16 @@ export default function PendingApprovalCard({ onOpenModal }: Props) {
     limit: 100,
   });
 
-  const allPending = data?.data ?? [];
-  const crossTeam = allPending.filter((a) => a.assignedBy !== currentUserId);
+  const allPending = Array.isArray(data?.data)
+    ? data.data
+    : Array.isArray(data)
+      ? data
+      : [];
+  const crossTeam = allPending.filter((a) => a && a.assignedBy !== currentUserId);
 
   return (
     <StatsCard
+      className={className}
       title={t("pendingApproval")}
       value={crossTeam.length}
       subtitle={t("pendingApprovalSubtitle")}

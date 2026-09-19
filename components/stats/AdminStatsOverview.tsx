@@ -33,8 +33,7 @@ import {
   ChevronUp,
   Calendar,
   Building2,
-  CheckSquare,
-  TrendingUp,
+  Award,
   RotateCw,
   LayoutDashboard,
   Zap,
@@ -129,11 +128,13 @@ export default function AdminStatsOverview() {
 
   const totalInterns = stats?.system?.totalInterns ?? stats?.interns?.total ?? 0;
   const activeInterns = stats?.system?.activeInterns ?? stats?.interns?.active ?? 0;
+  const completedInterns = stats?.system?.completedInterns ?? stats?.interns?.completed ?? 0;
   const totalLeaders = stats?.system?.activeLeaders ?? stats?.system?.leaders ?? 0;
   const activeTasks = stats?.tasks?.activeTasks ?? stats?.assignments?.byStatus?.inProgress ?? 0;
   const totalTasks = stats?.tasks?.totalTasks ?? stats?.tasks?.total ?? 0;
   const completedTasks = stats?.tasks?.completedTasks ?? 0;
-  const systemCompletionRate = stats?.tasks?.systemCompletionRate ?? stats?.systemCompletionRate ?? 0;
+  const totalAppsCount =
+    stats?.applications?.totalApplications ?? stats?.applications?.total ?? 0;
 
   const actionAlertsObj =
     typeof stats?.actionAlerts === "object" && !Array.isArray(stats?.actionAlerts)
@@ -157,6 +158,50 @@ export default function AdminStatsOverview() {
     stats?.system?.droppedInterns ??
     stats?.interns?.dropped ??
     0;
+
+  // Retention display logic (Phương án 1: Phân tách theo trạng thái khóa thực tập)
+  const finishedInterns = completedInterns + droppedInternsCount;
+  const retentionDisplay = (() => {
+    if (finishedInterns > 0) {
+      const calculatedRate = Math.round((completedInterns / finishedInterns) * 100);
+      return {
+        value: `${calculatedRate}%`,
+        subtitle: t("admin.dashboard.retentionCardSubtitle", {
+          completed: completedInterns,
+          dropped: droppedInternsCount,
+        }),
+        trend: {
+          text:
+            calculatedRate >= 80
+              ? t("admin.dashboard.retentionHigh")
+              : t("admin.dashboard.retentionAttention"),
+          positive: calculatedRate >= 80,
+        },
+      };
+    }
+
+    if (activeInterns > 0) {
+      return {
+        value: "100%",
+        subtitle: t("admin.dashboard.retentionOngoingSubtitle", {
+          active: activeInterns,
+        }),
+        trend: {
+          text: t("admin.dashboard.retentionOngoingTrend"),
+          positive: true,
+        },
+      };
+    }
+
+    return {
+      value: "—",
+      subtitle: t("admin.dashboard.retentionNoDataSubtitle"),
+      trend: {
+        text: t("admin.dashboard.retentionNoDataTrend"),
+        positive: true,
+      },
+    };
+  })();
 
   const dynamicAlerts = Array.isArray(stats?.actionAlerts) ? stats?.actionAlerts : [];
 
@@ -325,29 +370,27 @@ export default function AdminStatsOverview() {
         />
 
         <StatsCard
-          title={t("admin.dashboard.activeTasks")}
-          value={activeTasks}
-          subtitle={t("admin.dashboard.totalTasksSubtitle", { n: totalTasks })}
-          icon={<CheckSquare className="h-6 w-6 text-cyan-400" />}
-          href="/admin/interns"
+          title={t("admin.dashboard.pendingApps")}
+          value={pendingAppsCount}
+          subtitle={t("admin.dashboard.totalApps", { n: totalAppsCount })}
+          icon={<FileText className="h-6 w-6 text-amber-400" />}
+          href="/admin/onboarding?inviteStatus=USED&applicationStatus=PENDING"
           trend={{
-            text: t("admin.dashboard.completedTasksTrend", { n: completedTasks }),
-            positive: true,
+            text:
+              pendingAppsCount > 0
+                ? t("admin.dashboard.needReview")
+                : t("admin.dashboard.allDone"),
+            positive: pendingAppsCount === 0,
           }}
         />
 
         <StatsCard
-          title={t("admin.dashboard.systemCompletionRate")}
-          value={`${systemCompletionRate}%`}
-          subtitle={t("admin.dashboard.systemProgressSubtitle")}
-          icon={<TrendingUp className="h-6 w-6 text-emerald-400" />}
-          trend={{
-            text:
-              systemCompletionRate >= 70
-                ? t("admin.dashboard.goalStandardMet")
-                : t("admin.dashboard.goalPushNeeded"),
-            positive: systemCompletionRate >= 70,
-          }}
+          title={t("admin.dashboard.retentionRateCardTitle")}
+          value={retentionDisplay.value}
+          subtitle={retentionDisplay.subtitle}
+          icon={<Award className="h-6 w-6 text-emerald-400" />}
+          href="/admin/interns"
+          trend={retentionDisplay.trend}
         />
       </div>
 

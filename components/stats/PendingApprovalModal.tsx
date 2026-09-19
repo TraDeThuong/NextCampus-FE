@@ -2,9 +2,8 @@
 
 import { useContext } from "react";
 import { createPortal } from "react-dom";
-import { HiXMark } from "react-icons/hi2";
-import { CheckCircle, XCircle, Loader2, Calendar, User } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { CheckCircle, XCircle, Loader2, Calendar, User, Clock, X } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
 import { AuthContext } from "@/contexts/AuthContext";
 import { useTaskAssignments } from "@/hooks/task-assignment/useTaskAssignments";
 import { useApproveTaskAssignment } from "@/hooks/task-assignment/useApproveTaskAssignment";
@@ -29,6 +28,7 @@ const priorityBadge: Record<string, string> = {
 
 function PendingRow({ assignment }: { assignment: TaskAssignment }) {
   const t = useTranslations("leader.dashboard");
+  const locale = useLocale();
   const approveMutation = useApproveTaskAssignment();
   const rejectMutation = useRejectTaskAssignment();
 
@@ -36,7 +36,7 @@ function PendingRow({ assignment }: { assignment: TaskAssignment }) {
   const isProcessing = approveMutation.isPending || rejectMutation.isPending;
 
   return (
-    <div className="flex items-center gap-4 rounded-xl border border-white/10 bg-white/[0.03] p-4">
+    <div className="flex items-center gap-4 rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.05] transition-all p-4">
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-xs font-mono text-slate-500">{task.code || "—"}</span>
@@ -59,7 +59,7 @@ function PendingRow({ assignment }: { assignment: TaskAssignment }) {
         <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">
           <span className="flex items-center gap-1">
             <Calendar className="h-3 w-3" />
-            {new Date(task.deadline).toLocaleDateString("en-GB")}
+            {new Date(task.deadline).toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US")}
           </span>
           <span className="flex items-center gap-1">
             <User className="h-3 w-3" />
@@ -78,17 +78,19 @@ function PendingRow({ assignment }: { assignment: TaskAssignment }) {
         ) : (
           <>
             <button
+              type="button"
               onClick={() => approveMutation.mutate(assignment.id)}
               disabled={isProcessing}
-              className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-emerald-500 disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-emerald-500 disabled:opacity-50 cursor-pointer active:scale-95"
             >
               <CheckCircle className="h-3.5 w-3.5" />
               {t("approve")}
             </button>
             <button
+              type="button"
               onClick={() => rejectMutation.mutate(assignment.id)}
               disabled={isProcessing}
-              className="flex items-center gap-1.5 rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-400 transition hover:bg-red-500/20 disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-400 transition hover:bg-red-500/20 disabled:opacity-50 cursor-pointer active:scale-95"
             >
               <XCircle className="h-3.5 w-3.5" />
               {t("reject")}
@@ -113,25 +115,36 @@ export default function PendingApprovalModal({ isOpen, onClose }: Props) {
 
   if (!isOpen) return null;
 
-  const allPending = data?.data ?? [];
-  const crossTeam = allPending.filter((a) => a.assignedBy !== currentUserId);
+  const allPending = Array.isArray(data?.data)
+    ? data.data
+    : Array.isArray(data)
+      ? data
+      : [];
+  const crossTeam = allPending.filter((a) => a && a.assignedBy !== currentUserId);
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 backdrop-blur-md">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 backdrop-blur-md animate-fadeIn">
       <div className="relative w-full max-w-3xl max-h-[85vh] overflow-hidden rounded-[28px] border border-white/10 bg-card shadow-glass">
         <button
+          type="button"
           onClick={onClose}
-          className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-muted hover:text-foreground hover:bg-white/10 transition-all z-10"
+          aria-label={t("close") || "Close"}
+          className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-muted hover:text-foreground hover:bg-white/10 transition-all z-10 cursor-pointer active:scale-90"
         >
-          <HiXMark className="h-6 w-6" />
+          <X className="h-4 w-4" />
         </button>
 
         <div className="p-6 sm:p-8 overflow-y-auto max-h-[85vh]">
-          <div className="mb-6">
-            <h2 className="text-xl font-bold metal-text">{t("pendingModalTitle")}</h2>
-            <p className="text-xs text-muted mt-1">
-              {t("pendingModalDesc", { count: crossTeam.length })}
-            </p>
+          <div className="mb-6 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+              <Clock className="h-5 w-5 shrink-0" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold metal-text">{t("pendingModalTitle")}</h2>
+              <p className="text-xs text-muted mt-0.5">
+                {t("pendingModalDesc", { count: crossTeam.length })}
+              </p>
+            </div>
           </div>
 
           {isLoading ? (
