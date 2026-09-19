@@ -57,6 +57,29 @@ Khi làm việc với các tính năng có yếu tố AI (Gợi ý đánh giá t
      * **Mục đích**: Cho phép người dùng làm mới dữ liệu cục bộ tức thì thông qua TanStack Query `refetch()` mà **tuyệt đối KHÔNG tải lại toàn trang (không F5, không `window.location.reload()`)**, bảo toàn URL search query, bộ lọc và trạng thái modal.
      * **Vị trí chuẩn hóa**: Đặt tại ô tiêu đề cột cuối cùng của `<Table.Header>` (cột thao tác / Actions column header ở góc trên bên phải của bảng). Vị trí này trực quan, thẳng hàng với action buttons của từng dòng và cố định trong sticky header.
      * **Thành phần & Trạng thái**: Sử dụng `<Table.ReloadButton onReload={refetch} isReloading={isFetching} />`. Nút nhỏ gọn `h-7 w-7` bo góc `rounded-lg`, hover phát sáng `hover:text-cyan-400`, micro-interaction nhấn `active:scale-90`. Khi `isReloading` (tương ứng `isFetching`), icon xoay `animate-spin text-cyan-400` và tự động `disabled` tránh spam click. Tự động hỗ trợ tooltip & `aria-label` đa ngôn ngữ ("Làm mới dữ liệu" / "Refresh data").
+   - **Quy Chuẩn Chọn Ngày Tháng (Standardized DatePicker & DateRangePicker)**:
+     * **Tuyệt đối cấm `<input type="date">` native**: Không bao giờ sử dụng thẻ native `<input type="date">` thô sơ của trình duyệt ở bất kỳ trang hay bộ lọc nào (như `/admin/onboarding`, `LeaderTaskFilters`, `ActivityLogFilter`...).
+     * **Bắt buộc dùng `DatePicker` / `DateRangePicker`**: Luôn nhập khẩu và sử dụng từ `@/components/ui/DatePicker`.
+     * **Tiêu chuẩn UI/UX**:
+       - Giao diện Cyberpunk Glassmorphism (`backdrop-blur-2xl border border-white/10 shadow-2xl bg-[#0c1322]/95`).
+       - Popover hiển thị qua `createPortal(..., document.body)`, tự động tính vị trí và lật hướng (`flip`) chống tràn màn hình hoặc bị cắt bởi container `overflow-hidden`.
+       - Lưới lịch tương tác chuẩn 7 ngày (T2..CN / Mo..Su), đánh dấu chấm xanh cho Today.
+       - Highlight khoảng ngày chọn (Start: gradient tròn trái, End: gradient tròn phải, Middle: cyan wash).
+       - Hiệu ứng xem trước khoảng ngày khi hover (Hover Range Preview) tạo phản hồi trực quan sinh động.
+       - Tích hợp sẵn thanh phím tắt nhanh (Presets: Hôm nay, 7 ngày qua, 30 ngày qua, Tuần này, Tháng này).
+       - Hiển thị ngày tháng người dùng theo định dạng chuẩn `DD/MM/YYYY`, lưu trữ và đồng bộ URL query params / API chuẩn ISO `YYYY-MM-DD`.
+       - Tự động đóng khi nhấn phím `Escape` hoặc click ra ngoài.
+   - **Quy Chuẩn Chống Tràn Màn Hình Dropdown & Popover Trên Mobile**:
+     * **Nguyên tắc**: Mọi Dropdown / Popover (đặc biệt là `DatePicker`, `DateRangePicker`, `NotificationDropdown`, `FilterSelect`) trên giao diện di động (`< sm`) **TUYỆT ĐỐI KHÔNG để rơi vào tình trạng tràn mép trái/phải hoặc mất hút dưới đáy màn hình**.
+     * **NotificationDropdown trên Mobile**: Không dùng `absolute right-0 w-80` vì nút chuông không nằm ở sát mép phải màn hình (bị profile link đẩy sang trái) khiến menu bị đẩy lùi sang trái và tràn ra ngoài màn hình. Trên mobile, bắt buộc dùng `fixed left-3 right-3 top-[76px] max-w-[calc(100vw-24px)] sm:absolute sm:top-full sm:left-auto sm:right-0 sm:w-96` để menu trải đều trọn vẹn màn hình với lề 12px hai bên.
+     * **DatePicker / DateRangePicker trên Mobile**: Tự động tính toán chiều rộng responsive `Math.min(340, window.innerWidth - 20)` và căn giữa màn hình (`Math.round((vw - popoverWidth) / 2)`). Chiều cao tự động kẹp trong viewport `max-h-[calc(100dvh-20px)] overflow-y-auto`. Hàng presets chọn nhanh phải cuộn ngang (`overflow-x-auto`) thay vì wrap nhiều dòng đẩy lịch xuống dưới.
+   - **Quy Chuẩn Menu Thao Tác Bảng (Table 3-Dots Action Menu / `MoreVertical`)**:
+     * **Chống clipping & che khuất**: Bảng có `overflow-hidden` và `overflow-x-auto`, vì vậy menu thao tác bắt buộc gắn qua `createPortal(..., document.body)` kèm `zIndex: 9999` để không bao giờ bị cắt cụt bởi container bảng hay footer.
+     * **Lật vị trí thông minh (`flip placement`) & Kẹp chiều cao**: Tự động đo đạc khoảng cách trên và dưới nút trigger (`spaceBelow`, `spaceAbove`). Khi `spaceBelow < ESTIMATED_HEIGHT && spaceAbove > spaceBelow`, menu tự động mở ngược lên trên (`openUpward`), kẹp `maxHeight` theo không gian viewport thực tế và bật `overflowY: "auto"` chống mất hút dưới đáy màn hình.
+     * **Chống tràn mép ngang**: Luôn kẹp tọa độ `left = Math.max(8, Math.min(rect.right - MENU_WIDTH, vw - MENU_WIDTH - 8))` để menu không bao giờ tràn ra ngoài mép phải khi người dùng cuộn ngang bảng hoặc dùng điện thoại.
+     * **Tính vị trí đồng bộ khi click**: Gọi `updateMenuPosition()` ngay trước khi `setMenuOpen(true)` trong hàm `toggleMenu` để ngăn chặn hiện tượng menu chớp/nhấp nháy ở vị trí tĩnh `{}` trong frame render đầu tiên.
+     * **Đầy đủ phím tắt & Trải nghiệm cảm ứng**: Lắng nghe phím `Escape` để đóng menu và trả focus về nút trigger; hỗ trợ sự kiện `touchstart` bên cạnh `mousedown` để đóng menu khi chạm ra ngoài trên mobile; tự động đóng khi nút trigger cuộn ra ngoài màn hình.
+     * **Tuyệt đối không để menu rỗng**: Mọi trạng thái bản ghi (bao gồm `UNUSED`, `ACTIVE`, `USED`, `EXPIRED`, `REVOKED`...) đều phải có các thao tác tương ứng (ít nhất luôn có nút "Xem chi tiết" / "Xem đơn ứng tuyển").
    - **Đa ngôn ngữ & Theme**: Tuyệt đối không hardcode text tiếng Việt/Anh trực tiếp; dùng `useTranslations()`. Chế độ Theme (Sáng/Tối/Theo hệ thống) điều khiển qua class `.dark` trên thẻ `<html>` và token semantic Tailwind 4 theo [`.agents/rules/i18n-and-theming.md`](file:///d:/NodeJS/NexCampus/NexCampus-FE/.agents/rules/i18n-and-theming.md).
 
 4. **Bảo vệ mã nguồn & File hệ thống**:

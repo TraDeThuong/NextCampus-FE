@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
+import { DateRangePicker } from "@/components/ui/DatePicker";
 
 type Range = "this-week" | "this-month" | "custom" | null;
 
@@ -27,19 +28,14 @@ function getMonthRange() {
 }
 
 function fmtDateInput(d: Date) {
-    return d.toISOString().slice(0, 10);
-}
-
-function fmtDisplay(d: Date, locale: string) {
-    return d.toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US", {
-        month: "short",
-        day: "numeric",
-    });
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
 }
 
 export default function DateRangeFilter() {
     const t = useTranslations();
-    const locale = useLocale();
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();
@@ -50,33 +46,39 @@ export default function DateRangeFilter() {
     const week = useMemo(() => getWeekRange(), []);
     const month = useMemo(() => getMonthRange(), []);
 
+    const weekFrom = fmtDateInput(week.from);
+    const weekTo = fmtDateInput(week.to);
+    const monthFrom = fmtDateInput(month.from);
+    const monthTo = fmtDateInput(month.to);
+
     const activeRange: Range =
-        currentFrom === fmtDateInput(week.from) && currentTo === fmtDateInput(week.to)
+        currentFrom === weekFrom && currentTo === weekTo
             ? "this-week"
-            : currentFrom === fmtDateInput(month.from) && currentTo === fmtDateInput(month.to)
+            : currentFrom === monthFrom && currentTo === monthTo
               ? "this-month"
               : currentFrom && currentTo
                 ? "custom"
                 : null;
 
-    const [range, setRange] = useState<Range>(activeRange);
-
-    function applyRange(r: Range) {
-        setRange(r);
+    function applyRange(r: "this-week" | "this-month") {
         const params = new URLSearchParams(searchParams.toString());
 
         if (r === "this-week") {
-            params.set("createdFrom", fmtDateInput(week.from));
-            params.set("createdTo", fmtDateInput(week.to));
+            if (activeRange === "this-week") {
+                params.delete("createdFrom");
+                params.delete("createdTo");
+            } else {
+                params.set("createdFrom", weekFrom);
+                params.set("createdTo", weekTo);
+            }
         } else if (r === "this-month") {
-            params.set("createdFrom", fmtDateInput(month.from));
-            params.set("createdTo", fmtDateInput(month.to));
-        } else if (r === "custom") {
-            if (currentFrom) params.set("createdFrom", currentFrom);
-            if (currentTo) params.set("createdTo", currentTo);
-        } else {
-            params.delete("createdFrom");
-            params.delete("createdTo");
+            if (activeRange === "this-month") {
+                params.delete("createdFrom");
+                params.delete("createdTo");
+            } else {
+                params.set("createdFrom", monthFrom);
+                params.set("createdTo", monthTo);
+            }
         }
 
         params.set("page", "1");
@@ -93,25 +95,24 @@ export default function DateRangeFilter() {
         router.push(`${pathname}?${params.toString()}`);
     }
 
+    function handleClear() {
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete("createdFrom");
+        params.delete("createdTo");
+        params.set("page", "1");
+        router.push(`${pathname}?${params.toString()}`);
+    }
+
     const pillBase =
         "rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 border cursor-pointer whitespace-nowrap active:scale-95";
     const pillActive =
-        "border-primary-light/40 bg-primary-light/15 text-primary-light shadow-[0_0_16px_rgba(21,174,245,0.15)]";
+        "border-cyan-400/50 bg-cyan-500/15 text-cyan-400 shadow-[0_0_16px_rgba(6,182,212,0.2)]";
     const pillInactive =
         "border-transparent text-muted hover:text-foreground hover:border-border dark:hover:border-white/10 hover:bg-card/60";
 
-    const activeLabel =
-        activeRange === "this-week"
-            ? `${fmtDisplay(week.from, locale)} – ${fmtDisplay(week.to, locale)}`
-            : activeRange === "this-month"
-              ? `${fmtDisplay(month.from, locale)} – ${fmtDisplay(month.to, locale)}`
-              : activeRange === "custom"
-                ? `${currentFrom} – ${currentTo}`
-                : null;
-
     return (
-        <div className="flex flex-col gap-2.5">
-            <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-2 max-w-full">
+            <div className="flex items-center gap-1.5 shrink-0">
                 <button
                     type="button"
                     onClick={() => applyRange("this-week")}
@@ -126,51 +127,18 @@ export default function DateRangeFilter() {
                 >
                     {t("admin.onboarding.thisMonth")}
                 </button>
-                <button
-                    type="button"
-                    onClick={() => {
-                        setRange("custom");
-                        applyRange("custom");
-                    }}
-                    className={`${pillBase} ${activeRange === "custom" ? pillActive : pillInactive}`}
-                >
-                    {t("admin.onboarding.custom")}
-                </button>
             </div>
 
-            {activeLabel && (
-                <p className="text-xs text-muted font-medium tracking-wide pl-1">
-                    {activeLabel}
-                </p>
-            )}
-
-            {range === "custom" && (
-                <div className="flex items-center gap-2 pt-1">
-                    <input
-                        type="date"
-                        value={currentFrom}
-                        onChange={(e) => applyCustom(e.target.value, currentTo)}
-                        onClick={(e) => {
-                            try {
-                                e.currentTarget.showPicker?.();
-                            } catch {}
-                        }}
-                        className="w-[144px] rounded-xl border border-border dark:border-white/10 bg-card/60 dark:bg-white/[0.04] py-1.5 px-3 [font-family:var(--font-body),sans-serif] text-xs text-foreground outline-none transition-all cursor-pointer hover:border-border-strong focus:border-primary-light/50 focus:shadow-[0_0_16px_rgba(21,174,245,0.1)] [color-scheme:light] dark:[color-scheme:dark]"
-                    />
-                    <span className="text-xs text-muted">–</span>
-                    <input
-                        type="date"
-                        value={currentTo}
-                        onChange={(e) => applyCustom(currentFrom, e.target.value)}
-                        onClick={(e) => {
-                            try {
-                                e.currentTarget.showPicker?.();
-                            } catch {}
-                        }}
-                        className="w-[144px] rounded-xl border border-border dark:border-white/10 bg-card/60 dark:bg-white/[0.04] py-1.5 px-3 [font-family:var(--font-body),sans-serif] text-xs text-foreground outline-none transition-all cursor-pointer hover:border-border-strong focus:border-primary-light/50 focus:shadow-[0_0_16px_rgba(21,174,245,0.1)] [color-scheme:light] dark:[color-scheme:dark]"
-                    />
-                </div>
-            )}
+            {/* Custom Cyberpunk Date Range Picker (Zero native input) */}
+            <DateRangePicker
+                startDate={currentFrom}
+                endDate={currentTo}
+                onChange={applyCustom}
+                onClear={handleClear}
+                placeholder={t("admin.onboarding.custom")}
+                align="right"
+                className="max-w-full"
+            />
         </div>
     );
 }

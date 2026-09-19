@@ -15,7 +15,7 @@ import Spinner from "@/components/ui/Spinner";
 import OnboardingRow from "./OnboardingRow";
 
 const COLUMNS =
-  "minmax(200px,2fr) minmax(130px,1.2fr) minmax(130px,1.2fr) 115px 110px 105px 44px";
+  "minmax(200px, 1.4fr) minmax(140px, 1.1fr) minmax(140px, 1.1fr) 140px 130px 115px 44px";
 
 export default function OnboardingTable() {
   const t = useTranslations();

@@ -29,6 +29,7 @@ export default function OnboardingFilters() {
 
   const inviteStatusOptions = useMemo(
     () => [
+      { value: "UNUSED", label: t("admin.onboarding.inviteStatus_UNUSED") },
       { value: "ACTIVE", label: t("admin.onboarding.inviteStatus_ACTIVE") },
       { value: "USED", label: t("admin.onboarding.inviteStatus_USED") },
       { value: "EXPIRED", label: t("admin.onboarding.inviteStatus_EXPIRED") },

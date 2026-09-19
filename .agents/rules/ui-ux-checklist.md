@@ -73,6 +73,17 @@ Table là thành phần dễ bị "vỡ" giao diện nhất khi lên code. Phả
    - Khi Dropdown nằm ở sát đáy màn hình, menu phải tự động mở ngược lên trên (`side="top"`) để không bị tràn hay khuất ngoài viewport.
 5. **Trường hợp chữ quá dài**:
    - Từng item trong dropdown nếu text quá dài phải được xử lý `truncate` kèm tooltip, tránh làm phình độ rộng của popover ra toàn màn hình.
+6. **Hiển thị trên Mobile (Mobile Viewport & Overflow Protection)**:
+   - **Chống tràn mép trái/phải**: Tuyệt đối không dùng `absolute right-0` với chiều rộng cố định lớn (như `w-80`, `w-96`) khi nút kích hoạt nằm thụt lùi vào giữa header/toolbar, vì sẽ làm menu bị dạt sang trái và tràn ra khỏi mép trái màn hình điện thoại.
+   - **Pattern chuẩn cho Dropdown Header (như `NotificationDropdown`)**: Trên mobile dùng `fixed left-3 right-3 top-[76px] max-w-[calc(100vw-24px)]`, trên desktop dùng `sm:absolute sm:top-full sm:right-0 sm:w-96`.
+   - **Pattern chuẩn cho DatePicker / Popovers**: Chiều rộng responsive `Math.min(340, window.innerWidth - 20)` và tự động căn giữa `left = Math.max(10, Math.round((vw - popoverWidth) / 2))`. Chiều cao kẹp `max-h-[calc(100dvh-20px)] overflow-y-auto` để không bao giờ bị cắt mất nút action ở đáy màn hình.
+7. **Menu Thao Tác Trong Bảng (Table 3-Dots Action Menu / `MoreVertical`)**:
+   - **Chống Clipping & Che Khuất**: Menu thao tác trong bảng bắt buộc gắn qua `createPortal(..., document.body)` với `zIndex: 9999` để thoát khỏi container bảng có `overflow-hidden` và `overflow-x-auto`.
+   - **Lật Vị Trí Thông Minh (`flip placement`)**: Tự động so sánh không gian trên và dưới: khi `spaceBelow < ESTIMATED_HEIGHT && spaceAbove > spaceBelow`, menu lật ngược lên trên (`openUpward`). Kẹp `maxHeight` theo không gian viewport thực tế và bật `overflowY: "auto"`.
+   - **Chống Tràn Mép Ngang**: Căn lề kẹp an toàn `left = Math.max(8, Math.min(rect.right - MENU_WIDTH, vw - MENU_WIDTH - 8))` chống tràn mép phải màn hình khi cuộn bảng hoặc trên mobile.
+   - **Tính Tọa Độ Đồng Bộ Khi Click**: Gọi `updateMenuPosition()` trước khi bật `setMenuOpen(true)` trong hàm `toggleMenu` tránh chớp vị trí ban đầu `{}`.
+   - **Phím Tắt & Cảm Ứng**: Đóng khi bấm `Escape` (trả focus về trigger), đóng khi chạm ngoài (`mousedown`, `touchstart`), tự đóng khi nút trigger cuộn ra ngoài viewport.
+   - **Không Bao Giờ Rỗng**: Luôn hỗ trợ đủ các trạng thái dữ liệu (kể cả `UNUSED`) và có fallback "Xem chi tiết".
 
 ---
 
@@ -90,7 +101,18 @@ Table là thành phần dễ bị "vỡ" giao diện nhất khi lên code. Phả
 4. **Định dạng đặc biệt**:
    - **Mật khẩu (Password)**: Bắt buộc có nút toggle icon mắt (Eye / EyeOff) để ẩn/hiện mật khẩu.
    - **Số (Number Input)**: Ẩn nút mũi tên mặc định xấu xí của trình duyệt (`[appearance:textfield]`), tích hợp nút tăng giảm tuỳ chỉnh hoặc validate số nguyên/số thực rõ ràng.
-   - **Ngày tháng (Datepicker)**: Sử dụng calendar popover trực quan, hiển thị ngày theo định dạng tiếng Việt `DD/MM/YYYY`, khóa không cho chọn ngày bất hợp lệ (quá khứ, cuối tuần) theo nghiệp vụ.
+   - **Ngày tháng (DatePicker & DateRangePicker)**:
+      * **Tuyệt đối CẤM `<input type="date">` native** trên toàn bộ hệ thống vì không tương thích Cyberpunk theme và gây vỡ layout trên các hệ điều hành khác nhau.
+      * **Bắt buộc sử dụng `DatePicker` / `DateRangePicker`** từ `@/components/ui/DatePicker`.
+      * **Quy cách UI/UX**:
+        - Popover gắn qua `createPortal(..., document.body)` chống bị che cắt bởi container `overflow-hidden`.
+        - Tự động phát hiện mép viewport để lật ngược lên trên (`flip`) hoặc căn lề phải (`align="right"`).
+        - Đóng mượt mà khi bấm phím `Escape` hoặc click ra ngoài (`mousedown`).
+        - Lưới lịch 7 ngày trực quan (`T2..CN` / `Mo..Su`), đánh dấu chấm phát sáng Today.
+        - Khoảng ngày chọn có gradient highlight (bắt đầu bo tròn trái, kết thúc bo tròn phải, giữa phủ cyan nhẹ).
+        - Hiệu ứng **Hover Range Preview** xem trước dải ngày trước khi click chốt.
+        - Tích hợp thanh phím tắt chọn nhanh (Presets: Hôm nay, 7 ngày, 30 ngày, Tuần này, Tháng này).
+        - Hiển thị ngày tháng người dùng theo định dạng chuẩn `DD/MM/YYYY`, lưu trữ và gửi API chuẩn ISO `YYYY-MM-DD`.
 
 ---
 

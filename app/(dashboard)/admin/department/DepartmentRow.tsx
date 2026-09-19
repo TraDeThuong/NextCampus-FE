@@ -54,29 +54,56 @@ export default function DepartmentRow({
     const menuId = useId();
 
     const updateMenuPosition = useCallback(() => {
-        if (triggerRef.current) {
-            const rect = triggerRef.current.getBoundingClientRect();
-            const spaceBelow = window.innerHeight - rect.bottom;
-            const openUpward = spaceBelow < 180 && rect.top > 180;
+        if (!triggerRef.current) return;
+        const rect = triggerRef.current.getBoundingClientRect();
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
 
-            const MENU_WIDTH = 140;
-            setMenuStyle({
-                position: "fixed",
-                top: openUpward ? undefined : rect.bottom + 6,
-                bottom: openUpward ? window.innerHeight - rect.top + 6 : undefined,
-                left: Math.max(8, rect.right - MENU_WIDTH),
-                width: MENU_WIDTH,
-                zIndex: 9999,
-            });
+        if (rect.bottom < 0 || rect.top > vh || rect.right < 0 || rect.left > vw) {
+            setMenuOpen(false);
+            return;
         }
-    }, []);
+
+        const MENU_WIDTH = Math.min(160, vw - 24);
+        const ESTIMATED_HEIGHT = 160;
+        const spaceBelow = vh - rect.bottom;
+        const spaceAbove = rect.top;
+
+        const openUpward = spaceBelow < ESTIMATED_HEIGHT && spaceAbove > spaceBelow;
+
+        const maxHeight = openUpward
+            ? Math.min(260, Math.max(100, spaceAbove - 16))
+            : Math.min(260, Math.max(100, spaceBelow - 16));
+
+        const left = Math.max(8, Math.min(rect.right - MENU_WIDTH, vw - MENU_WIDTH - 8));
+
+        setMenuStyle({
+            position: "fixed",
+            top: openUpward ? undefined : rect.bottom + 6,
+            bottom: openUpward ? vh - rect.top + 6 : undefined,
+            left,
+            width: MENU_WIDTH,
+            maxHeight,
+            overflowY: "auto",
+            zIndex: 9999,
+        });
+    }, [setMenuOpen]);
+
+    const toggleMenu = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!menuOpen) {
+            updateMenuPosition();
+            setMenuOpen(true);
+        } else {
+            setMenuOpen(false);
+        }
+    };
 
     useEffect(() => {
-        if (menuOpen) {
-            updateMenuPosition();
-            window.addEventListener("scroll", updateMenuPosition, true);
-            window.addEventListener("resize", updateMenuPosition);
-        }
+        if (!menuOpen) return;
+        updateMenuPosition();
+        window.addEventListener("scroll", updateMenuPosition, true);
+        window.addEventListener("resize", updateMenuPosition);
         return () => {
             window.removeEventListener("scroll", updateMenuPosition, true);
             window.removeEventListener("resize", updateMenuPosition);
@@ -84,7 +111,8 @@ export default function DepartmentRow({
     }, [menuOpen, updateMenuPosition]);
 
     useEffect(() => {
-        function handleClick(e: MouseEvent) {
+        if (!menuOpen) return;
+        function handleClickOutside(e: MouseEvent | TouchEvent) {
             const target = e.target as Node;
             if (
                 menuRef.current &&
@@ -95,8 +123,20 @@ export default function DepartmentRow({
                 setMenuOpen(false);
             }
         }
-        if (menuOpen) document.addEventListener("mousedown", handleClick);
-        return () => document.removeEventListener("mousedown", handleClick);
+        function handleKeyDown(e: KeyboardEvent) {
+            if (e.key === "Escape") {
+                setMenuOpen(false);
+                triggerRef.current?.focus();
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        document.addEventListener("touchstart", handleClickOutside, { passive: true });
+        window.addEventListener("keydown", handleKeyDown);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+            document.removeEventListener("touchstart", handleClickOutside);
+            window.removeEventListener("keydown", handleKeyDown);
+        };
     }, [menuOpen]);
 
     return (
@@ -143,7 +183,7 @@ export default function DepartmentRow({
                         aria-haspopup="menu"
                         aria-expanded={menuOpen}
                         aria-controls={menuId}
-                        onClick={() => setMenuOpen((prev) => !prev)}
+                        onClick={toggleMenu}
                         className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-muted transition hover:border-white/10 hover:bg-white/5 hover:text-foreground active:scale-[0.98]"
                     >
                         <MoreVertical className="h-4 w-4 shrink-0" />

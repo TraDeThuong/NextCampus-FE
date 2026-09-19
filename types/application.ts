@@ -37,7 +37,7 @@ export interface Application {
   attachments?: ApplicationAttachment[];
 }
 
-export type ApplicationInviteStatus = "ACTIVE" | "USED" | "EXPIRED" | "REVOKED";
+export type ApplicationInviteStatus = "UNUSED" | "ACTIVE" | "USED" | "EXPIRED" | "REVOKED";
 
 export interface ApplicationInvite {
   id: string;

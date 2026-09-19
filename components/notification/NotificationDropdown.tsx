@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Check, BellOff, Info, AlertTriangle, CheckCircle2, ShieldAlert, Trash2, Clock } from "lucide-react";
+import { ArrowLeft, Check, BellOff, Info, AlertTriangle, CheckCircle2, ShieldAlert, Trash2, Clock, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useNotifications } from "@/hooks/notification/useNotifications";
 import { useMarkAsRead } from "@/hooks/notification/useMarkAsRead";
@@ -11,7 +11,11 @@ import { useClearReadNotifications } from "@/hooks/notification/useClearReadNoti
 import type { Notification } from "@/types/notification";
 import Spinner from "@/components/ui/Spinner";
 
-export default function NotificationDropdown() {
+interface NotificationDropdownProps {
+  onClose?: () => void;
+}
+
+export default function NotificationDropdown({ onClose }: NotificationDropdownProps = {}) {
   const t = useTranslations("header.notification");
   const tCommon = useTranslations("common");
   const locale = useLocale();
@@ -79,9 +83,9 @@ export default function NotificationDropdown() {
   };
 
   return (
-    <div className="absolute right-0 mt-3 w-80 sm:w-96 rounded-2xl border border-white/10 bg-[#0B1020]/95 p-4 text-white shadow-[0_8px_32px_rgba(0,0,0,0.5)] backdrop-blur-xl z-50 animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed left-3 right-3 top-[76px] sm:top-full sm:absolute sm:left-auto sm:right-0 sm:mt-3 sm:w-96 max-w-[calc(100vw-24px)] sm:max-w-none rounded-2xl border border-white/10 bg-[#0B1020]/95 p-4 text-white shadow-[0_16px_48px_rgba(0,0,0,0.7)] backdrop-blur-2xl z-50 animate-in fade-in zoom-in-95 duration-150 max-h-[calc(100dvh-88px)] flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-white/10 pb-3">
+      <div className="flex items-center justify-between border-b border-white/10 pb-3 shrink-0">
         <div className="flex items-center gap-2">
           {selectedNotification ? (
             <>
@@ -107,35 +111,49 @@ export default function NotificationDropdown() {
           )}
         </div>
 
-        {!selectedNotification && <div className="flex items-center gap-3">
-          {unreadNotifications.length > 0 && (
-            <button
-              onClick={handleMarkAllRead}
-              disabled={isMarkingAllRead}
-              className="flex items-center gap-1 text-xs text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              title={t("markAllReadTitle")}
-            >
-              <Check size={14} className={isMarkingAllRead ? "animate-spin" : ""} />
-              <span>{t("markAllRead")}</span>
-            </button>
+        <div className="flex items-center gap-2 sm:gap-3">
+          {!selectedNotification && (
+            <>
+              {unreadNotifications.length > 0 && (
+                <button
+                  onClick={handleMarkAllRead}
+                  disabled={isMarkingAllRead}
+                  className="flex items-center gap-1 text-xs text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  title={t("markAllReadTitle")}
+                >
+                  <Check size={14} className={isMarkingAllRead ? "animate-spin" : ""} />
+                  <span className="hidden sm:inline">{t("markAllRead")}</span>
+                </button>
+              )}
+
+              {readNotifications.length > 0 && (
+                <button
+                  onClick={handleClearRead}
+                  disabled={isClearingRead}
+                  className="flex items-center gap-1 text-xs text-slate-400 hover:text-red-400 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  title={t("clearReadTitle")}
+                >
+                  <Trash2 size={13} className={isClearingRead ? "animate-spin" : ""} />
+                  <span className="hidden sm:inline">{t("clearRead")}</span>
+                </button>
+              )}
+            </>
           )}
 
-          {readNotifications.length > 0 && (
+          {onClose && (
             <button
-              onClick={handleClearRead}
-              disabled={isClearingRead}
-              className="flex items-center gap-1 text-xs text-slate-400 hover:text-red-400 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              title={t("clearReadTitle")}
+              onClick={onClose}
+              className="sm:hidden flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
+              aria-label="Đóng"
             >
-              <Trash2 size={13} className={isClearingRead ? "animate-spin" : ""} />
-              <span>{t("clearRead")}</span>
+              <X size={15} />
             </button>
           )}
-        </div>}
+        </div>
       </div>
 
       {/* Content */}
-      <div className="mt-2 max-h-80 overflow-y-auto scroll-smooth overscroll-contain divide-y divide-white/5 pr-1 scrollbar-thin scrollbar-thumb-white/10">
+      <div className="mt-2 flex-1 max-h-[calc(100dvh-180px)] sm:max-h-80 overflow-y-auto scroll-smooth overscroll-contain divide-y divide-white/5 pr-1 scrollbar-thin scrollbar-thumb-white/10">
         {isLoading ? (
           <div className="flex h-32 items-center justify-center">
             <Spinner size="sm" />

@@ -83,6 +83,40 @@ Chỉ lưu các quyết định kiến trúc và UI/UX đã được xác nhận
     * Icon `RotateCw` tự động xoay tròn liên tục khi dữ liệu đang được tải ngầm (`animate-spin text-cyan-400` khi `isReloading={true}`), đồng thời tự động vô hiệu hóa (`disabled`) để chống spam request.
     * Tích hợp tooltip và `aria-label` tự động theo ngôn ngữ: *"Làm mới dữ liệu"* (vi) / *"Refresh data"* (en).
 
+- **2026-09-19 — Chuẩn Hóa Giao Diện Chọn Ngày Tháng (DatePicker & DateRangePicker Standard)**:
+  - **Cấm Tuyệt Đối `<input type="date">` Native**: Không bao giờ sử dụng thẻ native `<input type="date">` thô sơ của trình duyệt. Native input gây vỡ giao diện hệ thống theme tối, phụ thuộc vào từng hệ điều hành khác nhau, và không hỗ trợ trải nghiệm Cyberpunk Glassmorphism.
+  - **Component Chuẩn Dùng Chung**: Bắt buộc sử dụng `DatePicker` (cho chọn 1 ngày) hoặc `DateRangePicker` (cho chọn khoảng ngày) từ `@/components/ui/DatePicker`.
+  - **Tiêu Chuẩn Thiết Kế & Trải Nghiệm Người Dùng (UI/UX Checklist)**:
+    * **Cyberpunk Glassmorphism**: Nền popover tối `bg-[#0c1322]/95 backdrop-blur-2xl border border-white/10 ring-1 ring-white/10 shadow-[0_24px_60px_rgba(0,0,0,0.7)]`.
+    * **Portal & Tự Động Định Vị**: Luôn gắn bằng `createPortal(..., document.body)` chống bị cắt vỡ bởi container có `overflow-hidden`. Tự động phát hiện đáy màn hình để lật ngược lên trên (`flip`) và căn lề phải (`align="right"`).
+    * **Đóng Phím Tắt & Click Ngoài**: Tự động đóng khi nhấn phím `Escape` hoặc click bên ngoài popover (`mousedown`).
+    * **Lưới Lịch 7 Ngày Trực Quan**: Tiêu đề tháng năm kèm nút chuyển tháng mượt mà, hàng thứ trong tuần đa ngôn ngữ (`T2..CN` / `Mo..Su`), đánh dấu chấm phát sáng cyan cho ngày hôm nay (Today).
+    * **Khoảng Ngày & Hiệu Ứng Hover Range Preview**:
+      - Chọn ngày bắt đầu: Bo tròn trái `rounded-l-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold shadow-[0_0_14px_rgba(6,182,212,0.4)]`.
+      - Chọn ngày kết thúc: Bo tròn phải `rounded-r-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold shadow-[0_0_14px_rgba(6,182,212,0.4)]`.
+      - Khoảng giữa: `bg-cyan-500/20 text-cyan-200 border-y border-cyan-500/20`.
+      - Hover Range Preview: Khi đã chọn ngày bắt đầu, việc rê chuột qua các ngày khác sẽ kích hoạt dải preview viền đứt nét cyan mềm mại (`bg-cyan-500/10 border-dashed`) trước khi click chốt.
+    * **Phím Tắt Nhanh (Presets)**: Tích hợp sẵn hàng nút chọn nhanh: *Hôm nay*, *7 ngày qua*, *30 ngày qua*, *Tuần này*, *Tháng này*.
+    * **Đồng Bộ Dữ Liệu Hai Chiều**:
+      - Hiển thị trên giao diện người dùng theo định dạng dễ đọc: `DD/MM/YYYY` (hoặc `DD/MM/YYYY – DD/MM/YYYY`).
+      - Lưu trữ và gửi API/URL Search Params theo chuẩn ISO `YYYY-MM-DD` (`createdFrom`, `createdTo`, `deadline`...).
+      - Luôn reset về `page=1` khi thay đổi ngày lọc.
+
+- **2026-09-19 — Chuẩn Hóa Responsive Cho Dropdown & Popover Trên Mobile (Chống Tràn Mép & Tràn Đáy)**:
+  - **Vấn đề đã khắc phục**:
+    1. Menu thông báo (`NotificationDropdown`) ban đầu dùng `absolute right-0 w-80`. Do icon chuông nằm trước link Profile (không ở sát mép phải màn hình), menu 320px bị đẩy lùi sang trái vượt qua mép màn hình điện thoại (overflow left).
+    2. Popover chọn ngày (`DatePicker`, `DateRangePicker`) có chiều rộng cố định 340px và chiều cao 420px, khi mở trên màn hình điện thoại nhỏ bị tràn ra mép phải/trái và tràn qua đáy màn hình (làm mất cụm nút Áp dụng/Đặt lại).
+  - **Giải pháp chuẩn hóa đã kiểm chứng**:
+    * **`NotificationDropdown`**:
+      - Trên mobile (`< sm`): Áp dụng `fixed left-3 right-3 top-[76px] max-w-[calc(100vw-24px)]`. Menu trải đều cân đối toàn màn hình với lề an toàn 12px hai bên, chiều cao kẹp `max-h-[calc(100dvh-88px)] flex flex-col`.
+      - Trên desktop (`sm:`): Giữ nguyên `sm:absolute sm:top-full sm:left-auto sm:right-0 sm:w-96 sm:mt-3`.
+      - Hỗ trợ nút `X` đóng nhanh trên mobile header và phím `Escape`.
+    * **`DatePicker` & `DateRangePicker`**:
+      - Chiều rộng linh hoạt: `popoverWidth = isMobile ? Math.min(340, window.innerWidth - 20) : 340`.
+      - Căn giữa trên mobile: `left = Math.max(10, Math.round((window.innerWidth - popoverWidth) / 2))`.
+      - Chiều cao & lật thông minh: Khi không đủ chỗ ở dưới hoặc trên, tự động kẹp `top = Math.max(10, window.innerHeight - popoverHeight - 10)` và bật `max-h-[calc(100dvh-20px)] overflow-y-auto`.
+      - Hàng phím tắt presets: Chuyển sang cuộn ngang `overflow-x-auto no-scrollbar` thay vì `flex-wrap` nhiều hàng, tiết kiệm tối đa chiều cao hiển thị.
+
 ---
 
 ## 2. Quyết định Kỹ thuật & Luồng Dữ Liệu
@@ -122,4 +156,10 @@ Chỉ lưu các quyết định kiến trúc và UI/UX đã được xác nhận
   - **Bỏ cột vai trò & Bỏ lọc vai trò ở `/admin/admin-team`**: Vì trang này chỉ dành cho Ban Quản Trị, cột vai trò và bộ lọc vai trò bị loại bỏ để bảng thoáng rộng và tập trung.
   - **Tập trung hóa đổi vai trò về `/admin/roles`**: Thao tác gán vai trò người dùng được quy tụ 100% về trang `/admin/roles` qua modal `RoleUsersModal` mở từ cột/nút "Thành viên" của từng vai trò. Xóa bỏ nút "Đổi vai trò" phân tán ở từng hàng `AdminTeamRow`.
 
-
+- **2026-09-19 — Chuẩn Hóa Menu Thao Tác Bảng (Table 3-Dots Action Menu / `MoreVertical`)**:
+  - **Portal & Z-Index Chống Clipping**: Menu thao tác 3 chấm trong bảng bắt buộc gắn qua `createPortal(..., document.body)` kèm `zIndex: 9999` để chống bị cắt xén (`clipping`) bởi container bảng có `overflow-hidden` hoặc `overflow-x-auto`.
+  - **Lật Vị Trí Thông Minh (`flip placement`) & Kẹp Chiều Cao**: Tự động so sánh `spaceBelow` và `spaceAbove`. Nếu `spaceBelow < ESTIMATED_HEIGHT && spaceAbove > spaceBelow`, menu tự động mở ngược lên trên (`openUpward`). Chiều cao menu kẹp trong viewport thực tế (`maxHeight: Math.min(260, Math.max(100, space - 16))`) kèm `overflowY: "auto"` chống mất hút dưới đáy màn hình.
+  - **Chống Tràn Mép Ngang**: Căn lề ngang kẹp an toàn `left = Math.max(8, Math.min(rect.right - MENU_WIDTH, vw - MENU_WIDTH - 8))` chống tràn mép phải màn hình khi người dùng cuộn ngang bảng hoặc dùng điện thoại.
+  - **Tính Tọa Độ Đồng Bộ**: Gọi `updateMenuPosition()` ngay khi click trước khi set `menuOpen(true)` để tránh menu bị chớp ở vị trí static `{}` tại frame render đầu tiên.
+  - **Phím Tắt & Cảm Ứng**: Đóng menu ngay khi bấm `Escape` (trả focus về nút trigger) hoặc chạm ngoài (`mousedown`, `touchstart`), tự động đóng khi nút trigger cuộn ra ngoài màn hình.
+  - **Bảo Đảm Menu Không Bao Giờ Rỗng**: Bổ sung đầy đủ các action cho toàn bộ trạng thái dữ liệu (kể cả trạng thái mặc định như `UNUSED` của Prisma) và luôn có fallback "Xem chi tiết" để menu không bao giờ bị rỗng.

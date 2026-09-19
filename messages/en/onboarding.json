@@ -61,6 +61,7 @@
       "thisWeek": "This Week",
       "thisMonth": "This Month",
       "custom": "Custom",
+      "inviteStatus_UNUSED": "Unused",
       "inviteStatus_ACTIVE": "Active",
       "inviteStatus_USED": "Used",
       "inviteStatus_EXPIRED": "Expired",
@@ -102,7 +103,16 @@
       "approving": "Approving...",
       "rejecting": "Rejecting...",
       "deleting": "Deleting...",
-      "actions": "Actions"
+      "actions": "Actions",
+      "assignmentTitle": "Department & Position Assignment",
+      "applicantPreferences": "Applicant Preferences",
+      "officialAssignment": "Official Assignment",
+      "noApplicationYet": "No Application Submitted Yet",
+      "noApplicationDescription": "The applicant has not submitted their online application form yet. You can share the invitation link with them to proceed.",
+      "noAttachments": "No attachments provided",
+      "inviteUrl": "Onboarding Invitation Link",
+      "viewFile": "View file",
+      "downloadFile": "Download"
     }
   },
   "onboarding": {
@@ -166,6 +176,7 @@
     "thisWeek": "This Week",
     "thisMonth": "This Month",
     "custom": "Custom",
+    "inviteStatus_UNUSED": "Unused",
     "inviteStatus_ACTIVE": "Active",
     "inviteStatus_USED": "Used",
     "inviteStatus_EXPIRED": "Expired",
@@ -207,6 +218,15 @@
     "approving": "Approving...",
     "rejecting": "Rejecting...",
     "deleting": "Deleting...",
-    "actions": "Actions"
+    "actions": "Actions",
+    "assignmentTitle": "Department & Position Assignment",
+    "applicantPreferences": "Applicant Preferences",
+    "officialAssignment": "Official Assignment",
+    "noApplicationYet": "No Application Submitted Yet",
+    "noApplicationDescription": "The applicant has not submitted their online application form yet. You can share the invitation link with them to proceed.",
+    "noAttachments": "No attachments provided",
+    "inviteUrl": "Onboarding Invitation Link",
+    "viewFile": "View file",
+    "downloadFile": "Download"
   }
 }

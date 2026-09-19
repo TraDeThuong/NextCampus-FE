@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bell } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useUnreadCount } from "@/hooks/notification/useUnreadCount";
@@ -16,6 +16,18 @@ export default function NotificationBell() {
   useNotificationSSE();
 
   const { data: unreadCount = 0 } = useUnreadCount();
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape" && isOpen) {
+        setIsOpen(false);
+      }
+    }
+    if (isOpen) {
+      document.addEventListener("keydown", handleKeyDown);
+    }
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
 
   return (
     <div ref={containerRef} className="relative">
@@ -33,7 +45,7 @@ export default function NotificationBell() {
         )}
       </button>
 
-      {isOpen && <NotificationDropdown />}
+      {isOpen && <NotificationDropdown onClose={() => setIsOpen(false)} />}
     </div>
   );
 }

@@ -30,6 +30,7 @@ import InlineSelect from "@/components/ui/InlineSelect";
 import { toast } from "react-hot-toast";
 
 const INVITE_COLORS: Record<string, string> = {
+    UNUSED: "border-sky-500/30 text-sky-400 bg-sky-500/10",
     ACTIVE: "border-sky-500/30 text-sky-400 bg-sky-500/10",
     USED: "border-emerald-500/30 text-emerald-400 bg-emerald-500/10",
     EXPIRED: "border-amber-500/30 text-amber-400 bg-amber-500/10",
@@ -95,29 +96,60 @@ export default function OnboardingRow({ invite }: Props) {
     const position = application?.position?.name ?? "—";
 
     const updateMenuPosition = useCallback(() => {
-        if (triggerRef.current) {
-            const rect = triggerRef.current.getBoundingClientRect();
-            const spaceBelow = window.innerHeight - rect.bottom;
-            const openUpward = spaceBelow < 220 && rect.top > 220;
+        if (!triggerRef.current) return;
+        const rect = triggerRef.current.getBoundingClientRect();
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
 
-            const MENU_WIDTH = 190;
-            setMenuStyle({
-                position: "fixed",
-                top: openUpward ? undefined : rect.bottom + 6,
-                bottom: openUpward ? window.innerHeight - rect.top + 6 : undefined,
-                left: Math.max(8, rect.right - MENU_WIDTH),
-                width: MENU_WIDTH,
-                zIndex: 9999,
-            });
+        // Tự động đóng nếu nút trigger cuộn ra hoàn toàn ngoài màn hình
+        if (rect.bottom < 0 || rect.top > vh || rect.right < 0 || rect.left > vw) {
+            setMenuOpen(false);
+            return;
         }
-    }, []);
+
+        const MENU_WIDTH = Math.min(195, vw - 24);
+        const ESTIMATED_HEIGHT = 160;
+        const spaceBelow = vh - rect.bottom;
+        const spaceAbove = rect.top;
+
+        // Tự động lật ngược lên trên (flip) khi không gian bên dưới không đủ và bên trên thoáng hơn
+        const openUpward = spaceBelow < ESTIMATED_HEIGHT && spaceAbove > spaceBelow;
+
+        // Giới hạn chiều cao tối đa kẹp trong viewport có bật cuộn theo chuẩn AGENTS.md
+        const maxHeight = openUpward
+            ? Math.min(260, Math.max(100, spaceAbove - 16))
+            : Math.min(260, Math.max(100, spaceBelow - 16));
+
+        // Căn lề ngang chống tràn cả mép trái lẫn mép phải (đặc biệt khi cuộn ngang bảng hoặc mobile)
+        const left = Math.max(8, Math.min(rect.right - MENU_WIDTH, vw - MENU_WIDTH - 8));
+
+        setMenuStyle({
+            position: "fixed",
+            top: openUpward ? undefined : rect.bottom + 6,
+            bottom: openUpward ? vh - rect.top + 6 : undefined,
+            left,
+            width: MENU_WIDTH,
+            maxHeight,
+            overflowY: "auto",
+            zIndex: 9999,
+        });
+    }, [setMenuOpen]);
+
+    const toggleMenu = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!menuOpen) {
+            updateMenuPosition();
+            setMenuOpen(true);
+        } else {
+            setMenuOpen(false);
+        }
+    };
 
     useEffect(() => {
-        if (menuOpen) {
-            updateMenuPosition();
-            window.addEventListener("scroll", updateMenuPosition, true);
-            window.addEventListener("resize", updateMenuPosition);
-        }
+        if (!menuOpen) return;
+        updateMenuPosition();
+        window.addEventListener("scroll", updateMenuPosition, true);
+        window.addEventListener("resize", updateMenuPosition);
         return () => {
             window.removeEventListener("scroll", updateMenuPosition, true);
             window.removeEventListener("resize", updateMenuPosition);
@@ -125,7 +157,8 @@ export default function OnboardingRow({ invite }: Props) {
     }, [menuOpen, updateMenuPosition]);
 
     useEffect(() => {
-        function handleClick(e: MouseEvent) {
+        if (!menuOpen) return;
+        function handleClickOutside(e: MouseEvent | TouchEvent) {
             const target = e.target as Node;
             if (
                 menuRef.current &&
@@ -136,8 +169,20 @@ export default function OnboardingRow({ invite }: Props) {
                 setMenuOpen(false);
             }
         }
-        if (menuOpen) document.addEventListener("mousedown", handleClick);
-        return () => document.removeEventListener("mousedown", handleClick);
+        function handleKeyDown(e: KeyboardEvent) {
+            if (e.key === "Escape") {
+                setMenuOpen(false);
+                triggerRef.current?.focus();
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        document.addEventListener("touchstart", handleClickOutside, { passive: true });
+        window.addEventListener("keydown", handleKeyDown);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+            document.removeEventListener("touchstart", handleClickOutside);
+            window.removeEventListener("keydown", handleKeyDown);
+        };
     }, [menuOpen]);
 
     function handleDepartmentChange(departmentId: string | null) {
@@ -316,7 +361,7 @@ export default function OnboardingRow({ invite }: Props) {
                 {/* Invite Status */}
                 <div>
                     <span
-                        className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold tracking-wider ${
+                        className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold tracking-wider whitespace-nowrap ${
                             INVITE_COLORS[invite.status] ?? "border-zinc-700 text-zinc-400"
                         }`}
                     >
@@ -328,7 +373,7 @@ export default function OnboardingRow({ invite }: Props) {
                 <div>
                     {appStatus ? (
                         <span
-                            className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold tracking-wider ${
+                            className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold tracking-wider whitespace-nowrap ${
                                 APP_COLORS[appStatus] ?? "border-zinc-700 text-zinc-400"
                             }`}
                         >
@@ -352,7 +397,7 @@ export default function OnboardingRow({ invite }: Props) {
                         aria-label="Actions menu"
                         aria-haspopup="menu"
                         aria-expanded={menuOpen}
-                        onClick={() => setMenuOpen((prev) => !prev)}
+                        onClick={toggleMenu}
                         disabled={isBusy}
                         className="flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-muted transition hover:border-border dark:hover:border-white/10 hover:bg-card hover:text-foreground active:scale-95 disabled:opacity-50"
                     >
@@ -373,10 +418,10 @@ export default function OnboardingRow({ invite }: Props) {
                                 role="menu"
                                 aria-label="Onboarding actions"
                                 style={menuStyle}
-                                className="rounded-2xl border border-border dark:border-white/10 bg-card/95 p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl"
+                                className="rounded-2xl border border-border dark:border-white/10 bg-card/95 p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/10"
                             >
-                                {/* ACTIVE: View + Copy link + Revoke */}
-                                {invite.status === "ACTIVE" && (
+                                {/* ACTIVE / UNUSED: View + Copy link + Revoke */}
+                                {(invite.status === "ACTIVE" || invite.status === "UNUSED") && (
                                     <>
                                         <button
                                             type="button"
@@ -554,6 +599,19 @@ export default function OnboardingRow({ invite }: Props) {
                                             {t("admin.onboarding.resendInvite")}
                                         </button>
                                     </>
+                                )}
+
+                                {/* Fallback View Details if none of the specific statuses matched */}
+                                {!["ACTIVE", "UNUSED", "USED", "EXPIRED", "REVOKED"].includes(invite.status) && (
+                                    <button
+                                        type="button"
+                                        role="menuitem"
+                                        onClick={handleView}
+                                        className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-muted transition hover:bg-white/5 hover:text-foreground"
+                                    >
+                                        <Eye className="h-4 w-4 shrink-0 text-cyan-400" />
+                                        {t("admin.onboarding.viewDetails")}
+                                    </button>
                                 )}
                             </div>,
                             document.body,

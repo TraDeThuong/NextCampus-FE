@@ -17,6 +17,7 @@ Hệ thống thành phần giao diện nền tảng được chuẩn hóa theo q
 | **Table** | [`Table.tsx`](file:///d:/NodeJS/NexCampus/NexCampus-FE/components/ui/Table.tsx) | Bảng dữ liệu dạng Compound (`Header`, `Row`, `Body`, `Footer`). Hỗ trợ cố định tiêu đề (`sticky top-0`), thanh cuộn ngang mượt mà, empty state đa ngôn ngữ không hardcode, và spinner khi `isLoading={true}`. | ✅ Đầy đủ |
 | **Pagination** | [`Pagination.tsx`](file:///d:/NodeJS/NexCampus/NexCampus-FE/components/ui/Pagination.tsx) | Phân trang thông minh với dấu ba chấm (`...`), nút Prev/Next tự động vô hiệu hóa tại biên, hiển thị tổng số dòng, kích thước chuẩn `h-9 w-9`. | ✅ Đầy đủ |
 | **Select** | [`Select.tsx`](file:///d:/NodeJS/NexCampus/NexCampus-FE/components/ui/Select.tsx) | Menu thả xuống độc lập cho form. Giới hạn `max-h-60`, thanh cuộn `custom-scrollbar`, tự động tích hợp ô tìm kiếm khi danh sách dài (`searchable`), đóng khi click ngoài hoặc bấm `Escape`. | ✅ Đầy đủ |
+| **DatePicker** | [`DatePicker.tsx`](file:///d:/NodeJS/NexCampus/NexCampus-FE/components/ui/DatePicker.tsx) | Bộ chọn ngày (`DatePicker`) & khoảng ngày (`DateRangePicker`) Cyberpunk Glassmorphism. Popover portal ra `document.body` tự lật `flip`, lưới lịch 7 ngày, highlight dải ngày, hiệu ứng hover range preview, phím tắt nhanh (presets), định dạng `DD/MM/YYYY`, đồng bộ API `YYYY-MM-DD`. | ✅ Đầy đủ |
 | **FilterSelect** | [`FilterSelect.tsx`](file:///d:/NodeJS/NexCampus/NexCampus-FE/components/ui/FilterSelect.tsx) | Dropdown chọn bộ lọc gắn trực tiếp với URL query parameters. | ✅ Đầy đủ |
 | **InlineSelect** | [`InlineSelect.tsx`](file:///d:/NodeJS/NexCampus/NexCampus-FE/components/ui/InlineSelect.tsx) | Dropdown chỉnh sửa nhanh trạng thái trực tiếp trên từng hàng của Table. | ✅ Đầy đủ |
 | **SortSelect** | [`SortSelect.tsx`](file:///d:/NodeJS/NexCampus/NexCampus-FE/components/ui/SortSelect.tsx) | Dropdown chọn chiều và tiêu chí sắp xếp. | ✅ Đầy đủ |
@@ -40,15 +41,11 @@ Dưới đây là danh sách các thành phần hiện chưa có component độ
    - *Hiện trạng*: Các trang quản trị (Admin Settings, Policy, Stats) đang tự quản lý state `[activeTab, setActiveTab]` riêng lẻ với các nút bấm thủ công.
    - *Đề xuất*: Xây dựng bộ `Tabs`, `Tabs.List`, `Tabs.Trigger`, `Tabs.Content` đồng nhất hiệu ứng trượt highlight.
 
-3. **DatePicker (`DatePicker.tsx`)**:
-   - *Hiện trạng*: Đang dùng thẻ native `<input type="date" />`.
-   - *Đề xuất*: Xây dựng DatePicker Popover hỗ trợ định dạng chuẩn tiếng Việt `DD/MM/YYYY`, khóa chọn ngày quá khứ/thứ 7, CN theo nghiệp vụ.
-
-4. **Checkbox & Radio (`Checkbox.tsx`, `Radio.tsx`)**:
+3. **Checkbox & Radio (`Checkbox.tsx`, `Radio.tsx`)**:
    - *Hiện trạng*: Đang dùng thẻ native `<input type="checkbox" />` kèm `accent-primary-main`.
    - *Đề xuất*: Đóng gói component Checkbox và Radio có viền kính mờ, icon dấu tích/chấm tròn mạ bạc hoặc xanh Cyan chuẩn Glassmorphism.
 
-5. **Toast / Notification Banner (`Toast.tsx`)**:
+4. **Toast / Notification Banner (`Toast.tsx`)**:
    - *Hiện trạng*: Đang dùng `react-hot-toast` / `sonner` gọi trực tiếp trong logic hook.
    - *Đề xuất*: Tạo wrapper cấu hình toast mặc định mang phong cách nền tối bo góc đồng nhất với hệ thống card.
 

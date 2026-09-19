@@ -61,6 +61,7 @@
       "thisWeek": "Tuần này",
       "thisMonth": "Tháng này",
       "custom": "Tuỳ chọn",
+      "inviteStatus_UNUSED": "Chưa sử dụng",
       "inviteStatus_ACTIVE": "Đang hoạt động",
       "inviteStatus_USED": "Đã sử dụng",
       "inviteStatus_EXPIRED": "Đã hết hạn",
@@ -102,7 +103,16 @@
       "approving": "Đang duyệt...",
       "rejecting": "Đang từ chối...",
       "deleting": "Đang xoá...",
-      "actions": "Thao tác"
+      "actions": "Thao tác",
+      "assignmentTitle": "Phân công Tiếp nhận",
+      "applicantPreferences": "Nguyện vọng Ứng viên",
+      "officialAssignment": "Phân công Tiếp nhận Chính thức",
+      "noApplicationYet": "Chưa có Hồ sơ Ứng tuyển",
+      "noApplicationDescription": "Ứng viên chưa hoàn tất nộp đơn trực tuyến. Hãy gửi liên kết lời mời cho ứng viên để tiếp tục.",
+      "noAttachments": "Không có tài liệu đính kèm nào",
+      "inviteUrl": "Đường dẫn lời mời onboarding",
+      "viewFile": "Xem tệp",
+      "downloadFile": "Tải về"
     }
   },
   "onboarding": {
@@ -166,6 +176,7 @@
     "thisWeek": "Tuần này",
     "thisMonth": "Tháng này",
     "custom": "Tuỳ chọn",
+    "inviteStatus_UNUSED": "Chưa sử dụng",
     "inviteStatus_ACTIVE": "Đang hoạt động",
     "inviteStatus_USED": "Đã sử dụng",
     "inviteStatus_EXPIRED": "Đã hết hạn",
@@ -207,6 +218,15 @@
     "approving": "Đang duyệt...",
     "rejecting": "Đang từ chối...",
     "deleting": "Đang xoá...",
-    "actions": "Thao tác"
+    "actions": "Thao tác",
+    "assignmentTitle": "Phân công Tiếp nhận",
+    "applicantPreferences": "Nguyện vọng Ứng viên",
+    "officialAssignment": "Phân công Tiếp nhận Chính thức",
+    "noApplicationYet": "Chưa có Hồ sơ Ứng tuyển",
+    "noApplicationDescription": "Ứng viên chưa hoàn tất nộp đơn trực tuyến. Hãy gửi liên kết lời mời cho ứng viên để tiếp tục.",
+    "noAttachments": "Không có tài liệu đính kèm nào",
+    "inviteUrl": "Đường dẫn lời mời onboarding",
+    "viewFile": "Xem tệp",
+    "downloadFile": "Tải về"
   }
 }

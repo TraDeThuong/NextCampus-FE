@@ -11,7 +11,6 @@ import OnboardingStats from "./OnboardingStats";
 import OnboardingFilters from "./OnboardingFilters";
 import OnboardingTable from "./OnboardingTable";
 import ApplicationDetail from "./ApplicationDetailModal";
-import MetalCard from "@/components/ui/MetalCard";
 
 const ApplicationDetailOverlay = dynamic(
   () => import("./ApplicationDetailOverlay"),
@@ -31,15 +30,13 @@ export default function OnboardingPageContent() {
       <div className="space-y-6">
         <Link
           href="/admin/onboarding"
-          className="inline-flex items-center gap-2 text-sm text-muted transition-colors hover:text-foreground"
+          className="inline-flex items-center gap-2 text-sm font-medium text-muted hover:text-foreground transition-all py-2 px-3.5 rounded-xl border border-border/60 dark:border-white/10 bg-card/60 hover:bg-card active:scale-95 focus-visible:ring-2 focus-visible:ring-cyan-500/50"
         >
           <ArrowLeft className="h-4 w-4 shrink-0" />
           {t("admin.onboarding.backToOnboarding")}
         </Link>
 
-        <MetalCard className="p-6 sm:p-8">
-          <ApplicationDetail id={id} />
-        </MetalCard>
+        <ApplicationDetail id={id} />
       </div>
     );
   }

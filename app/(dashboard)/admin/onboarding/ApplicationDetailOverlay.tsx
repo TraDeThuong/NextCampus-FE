@@ -52,8 +52,8 @@ export default function ApplicationDetailOverlay({ id }: { id: string }) {
           <HiXMark className="h-6 w-6 shrink-0" />
         </button>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden pt-10 sm:pt-8 custom-scrollbar">
-          <ApplicationDetail id={id} />
+        <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden pt-8 sm:pt-6 custom-scrollbar">
+          <ApplicationDetail id={id} isModal onClose={() => router.back()} />
         </div>
       </div>
     </div>,
