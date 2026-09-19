@@ -1,12 +1,15 @@
 {
   "admin": {
     "emails": {
-      "metaTitle": "Cấu hình Email",
+      "metaTitle": "Cấu hình Email & Thông báo",
+      "headerTitle": "Quản lý Email & Thông báo",
+      "headerDesc": "Cấu hình mẫu sự kiện thông báo hệ thống và gửi thông báo trực tiếp qua Web & Email.",
       "title": "Tiêu đề",
       "descTemplates": "Cấu hình tiêu đề và nội dung cho từng sự kiện thông báo hệ thống.",
       "descSend": "Gửi thông báo và email tuỳ chỉnh trực tiếp đến người dùng.",
       "templateSettings": "Cài đặt Mẫu",
-      "sendCustom": "Gửi Thông báo Tuỳ chỉnh",
+      "sendCustom": "Gửi Tùy chỉnh",
+      "refreshData": "Làm mới dữ liệu",
       "loadError": "Tải mẫu thông báo thất bại.",
       "templates": "Mẫu thông báo",
       "savedIndicator": "Mẫu đã được lưu trong cơ sở dữ liệu",
@@ -19,17 +22,17 @@
       "emailSubject": "Tiêu đề Email",
       "emailBody": "Nội dung Email",
       "titlePlaceholder": "VD: Bạn đã được giao công việc mới",
-      "contentPlaceholder": "Nhập nội dung thông báo. Sử dụng {{variable}} cho giá trị động.",
-      "emailSubjectHint": "Nếu để trống, sẽ dùng Tiêu đề Thông báo Web.",
-      "emailBodyHint": "Nếu để trống, sẽ dùng Nội dung Thông báo Web.",
+      "contentPlaceholder": "Nhập nội dung thông báo. Sử dụng các biến bên dưới để chèn giá trị động.",
+      "emailSubjectHint": "Nếu để trống, sẽ tự động kế thừa từ Tiêu đề Thông báo Web.",
+      "emailBodyHint": "Nếu để trống, sẽ tự động kế thừa từ Nội dung Thông báo Web.",
       "availableVariables": "Biến khả dụng",
       "clickToInsert": "Nhấn để chèn vào vị trí con trỏ",
-      "livePreview": "Xem trước",
-      "sampleSubstituted": "Giá trị mẫu đã được thay thế",
+      "livePreview": "Xem trước thực tế",
+      "sampleSubstituted": "Giá trị mẫu đã được thay thế tự động",
       "subject": "Tiêu đề",
       "content": "Nội dung",
       "restoreDefault": "Khôi phục Mặc định",
-      "usingFallback": "Đang dùng mẫu mặc định — lưu để duy trì",
+      "usingFallback": "Đang dùng mẫu mặc định hệ thống — lưu để duy trì",
       "saveChanges": "Lưu Thay đổi",
       "missingVariables": "Thiếu biến bắt buộc trong mẫu {channel}: {vars}",
       "webTitleRequired": "Vui lòng nhập tiêu đề thông báo Web",
@@ -39,11 +42,11 @@
       "recipientEmail": "Email Người nhận",
       "emailPlaceholder": "VD: intern@nexcampus.vn",
       "foundUser": "Đã tìm thấy người dùng: {name} ({role})",
-      "userNotRegistered": "Người dùng chưa đăng ký. Không thể gửi thông báo Web. Vui lòng bỏ chọn kênh Web để chỉ gửi Email.",
-      "guestUser": "Ứng viên / Khách: Tin nhắn sẽ được gửi trực tiếp đến địa chỉ email này qua SMTP.",
-      "noUserFound": "Không tìm thấy người dùng với email này.",
+      "userNotRegistered": "Người dùng chưa có tài khoản trong hệ thống. Không thể gửi thông báo Web. Vui lòng bỏ chọn kênh Web để chỉ gửi qua Email.",
+      "guestUser": "Ứng viên / Khách ngoài hệ thống: Thông điệp sẽ được gửi trực tiếp đến hòm thư này qua SMTP.",
+      "noUserFound": "Không tìm thấy người dùng nào với địa chỉ email này.",
       "verifyEmailFailed": "Xác minh email thất bại.",
-      "prefillTemplate": "Điền sẵn từ Mẫu (Tuỳ chọn)",
+      "prefillTemplate": "Điền sẵn từ Mẫu có sẵn (Tuỳ chọn)",
       "selectTemplate": "-- Chọn Mẫu --",
       "dispatchChannels": "Kênh Gửi",
       "webNotification": "Thông báo Web",
@@ -51,26 +54,125 @@
       "webContent_tab": "Nội dung Web",
       "emailContent_tab": "Nội dung Email",
       "fallsBackWebTitle": "Kế thừa Tiêu đề Web",
-      "fallsBackWebContent": "Kế thừa Nội dung Web. Hỗ trợ thẻ HTML.",
+      "fallsBackWebContent": "Kế thừa Nội dung Web (hỗ trợ định dạng HTML)",
       "notifBody": "Nội dung Thông báo",
       "sendNotification": "Gửi Thông báo",
-      "actualPreview": "Xem trước nội dung thực tế",
+      "actualPreview": "Mô phỏng nội dung gửi thực tế",
       "validEmailRequired": "Vui lòng nhập địa chỉ email hợp lệ",
       "selectChannel": "Vui lòng chọn ít nhất một kênh gửi (Web hoặc Email)",
-      "registeredUserRequired": "Cần có tài khoản đã đăng ký để gửi thông báo Web.",
+      "registeredUserRequired": "Cần có tài khoản đã đăng ký trên hệ thống để gửi thông báo Web.",
       "webFieldsRequired": "Vui lòng nhập tiêu đề và nội dung thông báo Web.",
       "emailFieldsRequired": "Vui lòng nhập tiêu đề và nội dung email (hoặc điền vào mục Web để kế thừa).",
       "notifSent": "Đã gửi thông báo thành công!",
-      "notifFailed": "Gửi thông báo thất bại."
+      "notifFailed": "Gửi thông báo thất bại.",
+      "senderInfo": "Người gửi: NexCampus System <no-reply@nexcampus.vn>",
+      "justNow": "Vừa xong",
+      "webPreviewNotice": "Mô phỏng hiển thị trên thanh thông báo Web",
+      "emailPreviewNotice": "Mô phỏng hiển thị trên hộp thư Email",
+      "stats": {
+        "totalTemplates": "Tổng mẫu thông báo",
+        "savedInDb": "Đã lưu trong CSDL",
+        "systemDefaults": "Mặc định hệ thống",
+        "omnichannel": "Đa kênh Web & Email",
+        "loadError": "Không thể tải thống kê mẫu thông báo."
+      },
+      "catalog": {
+        "searchPlaceholder": "Tìm kiếm mẫu theo tên, mô tả hoặc mã...",
+        "allChannels": "Tất cả",
+        "webAndEmail": "Web & Email",
+        "emailOnly": "Chỉ Email",
+        "savedBadge": "Đã lưu CSDL",
+        "defaultBadge": "Mặc định",
+        "noResults": "Không tìm thấy mẫu thông báo phù hợp",
+        "TASK_ASSIGNMENT": {
+          "label": "Giao việc mới",
+          "description": "Gửi đến thực tập sinh khi được phân công một công việc mới"
+        },
+        "TASK_SUBMISSION": {
+          "label": "Nộp bài công việc",
+          "description": "Gửi đến leader khi thực tập sinh nộp bài công việc cần duyệt"
+        },
+        "SUBMISSION_REVIEW": {
+          "label": "Kết quả duyệt bài",
+          "description": "Gửi đến thực tập sinh khi bài nộp được đánh giá hoặc phản hồi"
+        },
+        "DAILY_REPORT": {
+          "label": "Báo cáo hàng ngày",
+          "description": "Gửi đến leader khi thực tập sinh nộp báo cáo công việc hàng ngày"
+        },
+        "WEEKLY_EVALUATION": {
+          "label": "Đánh giá tuần",
+          "description": "Gửi đến thực tập sinh khi bảng đánh giá tuần được công bố"
+        },
+        "TASK_REMINDER": {
+          "label": "Nhắc nhở hạn nộp",
+          "description": "Tự động nhắc nhở thực tập sinh trước khi công việc sắp đến hạn"
+        },
+        "EVALUATION_REMINDER": {
+          "label": "Nhắc nhở đánh giá",
+          "description": "Tự động nhắc nhở leader hoàn thành đánh giá thực tập sinh đúng hạn"
+        },
+        "APPLICATION_INVITE": {
+          "label": "Thư mời nộp đơn",
+          "description": "Gửi thư mời ứng viên truy cập liên kết bảo mật để điền thông tin đăng ký"
+        },
+        "APPLICATION_APPROVED": {
+          "label": "Phê duyệt đơn đăng ký",
+          "description": "Gửi thông báo phê duyệt kèm thông tin tài khoản đăng nhập hệ thống"
+        },
+        "APPLICATION_REJECTED": {
+          "label": "Từ chối đơn đăng ký",
+          "description": "Gửi thư thông báo kết quả chưa phù hợp đến ứng viên tuyển dụng"
+        },
+        "USER_CREATED": {
+          "label": "Tạo tài khoản mới",
+          "description": "Gửi thông tin đăng nhập khi tài khoản được quản trị viên khởi tạo"
+        },
+        "PASSWORD_RESET": {
+          "label": "Khôi phục mật khẩu",
+          "description": "Gửi liên kết đặt lại mật khẩu kèm thông tin thiết bị và vị trí yêu cầu"
+        },
+        "SECURITY_ALERT": {
+          "label": "Cảnh báo bảo mật",
+          "description": "Cảnh báo khi phát hiện lượt đăng nhập mới kèm nút khóa phiên ngay lập tức"
+        },
+        "MEETING_INVITATION": {
+          "label": "Thư mời họp",
+          "description": "Gửi lời mời tham gia cuộc họp đến các thành viên được chỉ định"
+        },
+        "MEETING_CREATED": {
+          "label": "Cuộc họp mới",
+          "description": "Thông báo đến người tham gia khi có lịch họp mới được tạo"
+        },
+        "MEETING_CANCELLED": {
+          "label": "Hủy cuộc họp",
+          "description": "Thông báo đến người tham gia khi một cuộc họp đã bị hủy"
+        },
+        "ABSENCE_SUBMITTED": {
+          "label": "Yêu cầu vắng mặt",
+          "description": "Thông báo đến leader / quản trị khi thực tập sinh báo vắng mặt"
+        },
+        "ABSENCE_REVIEWED": {
+          "label": "Duyệt yêu cầu vắng mặt",
+          "description": "Thông báo kết quả phê duyệt hoặc từ chối yêu cầu vắng mặt"
+        },
+        "TASK_ASSIGNMENT_REJECTED": {
+          "label": "Từ chối nhận việc",
+          "description": "Thông báo đến người giao khi yêu cầu phân công công việc bị từ chối"
+        }
+      }
     }
   },
   "emails": {
-    "metaTitle": "Cấu hình Email",
+    "metaTitle": "Cấu hình Email & Thông báo",
+    "headerTitle": "Quản lý Email & Thông báo",
+    "headerDesc": "Cấu hình mẫu sự kiện thông báo hệ thống và gửi thông báo trực tiếp qua Web & Email.",
     "title": "Tiêu đề",
     "descTemplates": "Cấu hình tiêu đề và nội dung cho từng sự kiện thông báo hệ thống.",
     "descSend": "Gửi thông báo và email tuỳ chỉnh trực tiếp đến người dùng.",
     "templateSettings": "Cài đặt Mẫu",
-    "sendCustom": "Gửi Thông báo Tuỳ chỉnh",
+    "sendCustom": "Gửi Tùy chỉnh",
+    "refreshData": "Làm mới dữ liệu",
     "loadError": "Tải mẫu thông báo thất bại.",
     "templates": "Mẫu thông báo",
     "savedIndicator": "Mẫu đã được lưu trong cơ sở dữ liệu",
@@ -83,17 +185,17 @@
     "emailSubject": "Tiêu đề Email",
     "emailBody": "Nội dung Email",
     "titlePlaceholder": "VD: Bạn đã được giao công việc mới",
-    "contentPlaceholder": "Nhập nội dung thông báo. Sử dụng {{variable}} cho giá trị động.",
-    "emailSubjectHint": "Nếu để trống, sẽ dùng Tiêu đề Thông báo Web.",
-    "emailBodyHint": "Nếu để trống, sẽ dùng Nội dung Thông báo Web.",
+    "contentPlaceholder": "Nhập nội dung thông báo. Sử dụng các biến bên dưới để chèn giá trị động.",
+    "emailSubjectHint": "Nếu để trống, sẽ tự động kế thừa từ Tiêu đề Thông báo Web.",
+    "emailBodyHint": "Nếu để trống, sẽ tự động kế thừa từ Nội dung Thông báo Web.",
     "availableVariables": "Biến khả dụng",
     "clickToInsert": "Nhấn để chèn vào vị trí con trỏ",
-    "livePreview": "Xem trước",
-    "sampleSubstituted": "Giá trị mẫu đã được thay thế",
+    "livePreview": "Xem trước thực tế",
+    "sampleSubstituted": "Giá trị mẫu đã được thay thế tự động",
     "subject": "Tiêu đề",
     "content": "Nội dung",
     "restoreDefault": "Khôi phục Mặc định",
-    "usingFallback": "Đang dùng mẫu mặc định — lưu để duy trì",
+    "usingFallback": "Đang dùng mẫu mặc định hệ thống — lưu để duy trì",
     "saveChanges": "Lưu Thay đổi",
     "missingVariables": "Thiếu biến bắt buộc trong mẫu {channel}: {vars}",
     "webTitleRequired": "Vui lòng nhập tiêu đề thông báo Web",
@@ -103,11 +205,11 @@
     "recipientEmail": "Email Người nhận",
     "emailPlaceholder": "VD: intern@nexcampus.vn",
     "foundUser": "Đã tìm thấy người dùng: {name} ({role})",
-    "userNotRegistered": "Người dùng chưa đăng ký. Không thể gửi thông báo Web. Vui lòng bỏ chọn kênh Web để chỉ gửi Email.",
-    "guestUser": "Ứng viên / Khách: Tin nhắn sẽ được gửi trực tiếp đến địa chỉ email này qua SMTP.",
-    "noUserFound": "Không tìm thấy người dùng với email này.",
+    "userNotRegistered": "Người dùng chưa có tài khoản trong hệ thống. Không thể gửi thông báo Web. Vui lòng bỏ chọn kênh Web để chỉ gửi qua Email.",
+    "guestUser": "Ứng viên / Khách ngoài hệ thống: Thông điệp sẽ được gửi trực tiếp đến hòm thư này qua SMTP.",
+    "noUserFound": "Không tìm thấy người dùng nào với địa chỉ email này.",
     "verifyEmailFailed": "Xác minh email thất bại.",
-    "prefillTemplate": "Điền sẵn từ Mẫu (Tuỳ chọn)",
+    "prefillTemplate": "Điền sẵn từ Mẫu có sẵn (Tuỳ chọn)",
     "selectTemplate": "-- Chọn Mẫu --",
     "dispatchChannels": "Kênh Gửi",
     "webNotification": "Thông báo Web",
@@ -115,16 +217,112 @@
     "webContent_tab": "Nội dung Web",
     "emailContent_tab": "Nội dung Email",
     "fallsBackWebTitle": "Kế thừa Tiêu đề Web",
-    "fallsBackWebContent": "Kế thừa Nội dung Web. Hỗ trợ thẻ HTML.",
+    "fallsBackWebContent": "Kế thừa Nội dung Web (hỗ trợ định dạng HTML)",
     "notifBody": "Nội dung Thông báo",
     "sendNotification": "Gửi Thông báo",
-    "actualPreview": "Xem trước nội dung thực tế",
+    "actualPreview": "Mô phỏng nội dung gửi thực tế",
     "validEmailRequired": "Vui lòng nhập địa chỉ email hợp lệ",
     "selectChannel": "Vui lòng chọn ít nhất một kênh gửi (Web hoặc Email)",
-    "registeredUserRequired": "Cần có tài khoản đã đăng ký để gửi thông báo Web.",
+    "registeredUserRequired": "Cần có tài khoản đã đăng ký trên hệ thống để gửi thông báo Web.",
     "webFieldsRequired": "Vui lòng nhập tiêu đề và nội dung thông báo Web.",
     "emailFieldsRequired": "Vui lòng nhập tiêu đề và nội dung email (hoặc điền vào mục Web để kế thừa).",
     "notifSent": "Đã gửi thông báo thành công!",
-    "notifFailed": "Gửi thông báo thất bại."
+    "notifFailed": "Gửi thông báo thất bại.",
+    "senderInfo": "Người gửi: NexCampus System <no-reply@nexcampus.vn>",
+    "justNow": "Vừa xong",
+    "webPreviewNotice": "Mô phỏng hiển thị trên thanh thông báo Web",
+    "emailPreviewNotice": "Mô phỏng hiển thị trên hộp thư Email",
+    "stats": {
+      "totalTemplates": "Tổng mẫu thông báo",
+      "savedInDb": "Đã lưu trong CSDL",
+      "systemDefaults": "Mặc định hệ thống",
+      "omnichannel": "Đa kênh Web & Email",
+      "loadError": "Không thể tải thống kê mẫu thông báo."
+    },
+    "catalog": {
+      "searchPlaceholder": "Tìm kiếm mẫu theo tên, mô tả hoặc mã...",
+      "allChannels": "Tất cả",
+      "webAndEmail": "Web & Email",
+      "emailOnly": "Chỉ Email",
+      "savedBadge": "Đã lưu CSDL",
+      "defaultBadge": "Mặc định",
+      "noResults": "Không tìm thấy mẫu thông báo phù hợp",
+      "TASK_ASSIGNMENT": {
+        "label": "Giao việc mới",
+        "description": "Gửi đến thực tập sinh khi được phân công một công việc mới"
+      },
+      "TASK_SUBMISSION": {
+        "label": "Nộp bài công việc",
+        "description": "Gửi đến leader khi thực tập sinh nộp bài công việc cần duyệt"
+      },
+      "SUBMISSION_REVIEW": {
+        "label": "Kết quả duyệt bài",
+        "description": "Gửi đến thực tập sinh khi bài nộp được đánh giá hoặc phản hồi"
+      },
+      "DAILY_REPORT": {
+        "label": "Báo cáo hàng ngày",
+        "description": "Gửi đến leader khi thực tập sinh nộp báo cáo công việc hàng ngày"
+      },
+      "WEEKLY_EVALUATION": {
+        "label": "Đánh giá tuần",
+        "description": "Gửi đến thực tập sinh khi bảng đánh giá tuần được công bố"
+      },
+      "TASK_REMINDER": {
+        "label": "Nhắc nhở hạn nộp",
+        "description": "Tự động nhắc nhở thực tập sinh trước khi công việc sắp đến hạn"
+      },
+      "EVALUATION_REMINDER": {
+        "label": "Nhắc nhở đánh giá",
+        "description": "Tự động nhắc nhở leader hoàn thành đánh giá thực tập sinh đúng hạn"
+      },
+      "APPLICATION_INVITE": {
+        "label": "Thư mời nộp đơn",
+        "description": "Gửi thư mời ứng viên truy cập liên kết bảo mật để điền thông tin đăng ký"
+      },
+      "APPLICATION_APPROVED": {
+        "label": "Phê duyệt đơn đăng ký",
+        "description": "Gửi thông báo phê duyệt kèm thông tin tài khoản đăng nhập hệ thống"
+      },
+      "APPLICATION_REJECTED": {
+        "label": "Từ chối đơn đăng ký",
+        "description": "Gửi thư thông báo kết quả chưa phù hợp đến ứng viên tuyển dụng"
+      },
+      "USER_CREATED": {
+        "label": "Tạo tài khoản mới",
+        "description": "Gửi thông tin đăng nhập khi tài khoản được quản trị viên khởi tạo"
+      },
+      "PASSWORD_RESET": {
+        "label": "Khôi phục mật khẩu",
+        "description": "Gửi liên kết đặt lại mật khẩu kèm thông tin thiết bị và vị trí yêu cầu"
+      },
+      "SECURITY_ALERT": {
+        "label": "Cảnh báo bảo mật",
+        "description": "Cảnh báo khi phát hiện lượt đăng nhập mới kèm nút khóa phiên ngay lập tức"
+      },
+      "MEETING_INVITATION": {
+        "label": "Thư mời họp",
+        "description": "Gửi lời mời tham gia cuộc họp đến các thành viên được chỉ định"
+      },
+      "MEETING_CREATED": {
+        "label": "Cuộc họp mới",
+        "description": "Thông báo đến người tham gia khi có lịch họp mới được tạo"
+      },
+      "MEETING_CANCELLED": {
+        "label": "Hủy cuộc họp",
+        "description": "Thông báo đến người tham gia khi một cuộc họp đã bị hủy"
+      },
+      "ABSENCE_SUBMITTED": {
+        "label": "Yêu cầu vắng mặt",
+        "description": "Thông báo đến leader / quản trị khi thực tập sinh báo vắng mặt"
+      },
+      "ABSENCE_REVIEWED": {
+        "label": "Duyệt yêu cầu vắng mặt",
+        "description": "Thông báo kết quả phê duyệt hoặc từ chối yêu cầu vắng mặt"
+      },
+      "TASK_ASSIGNMENT_REJECTED": {
+        "label": "Từ chối nhận việc",
+        "description": "Thông báo đến người giao khi yêu cầu phân công công việc bị từ chối"
+      }
+    }
   }
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState, useMemo } from "react";
 import {
   ClipboardList,
   Upload,
@@ -20,6 +21,10 @@ import {
   FileX,
   ClipboardCheck,
   XCircle,
+  Search,
+  X,
+  Globe,
+  Mail,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { NotificationTemplate } from "@/types/notificationTemplate";
@@ -338,43 +343,43 @@ const COLOR_MAP: Record<
     bg: "bg-cyan-500/10",
     text: "text-cyan-400",
     border: "border-cyan-400/30",
-    dot: "bg-cyan-400",
+    dot: "bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)]",
   },
   blue: {
     bg: "bg-blue-500/10",
     text: "text-blue-400",
     border: "border-blue-400/30",
-    dot: "bg-blue-400",
+    dot: "bg-blue-400 shadow-[0_0_8px_rgba(59,130,246,0.8)]",
   },
   emerald: {
     bg: "bg-emerald-500/10",
     text: "text-emerald-400",
     border: "border-emerald-400/30",
-    dot: "bg-emerald-400",
+    dot: "bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.8)]",
   },
   purple: {
     bg: "bg-purple-500/10",
     text: "text-purple-400",
     border: "border-purple-400/30",
-    dot: "bg-purple-400",
+    dot: "bg-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.8)]",
   },
   amber: {
     bg: "bg-amber-500/10",
     text: "text-amber-400",
     border: "border-amber-400/30",
-    dot: "bg-amber-400",
+    dot: "bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.8)]",
   },
   orange: {
     bg: "bg-orange-500/10",
     text: "text-orange-400",
     border: "border-orange-400/30",
-    dot: "bg-orange-400",
+    dot: "bg-orange-400 shadow-[0_0_8px_rgba(249,115,22,0.8)]",
   },
   rose: {
     bg: "bg-rose-500/10",
     text: "text-rose-400",
     border: "border-rose-400/30",
-    dot: "bg-rose-400",
+    dot: "bg-rose-400 shadow-[0_0_8px_rgba(244,63,94,0.8)]",
   },
 };
 
@@ -392,90 +397,258 @@ export default function TemplateSidebar({
   onSelect,
 }: Props) {
   const t = useTranslations();
-  const dbMap = new Map(dbTemplates.map((t) => [t.type, t]));
+  const [searchTerm, setSearchTerm] = useState("");
+  const [channelFilter, setChannelFilter] = useState<"all" | "webAndEmail" | "emailOnly">("all");
+
+  const dbMap = useMemo(
+    () => new Map(dbTemplates.map((item) => [item.type, item])),
+    [dbTemplates]
+  );
+
+  // Filter templates by channel and search query
+  const filteredTemplates = useMemo(() => {
+    return TEMPLATE_CATALOG.filter((item) => {
+      // 1. Channel Filter
+      if (channelFilter === "webAndEmail") {
+        const isOmni =
+          (item.channels as readonly string[]).includes("web") &&
+          (item.channels as readonly string[]).includes("email");
+        if (!isOmni) return false;
+      } else if (channelFilter === "emailOnly") {
+        const isEmailOnly =
+          !(item.channels as readonly string[]).includes("web") &&
+          (item.channels as readonly string[]).includes("email");
+        if (!isEmailOnly) return false;
+      }
+
+      // 2. Search Filter
+      if (!searchTerm.trim()) return true;
+
+      const q = searchTerm.toLowerCase().trim();
+      const labelVi = t.has(`admin.emails.catalog.${item.type}.label`)
+        ? t(`admin.emails.catalog.${item.type}.label`).toLowerCase()
+        : item.label.toLowerCase();
+      const descVi = t.has(`admin.emails.catalog.${item.type}.description`)
+        ? t(`admin.emails.catalog.${item.type}.description`).toLowerCase()
+        : item.description.toLowerCase();
+      const typeStr = item.type.toLowerCase();
+
+      return (
+        labelVi.includes(q) ||
+        descVi.includes(q) ||
+        typeStr.includes(q) ||
+        item.label.toLowerCase().includes(q)
+      );
+    });
+  }, [channelFilter, searchTerm, t]);
 
   return (
     <div
       className="
-        rounded-[28px]
-        border border-white/10
-        bg-[linear-gradient(145deg,#101827_0%,#1a2235_20%,#0f172a_55%,#050816_100%)]
-        shadow-[0_12px_40px_rgba(0,0,0,.45)]
+        rounded-3xl
+        border border-border
+        bg-card/90 dark:bg-[#0c1222]/90
+        shadow-[0_12px_40px_rgba(0,0,0,.35)]
+        backdrop-blur-xl
         overflow-hidden
         h-full
         flex flex-col
       "
     >
-      {/* Header */}
-      <div className="border-b border-white/10 px-4 py-3.5 shrink-0">
-        <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
-          {t("admin.emails.templates")}
-        </p>
+      {/* Header & Title */}
+      <div className="border-b border-border/80 px-4 py-3.5 shrink-0 bg-white/[0.02]">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-bold uppercase tracking-wider text-muted">
+            {t("admin.emails.templates")}
+          </p>
+          <span className="rounded-full bg-primary-main/10 text-primary-light px-2 py-0.5 text-[11px] font-semibold">
+            {filteredTemplates.length} / {TEMPLATE_CATALOG.length}
+          </span>
+        </div>
+
+        {/* Search Input */}
+        <div className="mt-3 relative">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder={t("admin.emails.catalog.searchPlaceholder")}
+            className="
+              w-full rounded-xl
+              bg-background/80 border border-border
+              px-9 py-2 text-xs text-foreground placeholder:text-muted/60
+              outline-none transition-all duration-200
+              focus:border-primary-light/50 focus:ring-1 focus:ring-primary-light/40
+            "
+          />
+          <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-muted pointer-events-none" />
+          {searchTerm && (
+            <button
+              type="button"
+              onClick={() => setSearchTerm("")}
+              className="absolute right-2.5 top-2.5 text-muted hover:text-foreground cursor-pointer p-0.5 rounded"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          )}
+        </div>
+
+        {/* Channel Filter Pills */}
+        <div className="mt-2.5 flex items-center gap-1 overflow-x-auto no-scrollbar pt-0.5">
+          <button
+            type="button"
+            onClick={() => setChannelFilter("all")}
+            className={`
+              rounded-lg px-2.5 py-1 text-[11px] font-semibold shrink-0 transition-all cursor-pointer
+              ${
+                channelFilter === "all"
+                  ? "bg-primary-main text-white shadow-sm"
+                  : "bg-white/5 text-muted hover:text-foreground hover:bg-white/10"
+              }
+            `}
+          >
+            {t("admin.emails.catalog.allChannels")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setChannelFilter("webAndEmail")}
+            className={`
+              flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold shrink-0 transition-all cursor-pointer
+              ${
+                channelFilter === "webAndEmail"
+                  ? "bg-primary-main text-white shadow-sm"
+                  : "bg-white/5 text-muted hover:text-foreground hover:bg-white/10"
+              }
+            `}
+          >
+            <Globe className="h-3 w-3" />
+            <span>{t("admin.emails.catalog.webAndEmail")}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setChannelFilter("emailOnly")}
+            className={`
+              flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold shrink-0 transition-all cursor-pointer
+              ${
+                channelFilter === "emailOnly"
+                  ? "bg-primary-main text-white shadow-sm"
+                  : "bg-white/5 text-muted hover:text-foreground hover:bg-white/10"
+              }
+            `}
+          >
+            <Mail className="h-3 w-3" />
+            <span>{t("admin.emails.catalog.emailOnly")}</span>
+          </button>
+        </div>
       </div>
 
       {/* List */}
-      <ul className="p-2 space-y-1 overflow-y-auto no-scrollbar flex-1">
-        {TEMPLATE_CATALOG.map((item) => {
-          const colors = COLOR_MAP[item.color];
-          const isSelected = selectedType === item.type;
-          const hasDbRecord = dbMap.has(item.type);
-          const Icon = item.icon;
+      <ul className="p-2 space-y-1 overflow-y-auto custom-scrollbar flex-1">
+        {filteredTemplates.length === 0 ? (
+          <li className="py-12 px-4 text-center">
+            <p className="text-xs text-muted">
+              {t("admin.emails.catalog.noResults")}
+            </p>
+          </li>
+        ) : (
+          filteredTemplates.map((item) => {
+            const colors = COLOR_MAP[item.color];
+            const isSelected = selectedType === item.type;
+            const hasDbRecord = dbMap.has(item.type);
+            const Icon = item.icon;
 
-          return (
-            <li key={item.type}>
-              <button
-                type="button"
-                onClick={() => onSelect(item.type)}
-                className={`
-                  w-full flex items-start gap-3 rounded-2xl px-3 py-3
-                  text-left transition-all duration-200
-                  ${
-                    isSelected
-                      ? `border ${colors.border} ${colors.bg}`
-                      : "border border-transparent hover:bg-white/5"
-                  }
-                `}
-              >
-                {/* Icon */}
-                <div
+            const label = t.has(`admin.emails.catalog.${item.type}.label`)
+              ? t(`admin.emails.catalog.${item.type}.label`)
+              : item.label;
+
+            const description = t.has(
+              `admin.emails.catalog.${item.type}.description`
+            )
+              ? t(`admin.emails.catalog.${item.type}.description`)
+              : item.description;
+
+            const hasWeb = (item.channels as readonly string[]).includes("web");
+            const hasEmail = (item.channels as readonly string[]).includes("email");
+
+            return (
+              <li key={item.type}>
+                <button
+                  type="button"
+                  onClick={() => onSelect(item.type)}
                   className={`
-                    mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl
-                    ${isSelected ? `${colors.bg} ${colors.text}` : "bg-white/5 text-slate-400"}
+                    w-full flex items-start gap-3 rounded-2xl px-3 py-3
+                    text-left transition-all duration-200 cursor-pointer
+                    active:scale-[0.99]
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-light
+                    ${
+                      isSelected
+                        ? `border ${colors.border} ${colors.bg} shadow-[0_0_20px_rgba(0,0,0,0.2)]`
+                        : "border border-transparent hover:bg-white/5"
+                    }
                   `}
                 >
-                  <Icon className="h-4 w-4" />
-                </div>
-
-                {/* Text */}
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`text-sm font-semibold truncate ${isSelected ? "text-white" : "text-slate-300"}`}
-                    >
-                      {item.label}
-                    </span>
-                    {/* Saved indicator */}
-                    {hasDbRecord && (
-                      <span
-                        className={`h-1.5 w-1.5 shrink-0 rounded-full ${colors.dot}`}
-                        title={t("admin.emails.savedIndicator")}
-                      />
-                    )}
+                  {/* Icon */}
+                  <div
+                    className={`
+                      mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-all duration-300
+                      ${
+                        isSelected
+                          ? `${colors.bg} ${colors.text} shadow-sm scale-105`
+                          : "bg-white/5 text-muted hover:text-foreground"
+                      }
+                    `}
+                  >
+                    <Icon className="h-4 w-4" />
                   </div>
-                  <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">
-                    {item.description}
-                  </p>
-                </div>
-              </button>
-            </li>
-          );
-        })}
+
+                  {/* Text */}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-1.5">
+                      <span
+                        className={`text-sm font-semibold truncate ${
+                          isSelected ? "text-foreground font-bold" : "text-foreground/80"
+                        }`}
+                        title={label}
+                      >
+                        {label}
+                      </span>
+
+                      {/* Saved indicator or Channel icon */}
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {hasDbRecord && (
+                          <span
+                            className={`h-2 w-2 shrink-0 rounded-full ${colors.dot}`}
+                            title={t("admin.emails.savedIndicator")}
+                          />
+                        )}
+                        <span className="flex items-center gap-0.5 text-[10px] text-muted">
+                          {hasWeb && <Globe className="h-3 w-3" />}
+                          {hasEmail && <Mail className="h-3 w-3" />}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted mt-0.5 line-clamp-2 leading-relaxed">
+                      {description}
+                    </p>
+                  </div>
+                </button>
+              </li>
+            );
+          })
+        )}
       </ul>
 
       {/* Footer legend */}
-      <div className="border-t border-white/5 px-4 py-3 flex items-center gap-2 shrink-0">
-        <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
-        <p className="text-xs text-slate-600">{t("admin.emails.dotSaved")}</p>
+      <div className="border-t border-border/80 px-4 py-3 flex items-center justify-between shrink-0 bg-white/[0.01]">
+        <div className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
+          <p className="text-[11px] text-muted font-medium">
+            {t("admin.emails.dotSaved")}
+          </p>
+        </div>
+        <span className="text-[10px] text-muted font-mono uppercase">
+          {selectedType}
+        </span>
       </div>
     </div>
   );

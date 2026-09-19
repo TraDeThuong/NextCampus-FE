@@ -1,12 +1,15 @@
 {
   "admin": {
     "emails": {
-      "metaTitle": "Email Configuration",
+      "metaTitle": "Email & Notification Configuration",
+      "headerTitle": "Email & Notification Management",
+      "headerDesc": "Configure system event notification templates and dispatch custom messages via Web & Email.",
       "title": "Title",
       "descTemplates": "Configure the title and content for each system notification event.",
       "descSend": "Send direct custom notifications and emails to company users.",
       "templateSettings": "Template Settings",
-      "sendCustom": "Send Custom Notification",
+      "sendCustom": "Send Custom",
+      "refreshData": "Refresh data",
       "loadError": "Failed to load notification templates.",
       "templates": "Templates",
       "savedIndicator": "Template saved in database",
@@ -18,18 +21,18 @@
       "notifContent": "Notification Content",
       "emailSubject": "Email Subject",
       "emailBody": "Email Body",
-      "titlePlaceholder": "e.g., New task assigned",
-      "contentPlaceholder": "Write the notification body. Use {{variable}} for dynamic values.",
-      "emailSubjectHint": "If empty, falls back to the Web Notification Title.",
-      "emailBodyHint": "If empty, falls back to the Web Notification Content.",
+      "titlePlaceholder": "e.g., You have been assigned a new task",
+      "contentPlaceholder": "Write the notification body. Use the available variables below for dynamic values.",
+      "emailSubjectHint": "If empty, automatically inherits from Web Notification Title.",
+      "emailBodyHint": "If empty, automatically inherits from Web Notification Content.",
       "availableVariables": "Available Variables",
-      "clickToInsert": "Click to insert at cursor",
+      "clickToInsert": "Click to insert at cursor position",
       "livePreview": "Live Preview",
-      "sampleSubstituted": "Sample values substituted",
+      "sampleSubstituted": "Sample values substituted automatically",
       "subject": "Subject",
       "content": "Content",
       "restoreDefault": "Restore Default",
-      "usingFallback": "Using dispatcher fallback — save to persist",
+      "usingFallback": "Using system default template — save to persist in database",
       "saveChanges": "Save Changes",
       "missingVariables": "Missing required variables in {channel} template: {vars}",
       "webTitleRequired": "Web notification title is required",
@@ -39,10 +42,10 @@
       "recipientEmail": "Recipient Email",
       "emailPlaceholder": "e.g., intern@nexcampus.vn",
       "foundUser": "Found Registered User: {name} ({role})",
-      "userNotRegistered": "User not registered. Cannot send Web notification. Please uncheck Web channel to send Email only.",
-      "guestUser": "Onboarding Candidate / Guest: Message will be sent directly to this email address via SMTP.",
-      "noUserFound": "No user found with this email in database.",
-      "verifyEmailFailed": "Failed to verify email.",
+      "userNotRegistered": "User not registered in database. Cannot dispatch Web notification. Please uncheck Web channel to send Email only.",
+      "guestUser": "Onboarding Candidate / Guest: Message will be dispatched directly to this email address via SMTP.",
+      "noUserFound": "No user found with this email address.",
+      "verifyEmailFailed": "Failed to verify email address.",
       "prefillTemplate": "Pre-fill from Template (Optional)",
       "selectTemplate": "-- Select Template --",
       "dispatchChannels": "Dispatch Channels",
@@ -51,26 +54,125 @@
       "webContent_tab": "Web Content",
       "emailContent_tab": "Email Content",
       "fallsBackWebTitle": "Falls back to Web Title",
-      "fallsBackWebContent": "Falls back to Web Content. HTML tags supported.",
+      "fallsBackWebContent": "Falls back to Web Content (HTML formatting supported)",
       "notifBody": "Notification Body",
       "sendNotification": "Send Notification",
-      "actualPreview": "Actual text dispatch preview",
+      "actualPreview": "Simulated actual dispatch preview",
       "validEmailRequired": "Please enter a valid email address",
       "selectChannel": "Please select at least one dispatch channel (Web or Email)",
-      "registeredUserRequired": "A registered user account is required to send Web notifications.",
+      "registeredUserRequired": "A registered user account is required to dispatch Web notifications.",
       "webFieldsRequired": "Web notification title and content are required.",
       "emailFieldsRequired": "Email subject and content are required (or Web fields must be filled to inherit).",
       "notifSent": "Notification dispatched successfully!",
-      "notifFailed": "Failed to dispatch notification."
+      "notifFailed": "Failed to dispatch notification.",
+      "senderInfo": "From: NexCampus System <no-reply@nexcampus.vn>",
+      "justNow": "Just now",
+      "webPreviewNotice": "Simulated preview on Web notification tray",
+      "emailPreviewNotice": "Simulated preview in Email inbox",
+      "stats": {
+        "totalTemplates": "Total Templates",
+        "savedInDb": "Saved in Database",
+        "systemDefaults": "System Defaults",
+        "omnichannel": "Web & Email Channels",
+        "loadError": "Failed to load notification template statistics."
+      },
+      "catalog": {
+        "searchPlaceholder": "Search templates by name, description or type...",
+        "allChannels": "All",
+        "webAndEmail": "Web & Email",
+        "emailOnly": "Email Only",
+        "savedBadge": "Saved in DB",
+        "defaultBadge": "Default",
+        "noResults": "No matching notification templates found",
+        "TASK_ASSIGNMENT": {
+          "label": "Task Assigned",
+          "description": "Sent when a task is assigned to an intern"
+        },
+        "TASK_SUBMISSION": {
+          "label": "Task Submitted",
+          "description": "Sent to leader when an intern submits a task for review"
+        },
+        "SUBMISSION_REVIEW": {
+          "label": "Submission Reviewed",
+          "description": "Sent to intern when their submission is evaluated or commented on"
+        },
+        "DAILY_REPORT": {
+          "label": "Daily Report",
+          "description": "Sent to leader when an intern submits their daily report"
+        },
+        "WEEKLY_EVALUATION": {
+          "label": "Weekly Evaluation",
+          "description": "Sent to intern when weekly 12-criteria evaluation is published"
+        },
+        "TASK_REMINDER": {
+          "label": "Task Reminder",
+          "description": "Automated reminder sent to intern before task deadline"
+        },
+        "EVALUATION_REMINDER": {
+          "label": "Evaluation Reminder",
+          "description": "Automated reminder for leaders to complete intern evaluations"
+        },
+        "APPLICATION_INVITE": {
+          "label": "Onboarding Invitation",
+          "description": "Sent when inviting candidate to submit onboarding policies via secure link"
+        },
+        "APPLICATION_APPROVED": {
+          "label": "Onboarding Approved",
+          "description": "Sent when onboarding registration is approved with login credentials"
+        },
+        "APPLICATION_REJECTED": {
+          "label": "Onboarding Rejected",
+          "description": "Sent when candidate onboarding registration is rejected"
+        },
+        "USER_CREATED": {
+          "label": "Account Created",
+          "description": "Sent when a new user account is created by an administrator"
+        },
+        "PASSWORD_RESET": {
+          "label": "Password Reset Request",
+          "description": "Sent when a user requests password reset with device and IP security info"
+        },
+        "SECURITY_ALERT": {
+          "label": "Security Login Alert",
+          "description": "Sent when new login is detected with revoke session button"
+        },
+        "MEETING_INVITATION": {
+          "label": "Meeting Invitation",
+          "description": "Sent to attendees when they are invited to a meeting"
+        },
+        "MEETING_CREATED": {
+          "label": "Meeting Created",
+          "description": "Sent to attendees when a new meeting is scheduled"
+        },
+        "MEETING_CANCELLED": {
+          "label": "Meeting Cancelled",
+          "description": "Sent to attendees when a scheduled meeting is cancelled"
+        },
+        "ABSENCE_SUBMITTED": {
+          "label": "Absence Submitted",
+          "description": "Sent to leader/admin when an intern requests meeting absence"
+        },
+        "ABSENCE_REVIEWED": {
+          "label": "Absence Reviewed",
+          "description": "Sent to intern when their absence request is approved or rejected"
+        },
+        "TASK_ASSIGNMENT_REJECTED": {
+          "label": "Task Assignment Rejected",
+          "description": "Sent to assigner when a task assignment is rejected by a leader"
+        }
+      }
     }
   },
   "emails": {
-    "metaTitle": "Email Configuration",
+    "metaTitle": "Email & Notification Configuration",
+    "headerTitle": "Email & Notification Management",
+    "headerDesc": "Configure system event notification templates and dispatch custom messages via Web & Email.",
     "title": "Title",
     "descTemplates": "Configure the title and content for each system notification event.",
     "descSend": "Send direct custom notifications and emails to company users.",
     "templateSettings": "Template Settings",
-    "sendCustom": "Send Custom Notification",
+    "sendCustom": "Send Custom",
+    "refreshData": "Refresh data",
     "loadError": "Failed to load notification templates.",
     "templates": "Templates",
     "savedIndicator": "Template saved in database",
@@ -82,18 +184,18 @@
     "notifContent": "Notification Content",
     "emailSubject": "Email Subject",
     "emailBody": "Email Body",
-    "titlePlaceholder": "e.g., New task assigned",
-    "contentPlaceholder": "Write the notification body. Use {{variable}} for dynamic values.",
-    "emailSubjectHint": "If empty, falls back to the Web Notification Title.",
-    "emailBodyHint": "If empty, falls back to the Web Notification Content.",
+    "titlePlaceholder": "e.g., You have been assigned a new task",
+    "contentPlaceholder": "Write the notification body. Use the available variables below for dynamic values.",
+    "emailSubjectHint": "If empty, automatically inherits from Web Notification Title.",
+    "emailBodyHint": "If empty, automatically inherits from Web Notification Content.",
     "availableVariables": "Available Variables",
-    "clickToInsert": "Click to insert at cursor",
+    "clickToInsert": "Click to insert at cursor position",
     "livePreview": "Live Preview",
-    "sampleSubstituted": "Sample values substituted",
+    "sampleSubstituted": "Sample values substituted automatically",
     "subject": "Subject",
     "content": "Content",
     "restoreDefault": "Restore Default",
-    "usingFallback": "Using dispatcher fallback — save to persist",
+    "usingFallback": "Using system default template — save to persist in database",
     "saveChanges": "Save Changes",
     "missingVariables": "Missing required variables in {channel} template: {vars}",
     "webTitleRequired": "Web notification title is required",
@@ -103,10 +205,10 @@
     "recipientEmail": "Recipient Email",
     "emailPlaceholder": "e.g., intern@nexcampus.vn",
     "foundUser": "Found Registered User: {name} ({role})",
-    "userNotRegistered": "User not registered. Cannot send Web notification. Please uncheck Web channel to send Email only.",
-    "guestUser": "Onboarding Candidate / Guest: Message will be sent directly to this email address via SMTP.",
-    "noUserFound": "No user found with this email in database.",
-    "verifyEmailFailed": "Failed to verify email.",
+    "userNotRegistered": "User not registered in database. Cannot dispatch Web notification. Please uncheck Web channel to send Email only.",
+    "guestUser": "Onboarding Candidate / Guest: Message will be dispatched directly to this email address via SMTP.",
+    "noUserFound": "No user found with this email address.",
+    "verifyEmailFailed": "Failed to verify email address.",
     "prefillTemplate": "Pre-fill from Template (Optional)",
     "selectTemplate": "-- Select Template --",
     "dispatchChannels": "Dispatch Channels",
@@ -115,16 +217,112 @@
     "webContent_tab": "Web Content",
     "emailContent_tab": "Email Content",
     "fallsBackWebTitle": "Falls back to Web Title",
-    "fallsBackWebContent": "Falls back to Web Content. HTML tags supported.",
+    "fallsBackWebContent": "Falls back to Web Content (HTML formatting supported)",
     "notifBody": "Notification Body",
     "sendNotification": "Send Notification",
-    "actualPreview": "Actual text dispatch preview",
+    "actualPreview": "Simulated actual dispatch preview",
     "validEmailRequired": "Please enter a valid email address",
     "selectChannel": "Please select at least one dispatch channel (Web or Email)",
-    "registeredUserRequired": "A registered user account is required to send Web notifications.",
+    "registeredUserRequired": "A registered user account is required to dispatch Web notifications.",
     "webFieldsRequired": "Web notification title and content are required.",
     "emailFieldsRequired": "Email subject and content are required (or Web fields must be filled to inherit).",
     "notifSent": "Notification dispatched successfully!",
-    "notifFailed": "Failed to dispatch notification."
+    "notifFailed": "Failed to dispatch notification.",
+    "senderInfo": "From: NexCampus System <no-reply@nexcampus.vn>",
+    "justNow": "Just now",
+    "webPreviewNotice": "Simulated preview on Web notification tray",
+    "emailPreviewNotice": "Simulated preview in Email inbox",
+    "stats": {
+      "totalTemplates": "Total Templates",
+      "savedInDb": "Saved in Database",
+      "systemDefaults": "System Defaults",
+      "omnichannel": "Web & Email Channels",
+      "loadError": "Failed to load notification template statistics."
+    },
+    "catalog": {
+      "searchPlaceholder": "Search templates by name, description or type...",
+      "allChannels": "All",
+      "webAndEmail": "Web & Email",
+      "emailOnly": "Email Only",
+      "savedBadge": "Saved in DB",
+      "defaultBadge": "Default",
+      "noResults": "No matching notification templates found",
+      "TASK_ASSIGNMENT": {
+        "label": "Task Assigned",
+        "description": "Sent when a task is assigned to an intern"
+      },
+      "TASK_SUBMISSION": {
+        "label": "Task Submitted",
+        "description": "Sent to leader when an intern submits a task for review"
+      },
+      "SUBMISSION_REVIEW": {
+        "label": "Submission Reviewed",
+        "description": "Sent to intern when their submission is evaluated or commented on"
+      },
+      "DAILY_REPORT": {
+        "label": "Daily Report",
+        "description": "Sent to leader when an intern submits their daily report"
+      },
+      "WEEKLY_EVALUATION": {
+        "label": "Weekly Evaluation",
+        "description": "Sent to intern when weekly 12-criteria evaluation is published"
+      },
+      "TASK_REMINDER": {
+        "label": "Task Reminder",
+        "description": "Automated reminder sent to intern before task deadline"
+      },
+      "EVALUATION_REMINDER": {
+        "label": "Evaluation Reminder",
+        "description": "Automated reminder for leaders to complete intern evaluations"
+      },
+      "APPLICATION_INVITE": {
+        "label": "Onboarding Invitation",
+        "description": "Sent when inviting candidate to submit onboarding policies via secure link"
+      },
+      "APPLICATION_APPROVED": {
+        "label": "Onboarding Approved",
+        "description": "Sent when onboarding registration is approved with login credentials"
+      },
+      "APPLICATION_REJECTED": {
+        "label": "Onboarding Rejected",
+        "description": "Sent when candidate onboarding registration is rejected"
+      },
+      "USER_CREATED": {
+        "label": "Account Created",
+        "description": "Sent when a new user account is created by an administrator"
+      },
+      "PASSWORD_RESET": {
+        "label": "Password Reset Request",
+        "description": "Sent when a user requests password reset with device and IP security info"
+      },
+      "SECURITY_ALERT": {
+        "label": "Security Login Alert",
+        "description": "Sent when new login is detected with revoke session button"
+      },
+      "MEETING_INVITATION": {
+        "label": "Meeting Invitation",
+        "description": "Sent to attendees when they are invited to a meeting"
+      },
+      "MEETING_CREATED": {
+        "label": "Meeting Created",
+        "description": "Sent to attendees when a new meeting is scheduled"
+      },
+      "MEETING_CANCELLED": {
+        "label": "Meeting Cancelled",
+        "description": "Sent to attendees when a scheduled meeting is cancelled"
+      },
+      "ABSENCE_SUBMITTED": {
+        "label": "Absence Submitted",
+        "description": "Sent to leader/admin when an intern requests meeting absence"
+      },
+      "ABSENCE_REVIEWED": {
+        "label": "Absence Reviewed",
+        "description": "Sent to intern when their absence request is approved or rejected"
+      },
+      "TASK_ASSIGNMENT_REJECTED": {
+        "label": "Task Assignment Rejected",
+        "description": "Sent to assigner when a task assignment is rejected by a leader"
+      }
+    }
   }
 }

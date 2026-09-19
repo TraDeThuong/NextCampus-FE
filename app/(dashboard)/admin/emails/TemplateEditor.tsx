@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -9,18 +9,19 @@ import {
   Mail,
   Save,
   RotateCcw,
-  Loader2,
   Eye,
   Info,
+  Bell,
+  AlertCircle,
 } from "lucide-react";
 import type { NotificationTemplate } from "@/types/notificationTemplate";
 import { useUpsertNotificationTemplate } from "@/hooks/notificationTemplate/useUpsertNotificationTemplate";
 import { useResetNotificationTemplate } from "@/hooks/notificationTemplate/useResetNotificationTemplate";
-import Button from "@/components/ui/Button";
 import { TEMPLATE_CATALOG } from "./TemplateSidebar";
 import DOMPurify from "isomorphic-dompurify";
 import { toast } from "react-hot-toast";
 import { useTranslations } from "next-intl";
+import Spinner from "@/components/ui/Spinner";
 
 // ─── Types ────────────────────────────────────────────────────────────────
 
@@ -60,24 +61,36 @@ const SAMPLE_VALUES: Record<string, string> = {
   os: "Windows 11",
   browser: "Google Chrome",
   revokeUrl: "https://nexcampus.vn/security-alert?token=sample-revoke-token-123",
+  meetingTitle: "Sprint Planning Q3",
+  startTime: "26/07/2026 09:00",
+  creatorName: "Lê Văn C (Leader)",
+  userName: "Nguyễn Văn A",
+  reason: "Trùng lịch bảo vệ đồ án tốt nghiệp",
+  status: "APPROVED",
 };
 
 function interpolatePreview(template: string): string {
   let processed = template;
 
   // 1. Replace variables inside href="..." or href='...' raw, to avoid breaking HTML syntax
-  processed = processed.replace(/(href=["'])(.*?)(["'])/gi, (match: string, prefix: string, content: string, suffix: string) => {
-    const cleanContent = content.replace(/\{\{(\w+)\}\}/g, (_: string, key: string) => {
-      return (SAMPLE_VALUES as Record<string, string>)[key] !== undefined ? (SAMPLE_VALUES as Record<string, string>)[key] : "#";
-    });
-    return prefix + cleanContent + suffix;
-  });
+  processed = processed.replace(
+    /(href=["'])(.*?)(["'])/gi,
+    (_match: string, prefix: string, content: string, suffix: string) => {
+      const cleanContent = content.replace(
+        /\{\{(\w+)\}\}/g,
+        (__: string, key: string) => {
+          return SAMPLE_VALUES[key] !== undefined ? SAMPLE_VALUES[key] : "#";
+        }
+      );
+      return prefix + cleanContent + suffix;
+    }
+  );
 
   // 2. Wrap remaining variables outside href attributes with styled <mark> tags
   processed = processed.replace(/\{\{(\w+)\}\}/g, (_: string, key: string) => {
-    return (SAMPLE_VALUES as Record<string, string>)[key] !== undefined
-      ? `<mark class="bg-cyan-500/20 text-cyan-300 rounded px-0.5 font-mono">${(SAMPLE_VALUES as Record<string, string>)[key]}</mark>`
-      : `<span class="text-red-400 font-mono">{{${key}}}</span>`;
+    return SAMPLE_VALUES[key] !== undefined
+      ? `<mark class="bg-cyan-500/20 text-cyan-300 rounded px-1 py-0.5 font-mono text-xs font-semibold">${SAMPLE_VALUES[key]}</mark>`
+      : `<span class="text-rose-400 font-mono text-xs">{{${key}}}</span>`;
   });
 
   return processed;
@@ -85,10 +98,17 @@ function interpolatePreview(template: string): string {
 
 // ─── Sub-components ───────────────────────────────────────────────────────
 
-function FieldLabel({ children }: { children: React.ReactNode }) {
+function FieldLabel({
+  children,
+  required,
+}: {
+  children: React.ReactNode;
+  required?: boolean;
+}) {
   return (
-    <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+    <label className="text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center gap-1">
       {children}
+      {required && <span className="text-danger font-bold">*</span>}
     </label>
   );
 }
@@ -107,10 +127,19 @@ function VariableChips({
           key={v}
           type="button"
           onClick={() => onInsert(v)}
-          className="rounded-lg border border-cyan-400/20 bg-cyan-500/10 px-2.5 py-1 font-mono text-xs text-cyan-300 transition hover:border-cyan-400/40 hover:bg-cyan-500/20 active:scale-95"
-          title={`Insert {{${v}}}`}
+          className="
+            group flex items-center gap-1
+            rounded-lg sm:rounded-xl border border-cyan-400/25
+            bg-cyan-500/10 px-2.5 py-1.5
+            font-mono text-xs font-medium text-cyan-300
+            transition-all duration-200 cursor-pointer
+            hover:scale-105 hover:border-cyan-400/50 hover:bg-cyan-500/20 hover:text-cyan-200
+            active:scale-95
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400
+          "
+          title={`Nhấn để chèn {{${v}}}`}
         >
-          {"{{" + v + "}}"}
+          <span>{"{{" + v + "}}"}</span>
         </button>
       ))}
     </div>
@@ -141,20 +170,36 @@ function TemplateEditorInner({
 
   const [channel, setChannel] = useState<Channel>("web");
 
+  // Localized label and description
+  const label = t.has(`admin.emails.catalog.${type}.label`)
+    ? t(`admin.emails.catalog.${type}.label`)
+    : meta.label;
+
+  const description = t.has(`admin.emails.catalog.${type}.description`)
+    ? t(`admin.emails.catalog.${type}.description`)
+    : meta.description;
+
   // Helper to determine effective email content (fallback to catalog if old DB template lacks new variables)
-  const getEffectiveEmailContent = (t: NotificationTemplate | null, m: typeof meta) => {
-    if (!t?.emailContentTemplate) return m.defaults.emailContentTemplate ?? "";
-    if (t.type === "PASSWORD_RESET" && !t.emailContentTemplate.includes("{{ip}}")) {
+  const getEffectiveEmailContent = (
+    tmpl: NotificationTemplate | null,
+    m: typeof meta
+  ) => {
+    if (!tmpl?.emailContentTemplate) return m.defaults.emailContentTemplate ?? "";
+    if (
+      tmpl.type === "PASSWORD_RESET" &&
+      !tmpl.emailContentTemplate.includes("{{ip}}")
+    ) {
       return m.defaults.emailContentTemplate ?? "";
     }
-    return t.emailContentTemplate;
+    return tmpl.emailContentTemplate;
   };
 
   // Effective defaults: DB record values, else catalog defaults
   const defaults = {
     webTitle: template?.titleTemplate ?? meta?.defaults.titleTemplate ?? "",
     webContent: template?.contentTemplate ?? meta?.defaults.contentTemplate ?? "",
-    emailSubject: template?.emailSubjectTemplate ?? meta?.defaults.emailSubjectTemplate ?? "",
+    emailSubject:
+      template?.emailSubjectTemplate ?? meta?.defaults.emailSubjectTemplate ?? "",
     emailContent: getEffectiveEmailContent(template, meta),
   };
 
@@ -163,6 +208,7 @@ function TemplateEditorInner({
     handleSubmit,
     watch,
     setValue,
+    getValues,
     reset: resetForm,
     formState: { errors, isDirty },
   } = useForm<FormValues>({
@@ -182,7 +228,8 @@ function TemplateEditorInner({
     resetForm({
       webTitle: template?.titleTemplate ?? meta?.defaults.titleTemplate ?? "",
       webContent: template?.contentTemplate ?? meta?.defaults.contentTemplate ?? "",
-      emailSubject: template?.emailSubjectTemplate ?? meta?.defaults.emailSubjectTemplate ?? "",
+      emailSubject:
+        template?.emailSubjectTemplate ?? meta?.defaults.emailSubjectTemplate ?? "",
       emailContent: getEffectiveEmailContent(template, meta),
     });
   }, [type, template, meta, resetForm]);
@@ -205,8 +252,10 @@ function TemplateEditorInner({
   // Destructure RHF refs so we can merge them with our DOM refs
   const { ref: webTitleRhfRef, ...webTitleRest } = register("webTitle");
   const { ref: webContentRhfRef, ...webContentRest } = register("webContent");
-  const { ref: emailSubjectRhfRef, ...emailSubjectRest } = register("emailSubject");
-  const { ref: emailContentRhfRef, ...emailContentRest } = register("emailContent");
+  const { ref: emailSubjectRhfRef, ...emailSubjectRest } =
+    register("emailSubject");
+  const { ref: emailContentRhfRef, ...emailContentRest } =
+    register("emailContent");
 
   function insertVariable(varName: string) {
     const field = lastFocusedRef.current;
@@ -225,7 +274,7 @@ function TemplateEditorInner({
 
     const start = el.selectionStart ?? 0;
     const end = el.selectionEnd ?? 0;
-    const current = (watch(field) as string) ?? "";
+    const current = (getValues(field) as string) ?? "";
     const newValue =
       current.substring(0, start) + token + current.substring(end);
 
@@ -241,7 +290,11 @@ function TemplateEditorInner({
     if (!meta) return;
 
     // Helper to check missing variables in title/content
-    const checkChannelVariables = (titleStr: string = "", contentStr: string = "", channelName: string) => {
+    const checkChannelVariables = (
+      titleStr: string = "",
+      contentStr: string = "",
+      channelName: string
+    ) => {
       const combined = `${titleStr} ${contentStr}`;
       const missing: string[] = [];
       for (const variable of meta.variables) {
@@ -250,7 +303,12 @@ function TemplateEditorInner({
         }
       }
       if (missing.length > 0) {
-        toast.error(t("admin.emails.missingVariables", { channel: channelName, vars: missing.join(", ") }));;
+        toast.error(
+          t("admin.emails.missingVariables", {
+            channel: channelName,
+            vars: missing.join(", "),
+          })
+        );
         return false;
       }
       return true;
@@ -258,11 +316,11 @@ function TemplateEditorInner({
 
     if ((meta.channels as readonly string[]).includes("web")) {
       if (!data.webTitle?.trim()) {
-        toast.error(t("admin.emails.webTitleRequired"));;
+        toast.error(t("admin.emails.webTitleRequired"));
         return;
       }
       if (!data.webContent?.trim()) {
-        toast.error(t("admin.emails.webContentRequired"));;
+        toast.error(t("admin.emails.webContentRequired"));
         return;
       }
       if (!checkChannelVariables(data.webTitle, data.webContent, "Web")) {
@@ -272,14 +330,16 @@ function TemplateEditorInner({
 
     if ((meta.channels as readonly string[]).includes("email")) {
       if (!data.emailSubject?.trim()) {
-        toast.error(t("admin.emails.emailSubjectRequired"));;
+        toast.error(t("admin.emails.emailSubjectRequired"));
         return;
       }
       if (!data.emailContent?.trim()) {
-        toast.error(t("admin.emails.emailContentRequired"));;
+        toast.error(t("admin.emails.emailContentRequired"));
         return;
       }
-      if (!checkChannelVariables(data.emailSubject, data.emailContent, "Email")) {
+      if (
+        !checkChannelVariables(data.emailSubject, data.emailContent, "Email")
+      ) {
         return;
       }
     }
@@ -290,8 +350,7 @@ function TemplateEditorInner({
       meta.defaults.emailSubjectTemplate ||
       "Notification";
 
-    const contentTemplate =
-      data.webContent?.trim() || "Notification";
+    const contentTemplate = data.webContent?.trim() || "Notification";
 
     upsert({
       type,
@@ -319,7 +378,10 @@ function TemplateEditorInner({
   }
 
   const inputClass =
-    "w-full rounded-xl border border-white/10 bg-white/5 py-3 px-4 text-sm text-white outline-none transition focus:border-cyan-400/50 placeholder:text-slate-600 font-mono";
+    "w-full rounded-xl bg-card border border-border text-foreground px-4 py-2.5 sm:py-3 text-sm h-[42px] sm:h-[46px] outline-none transition-all duration-200 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 placeholder:text-muted/60 font-mono";
+
+  const textareaClass =
+    "w-full rounded-xl bg-card border border-border text-foreground px-4 py-2.5 sm:py-3 text-sm outline-none transition-all duration-200 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 placeholder:text-muted/60 font-mono custom-scrollbar";
 
   const previewTitle =
     channel === "web"
@@ -344,48 +406,54 @@ function TemplateEditorInner({
   return (
     <div
       className="
-        rounded-[28px]
-        border border-white/10
-        bg-[linear-gradient(145deg,#101827_0%,#1a2235_20%,#0f172a_55%,#050816_100%)]
-        shadow-[0_12px_40px_rgba(0,0,0,.45)]
+        rounded-3xl
+        border border-border
+        bg-card/90 dark:bg-[#0c1222]/90
+        shadow-[0_12px_40px_rgba(0,0,0,.35)]
+        backdrop-blur-xl
         overflow-hidden
+        flex flex-col
       "
     >
       {/* Editor Header */}
-      <div className="border-b border-white/10 px-6 py-4 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400">
-            <Icon className="h-4 w-4" />
+      <div className="border-b border-border/80 px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white/[0.02]">
+        <div className="flex items-center gap-3.5">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-cyan-400/30 bg-cyan-500/10 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+            <Icon className="h-5 w-5 shrink-0" />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-white">{meta.label}</h3>
-            <p className="text-xs text-slate-500">{meta.description}</p>
+            <h2 className="text-base sm:text-lg font-bold text-foreground">
+              {label}
+            </h2>
+            <p className="text-xs text-muted mt-0.5">{description}</p>
           </div>
         </div>
 
         {/* Type badge */}
-        <span className="shrink-0 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 font-mono text-xs text-slate-400">
-          {type}
-        </span>
+        <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+          <span className="rounded-xl border border-border bg-white/5 px-3 py-1 font-mono text-xs text-primary-light font-semibold">
+            {type}
+          </span>
+        </div>
       </div>
 
       {/* Channel Tabs */}
-      <div className="border-b border-white/10 px-6 flex gap-1 pt-3">
+      <div className="border-b border-border/80 px-6 flex gap-2 pt-3 bg-white/[0.01]">
         {(meta.channels as readonly string[]).includes("web") && (
           <button
             type="button"
             onClick={() => setChannel("web")}
             className={`
-              flex items-center gap-2 rounded-t-xl px-4 py-2.5 text-sm font-medium transition
+              flex items-center gap-2 rounded-t-xl px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer
               ${
                 channel === "web"
-                  ? "border border-b-0 border-white/10 bg-white/5 text-white"
-                  : "text-slate-500 hover:text-slate-300"
+                  ? "border border-b-0 border-border bg-card text-cyan-400 shadow-sm"
+                  : "text-muted hover:text-foreground hover:bg-white/5"
               }
             `}
           >
-            <Globe className="h-3.5 w-3.5" />
-            {t("admin.emails.web")}
+            <Globe className="h-4 w-4 shrink-0" />
+            <span>{t("admin.emails.web")}</span>
           </button>
         )}
 
@@ -394,20 +462,20 @@ function TemplateEditorInner({
             type="button"
             onClick={() => setChannel("email")}
             className={`
-              flex items-center gap-2 rounded-t-xl px-4 py-2.5 text-sm font-medium transition
+              flex items-center gap-2 rounded-t-xl px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer
               ${
                 channel === "email"
-                  ? "border border-b-0 border-white/10 bg-white/5 text-white"
-                  : "text-slate-500 hover:text-slate-300"
+                  ? "border border-b-0 border-border bg-card text-cyan-400 shadow-sm"
+                  : "text-muted hover:text-foreground hover:bg-white/5"
               }
             `}
           >
-            <Mail className="h-3.5 w-3.5" />
-            {t("admin.emails.email")}
+            <Mail className="h-4 w-4 shrink-0" />
+            <span>{t("admin.emails.email")}</span>
             {(meta.channels as readonly string[]).includes("web") &&
               !template?.emailSubjectTemplate &&
               !template?.emailContentTemplate && (
-                <span className="rounded-full bg-slate-700 px-1.5 py-0.5 text-[10px] text-slate-400">
+                <span className="rounded-full bg-cyan-500/15 border border-cyan-400/20 px-2 py-0.5 text-[10px] text-cyan-300 font-medium">
                   {t("admin.emails.inheritsWeb")}
                 </span>
               )}
@@ -416,89 +484,111 @@ function TemplateEditorInner({
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit(onSave)} className="p-6 space-y-6">
+      <form onSubmit={handleSubmit(onSave)} className="p-6 space-y-6 flex-1">
         {channel === "web" && (
-          <>
+          <div className="space-y-4">
             {/* Web Title */}
-            <div className="space-y-2">
-              <FieldLabel>{t("admin.emails.notifTitle")}</FieldLabel>
+            <div className="space-y-1.5">
+              <FieldLabel required>{t("admin.emails.notifTitle")}</FieldLabel>
               <input
                 {...webTitleRest}
-                ref={(el) => { webTitleRhfRef(el); webTitleRef.current = el; }}
+                ref={(el) => {
+                  webTitleRhfRef(el);
+                  webTitleRef.current = el;
+                }}
                 type="text"
-                placeholder="e.g., Bạn đã được giao công việc mới"
+                placeholder={t("admin.emails.titlePlaceholder")}
                 onFocus={() => (lastFocusedRef.current = "webTitle")}
                 className={inputClass}
               />
               {errors.webTitle && (
-                <p className="text-xs text-red-400">
-                  {errors.webTitle.message}
+                <p className="text-xs text-danger flex items-center gap-1.5 mt-0.5 animate-fadeIn">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{errors.webTitle.message}</span>
                 </p>
               )}
             </div>
 
             {/* Web Content */}
-            <div className="space-y-2">
-              <FieldLabel>{t("admin.emails.notifContent")}</FieldLabel>
+            <div className="space-y-1.5">
+              <FieldLabel required>{t("admin.emails.notifContent")}</FieldLabel>
               <textarea
                 {...webContentRest}
-                ref={(el) => { webContentRhfRef(el); webContentRef.current = el; }}
+                ref={(el) => {
+                  webContentRhfRef(el);
+                  webContentRef.current = el;
+                }}
                 rows={4}
-                placeholder="Write the notification body. Use {{variable}} for dynamic values."
+                placeholder={t("admin.emails.contentPlaceholder")}
                 onFocus={() => (lastFocusedRef.current = "webContent")}
-                className={`${inputClass} resize-none`}
+                className={`${textareaClass} resize-none`}
               />
               {errors.webContent && (
-                <p className="text-xs text-red-400">
-                  {errors.webContent.message}
+                <p className="text-xs text-danger flex items-center gap-1.5 mt-0.5 animate-fadeIn">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{errors.webContent.message}</span>
                 </p>
               )}
             </div>
-          </>
+          </div>
         )}
 
         {channel === "email" && (
-          <>
+          <div className="space-y-4">
             {/* Email Subject */}
-            <div className="space-y-2">
-              <FieldLabel>{t("admin.emails.emailSubject")}</FieldLabel>
-              <p className="text-xs text-slate-500">
+            <div className="space-y-1.5">
+              <FieldLabel required>{t("admin.emails.emailSubject")}</FieldLabel>
+              <p className="text-xs text-muted">
                 {t("admin.emails.emailSubjectHint")}
               </p>
               <input
                 {...emailSubjectRest}
-                ref={(el) => { emailSubjectRhfRef(el); emailSubjectRef.current = el; }}
+                ref={(el) => {
+                  emailSubjectRhfRef(el);
+                  emailSubjectRef.current = el;
+                }}
                 type="text"
-                placeholder={webTitle ? `Falls back to: "${webTitle}"` : `Inherits ${t("admin.emails.title")}`}
+                placeholder={
+                  webTitle
+                    ? `${t("admin.emails.fallsBackWebTitle")}: "${webTitle}"`
+                    : t("admin.emails.fallsBackWebTitle")
+                }
                 onFocus={() => (lastFocusedRef.current = "emailSubject")}
                 className={inputClass}
               />
             </div>
 
             {/* Email Content */}
-            <div className="space-y-2">
-              <FieldLabel>{t("admin.emails.emailBody")}</FieldLabel>
-              <p className="text-xs text-slate-500">
+            <div className="space-y-1.5">
+              <FieldLabel required>{t("admin.emails.emailBody")}</FieldLabel>
+              <p className="text-xs text-muted">
                 {t("admin.emails.emailBodyHint")}
               </p>
               <textarea
                 {...emailContentRest}
-                ref={(el) => { emailContentRhfRef(el); emailContentRef.current = el; }}
-                rows={5}
-                placeholder={webContent ? `Falls back to:\n"${webContent}"` : `Inherits ${t("admin.emails.content")}`}
+                ref={(el) => {
+                  emailContentRhfRef(el);
+                  emailContentRef.current = el;
+                }}
+                rows={6}
+                placeholder={
+                  webContent
+                    ? `${t("admin.emails.fallsBackWebContent")}:\n"${webContent}"`
+                    : t("admin.emails.fallsBackWebContent")
+                }
                 onFocus={() => (lastFocusedRef.current = "emailContent")}
-                className={`${inputClass} resize-y min-h-[150px] max-h-[500px]`}
+                className={`${textareaClass} resize-y min-h-[140px] max-h-[480px]`}
               />
             </div>
-          </>
+          </div>
         )}
 
         {/* Available Variables */}
-        <div className="space-y-2">
+        <div className="space-y-2 rounded-2xl border border-border bg-background/50 p-4">
           <div className="flex items-center gap-2">
             <FieldLabel>{t("admin.emails.availableVariables")}</FieldLabel>
-            <Info className="h-3.5 w-3.5 text-slate-600" />
-            <span className="text-xs text-slate-600">
+            <Info className="h-3.5 w-3.5 text-muted shrink-0" />
+            <span className="text-xs text-muted">
               {t("admin.emails.clickToInsert")}
             </span>
           </div>
@@ -510,107 +600,137 @@ function TemplateEditorInner({
 
         {/* Live Preview */}
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <FieldLabel>{t("admin.emails.livePreview")}</FieldLabel>
-            <Eye className="h-3.5 w-3.5 text-slate-600" />
-            <span className="text-xs text-slate-600">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FieldLabel>{t("admin.emails.livePreview")}</FieldLabel>
+              <Eye className="h-3.5 w-3.5 text-cyan-400 shrink-0" />
+            </div>
+            <span className="text-xs text-muted">
               {t("admin.emails.sampleSubstituted")}
             </span>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
-            <style dangerouslySetInnerHTML={{ __html: `
-              .preview-html ul {
-                list-style-type: disc !important;
-                padding-left: 1.25rem !important;
-                margin-top: 0.5rem !important;
-                margin-bottom: 0.5rem !important;
-              }
-              .preview-html ol {
-                list-style-type: decimal !important;
-                padding-left: 1.25rem !important;
-                margin-top: 0.5rem !important;
-                margin-bottom: 0.5rem !important;
-              }
-              .preview-html li {
-                display: list-item !important;
-                margin-bottom: 0.25rem !important;
-              }
-              .email-paper {
-                background-color: #ffffff !important;
-                color: #1e293b !important;
-                border-radius: 16px !important;
-                padding: 1.5rem !important;
-                width: 100% !important;
-                max-width: 600px !important;
-                box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06) !important;
-                border: 1px solid #e2e8f0 !important;
-                line-height: 1.6 !important;
-                text-align: left !important;
-              }
-              .email-paper a {
-                color: #3b82f6 !important;
-                text-decoration: underline !important;
-              }
-              .email-paper a[style*="background-color"] {
-                color: #ffffff !important;
-                text-decoration: none !important;
-              }
-              .email-paper mark {
-                background-color: #ecfeff !important;
-                color: #0891b2 !important;
-              }
-            `}} />
+          <div className="rounded-2xl border border-border bg-background/70 p-4 shadow-inner">
+            <style
+              dangerouslySetInnerHTML={{
+                __html: `
+                .preview-html ul {
+                  list-style-type: disc !important;
+                  padding-left: 1.25rem !important;
+                  margin-top: 0.5rem !important;
+                  margin-bottom: 0.5rem !important;
+                }
+                .preview-html ol {
+                  list-style-type: decimal !important;
+                  padding-left: 1.25rem !important;
+                  margin-top: 0.5rem !important;
+                  margin-bottom: 0.5rem !important;
+                }
+                .preview-html li {
+                  display: list-item !important;
+                  margin-bottom: 0.25rem !important;
+                }
+                .email-paper {
+                  background-color: #ffffff !important;
+                  color: #1e293b !important;
+                  border-radius: 16px !important;
+                  padding: 1.5rem !important;
+                  width: 100% !important;
+                  max-width: 620px !important;
+                  box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
+                  border: 1px solid #e2e8f0 !important;
+                  line-height: 1.6 !important;
+                  text-align: left !important;
+                }
+                .email-paper a {
+                  color: #2563eb !important;
+                  text-decoration: underline !important;
+                }
+                .email-paper a[style*="background-color"] {
+                  color: #ffffff !important;
+                  text-decoration: none !important;
+                }
+                .email-paper mark {
+                  background-color: #ecfeff !important;
+                  color: #0891b2 !important;
+                }
+              `,
+              }}
+            />
 
             {channel === "email" ? (
               <div className="space-y-4">
-                {/* Email Subject block */}
-                <div className="flex items-center gap-3 border-b border-white/5 pb-3">
-                  <span className="shrink-0 text-xs font-semibold text-slate-500 w-16">
-                    {t("admin.emails.subject")}
-                  </span>
-                  <p
-                    className="text-sm text-slate-200 font-semibold preview-html"
-                    dangerouslySetInnerHTML={{
-                      __html: DOMPurify.sanitize(interpolatePreview(previewTitle), { ADD_ATTR: ["style", "target"] }),
-                    }}
-                  />
+                {/* Envelope Meta Header */}
+                <div className="rounded-xl border border-border bg-card p-3 space-y-2 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-muted w-14 shrink-0">
+                      {t("admin.emails.subject")}:
+                    </span>
+                    <p
+                      className="text-foreground font-semibold preview-html truncate"
+                      dangerouslySetInnerHTML={{
+                        __html: DOMPurify.sanitize(
+                          interpolatePreview(previewTitle),
+                          { ADD_ATTR: ["style", "target"] }
+                        ),
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 text-muted">
+                    <span className="font-semibold w-14 shrink-0">
+                      {t("admin.emails.senderInfo").split(":")[0]}:
+                    </span>
+                    <span>NexCampus System &lt;no-reply@nexcampus.vn&gt;</span>
+                  </div>
                 </div>
 
                 {/* Simulated Email Canvas */}
-                <div className="rounded-xl bg-slate-950/80 p-6 flex justify-center border border-white/5">
+                <div className="rounded-2xl bg-slate-950/80 p-4 sm:p-6 flex justify-center border border-border">
                   <div
                     className="email-paper preview-html text-sm"
                     dangerouslySetInnerHTML={{
-                      __html: DOMPurify.sanitize(interpolatePreview(previewContent), { ADD_ATTR: ["style", "target"] }),
+                      __html: DOMPurify.sanitize(
+                        interpolatePreview(previewContent),
+                        { ADD_ATTR: ["style", "target"] }
+                      ),
                     }}
                   />
                 </div>
               </div>
             ) : (
-              <div className="space-y-3">
-                {/* Web Title block */}
-                <div className="flex items-start gap-3 border-b border-white/5 pb-3">
-                  <span className="shrink-0 text-xs font-semibold text-slate-500 w-16 pt-0.5">
-                    {t("admin.emails.title")}
+              /* Simulated Web Notification Popover Item */
+              <div className="rounded-2xl border border-cyan-400/20 bg-card p-4 space-y-2.5 shadow-sm">
+                <div className="flex items-center justify-between border-b border-border/80 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-400/20">
+                      <Bell className="h-3.5 w-3.5 shrink-0" />
+                    </div>
+                    <span className="text-xs font-semibold text-cyan-400 uppercase tracking-wider">
+                      NexCampus System
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-muted">
+                    {t("admin.emails.justNow")}
                   </span>
-                  <p
-                    className="text-sm text-slate-200 font-semibold preview-html"
-                    dangerouslySetInnerHTML={{
-                      __html: DOMPurify.sanitize(interpolatePreview(previewTitle), { ADD_ATTR: ["style", "target"] }),
-                    }}
-                  />
                 </div>
 
-                {/* Web Content block */}
-                <div className="flex items-start gap-3">
-                  <span className="shrink-0 text-xs font-semibold text-slate-500 w-16 pt-0.5">
-                    {t("admin.emails.content")}
-                  </span>
+                <div className="space-y-1">
                   <p
-                    className="text-sm text-slate-300 leading-relaxed preview-html"
+                    className="text-sm font-bold text-foreground preview-html"
                     dangerouslySetInnerHTML={{
-                      __html: DOMPurify.sanitize(interpolatePreview(previewContent), { ADD_ATTR: ["style", "target"] }),
+                      __html: DOMPurify.sanitize(
+                        interpolatePreview(previewTitle),
+                        { ADD_ATTR: ["style", "target"] }
+                      ),
+                    }}
+                  />
+                  <p
+                    className="text-xs sm:text-sm text-muted leading-relaxed preview-html"
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(
+                        interpolatePreview(previewContent),
+                        { ADD_ATTR: ["style", "target"] }
+                      ),
                     }}
                   />
                 </div>
@@ -619,47 +739,75 @@ function TemplateEditorInner({
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center justify-between border-t border-white/5 pt-4">
-          {/* {t("admin.emails.restoreDefault")} — only visible if template exists in DB */}
+        {/* Action Controls */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-t border-border pt-5">
+          {/* Restore Default */}
           <div>
             {template?.id ? (
               <button
                 type="button"
                 onClick={onReset}
                 disabled={resetting}
-                className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-400 transition hover:text-white hover:bg-white/10 disabled:opacity-50"
+                className="
+                  flex items-center gap-2 rounded-xl border border-rose-500/20
+                  bg-rose-500/5 px-4 py-2.5 text-xs sm:text-sm font-semibold text-rose-400
+                  transition-all duration-200 cursor-pointer
+                  hover:bg-rose-500/15 hover:border-rose-500/40 hover:text-rose-300
+                  active:scale-[0.98]
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                "
               >
                 {resetting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Spinner size="sm" />
                 ) : (
-                  <RotateCcw className="h-4 w-4" />
+                  <RotateCcw className="h-4 w-4 shrink-0" />
                 )}
-                {t("admin.emails.restoreDefault")}
+                <span>{t("admin.emails.restoreDefault")}</span>
               </button>
             ) : (
-              <p className="text-xs text-slate-600 flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-slate-600" />
-                {t("admin.emails.usingFallback")}
+              <p className="text-xs text-muted flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.6)]" />
+                <span>{t("admin.emails.usingFallback")}</span>
               </p>
             )}
           </div>
 
           {/* Save */}
-          <Button
+          <button
             type="submit"
             disabled={saving || (!isDirty && !!template)}
-            variant="glass"
+            className="
+              group relative inline-flex items-center justify-center gap-2 overflow-hidden
+              rounded-xl sm:rounded-2xl
+              h-[42px] sm:h-[46px] px-6 sm:px-8
+              bg-gradient-to-r from-(--primary-main) to-(--primary-light)
+              text-sm font-semibold text-white
+              shadow-[0_0_25px_rgba(21,174,245,0.25)]
+              transition-all duration-300
+              hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-[0_0_35px_rgba(21,174,245,0.4)] hover:brightness-110
+              active:scale-[0.98]
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400
+              disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed
+              cursor-pointer select-none
+            "
           >
-            {saving ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <>
-                <Save className="h-4 w-4 mr-2" />
-                {t("admin.emails.saveChanges")}
-              </>
-            )}
-          </Button>
+            <span
+              className="
+                pointer-events-none absolute inset-y-0 -left-24 w-16 rotate-12
+                bg-white/30 blur-lg
+                transition-all duration-700
+                group-hover:left-[130%]
+              "
+            />
+            <span className="relative flex items-center gap-2">
+              {saving ? (
+                <Spinner size="sm" />
+              ) : (
+                <Save className="h-4 w-4 shrink-0" />
+              )}
+              <span>{t("admin.emails.saveChanges")}</span>
+            </span>
+          </button>
         </div>
       </form>
     </div>

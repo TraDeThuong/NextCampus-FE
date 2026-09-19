@@ -1,24 +1,26 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import {
   Globe,
   Mail,
   Send,
   Eye,
-  Info,
   CheckCircle2,
   AlertCircle,
   Search,
+  UserCheck,
+  UserX,
+  Bell,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useTranslations } from "next-intl";
 import Spinner from "@/components/ui/Spinner";
+import Select, { type SelectOption } from "@/components/ui/Select";
 import { TEMPLATE_CATALOG } from "./TemplateSidebar";
 import { notificationService } from "@/services/notification.service";
 import { getUsersService } from "@/services/user.service";
 import type { User } from "@/types/user";
-import Button from "@/components/ui/Button";
 import DOMPurify from "isomorphic-dompurify";
 
 type Channel = "web" | "email";
@@ -43,6 +45,22 @@ export default function SendNotificationTab() {
 
   const [channel, setChannel] = useState<Channel>("web");
   const [sending, setSending] = useState(false);
+
+  // Options for template dropdown
+  const templateOptions = useMemo<SelectOption[]>(() => {
+    return [
+      { value: "", label: t("admin.emails.selectTemplate") },
+      ...TEMPLATE_CATALOG.map((item) => {
+        const itemLabel = t.has(`admin.emails.catalog.${item.type}.label`)
+          ? t(`admin.emails.catalog.${item.type}.label`)
+          : item.label;
+        return {
+          value: item.type,
+          label: `${itemLabel} (${item.type})`,
+        };
+      }),
+    ];
+  }, [t]);
 
   // Debounced search recipient on email input change
   useEffect(() => {
@@ -84,7 +102,7 @@ export default function SendNotificationTab() {
       return;
     }
 
-    const meta = TEMPLATE_CATALOG.find((t) => t.type === type);
+    const meta = TEMPLATE_CATALOG.find((item) => item.type === type);
     if (meta) {
       setWebTitle(meta.defaults.titleTemplate || "");
       setWebContent(meta.defaults.contentTemplate || "");
@@ -110,20 +128,20 @@ export default function SendNotificationTab() {
 
     const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
     if (!isEmailValid) {
-      toast.error(t("admin.emails.validEmailRequired"));;
+      toast.error(t("admin.emails.validEmailRequired"));
       return;
     }
     if (!sendWeb && !sendEmail) {
-      toast.error(t("admin.emails.selectChannel"));;
+      toast.error(t("admin.emails.selectChannel"));
       return;
     }
     if (sendWeb) {
       if (!recipient) {
-        toast.error(t("admin.emails.registeredUserRequired"));;
+        toast.error(t("admin.emails.registeredUserRequired"));
         return;
       }
       if (!webTitle.trim() || !webContent.trim()) {
-        toast.error(t("admin.emails.webFieldsRequired"));;
+        toast.error(t("admin.emails.webFieldsRequired"));
         return;
       }
     }
@@ -131,7 +149,7 @@ export default function SendNotificationTab() {
       const finalSubject = emailSubject.trim() || webTitle.trim();
       const finalContent = emailContent.trim() || webContent.trim();
       if (!finalSubject || !finalContent) {
-        toast.error(t("admin.emails.emailFieldsRequired"));;
+        toast.error(t("admin.emails.emailFieldsRequired"));
         return;
       }
     }
@@ -149,7 +167,7 @@ export default function SendNotificationTab() {
         sendEmail,
       });
 
-      toast.success(t("admin.emails.notifSent"));;
+      toast.success(t("admin.emails.notifSent"));
       // Reset form on success
       setWebTitle("");
       setWebContent("");
@@ -159,7 +177,9 @@ export default function SendNotificationTab() {
       setEmail("");
       setRecipient(null);
     } catch (err: unknown) {
-      const errMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || t("admin.emails.notifFailed");
+      const errMsg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message || t("admin.emails.notifFailed");
       toast.error(errMsg);
     } finally {
       isSubmittingRef.current = false;
@@ -168,7 +188,10 @@ export default function SendNotificationTab() {
   }
 
   const inputClass =
-    "w-full rounded-xl border border-white/10 bg-white/5 py-3 px-4 text-sm text-white outline-none transition focus:border-cyan-400/50 placeholder:text-slate-600 font-mono";
+    "w-full rounded-xl bg-card border border-border text-foreground px-4 py-2.5 sm:py-3 text-sm h-[42px] sm:h-[46px] outline-none transition-all duration-200 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 placeholder:text-muted/60";
+
+  const textareaClass =
+    "w-full rounded-xl bg-card border border-border text-foreground px-4 py-2.5 sm:py-3 text-sm outline-none transition-all duration-200 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 placeholder:text-muted/60 custom-scrollbar";
 
   const previewTitle =
     channel === "web"
@@ -183,11 +206,12 @@ export default function SendNotificationTab() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
       {/* Configuration Form */}
-      <div className="space-y-6 rounded-[28px] border border-white/10 bg-slate-900/40 p-6 shadow-[0_12px_40px_rgba(0,0,0,.45)]">
+      <div className="space-y-6 rounded-3xl border border-border bg-card/90 dark:bg-[#0c1222]/90 p-5 sm:p-6 shadow-[0_12px_40px_rgba(0,0,0,.35)] backdrop-blur-xl">
         {/* Recipient Lookup */}
         <div className="space-y-2">
-          <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <label className="text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center gap-1">
             {t("admin.emails.recipientEmail")}
+            <span className="text-danger font-bold">*</span>
           </label>
           <div className="relative">
             <input
@@ -195,9 +219,9 @@ export default function SendNotificationTab() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={t("admin.emails.emailPlaceholder")}
-              className={inputClass}
+              className={`${inputClass} pr-10`}
             />
-            <div className="absolute right-3 top-3.5 text-slate-500">
+            <div className="absolute right-3.5 top-3 text-muted pointer-events-none">
               {searching ? (
                 <Spinner size="sm" />
               ) : (
@@ -207,96 +231,144 @@ export default function SendNotificationTab() {
           </div>
 
           {recipient && (
-            <div className="flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 text-emerald-400 text-xs">
-              <CheckCircle2 className="h-4 w-4 shrink-0" />
-              <span>
-                Found Registered User: <strong>{recipient.fullName}</strong> ({recipient.role?.name})
-              </span>
+            <div className="flex items-center gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 p-3.5 text-emerald-400 text-xs sm:text-sm shadow-sm animate-fadeIn">
+              <UserCheck className="h-5 w-5 shrink-0 text-emerald-400" />
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-foreground">
+                  {t("admin.emails.foundUser", {
+                    name: recipient.fullName ?? "",
+                    role: recipient.role?.name ?? "",
+                  })}
+                </p>
+                <p className="text-xs text-muted mt-0.5">{recipient.email}</p>
+              </div>
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
             </div>
           )}
 
-          {!recipient && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) && !searching && (
-            <div className={`flex items-center gap-3 rounded-xl p-3 text-xs border ${
-              sendWeb 
-                ? "border-red-500/20 bg-red-500/5 text-red-400" 
-                : "border-amber-500/20 bg-amber-500/5 text-amber-400"
-            }`}>
-              <AlertCircle className="h-4 w-4 shrink-0" />
-              <span>
-                {sendWeb 
-                  ? "User not registered. Cannot send Web notification. Please uncheck Web channel to send Email only."
-                  : "Onboarding Candidate / Guest: Message will be sent directly to this email address via SMTP."}
-              </span>
-            </div>
-          )}
+          {!recipient &&
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) &&
+            !searching && (
+              <div
+                className={`flex items-start gap-3 rounded-2xl p-3.5 text-xs sm:text-sm border shadow-sm animate-fadeIn ${
+                  sendWeb
+                    ? "border-rose-500/25 bg-rose-500/10 text-rose-300"
+                    : "border-amber-500/25 bg-amber-500/10 text-amber-300"
+                }`}
+              >
+                {sendWeb ? (
+                  <UserX className="h-5 w-5 shrink-0 text-rose-400 mt-0.5" />
+                ) : (
+                  <AlertCircle className="h-5 w-5 shrink-0 text-amber-400 mt-0.5" />
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium leading-relaxed">
+                    {sendWeb
+                      ? t("admin.emails.userNotRegistered")
+                      : t("admin.emails.guestUser")}
+                  </p>
+                </div>
+              </div>
+            )}
         </div>
 
-        {/* Template Select */}
+        {/* Standardized Select for Template */}
         <div className="space-y-2">
-          <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-            {t("admin.emails.prefillTemplate")}
-          </label>
-          <select
+          <Select
+            label={t("admin.emails.prefillTemplate")}
+            placeholder={t("admin.emails.selectTemplate")}
+            options={templateOptions}
             value={selectedTemplateType}
-            onChange={(e) => handleSelectTemplate(e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-slate-950 py-3 px-4 text-sm text-slate-300 outline-none transition focus:border-cyan-400/50"
-          >
-            <option value="">{t("admin.emails.selectTemplate")}</option>
-            {TEMPLATE_CATALOG.map((t) => (
-              <option key={t.type} value={t.type}>
-                {t.label}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => handleSelectTemplate(val)}
+            searchable
+          />
         </div>
 
-        {/* Channels Checkbox */}
-        <div className="space-y-2 border-t border-white/5 pt-4">
-          <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-2">
+        {/* Channels Checkbox Cards */}
+        <div className="space-y-2.5 border-t border-border/80 pt-5">
+          <label className="text-xs sm:text-sm font-medium text-foreground/90 select-none block">
             {t("admin.emails.dispatchChannels")}
           </label>
-          <div className="flex items-center gap-6">
-            <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Web Card */}
+            <label
+              className={`
+                flex items-center gap-3 rounded-2xl border p-3.5 cursor-pointer transition-all duration-200 select-none
+                ${
+                  sendWeb
+                    ? "border-cyan-400/40 bg-cyan-500/10 text-foreground shadow-sm"
+                    : "border-border bg-card/60 text-muted hover:border-border-strong hover:bg-white/5"
+                }
+              `}
+            >
               <input
                 type="checkbox"
                 checked={sendWeb}
                 onChange={(e) => setSendWeb(e.target.checked)}
-                className="rounded border-white/10 bg-white/5 text-cyan-500 focus:ring-0 focus:ring-offset-0"
+                className="h-4 w-4 rounded border-border text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer"
               />
-              {t("admin.emails.webNotification")}
+              <div className="flex items-center gap-2 min-w-0">
+                <Globe
+                  className={`h-4 w-4 shrink-0 ${
+                    sendWeb ? "text-cyan-400" : "text-muted"
+                  }`}
+                />
+                <span className="text-xs sm:text-sm font-medium">
+                  {t("admin.emails.webNotification")}
+                </span>
+              </div>
             </label>
 
-            <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
+            {/* Email Card */}
+            <label
+              className={`
+                flex items-center gap-3 rounded-2xl border p-3.5 cursor-pointer transition-all duration-200 select-none
+                ${
+                  sendEmail
+                    ? "border-cyan-400/40 bg-cyan-500/10 text-foreground shadow-sm"
+                    : "border-border bg-card/60 text-muted hover:border-border-strong hover:bg-white/5"
+                }
+              `}
+            >
               <input
                 type="checkbox"
                 checked={sendEmail}
                 onChange={(e) => setSendEmail(e.target.checked)}
-                className="rounded border-white/10 bg-white/5 text-cyan-500 focus:ring-0 focus:ring-offset-0"
+                className="h-4 w-4 rounded border-border text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer"
               />
-              {t("admin.emails.emailMessage")}
+              <div className="flex items-center gap-2 min-w-0">
+                <Mail
+                  className={`h-4 w-4 shrink-0 ${
+                    sendEmail ? "text-cyan-400" : "text-muted"
+                  }`}
+                />
+                <span className="text-xs sm:text-sm font-medium">
+                  {t("admin.emails.emailMessage")}
+                </span>
+              </div>
             </label>
           </div>
         </div>
 
         {/* Form Editors */}
-        <div className="border-t border-white/5 pt-4 space-y-4">
+        <div className="border-t border-border/80 pt-5 space-y-4">
           {/* Tabs */}
-          <div className="flex gap-1 border-b border-white/10 pt-1">
+          <div className="flex gap-2 border-b border-border/80 pt-1">
             {sendWeb && (
               <button
                 type="button"
                 onClick={() => setChannel("web")}
                 className={`
-                  flex items-center gap-2 rounded-t-xl px-4 py-2 text-sm font-medium transition
+                  flex items-center gap-2 rounded-t-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer
                   ${
                     channel === "web"
-                      ? "border border-b-0 border-white/10 bg-white/5 text-white"
-                      : "text-slate-500 hover:text-slate-300"
+                      ? "border border-b-0 border-border bg-card text-cyan-400 shadow-sm"
+                      : "text-muted hover:text-foreground hover:bg-white/5"
                   }
                 `}
               >
-                <Globe className="h-3.5 w-3.5" />
-                Web Content
+                <Globe className="h-4 w-4 shrink-0" />
+                <span>{t("admin.emails.webContent_tab")}</span>
               </button>
             )}
 
@@ -305,197 +377,256 @@ export default function SendNotificationTab() {
                 type="button"
                 onClick={() => setChannel("email")}
                 className={`
-                  flex items-center gap-2 rounded-t-xl px-4 py-2 text-sm font-medium transition
+                  flex items-center gap-2 rounded-t-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer
                   ${
                     channel === "email"
-                      ? "border border-b-0 border-white/10 bg-white/5 text-white"
-                      : "text-slate-500 hover:text-slate-300"
+                      ? "border border-b-0 border-border bg-card text-cyan-400 shadow-sm"
+                      : "text-muted hover:text-foreground hover:bg-white/5"
                   }
                 `}
               >
-                <Mail className="h-3.5 w-3.5" />
-                Email Content
+                <Mail className="h-4 w-4 shrink-0" />
+                <span>{t("admin.emails.emailContent_tab")}</span>
               </button>
             )}
           </div>
 
           {/* Editors body */}
           {channel === "web" && sendWeb && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400">
-                  Notification Title
+            <div className="space-y-4 animate-fadeIn">
+              <div className="space-y-1.5">
+                <label className="text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center gap-1">
+                  {t("admin.emails.notifTitle")}
+                  <span className="text-danger font-bold">*</span>
                 </label>
                 <input
                   type="text"
                   value={webTitle}
                   onChange={(e) => setWebTitle(e.target.value)}
+                  placeholder={t("admin.emails.titlePlaceholder")}
                   className={inputClass}
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400">
-                  Notification Body
+              <div className="space-y-1.5">
+                <label className="text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center gap-1">
+                  {t("admin.emails.notifContent")}
+                  <span className="text-danger font-bold">*</span>
                 </label>
                 <textarea
                   value={webContent}
                   onChange={(e) => setWebContent(e.target.value)}
                   rows={5}
-                  className={`${inputClass} resize-none`}
+                  placeholder={t("admin.emails.contentPlaceholder")}
+                  className={`${textareaClass} resize-none`}
                 />
               </div>
             </div>
           )}
 
           {channel === "email" && sendEmail && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400">
-                  Email Subject
+            <div className="space-y-4 animate-fadeIn">
+              <div className="space-y-1.5">
+                <label className="text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center gap-1">
+                  {t("admin.emails.emailSubject")}
+                  <span className="text-danger font-bold">*</span>
                 </label>
                 <input
                   type="text"
                   value={emailSubject}
                   onChange={(e) => setEmailSubject(e.target.value)}
-                  placeholder="Falls back to Web Title"
+                  placeholder={
+                    webTitle
+                      ? `${t("admin.emails.fallsBackWebTitle")}: "${webTitle}"`
+                      : t("admin.emails.fallsBackWebTitle")
+                  }
                   className={inputClass}
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400">
-                  Email Body
+              <div className="space-y-1.5">
+                <label className="text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center gap-1">
+                  {t("admin.emails.emailBody")}
+                  <span className="text-danger font-bold">*</span>
                 </label>
                 <textarea
                   value={emailContent}
                   onChange={(e) => setEmailContent(e.target.value)}
-                  rows={5}
-                  placeholder="Falls back to Web Content. HTML tags supported."
-                  className={`${inputClass} resize-none`}
+                  rows={6}
+                  placeholder={
+                    webContent
+                      ? `${t("admin.emails.fallsBackWebContent")}:\n"${webContent}"`
+                      : t("admin.emails.fallsBackWebContent")
+                  }
+                  className={`${textareaClass} resize-y min-h-[140px] max-h-[480px]`}
                 />
               </div>
             </div>
           )}
         </div>
 
-        {/* Send Button */}
-        <div className="border-t border-white/5 pt-4 flex justify-end">
-          <Button
+        {/* Send Action Button */}
+        <div className="border-t border-border/80 pt-5 flex justify-end">
+          <button
+            type="button"
             onClick={handleSend}
             disabled={
-              sending || 
-              !email.includes("@") || 
-              email.trim().length <= 3 || 
+              sending ||
+              !email.includes("@") ||
+              email.trim().length <= 3 ||
               (sendWeb && !recipient)
             }
-            className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-medium shadow-[0_4px_20px_rgba(6,182,212,0.25)] rounded-xl px-5 py-2.5 disabled:opacity-50"
+            className="
+              group relative inline-flex items-center justify-center gap-2 overflow-hidden
+              rounded-xl sm:rounded-2xl
+              h-[42px] sm:h-[46px] px-6 sm:px-8
+              bg-gradient-to-r from-(--primary-main) to-(--primary-light)
+              text-sm font-semibold text-white
+              shadow-[0_0_25px_rgba(21,174,245,0.25)]
+              transition-all duration-300
+              hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-[0_0_35px_rgba(21,174,245,0.4)] hover:brightness-110
+              active:scale-[0.98]
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400
+              disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed
+              cursor-pointer select-none
+            "
           >
-            {sending ? (
-              <Spinner size="sm" />
-            ) : (
-              <Send className="h-4 w-4 mr-2" />
-            )}
-            {t("admin.emails.sendNotification")}
-          </Button>
+            <span
+              className="
+                pointer-events-none absolute inset-y-0 -left-24 w-16 rotate-12
+                bg-white/30 blur-lg
+                transition-all duration-700
+                group-hover:left-[130%]
+              "
+            />
+            <span className="relative flex items-center gap-2">
+              {sending ? (
+                <Spinner size="sm" />
+              ) : (
+                <Send className="h-4 w-4 shrink-0" />
+              )}
+              <span>{t("admin.emails.sendNotification")}</span>
+            </span>
+          </button>
         </div>
       </div>
 
       {/* Live Preview Pane */}
-      <div className="space-y-6 rounded-[28px] border border-white/10 bg-slate-900/40 p-6 shadow-[0_12px_40px_rgba(0,0,0,.45)]">
-        <div className="flex items-center gap-2">
-          <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-            {t("admin.emails.livePreview")}
-          </label>
-          <Eye className="h-3.5 w-3.5 text-slate-600" />
-          <span className="text-xs text-slate-600">Actual text dispatch preview</span>
+      <div className="space-y-6 rounded-3xl border border-border bg-card/90 dark:bg-[#0c1222]/90 p-5 sm:p-6 shadow-[0_12px_40px_rgba(0,0,0,.35)] backdrop-blur-xl">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <label className="text-xs sm:text-sm font-bold uppercase tracking-wider text-muted">
+              {t("admin.emails.livePreview")}
+            </label>
+            <Eye className="h-4 w-4 text-cyan-400 shrink-0" />
+          </div>
+          <span className="text-xs text-muted">
+            {t("admin.emails.actualPreview")}
+          </span>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 min-h-[300px]">
-          <style dangerouslySetInnerHTML={{ __html: `
-            .preview-html ul {
-              list-style-type: disc !important;
-              padding-left: 1.25rem !important;
-              margin-top: 0.5rem !important;
-              margin-bottom: 0.5rem !important;
-            }
-            .preview-html ol {
-              list-style-type: decimal !important;
-              padding-left: 1.25rem !important;
-              margin-top: 0.5rem !important;
-              margin-bottom: 0.5rem !important;
-            }
-            .preview-html li {
-              display: list-item !important;
-              margin-bottom: 0.25rem !important;
-            }
-            .email-paper {
-              background-color: #ffffff !important;
-              color: #1e293b !important;
-              border-radius: 16px !important;
-              padding: 1.5rem !important;
-              width: 100% !important;
-              max-width: 600px !important;
-              box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06) !important;
-              border: 1px solid #e2e8f0 !important;
-              line-height: 1.6 !important;
-              text-align: left !important;
-            }
-            .email-paper a {
-              color: #3b82f6 !important;
-              text-decoration: underline !important;
-            }
-            .email-paper a[style*="background-color"] {
-              color: #ffffff !important;
-              text-decoration: none !important;
-            }
-          `}} />
+        <div className="rounded-2xl border border-border bg-background/70 p-4 min-h-[320px] shadow-inner">
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
+              .preview-html ul {
+                list-style-type: disc !important;
+                padding-left: 1.25rem !important;
+                margin-top: 0.5rem !important;
+                margin-bottom: 0.5rem !important;
+              }
+              .preview-html ol {
+                list-style-type: decimal !important;
+                padding-left: 1.25rem !important;
+                margin-top: 0.5rem !important;
+                margin-bottom: 0.5rem !important;
+              }
+              .preview-html li {
+                display: list-item !important;
+                margin-bottom: 0.25rem !important;
+              }
+              .email-paper {
+                background-color: #ffffff !important;
+                color: #1e293b !important;
+                border-radius: 16px !important;
+                padding: 1.5rem !important;
+                width: 100% !important;
+                max-width: 620px !important;
+                box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
+                border: 1px solid #e2e8f0 !important;
+                line-height: 1.6 !important;
+                text-align: left !important;
+              }
+              .email-paper a {
+                color: #2563eb !important;
+                text-decoration: underline !important;
+              }
+              .email-paper a[style*="background-color"] {
+                color: #ffffff !important;
+                text-decoration: none !important;
+              }
+            `,
+            }}
+          />
 
           {channel === "email" && sendEmail ? (
             <div className="space-y-4">
-              {/* Subject */}
-              <div className="flex items-center gap-3 border-b border-white/5 pb-3">
-                <span className="shrink-0 text-xs font-semibold text-slate-500 w-16">
-                  Subject
-                </span>
-                <p className="text-sm text-slate-200 font-semibold preview-html">
-                  {previewTitle}
-                </p>
+              {/* Envelope Meta Header */}
+              <div className="rounded-xl border border-border bg-card p-3 space-y-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-muted w-14 shrink-0">
+                    {t("admin.emails.subject")}:
+                  </span>
+                  <p className="text-foreground font-semibold preview-html truncate">
+                    {previewTitle}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-muted">
+                  <span className="font-semibold w-14 shrink-0">
+                    {t("admin.emails.recipientEmail")}:
+                  </span>
+                  <span className="font-mono text-cyan-400">
+                    {email.trim() || "recipient@example.com"}
+                  </span>
+                </div>
               </div>
 
-              {/* Email Content */}
-              <div className="rounded-xl bg-slate-950/80 p-6 flex justify-center border border-white/5">
+              {/* Email Content Canvas */}
+              <div className="rounded-2xl bg-slate-950/80 p-4 sm:p-6 flex justify-center border border-border">
                 <div
                   className="email-paper preview-html text-sm"
                   dangerouslySetInnerHTML={{
-                    __html: DOMPurify.sanitize(previewContent, { ADD_ATTR: ["style", "target"] }),
+                    __html: DOMPurify.sanitize(previewContent, {
+                      ADD_ATTR: ["style", "target"],
+                    }),
                   }}
                 />
               </div>
             </div>
           ) : (
-            <div className="space-y-3">
-              {/* Title */}
-              <div className="flex items-start gap-3 border-b border-white/5 pb-3">
-                <span className="shrink-0 text-xs font-semibold text-slate-500 w-16 pt-0.5">
-                  Title
+            /* Simulated Web Notification Popover Item */
+            <div className="rounded-2xl border border-cyan-400/20 bg-card p-4 space-y-2.5 shadow-sm">
+              <div className="flex items-center justify-between border-b border-border/80 pb-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-400/20">
+                    <Bell className="h-3.5 w-3.5 shrink-0" />
+                  </div>
+                  <span className="text-xs font-semibold text-cyan-400 uppercase tracking-wider">
+                    NexCampus System
+                  </span>
+                </div>
+                <span className="text-[11px] text-muted">
+                  {t("admin.emails.justNow")}
                 </span>
-                <p className="text-sm text-slate-200 font-semibold preview-html">
-                  {previewTitle}
-                </p>
               </div>
 
-              {/* Content */}
-              <div className="flex items-start gap-3">
-                <span className="shrink-0 text-xs font-semibold text-slate-500 w-16 pt-0.5">
-                  Content
-                </span>
-                <p
-                  className="text-sm text-slate-300 leading-relaxed preview-html"
-                  dangerouslySetInnerHTML={{
-                    __html: DOMPurify.sanitize(previewContent, { ADD_ATTR: ["style", "target"] }),
-                  }}
-                />
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-foreground preview-html">
+                  {previewTitle}
+                </p>
+                <p className="text-xs sm:text-sm text-muted leading-relaxed preview-html">
+                  {previewContent}
+                </p>
               </div>
             </div>
           )}

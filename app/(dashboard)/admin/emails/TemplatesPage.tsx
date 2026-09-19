@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { Bell, AlertTriangle } from "lucide-react";
+import React, { useState } from "react";
+import { AlertTriangle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useNotificationTemplates } from "@/hooks/notificationTemplate/useNotificationTemplates";
 import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
+import EmailsHeader from "./EmailsHeader";
+import EmailsStats from "./EmailsStats";
 import TemplateSidebar from "./TemplateSidebar";
 import TemplateEditor from "./TemplateEditor";
 import SendNotificationTab from "./SendNotificationTab";
@@ -19,57 +21,17 @@ export default function TemplatesPage() {
   const templates = data?.data ?? [];
 
   const selectedTemplate =
-    templates.find((t) => t.type === selectedType) ?? null;
+    templates.find((tmpl) => tmpl.type === selectedType) ?? null;
 
   return (
     <div className="space-y-6">
-      <MetalCard>
-        <div className="rounded-3xl p-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-400">
-                <Bell className="h-6 w-6" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold metal-text">
-                  {t("admin.emails.title")}
-                </h2>
-                <p className="mt-0.5 text-sm text-slate-500">
-                  {mode === "templates"
-                    ? t("admin.emails.descTemplates")
-                    : t("admin.emails.descSend")}
-                </p>
-              </div>
-            </div>
+      {/* Standardized Header */}
+      <EmailsHeader mode={mode} setMode={setMode} />
 
-            <div className="flex rounded-xl bg-slate-950 p-1 border border-white/5 self-start md:self-auto">
-              <button
-                type="button"
-                onClick={() => setMode("templates")}
-                className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
-                  mode === "templates"
-                    ? "bg-white/10 text-white shadow-sm"
-                    : "text-slate-500 hover:text-slate-300"
-                }`}
-              >
-                {t("admin.emails.templateSettings")}
-              </button>
-              <button
-                type="button"
-                onClick={() => setMode("send")}
-                className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
-                  mode === "send"
-                    ? "bg-white/10 text-white shadow-sm"
-                    : "text-slate-500 hover:text-slate-300"
-                }`}
-              >
-                {t("admin.emails.sendCustom")}
-              </button>
-            </div>
-          </div>
-        </div>
-      </MetalCard>
+      {/* KPI Stats Cards */}
+      <EmailsStats />
 
+      {/* Main Content Area */}
       {mode === "send" ? (
         <SendNotificationTab />
       ) : isPending ? (
@@ -78,22 +40,21 @@ export default function TemplatesPage() {
         </MetalCard>
       ) : isError ? (
         <MetalCard className="flex flex-col items-center justify-center gap-3 py-24">
-          <AlertTriangle className="h-8 w-8 text-red-400" />
-          <p className="text-sm text-slate-400">
-            {t("admin.emails.loadError")}
-          </p>
+          <AlertTriangle className="h-8 w-8 text-rose-400" />
+          <p className="text-sm text-rose-300">{t("admin.emails.loadError")}</p>
         </MetalCard>
       ) : (
-        <div className="flex gap-6 items-stretch">
-          <div className="w-72 shrink-0 relative">
-            <div className="absolute inset-0">
-              <TemplateSidebar
-                dbTemplates={templates}
-                selectedType={selectedType}
-                onSelect={setSelectedType}
-              />
-            </div>
+        <div className="flex flex-col lg:flex-row gap-6 items-stretch">
+          {/* Responsive Sidebar Catalog */}
+          <div className="w-full lg:w-80 shrink-0 min-h-[500px] lg:min-h-[640px]">
+            <TemplateSidebar
+              dbTemplates={templates}
+              selectedType={selectedType}
+              onSelect={setSelectedType}
+            />
           </div>
+
+          {/* Template Configuration Editor */}
           <div className="flex-1 min-w-0">
             <TemplateEditor
               type={selectedType}
