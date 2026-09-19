@@ -1,10 +1,10 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { AssignmentDetail } from "@/types/stats";
 import Table from "../ui/Table";
 import Spinner from "../ui/Spinner";
-import { HiXMark } from "react-icons/hi2";
+import { X, ShieldAlert } from "lucide-react";
 import { createPortal } from "react-dom";
 import useOutsideClick from "@/hooks/useOutsideClick";
 
@@ -36,6 +36,7 @@ export default function TaskAssignmentModal({
   onPageChange,
 }: TaskAssignmentModalProps) {
   const t = useTranslations();
+  const locale = useLocale();
   const ref = useOutsideClick<HTMLDivElement>(onClose);
   const statusLabels: Record<string, string> = {
     PENDING_APPROVAL: t("admin.taskModal.statusPendingApproval"),
@@ -54,22 +55,30 @@ export default function TaskAssignmentModal({
         ref={ref}
         className="relative w-full max-w-5xl max-h-[85vh] overflow-y-auto rounded-[28px] border border-white/10 bg-card p-6 sm:p-8 shadow-glass backdrop-blur-2xl"
       >
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-muted hover:text-foreground hover:bg-white/10 transition-all cursor-pointer"
-        >
-          <HiXMark className="h-6 w-6" />
-        </button>
-
         {/* Modal Header */}
-        <div className="mb-6">
-          <h2 className="text-xl font-bold text-foreground metal-text">
-            {title}
-          </h2>
-          <p className="text-xs text-muted mt-1">
-            {t("admin.taskModal.showingItems", { n: totalItems })}
-          </p>
+        <div className="mb-6 flex items-start justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 shrink-0 shadow-[0_0_15px_rgba(244,63,94,0.15)]">
+                <ShieldAlert className="h-5 w-5 shrink-0" />
+              </div>
+              <h2 className="text-xl font-bold text-foreground metal-text truncate">
+                {title}
+              </h2>
+            </div>
+            <p className="text-xs text-muted mt-1.5">
+              {t("admin.taskModal.showingItems", { n: totalItems })}
+            </p>
+          </div>
+
+          {/* Close Button */}
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-muted hover:text-foreground hover:bg-white/10 transition-all cursor-pointer shrink-0"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
 
         {isLoading ? (
@@ -145,7 +154,9 @@ export default function TaskAssignmentModal({
                           item.isOverdue ? "text-rose-400 font-bold" : "text-muted"
                         }`}
                       >
-                        {new Date(item.taskDeadline).toLocaleDateString("vi-VN")}
+                        {new Date(item.taskDeadline).toLocaleDateString(
+                          locale === "vi" ? "vi-VN" : "en-US"
+                        )}
                         {item.isOverdue && (
                           <span className="block text-[10px] text-rose-400">
                             {t("common.overdue")}

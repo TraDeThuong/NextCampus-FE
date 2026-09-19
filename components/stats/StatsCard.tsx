@@ -32,12 +32,12 @@ export default function StatsCard({
 }: StatsCardProps) {
   const t = useTranslations();
   const content = (
-    <MetalCard className={`p-4 sm:p-6 h-full flex flex-col ${href ? "cursor-pointer group/card" : ""} ${className}`}>
+    <MetalCard className={`p-4 sm:p-5 lg:p-6 h-full flex flex-col group/card ${href ? "cursor-pointer" : ""} ${className}`}>
       <div className="flex-1">
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-1 min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
-              <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted group-hover/card:text-primary-light transition-colors truncate">
+              <p className="text-[11px] sm:text-xs font-medium uppercase tracking-[0.1em] sm:tracking-[0.16em] text-muted group-hover/card:text-primary-light transition-colors truncate">
                 {title}
               </p>
               {href && (
@@ -46,15 +46,16 @@ export default function StatsCard({
                 </span>
               )}
             </div>
-            <h3 className="text-2xl sm:text-3xl font-extrabold text-foreground metal-text tracking-tight truncate">
+            <h3 className="chrome-text mt-1.5 sm:mt-2 text-2xl sm:text-4xl lg:text-5xl font-bold leading-none tracking-tight truncate">
               {value}
             </h3>
+            <div className="mt-2.5 sm:mt-3 h-[2px] w-10 sm:w-16 rounded-full bg-gradient-to-r from-primary-light/70 to-transparent" />
             {subtitle && (
-              <p className="text-[11px] sm:text-xs text-muted/80 pt-0.5 line-clamp-1">{subtitle}</p>
+              <p className="text-[11px] sm:text-xs text-muted/80 pt-1 line-clamp-1">{subtitle}</p>
             )}
           </div>
           {icon && (
-            <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 text-primary-light backdrop-blur-md shadow-inner group-hover/card:border-primary-light/40 group-hover/card:bg-primary-light/10 transition-all">
+            <div className="flex h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 text-primary-light backdrop-blur-md shadow-inner group-hover/card:border-primary-light/40 group-hover/card:bg-primary-light/10 transition-all duration-500 group-hover/card:rotate-6 group-hover/card:scale-110">
               {icon}
             </div>
           )}
