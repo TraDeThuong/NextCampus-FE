@@ -204,7 +204,7 @@ function Window({ children, name, size = "lg", title, onClose }: WindowProps) {
           onClick={handleClose}
           aria-label="Đóng"
           className="
-            absolute right-4 top-4 z-10
+            absolute right-4 top-4 z-30
             flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center
 
             rounded-xl sm:rounded-2xl

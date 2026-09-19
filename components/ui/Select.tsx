@@ -129,6 +129,7 @@ export default function Select({
           bg-card border text-foreground
           text-sm
           px-4 py-2.5 sm:py-3
+          h-[42px] sm:h-[46px]
           transition-all duration-200
           cursor-pointer
           active:scale-[0.99]

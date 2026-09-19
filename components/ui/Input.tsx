@@ -81,6 +81,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               ${leftIcon ? "pl-10" : "pl-4"}
               ${rightIcon || isPassword ? "pr-10" : "pr-4"}
               py-2.5 sm:py-3
+              h-[42px] sm:h-[46px]
               outline-none
               disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-white/5
               ${

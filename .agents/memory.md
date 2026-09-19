@@ -163,3 +163,12 @@ Chỉ lưu các quyết định kiến trúc và UI/UX đã được xác nhận
   - **Tính Tọa Độ Đồng Bộ**: Gọi `updateMenuPosition()` ngay khi click trước khi set `menuOpen(true)` để tránh menu bị chớp ở vị trí static `{}` tại frame render đầu tiên.
   - **Phím Tắt & Cảm Ứng**: Đóng menu ngay khi bấm `Escape` (trả focus về nút trigger) hoặc chạm ngoài (`mousedown`, `touchstart`), tự động đóng khi nút trigger cuộn ra ngoài màn hình.
   - **Bảo Đảm Menu Không Bao Giờ Rỗng**: Bổ sung đầy đủ các action cho toàn bộ trạng thái dữ liệu (kể cả trạng thái mặc định như `UNUSED` của Prisma) và luôn có fallback "Xem chi tiết" để menu không bao giờ bị rỗng.
+
+- **2026-09-19 — Đồng Bộ Chiều Cao Các Ô Cùng Hàng Trong Form (Uniform Field Height Across Rows)**:
+  - **Quy tắc bắt biến**: Mọi ô nhập liệu (`Input`, `Select`, `DatePicker`, radio card buttons...) khi nằm trên cùng một hàng ngang (`grid-cols-2`, `grid-cols-3`...) **BẮT BUỘC PHẢI CÓ CHIỀU CAO BẰNG NHAU TUYỆT ĐỐI**. Tuyệt đối không để ô cao ô thấp làm mất cân đối hàng lối giao diện.
+  - **Kích thước chuẩn hóa**:
+    * Chiều cao ô field / button trigger: `h-[42px] sm:h-[46px]` (padding `px-4 py-2.5 sm:py-3 text-sm rounded-xl`).
+    * Nhãn label: Đồng bộ dùng class `text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center gap-1` kèm dấu sao đỏ `*` nếu bắt buộc (`required`). Tuyệt đối không chèn thêm icon riêng lẻ vào dòng nhãn làm sai lệch chiều cao dòng.
+    * Khoảng cách giữa nhãn và ô nhập: Đồng bộ `gap-1.5`.
+    * Thông báo lỗi: Đồng bộ `text-xs text-danger flex items-center gap-1.5 mt-0.5 animate-fadeIn` kèm icon `<AlertCircle className="w-3.5 h-3.5 shrink-0" />`.
+

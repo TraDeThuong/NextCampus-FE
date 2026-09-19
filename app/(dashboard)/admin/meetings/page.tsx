@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import MeetingsClient from "../mettings/MeetingsClient";
+import MeetingsClient from "./MeetingsClient";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations();

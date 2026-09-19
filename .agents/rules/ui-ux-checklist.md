@@ -113,6 +113,13 @@ Table là thành phần dễ bị "vỡ" giao diện nhất khi lên code. Phả
         - Hiệu ứng **Hover Range Preview** xem trước dải ngày trước khi click chốt.
         - Tích hợp thanh phím tắt chọn nhanh (Presets: Hôm nay, 7 ngày, 30 ngày, Tuần này, Tháng này).
         - Hiển thị ngày tháng người dùng theo định dạng chuẩn `DD/MM/YYYY`, lưu trữ và gửi API chuẩn ISO `YYYY-MM-DD`.
+5. **Đồng Bộ Chiều Cao Các Ô Cùng Hàng (Uniform Field Height Across Rows - BẮT BUỘC)**:
+   - **Quy tắc bất biến**: Mọi ô nhập liệu (`Input`, `Select`, `DatePicker`, các nút radio chọn dạng card button...) khi đặt trên **cùng một hàng** (`grid-cols-2`, `grid-cols-3`...) **BẮT BUỘC PHẢI CÓ CHIỀU CAO BẰNG NHAU TUYỆT ĐỐI**. Tuyệt đối không để xảy ra tình trạng ô cao ô thấp làm lệch lạc hàng lối.
+   - **Kích thước chuẩn hóa**:
+     * Chiều cao ô nhập / nút chọn: `h-[42px] sm:h-[46px]` (padding `px-4 py-2.5 sm:py-3 text-sm rounded-xl`).
+     * Nhãn label: Đồng bộ dùng class `text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center gap-1` kèm dấu sao đỏ `*` nếu required. Tuyệt đối không nhét thêm icon tự chế vào nhãn làm lệch dòng nhãn.
+     * Khoảng cách giữa nhãn và ô nhập: Đồng bộ `gap-1.5`.
+     * Thông báo lỗi: Đồng bộ `text-xs text-danger flex items-center gap-1.5 mt-0.5 animate-fadeIn` kèm icon `<AlertCircle className="w-3.5 h-3.5 shrink-0" />`.
 
 ---
 

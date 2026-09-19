@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useMemo, useRef } from "react";
-import { useTranslations } from "next-intl";
-import { ChevronLeft, ChevronRight, AlertTriangle, Calendar } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
+import { ChevronLeft, ChevronRight, AlertTriangle, Calendar as CalendarIcon } from "lucide-react";
 import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
 import Modal from "@/components/ui/Modal";
@@ -10,11 +10,6 @@ import { useMeetings } from "@/hooks/meeting/useMeetings";
 import MeetingCalendarDay from "./MeetingCalendarDay";
 import CreateMeetingModal from "./CreateMeetingModal";
 import type { Meeting } from "@/types/meeting";
-
-const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
 
 function getDaysInMonth(year: number, month: number): number {
   return new Date(year, month + 1, 0).getDate();
@@ -41,17 +36,11 @@ export default function MeetingCalendar({
   currentUserId?: string;
 }) {
   const t = useTranslations();
-  const DAY_NAMES = [
-    t("admin.meetings.dayMon"),
-    t("admin.meetings.dayTue"),
-    t("admin.meetings.dayWed"),
-    t("admin.meetings.dayThu"),
-    t("admin.meetings.dayFri"),
-    t("admin.meetings.daySat"),
-    t("admin.meetings.daySun"),
-  ];
+  const locale = useLocale();
   const today = new Date();
-  const [currentMonth, setCurrentMonth] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+  const [currentMonth, setCurrentMonth] = useState(
+    new Date(today.getFullYear(), today.getMonth(), 1),
+  );
   const [scheduleDate, setScheduleDate] = useState<Date | null>(null);
   const scheduleRef = useRef<HTMLButtonElement>(null);
 
@@ -74,7 +63,7 @@ export default function MeetingCalendar({
     order: "asc",
   });
 
-  const meetings = data?.data ?? [];
+  const meetings = useMemo(() => data?.data ?? [], [data?.data]);
 
   const meetingsByDay = useMemo(() => {
     const map = new Map<string, Meeting[]>();
@@ -104,72 +93,96 @@ export default function MeetingCalendar({
   }
 
   function isPast(d: Date) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return d < today;
+    const tDate = new Date();
+    tDate.setHours(0, 0, 0, 0);
+    return d < tDate;
   }
+
+  // Localized Month & Year header
+  const formattedMonthYear = useMemo(() => {
+    const str = currentMonth.toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US", {
+      month: "long",
+      year: "numeric",
+    });
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }, [currentMonth, locale]);
+
+  // Clean 7-day abbreviations
+  const dayNames = useMemo(() => {
+    if (locale === "vi") {
+      return ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+    }
+    return ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  }, [locale]);
 
   return (
     <Modal>
       <MetalCard>
         <div className="p-4 sm:p-6">
-          {/* Navigation */}
-          <div className="mb-4 flex items-center justify-between">
+          {/* Navigation and Title */}
+          <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={prevMonth}
-                className="hover:cursor-pointer rounded-lg border border-white/10 p-1.5 text-slate-400 transition hover:border-white/30 hover:text-white"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <h3 className="text-lg font-semibold metal-text">
-                {MONTH_NAMES[month]} {year}
-              </h3>
-              <button
-                type="button"
-                onClick={nextMonth}
-                className="hover:cursor-pointer rounded-lg border border-white/10 p-1.5 text-slate-400 transition hover:border-white/30 hover:text-white"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
+              <div className="flex items-center gap-1.5 rounded-xl border border-border/70 dark:border-white/10 bg-card/60 dark:bg-white/[0.03] p-1">
+                <button
+                  type="button"
+                  onClick={prevMonth}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition hover:bg-card hover:text-foreground active:scale-95"
+                  aria-label="Previous month"
+                >
+                  <ChevronLeft className="h-4 w-4 shrink-0" />
+                </button>
+                <button
+                  type="button"
+                  onClick={nextMonth}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition hover:bg-card hover:text-foreground active:scale-95"
+                  aria-label="Next month"
+                >
+                  <ChevronRight className="h-4 w-4 shrink-0" />
+                </button>
+              </div>
 
-          {currentUserId && (
-            <div className="mb-4 flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2">
+                <CalendarIcon className="h-5 w-5 shrink-0 text-cyan-400" />
+                <h3 className="text-lg sm:text-xl font-bold metal-text">
+                  {formattedMonthYear}
+                </h3>
+              </div>
+            </div>
+
+            {/* Legend badges */}
+            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 text-[11px] text-muted">
               {[
-                { color: "bg-blue-500", label: t("admin.meetings.byYou") },
-                { color: "bg-amber-500", label: t("admin.meetings.byLeader") },
-                { color: "bg-emerald-500", label: t("admin.meetings.ongoing") },
-                { color: "bg-violet-500", label: t("admin.meetings.completed") },
-                { color: "bg-red-500", label: t("admin.meetings.cancelled") },
+                { color: "bg-sky-400", label: t("admin.meetings.byYou") },
+                { color: "bg-amber-400", label: t("admin.meetings.byLeader") },
+                { color: "bg-emerald-400", label: t("admin.meetings.ongoing") },
+                { color: "bg-violet-400", label: t("admin.meetings.completed") },
+                { color: "bg-rose-400", label: t("admin.meetings.cancelled") },
               ].map((item) => (
                 <div key={item.label} className="flex items-center gap-1.5">
-                  <span className={`h-2.5 w-2.5 rounded-full ${item.color}`} />
-                  <span className="text-[11px] text-slate-500">{item.label}</span>
+                  <span className={`h-2 w-2 rounded-full shrink-0 ${item.color}`} />
+                  <span>{item.label}</span>
                 </div>
               ))}
             </div>
-          )}
+          </div>
 
           {isError ? (
-            <div className="flex items-center gap-3 rounded-2xl border border-red-500/20 bg-red-500/5 p-6">
+            <div className="flex items-center gap-3 rounded-2xl border border-red-500/20 bg-red-500/5 p-5">
               <AlertTriangle className="h-5 w-5 shrink-0 text-red-400" />
               <p className="text-sm text-red-300">{t("admin.meetings.loadMeetingsError")}</p>
             </div>
           ) : isPending ? (
-            <div className="flex items-center justify-center py-16">
+            <div className="flex items-center justify-center py-20">
               <Spinner size="lg" />
             </div>
           ) : (
             <>
               {/* Day headers */}
-              <div className="mb-2 grid grid-cols-7">
-                {DAY_NAMES.map((name) => (
+              <div className="mb-2 grid grid-cols-7 gap-1">
+                {dayNames.map((name) => (
                   <div
                     key={name}
-                    className="py-2 text-center text-xs font-semibold uppercase tracking-[0.15em] text-slate-500"
+                    className="py-1.5 text-center text-xs font-semibold tracking-wider text-muted uppercase"
                   >
                     {name}
                   </div>
@@ -177,7 +190,7 @@ export default function MeetingCalendar({
               </div>
 
               {/* Calendar grid */}
-              <div className="grid grid-cols-7 gap-1">
+              <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
                 {cells.map((date, i) => {
                   const key = date ? date.toDateString() : "";
                   const dayMeetings = key ? meetingsByDay.get(key) || [] : [];
@@ -201,11 +214,12 @@ export default function MeetingCalendar({
         </div>
       </MetalCard>
 
+      {/* Hidden trigger for scheduling modal */}
       <Modal.Open opens="schedule-meeting">
-        <button ref={scheduleRef} className="hidden" />
+        <button ref={scheduleRef} className="hidden" aria-hidden="true" />
       </Modal.Open>
 
-      <Modal.Window name="schedule-meeting" size="sm">
+      <Modal.Window name="schedule-meeting" size="md">
         <CreateMeetingModal
           defaultDate={scheduleDate ?? undefined}
           onCloseModal={() => setScheduleDate(null)}

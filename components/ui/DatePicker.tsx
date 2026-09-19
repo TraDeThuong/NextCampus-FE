@@ -17,6 +17,7 @@ import {
     X,
     RotateCcw,
     Check,
+    AlertCircle,
 } from "lucide-react";
 
 // ==========================================
@@ -165,6 +166,9 @@ export interface DatePickerProps {
     className?: string;
     align?: "left" | "right";
     label?: string;
+    required?: boolean;
+    error?: string;
+    helperText?: string;
 }
 
 // ==========================================
@@ -529,6 +533,7 @@ export function DateRangePicker({
                         role="dialog"
                         aria-modal="true"
                         aria-label={resolvedPlaceholder}
+                        data-portal="datepicker"
                         style={popoverStyle}
                         className="
                             rounded-2xl border border-white/10 bg-[#0c1322]/95 p-3.5 sm:p-4
@@ -762,6 +767,9 @@ export function DatePicker({
     className = "",
     align = "left",
     label,
+    required = false,
+    error,
+    helperText,
 }: DatePickerProps) {
     const locale = useLocale();
     const isVi = locale === "vi";
@@ -883,17 +891,18 @@ export function DatePicker({
     }, [viewYear, viewMonth, isVi]);
 
     return (
-        <div className={`flex flex-col gap-1.5 ${className}`}>
+        <div className={`relative w-full flex flex-col gap-1.5 ${className}`}>
             {label && (
                 <label
                     htmlFor={triggerId}
-                    className="text-xs font-semibold text-muted uppercase tracking-wider"
+                    className="text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center gap-1"
                 >
                     {label}
+                    {required && <span className="text-danger font-bold">*</span>}
                 </label>
             )}
 
-            <div className="relative">
+            <div className="relative w-full">
                 <button
                     id={triggerId}
                     ref={triggerRef}
@@ -906,17 +915,20 @@ export function DatePicker({
                         setOpen((prev) => !prev);
                     }}
                     className={`
-                        group flex w-full items-center justify-between gap-2 rounded-xl border px-3.5 py-2.5 text-xs font-medium
-                        transition-all duration-300 outline-none select-none cursor-pointer
+                        group flex w-full items-center justify-between gap-2.5 rounded-xl border px-4 py-2.5 sm:py-3 text-sm font-medium
+                        h-[42px] sm:h-[46px]
+                        transition-all duration-200 outline-none select-none cursor-pointer
                         backdrop-blur-xl shadow-glass
                         ${
                             disabled
                                 ? "opacity-50 cursor-not-allowed border-border bg-card"
                                 : open
                                   ? "border-cyan-400/80 bg-cyan-500/10 text-cyan-400 shadow-[0_0_24px_rgba(6,182,212,0.2)]"
-                                  : value
-                                    ? "border-border text-foreground hover:border-border-strong hover:bg-card-hover"
-                                    : "border-border dark:border-white/10 bg-card/60 dark:bg-white/[0.04] text-muted hover:text-foreground hover:border-border-strong"
+                                  : error
+                                    ? "border-danger focus-visible:border-danger focus-visible:ring-2 focus-visible:ring-danger/40"
+                                    : value
+                                      ? "border-border text-foreground hover:border-border-strong hover:bg-card-hover"
+                                      : "border-border dark:border-white/10 bg-card/60 dark:bg-white/[0.04] text-muted hover:text-foreground hover:border-border-strong"
                         }
                     `}
                 >
@@ -926,7 +938,7 @@ export function DatePicker({
                                 open || value ? "text-cyan-400" : "text-muted group-hover:text-foreground"
                             }`}
                         />
-                        <span className={value ? "text-foreground font-semibold" : "text-muted"}>
+                        <span className={value ? "text-foreground font-medium truncate" : "text-muted/60 truncate"}>
                             {value ? formatDisplayDate(value, locale) : resolvedPlaceholder}
                         </span>
                     </div>
@@ -954,6 +966,7 @@ export function DatePicker({
                             role="dialog"
                             aria-modal="true"
                             aria-label={label ?? resolvedPlaceholder}
+                            data-portal="datepicker"
                             style={popoverStyle}
                             className="
                                 rounded-2xl border border-white/10 bg-[#0c1322]/95 p-3.5
@@ -1056,6 +1069,18 @@ export function DatePicker({
                         document.body,
                     )}
             </div>
+
+            {error ? (
+                <p
+                    role="alert"
+                    className="text-xs text-danger flex items-center gap-1.5 mt-0.5 animate-fadeIn"
+                >
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{error}</span>
+                </p>
+            ) : helperText ? (
+                <p className="text-xs text-muted mt-0.5">{helperText}</p>
+            ) : null}
         </div>
     );
 }

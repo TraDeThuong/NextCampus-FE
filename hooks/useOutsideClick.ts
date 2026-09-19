@@ -8,9 +8,12 @@ export default function useOutsideClick<T extends HTMLElement>(
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
+      const target = e.target as Node;
+      // Bỏ qua click vào portal elements (vd: DatePicker calendar) - chúng nằm ngoài DOM tree của ref
+      if ((target as HTMLElement).closest?.('[data-portal]')) return;
       if (
         ref.current &&
-        !ref.current.contains(e.target as Node)
+        !ref.current.contains(target)
       ) {
         handler();
       }

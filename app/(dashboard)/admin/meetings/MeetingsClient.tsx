@@ -4,9 +4,9 @@ import { useState, useRef } from "react";
 import MeetingHeader from "./MeetingHeader";
 import MeetingStats from "./MeetingStats";
 import MeetingCalendar from "./MeetingCalendar";
+import UpcomingMeetingsCard from "./UpcomingMeetingsCard";
 import WeekMeetingsCard from "./WeekMeetingsCard";
 import LeaveRequestsCard from "./LeaveRequestsCard";
-import UpcomingMeetingsCard from "./UpcomingMeetingsCard";
 import MeetingDetailModal from "./MeetingDetailModal";
 import RecentNotifications from "@/components/meetings/RecentNotifications";
 import Modal from "@/components/ui/Modal";
@@ -19,32 +19,41 @@ export default function MeetingsClient() {
 
   function handleMeetingClick(id: string) {
     setSelectedMeetingId(id);
-    // Trigger Modal.Open click programmatically
+    // Programmatically open Modal.Window
     setTimeout(() => openRef.current?.click(), 0);
   }
 
   return (
     <Modal>
       <div className="space-y-6">
+        {/* Header */}
         <MeetingHeader />
+
+        {/* Full-width Stat Cards (2 cols mobile, 4 cols desktop) */}
+        <MeetingStats />
+
+        {/* Main Dashboard: Calendar (2 cols) + Borderless Right Sidebar (1 col) */}
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-          <MeetingStats />
-          <UpcomingMeetingsCard onMeetingClick={handleMeetingClick} />
-          <RecentNotifications />
-        </div>
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+          {/* Main Calendar View */}
           <div className="xl:col-span-2">
-            <MeetingCalendar onMeetingClick={handleMeetingClick} currentUserId={state.user?.id} />
+            <MeetingCalendar
+              onMeetingClick={handleMeetingClick}
+              currentUserId={state.user?.id}
+            />
           </div>
-          <div className="space-y-6">
+
+          {/* Borderless Right Panel (Rule 46) */}
+          <div className="space-y-6 xl:col-span-1">
+            <UpcomingMeetingsCard onMeetingClick={handleMeetingClick} />
             <WeekMeetingsCard onMeetingClick={handleMeetingClick} />
             <LeaveRequestsCard />
+            <RecentNotifications />
           </div>
         </div>
 
         {/* Hidden trigger for Modal.Window */}
         <Modal.Open opens="meeting-detail">
-          <button ref={openRef} className="hidden" />
+          <button ref={openRef} className="hidden" aria-hidden="true" />
         </Modal.Open>
 
         <Modal.Window name="meeting-detail" size="md">
