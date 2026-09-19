@@ -1,15 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { isAxiosError } from "axios";
-import { X, UserCheck, Loader2 } from "lucide-react";
+import { X, UserCheck, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useTranslations } from "next-intl";
+
 import { useDirectCreateIntern } from "@/hooks/intern/useDirectCreateIntern";
-import { useDepartments } from "@/hooks/department/useDepartments";
 import { usePositions } from "@/hooks/department/usePositions";
 import { useLeaders } from "@/hooks/leader/useLeaders";
+import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
+import { DatePicker } from "@/components/ui/DatePicker";
 
 interface Props {
   open: boolean;
@@ -30,9 +33,6 @@ export default function CreateInternModal({ open, onClose }: Props) {
   const [leaderId, setLeaderId] = useState("");
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const { data: departmentsData } = useDepartments();
-  const departments = departmentsData?.data ?? [];
 
   const { data: leadersData } = useLeaders();
   const leaders = leadersData?.data ?? [];
@@ -57,10 +57,21 @@ export default function CreateInternModal({ open, onClose }: Props) {
     setErrors({});
   }
 
-  function handleClose() {
+  const handleClose = useCallback(() => {
     resetForm();
     onClose();
-  }
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !isPending) {
+        handleClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, isPending, handleClose]);
 
   function validate(): boolean {
     const e: Record<string, string> = {};
@@ -110,147 +121,208 @@ export default function CreateInternModal({ open, onClose }: Props) {
   if (!open) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md" onClick={handleClose}>
-      <div onClick={(e) => e.stopPropagation()} className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-[28px] border border-white/10 bg-card shadow-glass">
+    <div
+      className="fixed inset-0 z-[110] flex items-center justify-center bg-black/75 p-4 backdrop-blur-md"
+      onClick={handleClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-[28px] border border-white/10 bg-[#0c1322]/95 shadow-[0_24px_64px_rgba(0,0,0,0.7)] backdrop-blur-2xl"
+      >
         <button
           onClick={handleClose}
-          className="absolute right-5 top-5 z-10 flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-muted hover:text-foreground hover:bg-white/10 transition-all"
+          type="button"
+          aria-label="Đóng"
+          disabled={isPending}
+          className="absolute right-5 top-5 z-10 flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-muted hover:text-foreground hover:bg-white/10 active:scale-95 transition-all disabled:opacity-50"
         >
-          <X className="h-5 w-5" />
+          <X className="h-4 w-4" />
         </button>
 
         <div className="p-6 sm:p-8">
           <div className="mb-6 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 shadow-inner">
               <UserCheck className="h-5 w-5 text-emerald-400" />
             </div>
             <div>
-              <h2 className="text-lg font-bold metal-text">{t("admin.interns.directAddTitle")}</h2>
-              <p className="text-xs text-muted">{t("admin.interns.directAddDescription")}</p>
+              <h2 className="text-xl font-bold metal-text">{t("admin.interns.directAddTitle")}</h2>
+              <p className="text-xs text-muted mt-0.5">{t("admin.interns.directAddDescription")}</p>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email & Full Name */}
-            <div className="grid grid-cols-2 gap-4">
-              <Field label={t("admin.interns.email")} required error={errors.email}>
-                <input
-                  type="email" value={email}
-                  onChange={(e) => { setEmail(e.target.value); if (errors.email) setErrors((p) => ({ ...p, email: "" })); }}
-                  placeholder={t("admin.interns.emailPlaceholder")}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-foreground placeholder:text-muted outline-none focus:border-emerald-400/40"
-                  disabled={isPending}
-                />
-              </Field>
-              <Field label={t("admin.interns.fullName")} required error={errors.fullName}>
-                <input
-                  type="text" value={fullName}
-                  onChange={(e) => { setFullName(e.target.value); if (errors.fullName) setErrors((p) => ({ ...p, fullName: "" })); }}
-                  placeholder={t("admin.interns.fullNamePlaceholder")}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-foreground placeholder:text-muted outline-none focus:border-emerald-400/40"
-                  disabled={isPending}
-                />
-              </Field>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Input
+                label={t("admin.interns.email")}
+                required
+                type="email"
+                value={email}
+                error={errors.email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (errors.email) setErrors((p) => ({ ...p, email: "" }));
+                }}
+                placeholder={t("admin.interns.emailPlaceholder")}
+                disabled={isPending}
+              />
+
+              <Input
+                label={t("admin.interns.fullName")}
+                required
+                type="text"
+                value={fullName}
+                error={errors.fullName}
+                onChange={(e) => {
+                  setFullName(e.target.value);
+                  if (errors.fullName) setErrors((p) => ({ ...p, fullName: "" }));
+                }}
+                placeholder={t("admin.interns.fullNamePlaceholder")}
+                disabled={isPending}
+              />
             </div>
 
             {/* Phone */}
-            <Field label={t("admin.interns.phone")} required error={errors.phone}>
-              <input
-                type="text" value={phone}
-                onChange={(e) => { setPhone(e.target.value); if (errors.phone) setErrors((p) => ({ ...p, phone: "" })); }}
-                placeholder={t("admin.interns.phonePlaceholder")}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-foreground placeholder:text-muted outline-none focus:border-emerald-400/40"
-                disabled={isPending}
-              />
-            </Field>
+            <Input
+              label={t("admin.interns.phone")}
+              required
+              type="text"
+              value={phone}
+              error={errors.phone}
+              onChange={(e) => {
+                setPhone(e.target.value);
+                if (errors.phone) setErrors((p) => ({ ...p, phone: "" }));
+              }}
+              placeholder={t("admin.interns.phonePlaceholder")}
+              disabled={isPending}
+            />
 
-            {/* Leader */}
-            <Field label={t("admin.interns.leader")} required error={errors.leaderId}>
-              <select
-                value={leaderId}
-                onChange={(e) => {
-                  setLeaderId(e.target.value);
-                  setDepartmentId("");
+            {/* Leader (Standardized Select) */}
+            <Select
+              label={t("admin.interns.leader")}
+              required
+              error={errors.leaderId}
+              value={leaderId}
+              onChange={(val) => {
+                setLeaderId(val);
+                setDepartmentId("");
+                setPositionId("");
+                if (errors.leaderId) setErrors((p) => ({ ...p, leaderId: "" }));
+              }}
+              disabled={isPending}
+              searchable
+              placeholder={t("admin.interns.selectOption")}
+              options={leaders.map((leader) => ({
+                value: leader.userId,
+                label: leader.user.fullName
+                  ? `${leader.user.fullName} (${leader.user.email})`
+                  : leader.user.email,
+              }))}
+            />
+
+            {/* Department & Position (Standardized Selects) */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Select
+                label={t("admin.interns.department")}
+                required
+                error={errors.departmentId}
+                value={departmentId}
+                onChange={(val) => {
+                  setDepartmentId(val);
                   setPositionId("");
-                  if (errors.leaderId) setErrors((p) => ({ ...p, leaderId: "" }));
+                  if (errors.departmentId) setErrors((p) => ({ ...p, departmentId: "" }));
                 }}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-foreground outline-none focus:border-emerald-400/40 disabled:opacity-50"
-                disabled={isPending}
-              >
-                <option value="">{t("admin.interns.selectOption")}</option>
-                {leaders.map((leader) => (
-                  <option key={leader.id} value={leader.userId}>
-                    {leader.user.fullName ? `${leader.user.fullName} (${leader.user.email})` : leader.user.email}
-                  </option>
-                ))}
-              </select>
-            </Field>
+                disabled={isPending || !leaderId}
+                searchable
+                placeholder={
+                  !leaderId
+                    ? t("admin.interns.selectLeaderFirst")
+                    : t("admin.interns.selectOption")
+                }
+                options={allowedDepartments.map((d) => ({
+                  value: d.id,
+                  label: d.name,
+                }))}
+              />
 
-            {/* Department & Position */}
-            <div className="grid grid-cols-2 gap-4">
-              <Field label={t("admin.interns.department")} required error={errors.departmentId}>
-                <select
-                  value={departmentId}
-                  onChange={(e) => { setDepartmentId(e.target.value); setPositionId(""); if (errors.departmentId) setErrors((p) => ({ ...p, departmentId: "" })); }}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-foreground outline-none focus:border-emerald-400/40 disabled:opacity-50"
-                  disabled={isPending || !leaderId}
-                >
-                  <option value="">{!leaderId ? t("admin.interns.selectLeaderFirst") : t("admin.interns.selectOption")}</option>
-                  {allowedDepartments.map((d) => (
-                    <option key={d.id} value={d.id}>{d.name}</option>
-                  ))}
-                </select>
-              </Field>
-              <Field label={t("admin.interns.position")} required error={errors.positionId}>
-                <select
-                  value={positionId}
-                  onChange={(e) => { setPositionId(e.target.value); if (errors.positionId) setErrors((p) => ({ ...p, positionId: "" })); }}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-foreground outline-none focus:border-emerald-400/40 disabled:opacity-50"
-                  disabled={isPending || !departmentId}
-                >
-                  <option value="">{t("admin.interns.selectOption")}</option>
-                  {positions.map((p) => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
-                  ))}
-                </select>
-              </Field>
+              <Select
+                label={t("admin.interns.position")}
+                required
+                error={errors.positionId}
+                value={positionId}
+                onChange={(val) => {
+                  setPositionId(val);
+                  if (errors.positionId) setErrors((p) => ({ ...p, positionId: "" }));
+                }}
+                disabled={isPending || !departmentId}
+                searchable
+                placeholder={t("admin.interns.selectOption")}
+                options={positions.map((p) => ({
+                  value: p.id,
+                  label: p.name,
+                }))}
+              />
             </div>
 
             {/* Start Date & Duration */}
-            <div className="grid grid-cols-2 gap-4">
-              <Field label={t("admin.interns.startDate")} required error={errors.startDate}>
-                <input
-                  type="date" value={startDate}
-                  onChange={(e) => { setStartDate(e.target.value); if (errors.startDate) setErrors((p) => ({ ...p, startDate: "" })); }}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-foreground outline-none focus:border-emerald-400/40"
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center gap-1">
+                  {t("admin.interns.startDate")}
+                  <span className="text-danger font-bold">*</span>
+                </label>
+                <DatePicker
+                  value={startDate}
+                  onChange={(val) => {
+                    setStartDate(val);
+                    if (errors.startDate) setErrors((p) => ({ ...p, startDate: "" }));
+                  }}
                   disabled={isPending}
                 />
-              </Field>
-              <Field label={t("admin.interns.duration")} required error={errors.duration}>
-                <input
-                  type="number" min={1} max={12} value={duration}
-                  onChange={(e) => { setDuration(Number(e.target.value)); if (errors.duration) setErrors((p) => ({ ...p, duration: "" })); }}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-foreground outline-none focus:border-emerald-400/40"
-                  disabled={isPending}
-                />
-              </Field>
+                {errors.startDate && (
+                  <p className="text-xs text-danger flex items-center gap-1.5 mt-0.5">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{errors.startDate}</span>
+                  </p>
+                )}
+              </div>
+
+              <Input
+                label={t("admin.interns.duration")}
+                required
+                type="number"
+                min={1}
+                max={12}
+                value={duration}
+                error={errors.duration}
+                onChange={(e) => {
+                  setDuration(Number(e.target.value));
+                  if (errors.duration) setErrors((p) => ({ ...p, duration: "" }));
+                }}
+                disabled={isPending}
+              />
             </div>
 
-            {/* Submit */}
-            <div className="flex justify-end gap-3 pt-2">
+            {/* Submit & Cancel */}
+            <div className="flex justify-end gap-3 pt-3 border-t border-white/5">
               <button
-                type="button" onClick={handleClose}
-                className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-400 transition hover:text-white hover:bg-white/10"
+                type="button"
+                onClick={handleClose}
                 disabled={isPending}
+                className="rounded-xl border border-border dark:border-white/10 bg-card/40 px-5 py-2.5 text-sm text-muted hover:text-foreground hover:bg-card active:scale-[0.98] transition disabled:opacity-50"
               >
                 {t("admin.interns.cancel")}
               </button>
               <button
                 type="submit"
                 disabled={isPending}
-                className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-500 disabled:opacity-50"
+                className="flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-500 active:scale-[0.98] transition disabled:opacity-50 shadow-md shadow-emerald-950/30"
               >
-                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserCheck className="h-4 w-4" />}
+                {isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <UserCheck className="h-4 w-4" />
+                )}
                 {isPending ? t("admin.interns.creating") : t("admin.interns.createIntern")}
               </button>
             </div>
@@ -259,17 +331,5 @@ export default function CreateInternModal({ open, onClose }: Props) {
       </div>
     </div>,
     document.body,
-  );
-}
-
-function Field({ label, required, error, children }: { label: string; required?: boolean; error?: string; children: React.ReactNode }) {
-  return (
-    <div className="space-y-1">
-      <label className="text-xs font-semibold text-slate-400">
-        {label}{required && <span className="text-red-400 ml-0.5">*</span>}
-      </label>
-      {children}
-      {error && <p className="text-xs text-red-400">{error}</p>}
-    </div>
   );
 }

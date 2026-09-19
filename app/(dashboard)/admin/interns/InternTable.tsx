@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react";
+import { ChevronLeft, ChevronRight, AlertTriangle, Users, RotateCcw, UserPlus } from "lucide-react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
@@ -15,7 +15,7 @@ import Spinner from "@/components/ui/Spinner";
 import InternRow from "./InternRow";
 
 const COLUMNS =
-    "minmax(160px,1.2fr) minmax(220px,2fr) minmax(100px,1fr) minmax(110px,1fr) 100px 150px 20px";
+    "minmax(180px,1.4fr) minmax(170px,1.2fr) minmax(130px,1fr) minmax(100px,0.65fr) 150px 175px 48px";
 
 export default function InternTable() {
     const t = useTranslations();
@@ -53,9 +53,28 @@ export default function InternTable() {
     const interns = data?.data ?? [];
     const meta = data?.meta;
 
+    const hasFilters = Boolean(
+        searchParams.get("fullName") ||
+        searchParams.get("department") ||
+        searchParams.get("position") ||
+        searchParams.get("leader") ||
+        searchParams.get("status")
+    );
+
     function goToPage(page: number) {
         const p = new URLSearchParams(searchParams.toString());
         p.set("page", String(page));
+        router.push(`${pathname}?${p.toString()}`);
+    }
+
+    function clearAllFilters() {
+        const p = new URLSearchParams(searchParams.toString());
+        p.delete("fullName");
+        p.delete("department");
+        p.delete("position");
+        p.delete("leader");
+        p.delete("status");
+        p.set("page", "1");
         router.push(`${pathname}?${p.toString()}`);
     }
 
@@ -70,8 +89,10 @@ export default function InternTable() {
     if (isError) {
         return (
             <MetalCard className="flex flex-col items-center justify-center gap-3 py-20">
-                <AlertTriangle className="h-8 w-8 text-red-400" />
-                <p className="text-sm text-slate-400">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-400">
+                    <AlertTriangle className="h-6 w-6" />
+                </div>
+                <p className="text-sm text-rose-300">
                     {t("admin.interns.loadError")}
                 </p>
             </MetalCard>
@@ -80,8 +101,33 @@ export default function InternTable() {
 
     if (interns.length === 0) {
         return (
-            <MetalCard className="flex flex-col items-center justify-center gap-3 py-20">
-                <p className="text-sm text-slate-500">{t("admin.interns.noInterns")}</p>
+            <MetalCard className="flex flex-col items-center justify-center gap-3 py-20 text-center px-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-400">
+                    <Users className="h-6 w-6" />
+                </div>
+                <p className="text-base font-medium text-foreground">
+                    {t("admin.interns.noInterns")}
+                </p>
+                {hasFilters ? (
+                    <button
+                        type="button"
+                        onClick={clearAllFilters}
+                        className="mt-2 inline-flex items-center gap-2 rounded-xl border border-border dark:border-white/10 bg-card/60 px-4 py-2 text-xs font-medium text-muted transition hover:bg-card hover:text-foreground active:scale-95"
+                    >
+                        <RotateCcw className="h-3.5 w-3.5" />
+                        {t("admin.interns.clearFilters")}
+                    </button>
+                ) : (
+                    <Modal.Open opens="invite-intern">
+                        <button
+                            type="button"
+                            className="mt-2 inline-flex items-center gap-2 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-xs font-medium text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20 active:scale-95"
+                        >
+                            <UserPlus className="h-3.5 w-3.5" />
+                            {t("admin.interns.addIntern")}
+                        </button>
+                    </Modal.Open>
+                )}
             </MetalCard>
         );
     }
@@ -125,7 +171,7 @@ export default function InternTable() {
                                 <button
                                     disabled={meta.page <= 1}
                                     onClick={() => goToPage(meta.page - 1)}
-                                    className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:opacity-30"
+                                    className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
                                 >
                                     <ChevronLeft className="h-4 w-4" />
                                 </button>
@@ -133,7 +179,7 @@ export default function InternTable() {
                                 <button
                                     disabled={meta.page >= meta.totalPages}
                                     onClick={() => goToPage(meta.page + 1)}
-                                    className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:opacity-30"
+                                    className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
                                 >
                                     <ChevronRight className="h-4 w-4" />
                                 </button>

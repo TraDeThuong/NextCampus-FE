@@ -70,9 +70,9 @@ export default function InternStats() {
 
     if (allError) {
         return (
-            <div className="flex items-center gap-3 rounded-3xl border border-red-500/20 bg-red-500/5 p-6 backdrop-blur-xl">
-                <AlertTriangle className="h-5 w-5 shrink-0 text-red-400" />
-                <p className="text-sm text-red-300">
+            <div className="flex items-center gap-3 rounded-3xl border border-rose-500/20 bg-rose-500/10 p-6 backdrop-blur-xl shadow-inner">
+                <AlertTriangle className="h-5 w-5 shrink-0 text-rose-400" />
+                <p className="text-sm text-rose-300">
                     {t("admin.interns.loadStatsError")}
                 </p>
             </div>

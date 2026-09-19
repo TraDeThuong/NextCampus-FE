@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { createPortal } from "react-dom";
 import { MoreVertical, Eye, Trash2, Circle, Loader2 } from "lucide-react";
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo, useId } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { toast } from "react-hot-toast";
 
@@ -11,7 +12,6 @@ import { useDeleteIntern } from "@/hooks/intern/useDeleteIntern";
 import { useLeaders } from "@/hooks/leader/useLeaders";
 import { useUpdateIntern } from "@/hooks/intern/useUpdateIntern";
 import { usePositions } from "@/hooks/department/usePositions";
-import { useDepartments } from "@/hooks/department/useDepartments";
 import Table from "@/components/ui/Table";
 import Modal from "@/components/ui/Modal";
 import InlineSelect from "@/components/ui/InlineSelect";
@@ -24,7 +24,7 @@ export default function InternRow({ intern }: InternRowProps) {
     const t = useTranslations();
     const locale = useLocale();
     const router = useRouter();
-    const { mutate: deleteIntern } = useDeleteIntern();
+    const { mutate: deleteIntern, isPending: isDeleting } = useDeleteIntern();
     const { data: leadersData } = useLeaders();
     const { mutate: updateIntern } = useUpdateIntern();
     const [updatingField, setUpdatingField] = useState<
@@ -40,24 +40,101 @@ export default function InternRow({ intern }: InternRowProps) {
         return selectedLeader ? selectedLeader.departments : [];
     }, [selectedLeader]);
 
-    const { data: deptsData } = useDepartments();
-    const departments = deptsData?.data ?? [];
-
     const { data: posData } = usePositions(intern.department?.id ?? undefined);
     const positions = posData?.data ?? [];
 
+    // Standardized 3-Dots Portal Action Menu (Rule 76-82 of AGENTS.md)
     const [menuOpen, setMenuOpen] = useState(false);
+    const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
+    const triggerRef = useRef<HTMLButtonElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
+    const menuId = useId();
+
+    const updateMenuPosition = useCallback(() => {
+        if (!triggerRef.current) return;
+        const rect = triggerRef.current.getBoundingClientRect();
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        if (rect.bottom < 0 || rect.top > vh || rect.right < 0 || rect.left > vw) {
+            setMenuOpen(false);
+            return;
+        }
+
+        const MENU_WIDTH = Math.min(170, vw - 24);
+        const ESTIMATED_HEIGHT = 120;
+        const spaceBelow = vh - rect.bottom;
+        const spaceAbove = rect.top;
+
+        const openUpward = spaceBelow < ESTIMATED_HEIGHT && spaceAbove > spaceBelow;
+
+        const maxHeight = openUpward
+            ? Math.min(260, Math.max(100, spaceAbove - 16))
+            : Math.min(260, Math.max(100, spaceBelow - 16));
+
+        const left = Math.max(8, Math.min(rect.right - MENU_WIDTH, vw - MENU_WIDTH - 8));
+
+        setMenuStyle({
+            position: "fixed",
+            top: openUpward ? undefined : rect.bottom + 6,
+            bottom: openUpward ? vh - rect.top + 6 : undefined,
+            left,
+            width: MENU_WIDTH,
+            maxHeight,
+            overflowY: "auto",
+            zIndex: 9999,
+        });
+    }, []);
+
+    const toggleMenu = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!menuOpen) {
+            updateMenuPosition();
+            setMenuOpen(true);
+        } else {
+            setMenuOpen(false);
+        }
+    };
 
     useEffect(() => {
-        function handleClick(e: MouseEvent) {
-            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        if (!menuOpen) return;
+        updateMenuPosition();
+        window.addEventListener("scroll", updateMenuPosition, true);
+        window.addEventListener("resize", updateMenuPosition);
+        return () => {
+            window.removeEventListener("scroll", updateMenuPosition, true);
+            window.removeEventListener("resize", updateMenuPosition);
+        };
+    }, [menuOpen, updateMenuPosition]);
+
+    useEffect(() => {
+        if (!menuOpen) return;
+        function handleClickOutside(e: MouseEvent | TouchEvent) {
+            const target = e.target as Node;
+            if (
+                menuRef.current &&
+                !menuRef.current.contains(target) &&
+                triggerRef.current &&
+                !triggerRef.current.contains(target)
+            ) {
                 setMenuOpen(false);
             }
         }
-        document.addEventListener("mousedown", handleClick);
-        return () => document.removeEventListener("mousedown", handleClick);
-    }, []);
+        function handleKeyDown(e: KeyboardEvent) {
+            if (e.key === "Escape") {
+                setMenuOpen(false);
+                triggerRef.current?.focus();
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        document.addEventListener("touchstart", handleClickOutside, { passive: true });
+        window.addEventListener("keydown", handleKeyDown);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+            document.removeEventListener("touchstart", handleClickOutside);
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [menuOpen]);
 
     const endDate = new Date(intern.startDate);
     endDate.setMonth(endDate.getMonth() + intern.duration);
@@ -71,16 +148,16 @@ export default function InternRow({ intern }: InternRowProps) {
     const statusBadge: Record<string, string> = {
         ACTIVE: "border-emerald-400/20 bg-emerald-500/10 text-emerald-300",
         COMPLETED: "border-blue-400/20 bg-blue-500/10 text-blue-300",
-        DROPPED: "border-red-400/20 bg-red-500/10 text-red-300",
+        DROPPED: "border-rose-400/20 bg-rose-500/10 text-rose-300",
     };
 
     const handleLeaderChange = useCallback(
         (newLeaderId: string | null) => {
             setUpdatingField("leader");
-            const selectedLeader = newLeaderId
+            const selectedLdr = newLeaderId
                 ? leaders.find((l) => l.userId === newLeaderId)
                 : null;
-            const hasSingleDepartment = selectedLeader?.departments?.length === 1;
+            const hasSingleDepartment = selectedLdr?.departments?.length === 1;
 
             updateIntern(
                 {
@@ -88,7 +165,7 @@ export default function InternRow({ intern }: InternRowProps) {
                     payload: {
                         leaderId: newLeaderId,
                         ...(hasSingleDepartment ? {
-                            departmentId: selectedLeader.departments[0].id,
+                            departmentId: selectedLdr.departments[0].id,
                         } : {
                             departmentId: null,
                             positionId: null,
@@ -151,26 +228,26 @@ export default function InternRow({ intern }: InternRowProps) {
             <Table.Row>
                 {/* Intern info */}
                 <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-slate-600 to-slate-800 text-sm font-bold text-slate-200">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-slate-600 to-slate-800 text-sm font-bold text-white shadow-sm ring-1 ring-white/10">
                         {intern.fullName.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0">
                         <p
-                            className="truncate text-sm font-medium text-white cursor-pointer hover:text-cyan-400 transition"
+                            className="truncate text-sm font-medium text-foreground cursor-pointer hover:text-cyan-400 transition"
                             onClick={() =>
                                 router.push(`/admin/interns/${intern.id}`)
                             }
                         >
                             {intern.fullName}
                         </p>
-                        <p className="truncate text-xs text-slate-500">
+                        <p className="truncate text-xs text-muted">
                             {intern.user.email}
                         </p>
                     </div>
                 </div>
 
                 {/* Leader */}
-                <div className="text-sm text-slate-400">
+                <div className="text-sm text-muted">
                     <InlineSelect
                         ariaLabel="Leader"
                         value={intern.leaderId}
@@ -188,7 +265,7 @@ export default function InternRow({ intern }: InternRowProps) {
                 </div>
 
                 {/* Department */}
-                <div className="text-sm text-slate-400">
+                <div className="text-sm text-muted">
                     <InlineSelect
                         ariaLabel="Department"
                         value={intern.department?.id ?? null}
@@ -208,7 +285,7 @@ export default function InternRow({ intern }: InternRowProps) {
                 </div>
 
                 {/* Position */}
-                <div className="text-sm text-slate-400">
+                <div className="text-sm text-muted">
                     <InlineSelect
                         ariaLabel="Position"
                         value={intern.position?.id ?? null}
@@ -228,9 +305,9 @@ export default function InternRow({ intern }: InternRowProps) {
                 </div>
 
                 {/* Duration */}
-                <div className="text-sm text-slate-400">
-                    <p>{fmtDate(new Date(intern.startDate))}</p>
-                    <p className="text-xs text-slate-600">→ {fmtDate(endDate)}</p>
+                <div className="text-sm text-muted">
+                    <p className="text-foreground font-medium">{fmtDate(new Date(intern.startDate))}</p>
+                    <p className="text-xs text-muted/70">→ {fmtDate(endDate)}</p>
                 </div>
 
                 {/* Status */}
@@ -248,7 +325,7 @@ export default function InternRow({ intern }: InternRowProps) {
                         ]}
                         renderTrigger={(label) => (
                             <span
-                                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${
+                                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition ${
                                     statusBadge[intern.status] ?? ""
                                 }`}
                             >
@@ -259,52 +336,69 @@ export default function InternRow({ intern }: InternRowProps) {
                     />
                 </div>
 
-                {/* Actions */}
-                <div className="relative" ref={menuRef}>
+                {/* Standardized Actions Column with Portal Action Menu */}
+                <div className="flex items-center justify-end">
                     <button
+                        ref={triggerRef}
                         type="button"
-                        onClick={() => setMenuOpen((prev) => !prev)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-slate-400 transition hover:border-white/10 hover:bg-white/5 hover:text-white"
+                        id={`intern-action-trigger-${menuId}`}
+                        aria-label="Thao tác"
+                        aria-expanded={menuOpen}
+                        aria-haspopup="true"
+                        onClick={toggleMenu}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-muted transition hover:border-white/10 hover:bg-white/5 hover:text-foreground active:scale-95"
                     >
                         <MoreVertical className="h-4 w-4" />
                     </button>
 
-                    {menuOpen && (
-                        <div className="absolute right-0 top-full z-50 mt-2 w-40 rounded-2xl border border-white/10 bg-[#0f172a] p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl">
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setMenuOpen(false);
-                                    router.push(`/admin/interns/${intern.id}`);
-                                }}
-                                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
+                    {menuOpen &&
+                        createPortal(
+                            <div
+                                ref={menuRef}
+                                id={`intern-action-menu-${menuId}`}
+                                role="menu"
+                                style={menuStyle}
+                                className="rounded-2xl border border-white/10 bg-[#0c1322]/95 p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn"
                             >
-                                <Eye className="h-4 w-4" />
-                                {t("admin.interns.view")}
-                            </button>
-
-                            {/* <Modal.Open opens={`delete-${intern.id}`}>
                                 <button
                                     type="button"
-                                    onClick={() => setMenuOpen(false)}
-                                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-red-400 transition hover:bg-red-500/10"
+                                    role="menuitem"
+                                    onClick={() => {
+                                        setMenuOpen(false);
+                                        router.push(`/admin/interns/${intern.id}`);
+                                    }}
+                                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground/90 transition hover:bg-white/10 hover:text-cyan-400 active:scale-98"
                                 >
-                                    <Trash2 className="h-4 w-4" />
-                                    Delete
+                                    <Eye className="h-4 w-4 shrink-0 text-cyan-400" />
+                                    {t("admin.interns.view")}
                                 </button>
-                            </Modal.Open> */}
-                        </div>
-                    )}
+
+                                <Modal.Open opens={`delete-intern-${intern.id}`}>
+                                    <button
+                                        type="button"
+                                        role="menuitem"
+                                        onClick={() => setMenuOpen(false)}
+                                        className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-rose-400 transition hover:bg-rose-500/10 hover:text-rose-300 active:scale-98"
+                                    >
+                                        <Trash2 className="h-4 w-4 shrink-0" />
+                                        {t("admin.interns.delete")}
+                                    </button>
+                                </Modal.Open>
+                            </div>,
+                            document.body,
+                        )}
                 </div>
             </Table.Row>
 
             {/* Delete confirm modal */}
-            <Modal.Window name={`delete-${intern.id}`} size="sm">
+            <Modal.Window name={`delete-intern-${intern.id}`} size="sm">
                 <DeleteConfirm
                     name={intern.fullName}
+                    isDeleting={isDeleting}
                     onConfirm={(onCloseModal) => {
-                        deleteIntern(intern.id);
-                        onCloseModal?.();
+                        deleteIntern(intern.id, {
+                            onSuccess: () => onCloseModal?.(),
+                        });
                     }}
                 />
             </Modal.Window>
@@ -312,44 +406,47 @@ export default function InternRow({ intern }: InternRowProps) {
     );
 }
 
-
-
 /* ─── DeleteConfirm ──────────────────────────────────────────── */
 
 function DeleteConfirm({
     name,
+    isDeleting,
     onConfirm,
     onCloseModal,
 }: {
     name: string;
+    isDeleting?: boolean;
     onConfirm: (onCloseModal?: () => void) => void;
     onCloseModal?: () => void;
 }) {
     const t = useTranslations();
     return (
         <div className="px-2 py-8 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 text-red-400">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-400 border border-rose-500/20 shadow-inner">
                 <Trash2 className="h-6 w-6" />
             </div>
-            <h3 className="mt-4 text-base font-semibold text-white">
+            <h3 className="mt-4 text-base font-semibold text-foreground">
                 {t("admin.interns.deleteTitle")}
             </h3>
-            <p className="mt-2 text-sm text-slate-400">
+            <p className="mt-2 text-sm text-muted">
                 {t("admin.interns.deleteConfirm", { name })}
             </p>
             <div className="mt-6 flex justify-center gap-3">
                 <button
                     type="button"
                     onClick={onCloseModal}
-                    className="rounded-xl border border-white/10 bg-white/5 px-5 py-2 text-sm text-slate-300 transition hover:text-white"
+                    disabled={isDeleting}
+                    className="rounded-xl border border-border dark:border-white/10 bg-card/40 px-5 py-2 text-sm text-muted hover:text-foreground hover:bg-card active:scale-[0.98] transition disabled:opacity-50"
                 >
                     {t("admin.interns.cancel")}
                 </button>
                 <button
                     type="button"
                     onClick={() => onConfirm(onCloseModal)}
-                    className="rounded-xl bg-red-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-red-500"
+                    disabled={isDeleting}
+                    className="flex items-center gap-2 rounded-xl bg-rose-600 px-5 py-2 text-sm font-medium text-white hover:bg-rose-500 active:scale-[0.98] transition disabled:opacity-50 shadow-sm"
                 >
+                    {isDeleting && <Loader2 className="h-4 w-4 animate-spin" />}
                     {t("admin.interns.delete")}
                 </button>
             </div>
