@@ -21,7 +21,6 @@ import {
   BookOpen,
 } from "lucide-react";
 import Modal from "@/components/ui/Modal";
-import Button from "@/components/ui/Button";
 import { usePermissions } from "@/hooks/rbac/usePermissions";
 import { useSyncRolePermissions } from "@/hooks/rbac/useSyncRolePermissions";
 import type { Role, Permission } from "@/types/rbac";
@@ -47,7 +46,7 @@ const RESOURCE_ICONS: Record<string, React.ElementType> = {
   SETTINGS: Settings,
 };
 
-const RESOURCE_LABELS: Record<string, string> = {
+const RESOURCE_FALLBACKS: Record<string, string> = {
   USER: "Quản lý Người dùng",
   ROLE: "Quản lý Vai trò",
   ROLE_PERMISSION: "Phân quyền Vai trò",
@@ -159,31 +158,39 @@ function RolePermissionsForm({
     });
   };
 
+  const getResourceLabel = (res: string) => {
+    try {
+      return t(`admin.roles.resources.${res}`) || RESOURCE_FALLBACKS[res] || res;
+    } catch {
+      return RESOURCE_FALLBACKS[res] || res;
+    }
+  };
+
   return (
-    <div className="p-6">
+    <div className="p-0 sm:p-1">
       {/* Modal Header */}
-      <div className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 border-b border-border pb-4 pr-12 sm:pr-0 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-emerald-400/30 bg-emerald-500/10 text-emerald-400">
-            <KeyRound className="h-5 w-5" />
+            <KeyRound className="h-5 w-5 shrink-0" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-lg font-bold text-foreground">
+              <h3 className="text-lg sm:text-xl font-bold text-foreground">
                 {t("admin.roles.permissionsModal.title")}
               </h3>
-              <span className="rounded-md border border-cyan-400/30 bg-cyan-500/10 px-2 py-0.5 text-xs font-semibold text-cyan-300">
+              <span className="rounded-lg border border-cyan-400/30 bg-cyan-500/10 px-2.5 py-0.5 text-xs font-semibold text-cyan-300">
                 {role.name}
               </span>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="mt-1 text-xs text-muted-foreground">
               {t("admin.roles.permissionsModal.description", { name: role.name })}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-emerald-400">
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
             {t("admin.roles.permissionsModal.grantedCount", {
               granted: selectedIds.length,
               total: allPermissions.length,
@@ -192,7 +199,7 @@ function RolePermissionsForm({
         </div>
       </div>
 
-      {/* Toolbar: Search and Bulk Action */}
+      {/* Toolbar: Search and Bulk Action (Uniform height h-[42px] sm:h-[46px]) */}
       <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
@@ -201,22 +208,22 @@ function RolePermissionsForm({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t("admin.roles.permissionsModal.searchPlaceholder")}
-            className="w-full rounded-xl border border-border bg-card py-2 pl-9 pr-4 text-xs text-foreground outline-none transition hover:border-border-strong focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 placeholder:text-muted"
+            className="w-full rounded-xl border border-border bg-card pl-10 pr-4 h-[42px] sm:h-[46px] text-xs sm:text-sm text-foreground outline-none transition-all hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-1 placeholder:text-muted/60"
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
             onClick={handleSelectAll}
-            className="rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition hover:border-cyan-400/40 hover:text-foreground"
+            className="h-[42px] sm:h-[46px] px-4 rounded-xl border border-border bg-card/60 text-xs sm:text-sm font-semibold text-muted-foreground transition-all duration-200 hover:bg-card hover:text-cyan-300 hover:border-cyan-400/50 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 cursor-pointer select-none"
           >
             {t("admin.roles.permissionsModal.selectAll")}
           </button>
           <button
             type="button"
             onClick={handleDeselectAll}
-            className="rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition hover:border-rose-400/40 hover:text-foreground"
+            className="h-[42px] sm:h-[46px] px-4 rounded-xl border border-border bg-card/60 text-xs sm:text-sm font-semibold text-muted-foreground transition-all duration-200 hover:bg-card hover:text-rose-400 hover:border-rose-400/50 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2 cursor-pointer select-none"
           >
             {t("admin.roles.permissionsModal.deselectAll")}
           </button>
@@ -224,15 +231,15 @@ function RolePermissionsForm({
       </div>
 
       {/* Permissions Grid Grouped by Resource */}
-      <div className="mt-4 max-h-[55vh] overflow-y-auto pr-1 space-y-4">
+      <div className="mt-4 max-h-[55vh] overflow-y-auto pr-1 space-y-4 custom-scrollbar">
         {loadingPermissions ? (
           <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
             <Loader2 className="h-8 w-8 animate-spin text-cyan-400" />
-            <p className="mt-2 text-xs">Đang tải danh mục quyền hệ thống...</p>
+            <p className="mt-2 text-xs">{t("admin.roles.loadingRoles")}</p>
           </div>
         ) : Object.keys(groupedPermissions).length === 0 ? (
           <div className="rounded-xl border border-dashed border-border py-12 text-center text-xs text-muted-foreground">
-            Không có quyền nào phù hợp với từ khóa tìm kiếm.
+            {t("admin.roles.table.noRolesFound")}
           </div>
         ) : (
           Object.entries(groupedPermissions).map(([resource, perms]) => {
@@ -244,19 +251,19 @@ function RolePermissionsForm({
             return (
               <div
                 key={resource}
-                className="rounded-2xl border border-border bg-card/60 p-4 transition hover:border-border-strong shadow-sm"
+                className="rounded-2xl border border-border bg-card/60 p-4 transition-all hover:border-border-strong shadow-sm"
               >
                 {/* Group Header */}
                 <div className="flex items-center justify-between border-b border-border/60 pb-3 mb-3">
                   <div className="flex items-center gap-2.5">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-500/10 border border-cyan-400/20 text-cyan-400">
                       <IconComp className="h-4 w-4 shrink-0" />
                     </div>
                     <div>
-                      <span className="text-xs font-bold text-foreground">
-                        {RESOURCE_LABELS[resource] || resource}
+                      <span className="text-xs sm:text-sm font-bold text-foreground select-none">
+                        {getResourceLabel(resource)}
                       </span>
-                      <span className="ml-2 text-[10px] text-muted-foreground">
+                      <span className="ml-2 text-[11px] text-muted-foreground font-medium">
                         ({selectedInGroup}/{perms.length} đã chọn)
                       </span>
                     </div>
@@ -265,12 +272,12 @@ function RolePermissionsForm({
                   <button
                     type="button"
                     onClick={() => handleToggleGroup(perms)}
-                    className="flex items-center gap-1.5 rounded-lg border border-border/80 px-2.5 py-1 text-[11px] font-medium text-cyan-400 transition hover:bg-cyan-500/10 hover:border-cyan-400/40"
+                    className="flex items-center gap-1.5 rounded-lg border border-border/80 bg-card/80 px-3 py-1.5 text-[11px] font-semibold text-cyan-400 transition-all duration-200 hover:bg-cyan-500/15 hover:border-cyan-400/50 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 cursor-pointer select-none"
                   >
                     {allSelected ? (
-                      <CheckSquare className="h-3.5 w-3.5" />
+                      <CheckSquare className="h-3.5 w-3.5 shrink-0" />
                     ) : (
-                      <Square className="h-3.5 w-3.5" />
+                      <Square className="h-3.5 w-3.5 shrink-0" />
                     )}
                     <span>
                       {allSelected
@@ -281,27 +288,45 @@ function RolePermissionsForm({
                 </div>
 
                 {/* Group Permissions Cards */}
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                   {perms.map((perm) => {
                     const isChecked = selectedIds.includes(perm.id);
+                    const actionUpper = perm.action?.toUpperCase() || "";
+
+                    const getActionBadgeClass = () => {
+                      if (actionUpper.includes("CREATE")) {
+                        return "bg-emerald-500/10 border-emerald-500/30 text-emerald-400";
+                      }
+                      if (actionUpper.includes("READ")) {
+                        return "bg-sky-500/10 border-sky-500/30 text-sky-400";
+                      }
+                      if (actionUpper.includes("UPDATE")) {
+                        return "bg-amber-500/10 border-amber-500/30 text-amber-400";
+                      }
+                      if (actionUpper.includes("DELETE")) {
+                        return "bg-rose-500/10 border-rose-500/30 text-rose-400";
+                      }
+                      return "bg-purple-500/10 border-purple-500/30 text-purple-400";
+                    };
+
                     return (
                       <div
                         key={perm.id}
                         onClick={() => handleToggle(perm.id)}
-                        className={`flex items-start gap-3 rounded-xl p-2.5 border transition cursor-pointer select-none ${
+                        className={`flex items-start gap-3 rounded-xl p-3 border transition-all duration-200 cursor-pointer select-none active:scale-[0.99] ${
                           isChecked
-                            ? "bg-cyan-500/10 border-cyan-400/30 text-cyan-200"
-                            : "bg-background/40 border-border/50 text-muted-foreground hover:border-border-strong hover:bg-card"
+                            ? "bg-gradient-to-br from-cyan-500/15 to-blue-500/10 border-cyan-400/40 text-cyan-200 shadow-[0_0_12px_rgba(6,182,212,0.12)]"
+                            : "bg-background/40 border-border/50 text-muted-foreground hover:border-border-strong hover:bg-card/70"
                         }`}
                       >
                         <input
                           type="checkbox"
                           checked={isChecked}
                           onChange={() => handleToggle(perm.id)}
-                          className="mt-0.5 rounded border-border text-cyan-500 focus:ring-cyan-400/30 cursor-pointer"
+                          className="mt-0.5 h-4 w-4 rounded border-border text-cyan-500 focus:ring-cyan-400/40 cursor-pointer"
                         />
                         <div className="min-w-0 flex-1">
-                          <div className="flex items-center justify-between gap-1">
+                          <div className="flex items-center justify-between gap-1.5">
                             <p
                               className={`text-xs font-semibold ${
                                 isChecked ? "text-cyan-300" : "text-foreground"
@@ -309,12 +334,14 @@ function RolePermissionsForm({
                             >
                               {perm.name}
                             </p>
-                            <span className="text-[10px] uppercase font-mono px-1.5 py-0.2 rounded bg-muted/30 text-muted-foreground">
+                            <span
+                              className={`text-[10px] uppercase font-mono px-2 py-0.5 rounded-md border font-semibold shrink-0 ${getActionBadgeClass()}`}
+                            >
                               {perm.action}
                             </span>
                           </div>
                           {perm.description && (
-                            <p className="mt-0.5 text-[11px] text-muted-foreground line-clamp-2">
+                            <p className="mt-1 text-[11px] text-muted-foreground line-clamp-2">
                               {perm.description}
                             </p>
                           )}
@@ -331,7 +358,7 @@ function RolePermissionsForm({
 
       {/* Footer Actions */}
       <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
-        <span className="text-xs text-muted-foreground">
+        <span className="text-xs sm:text-sm font-semibold text-muted-foreground">
           {selectedIds.length} quyền được gán
         </span>
         <div className="flex items-center gap-3">
@@ -339,19 +366,39 @@ function RolePermissionsForm({
             type="button"
             onClick={onClose}
             disabled={isPending}
-            className="rounded-xl border border-border px-4 py-2 text-xs font-medium text-muted-foreground transition hover:bg-card hover:text-foreground disabled:opacity-50"
+            className="rounded-xl border border-border bg-card/60 px-5 h-[42px] text-xs sm:text-sm font-semibold text-muted-foreground transition-all duration-200 hover:bg-card hover:text-foreground hover:border-border-strong active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 cursor-pointer select-none disabled:opacity-50"
           >
             {t("admin.roles.permissionsModal.cancelBtn")}
           </button>
-          <Button
+          <button
             type="button"
             onClick={handleSave}
             disabled={isPending}
-            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-600 px-5 py-2 text-xs font-semibold text-white shadow-lg shadow-emerald-500/20 transition hover:brightness-110 disabled:opacity-50"
+            className="
+              group relative inline-flex items-center justify-center gap-2 overflow-hidden
+              rounded-xl
+              h-[42px] px-6
+              bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600
+              text-xs sm:text-sm font-semibold text-white
+              shadow-[0_0_25px_rgba(16,185,129,0.25)]
+              transition-all duration-300
+              hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-[0_0_35px_rgba(16,185,129,0.4)] hover:brightness-110
+              active:scale-[0.98]
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-background
+              disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed
+              cursor-pointer select-none
+            "
           >
-            {isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-            <span>{t("admin.roles.permissionsModal.saveBtn")}</span>
-          </Button>
+            <span className="pointer-events-none absolute inset-y-0 -left-24 w-16 rotate-12 bg-white/30 blur-lg transition-all duration-700 group-hover:left-[130%]" />
+            <span className="relative flex items-center gap-2">
+              {isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin shrink-0" />
+              ) : (
+                <ShieldCheck className="h-4 w-4 shrink-0 transition-transform duration-300 group-hover:scale-110" />
+              )}
+              <span>{t("admin.roles.permissionsModal.saveBtn")}</span>
+            </span>
+          </button>
         </div>
       </div>
     </div>

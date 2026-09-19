@@ -17,7 +17,7 @@ import type {
 export const getRolesService = async (
   params?: RoleQueryParams,
 ): Promise<RoleListResponse> => {
-  const response = await api.get<RoleListResponse>("/roles", { params });
+  const response = await api.get<RoleListResponse>("/rbac/roles", { params });
   return response.data;
 };
 
@@ -27,7 +27,7 @@ export const getRolesService = async (
 export const getRoleByIdService = async (
   id: string,
 ): Promise<RoleDetailResponse> => {
-  const response = await api.get<RoleDetailResponse>(`/roles/${id}`);
+  const response = await api.get<RoleDetailResponse>(`/rbac/roles/${id}`);
   return response.data;
 };
 
@@ -37,7 +37,7 @@ export const getRoleByIdService = async (
 export const createRoleService = async (
   payload: CreateRolePayload,
 ): Promise<RoleDetailResponse> => {
-  const response = await api.post<RoleDetailResponse>("/roles", payload);
+  const response = await api.post<RoleDetailResponse>("/rbac/roles", payload);
   return response.data;
 };
 
@@ -48,7 +48,7 @@ export const updateRoleService = async (
   id: string,
   payload: UpdateRolePayload,
 ): Promise<RoleDetailResponse> => {
-  const response = await api.put<RoleDetailResponse>(`/roles/${id}`, payload);
+  const response = await api.put<RoleDetailResponse>(`/rbac/roles/${id}`, payload);
   return response.data;
 };
 
@@ -59,7 +59,7 @@ export const deleteRoleService = async (
   id: string,
 ): Promise<{ success: boolean; message: string }> => {
   const response = await api.delete<{ success: boolean; message: string }>(
-    `/roles/${id}`,
+    `/rbac/roles/${id}`,
   );
   return response.data;
 };
@@ -70,7 +70,7 @@ export const deleteRoleService = async (
 export const getPermissionsService = async (
   params?: PermissionQueryParams,
 ): Promise<PermissionListResponse> => {
-  const response = await api.get<PermissionListResponse>("/permissions", {
+  const response = await api.get<PermissionListResponse>("/rbac/permissions", {
     params,
   });
   return response.data;
@@ -84,7 +84,7 @@ export const syncRolePermissionsService = async (
   payload: SyncRolePermissionsPayload,
 ): Promise<{ success: boolean; data: unknown }> => {
   const response = await api.post<{ success: boolean; data: unknown }>(
-    `/roles/${roleId}/permissions`,
+    `/rbac/roles/${roleId}/permissions`,
     payload,
   );
   return response.data;
@@ -98,7 +98,7 @@ export const assignUserRoleService = async (
   payload: AssignUserRolePayload,
 ): Promise<{ success: boolean; data: unknown }> => {
   const response = await api.put<{ success: boolean; data: unknown }>(
-    `/users/${userId}/role`,
+    `/rbac/users/${userId}/role`,
     payload,
   );
   return response.data;

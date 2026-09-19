@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import RolesHeader from "./RolesHeader";
+import RolesStats from "./RolesStats";
 import RolesFilter from "./RolesFilter";
 import RolesTable from "./RolesTable";
 import Spinner from "@/components/ui/Spinner";
@@ -16,6 +17,7 @@ export default function RolesPage() {
   return (
     <div className="space-y-6">
       <RolesHeader />
+      <RolesStats />
       <Suspense
         fallback={
           <MetalCard className="flex items-center justify-center py-20">

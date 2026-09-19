@@ -5,10 +5,20 @@
       "title": "Vai trò & Phân quyền",
       "description": "Quản lý các vai trò trong hệ thống, thiết lập quyền hạn chi tiết và kiểm soát truy cập phân hệ.",
       "createRoleBtn": "Tạo vai trò mới",
+      "search": "Tìm kiếm",
       "searchPlaceholder": "Tìm kiếm theo tên hoặc mô tả vai trò...",
+      "filterRoleType": "Phân loại",
       "filterAll": "Tất cả vai trò",
       "filterSystem": "Vai trò hệ thống",
       "filterCustom": "Vai trò tùy chỉnh",
+      "clearFilters": "Xóa tất cả bộ lọc",
+      "loadError": "Không thể tải danh sách vai trò. Vui lòng thử lại sau.",
+      "loadingRoles": "Đang tải danh sách vai trò...",
+      "stats": {
+        "totalRoles": "Tổng số vai trò",
+        "systemRoles": "Vai trò hệ thống",
+        "customRoles": "Vai trò tùy chỉnh"
+      },
       "table": {
         "roleName": "Tên vai trò",
         "roleType": "Phân loại",
@@ -31,7 +41,15 @@
         "deleteConfirmTitle": "Xác nhận xóa vai trò",
         "deleteConfirmDesc": "Bạn có chắc chắn muốn xóa vai trò \"{name}\"? Thao tác này không thể hoàn tác.",
         "confirmDeleteBtn": "Xác nhận xóa",
-        "cancelBtn": "Hủy bỏ"
+        "cancelBtn": "Hủy bỏ",
+        "pagination": "Trang {page} / {totalPages} (Tổng {total} vai trò)",
+        "colRole": "Vai trò",
+        "colType": "Phân loại",
+        "colUsers": "Thành viên",
+        "colPermissions": "Quyền hạn",
+        "colActions": "Thao tác",
+        "noDescription": "Chưa có mô tả cho vai trò này.",
+        "moreActions": "Thao tác"
       },
       "createModal": {
         "title": "Tạo Vai Trò Mới",
@@ -114,10 +132,20 @@
     "title": "Vai trò & Phân quyền",
     "description": "Quản lý các vai trò trong hệ thống, thiết lập quyền hạn chi tiết và kiểm soát truy cập phân hệ.",
     "createRoleBtn": "Tạo vai trò mới",
+    "search": "Tìm kiếm",
     "searchPlaceholder": "Tìm kiếm theo tên hoặc mô tả vai trò...",
+    "filterRoleType": "Phân loại",
     "filterAll": "Tất cả vai trò",
     "filterSystem": "Vai trò hệ thống",
     "filterCustom": "Vai trò tùy chỉnh",
+    "clearFilters": "Xóa tất cả bộ lọc",
+    "loadError": "Không thể tải danh sách vai trò. Vui lòng thử lại sau.",
+    "loadingRoles": "Đang tải danh sách vai trò...",
+    "stats": {
+      "totalRoles": "Tổng số vai trò",
+      "systemRoles": "Vai trò hệ thống",
+      "customRoles": "Vai trò tùy chỉnh"
+    },
     "table": {
       "roleName": "Tên vai trò",
       "roleType": "Phân loại",
@@ -139,7 +167,15 @@
       "deleteConfirmTitle": "Xác nhận xóa vai trò",
       "deleteConfirmDesc": "Bạn có chắc chắn muốn xóa vai trò \"{name}\"? Thao tác này không thể hoàn tác.",
       "confirmDeleteBtn": "Xác nhận xóa",
-      "cancelBtn": "Hủy bỏ"
+      "cancelBtn": "Hủy bỏ",
+      "pagination": "Trang {page} / {totalPages} (Tổng {total} vai trò)",
+      "colRole": "Vai trò",
+      "colType": "Phân loại",
+      "colUsers": "Thành viên",
+      "colPermissions": "Quyền hạn",
+      "colActions": "Thao tác",
+      "noDescription": "Chưa có mô tả cho vai trò này.",
+      "moreActions": "Thao tác"
     },
     "createModal": {
       "title": "Tạo Vai Trò Mới",

@@ -64,6 +64,12 @@ export interface PermissionQueryParams {
 export interface RoleListResponse {
   success: boolean;
   data: Role[];
+  meta?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
   pagination?: {
     page: number;
     limit: number;

@@ -5,10 +5,20 @@
       "title": "Roles & Permissions",
       "description": "Manage system roles, configure granular permissions, and control portal access privileges.",
       "createRoleBtn": "Create New Role",
+      "search": "Search",
       "searchPlaceholder": "Search by role name or description...",
+      "filterRoleType": "Role Type",
       "filterAll": "All Roles",
       "filterSystem": "System Roles",
       "filterCustom": "Custom Roles",
+      "clearFilters": "Clear all filters",
+      "loadError": "Failed to load roles. Please try again later.",
+      "loadingRoles": "Loading roles...",
+      "stats": {
+        "totalRoles": "Total Roles",
+        "systemRoles": "System Roles",
+        "customRoles": "Custom Roles"
+      },
       "table": {
         "roleName": "Role Name",
         "roleType": "Type",
@@ -31,7 +41,15 @@
         "deleteConfirmTitle": "Confirm Role Deletion",
         "deleteConfirmDesc": "Are you sure you want to delete role \"{name}\"? This action cannot be undone.",
         "confirmDeleteBtn": "Confirm Delete",
-        "cancelBtn": "Cancel"
+        "cancelBtn": "Cancel",
+        "pagination": "Page {page} of {totalPages} ({total} roles in total)",
+        "colRole": "Role",
+        "colType": "Type",
+        "colUsers": "Members",
+        "colPermissions": "Permissions",
+        "colActions": "Actions",
+        "noDescription": "No description provided for this role.",
+        "moreActions": "Actions"
       },
       "createModal": {
         "title": "Create New Role",
@@ -114,10 +132,20 @@
     "title": "Roles & Permissions",
     "description": "Manage system roles, configure granular permissions, and control portal access privileges.",
     "createRoleBtn": "Create New Role",
+    "search": "Search",
     "searchPlaceholder": "Search by role name or description...",
+    "filterRoleType": "Role Type",
     "filterAll": "All Roles",
     "filterSystem": "System Roles",
     "filterCustom": "Custom Roles",
+    "clearFilters": "Clear all filters",
+    "loadError": "Failed to load roles. Please try again later.",
+    "loadingRoles": "Loading roles...",
+    "stats": {
+      "totalRoles": "Total Roles",
+      "systemRoles": "System Roles",
+      "customRoles": "Custom Roles"
+    },
     "table": {
       "roleName": "Role Name",
       "roleType": "Type",
@@ -139,7 +167,15 @@
       "deleteConfirmTitle": "Confirm Role Deletion",
       "deleteConfirmDesc": "Are you sure you want to delete role \"{name}\"? This action cannot be undone.",
       "confirmDeleteBtn": "Confirm Delete",
-      "cancelBtn": "Cancel"
+      "cancelBtn": "Cancel",
+      "pagination": "Page {page} of {totalPages} ({total} roles in total)",
+      "colRole": "Role",
+      "colType": "Type",
+      "colUsers": "Members",
+      "colPermissions": "Permissions",
+      "colActions": "Actions",
+      "noDescription": "No description provided for this role.",
+      "moreActions": "Actions"
     },
     "createModal": {
       "title": "Create New Role",

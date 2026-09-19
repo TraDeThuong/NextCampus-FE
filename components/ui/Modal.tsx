@@ -91,10 +91,10 @@ function Open({ children, opens }: OpenProps) {
 }
 
 const windowSizes = {
-  sm: "max-w-[min(92vw,36rem)] p-5 sm:p-6",
-  md: "max-w-[min(94vw,56rem)] p-6 sm:p-8",
-  lg: "max-w-[min(96vw,72rem)] p-6 sm:p-10",
-  xl: "max-w-[min(96vw,90rem)] p-6 sm:p-10",
+  sm: "max-w-[min(96vw,36rem)] p-4 sm:p-6",
+  md: "max-w-[min(96vw,56rem)] p-4 sm:p-8",
+  lg: "max-w-[min(98vw,72rem)] p-4 sm:p-8 md:p-10",
+  xl: "max-w-[min(98vw,90rem)] p-4 sm:p-8 md:p-10",
 };
 
 function Window({ children, name, size = "lg", title, onClose }: WindowProps) {
@@ -143,7 +143,7 @@ function Window({ children, name, size = "lg", title, onClose }: WindowProps) {
         fixed inset-0 z-[1000]
         flex items-center justify-center
         bg-black/70
-        p-4 sm:p-6
+        p-2.5 sm:p-6
         backdrop-blur-md
         animate-fadeIn
       "
@@ -152,10 +152,10 @@ function Window({ children, name, size = "lg", title, onClose }: WindowProps) {
         ref={ref}
         className={`
           relative w-full
-          max-h-[calc(100vh-3rem)]
+          max-h-[calc(100dvh-1.25rem)] sm:max-h-[calc(100vh-3rem)]
           flex flex-col
 
-          rounded-[2rem]
+          rounded-2xl sm:rounded-[2rem]
           border border-border
           bg-[#0c1222]/95 dark:bg-[#0c1222]/95
           shadow-glass
@@ -166,14 +166,14 @@ function Window({ children, name, size = "lg", title, onClose }: WindowProps) {
           before:pointer-events-none
           before:absolute
           before:inset-0
-          before:rounded-[2rem]
+          before:rounded-2xl sm:before:rounded-[2rem]
           before:border
           before:border-white/10
 
           after:pointer-events-none
           after:absolute
           after:inset-0
-          after:rounded-[2rem]
+          after:rounded-2xl sm:after:rounded-[2rem]
           after:shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]
 
           ${windowSizes[size]}
@@ -204,8 +204,8 @@ function Window({ children, name, size = "lg", title, onClose }: WindowProps) {
           onClick={handleClose}
           aria-label="Đóng"
           className="
-            absolute right-4 top-4 z-30
-            flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center
+            absolute right-3 top-3 sm:right-4 sm:top-4 z-30
+            flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center
 
             rounded-xl sm:rounded-2xl
             border border-border
@@ -226,7 +226,7 @@ function Window({ children, name, size = "lg", title, onClose }: WindowProps) {
             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-light
           "
         >
-          <HiXMark className="h-6 w-6 shrink-0" />
+          <HiXMark className="h-5 w-5 sm:h-6 sm:w-6 shrink-0" />
         </button>
 
         <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
