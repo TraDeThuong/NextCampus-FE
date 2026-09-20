@@ -65,7 +65,16 @@
       "noMembersToAllocate": "Nhóm chưa có thành viên nào. Hãy cập nhật thành viên trước khi phân chia task.",
       "allocationSuccess": "Đã phân công {count} task cho các thành viên thành công.",
       "allocationFailed": "Phân bổ task thất bại. Vui lòng thử lại.",
-      "taskQuotaLabel": "Chỉ tiêu số task"
+      "taskQuotaLabel": "Chỉ tiêu số task",
+      "totalGroups": "Tổng nhóm công việc",
+      "activeGroups": "Đang hoạt động",
+      "totalMembers": "Tổng thành viên",
+      "loadStatsError": "Không thể tải số liệu thống kê nhóm công việc",
+      "loadError": "Không thể tải danh sách nhóm công việc. Vui lòng thử lại sau.",
+      "noFilterResults": "Không tìm thấy nhóm công việc nào phù hợp với bộ lọc.",
+      "resetFilter": "Đặt lại bộ lọc",
+      "reload": "Làm mới dữ liệu",
+      "activeFiltersCount": "({count} bộ lọc đang chọn)"
     }
   },
   "taskGroups": {
@@ -133,6 +142,15 @@
     "noMembersToAllocate": "Nhóm chưa có thành viên nào. Hãy cập nhật thành viên trước khi phân chia task.",
     "allocationSuccess": "Đã phân công {count} task cho các thành viên thành công.",
     "allocationFailed": "Phân bổ task thất bại. Vui lòng thử lại.",
-    "taskQuotaLabel": "Chỉ tiêu số task"
+    "taskQuotaLabel": "Chỉ tiêu số task",
+    "totalGroups": "Tổng nhóm công việc",
+    "activeGroups": "Đang hoạt động",
+    "totalMembers": "Tổng thành viên",
+    "loadStatsError": "Không thể tải số liệu thống kê nhóm công việc",
+    "loadError": "Không thể tải danh sách nhóm công việc. Vui lòng thử lại sau.",
+    "noFilterResults": "Không tìm thấy nhóm công việc nào phù hợp với bộ lọc.",
+    "resetFilter": "Đặt lại bộ lọc",
+    "reload": "Làm mới dữ liệu",
+    "activeFiltersCount": "({count} bộ lọc đang chọn)"
   }
 }

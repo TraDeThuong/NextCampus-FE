@@ -1,42 +1,44 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Building2, Briefcase, Users, AlertTriangle } from "lucide-react";
-import { useDepartments } from "@/hooks/department/useDepartments";
+import { useMemo } from "react";
+import { Layers, CheckCircle2, Users, AlertTriangle } from "lucide-react";
+import { useTaskGroups } from "@/hooks/task-group/useTaskGroups";
+import { extractTaskGroups } from "@/types/task-group";
 import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
 
-export default function DepartmentStats() {
+export default function TaskGroupStats() {
   const t = useTranslations();
-  const { data, isPending, isError } = useDepartments();
+  const { data, isLoading, isError } = useTaskGroups();
 
-  const departments = data?.data ?? [];
+  const taskGroups = useMemo(() => extractTaskGroups(data?.data), [data?.data]);
 
-  const totalDepartments = departments.length;
-  const totalPositions = departments.reduce(
-    (acc, dept) => acc + (dept.positions?.length ?? dept.positionsCount ?? 0),
-    0
-  );
-  const departmentsWithLeader = departments.filter(
-    (dept) => (dept.leaders?.length ?? 0) > 0
-  ).length;
+  const totalGroups = taskGroups.length;
+  const activeGroups = taskGroups.filter((g) => g.status === "ACTIVE").length;
+
+  const memberSet = new Set<string>();
+  taskGroups.forEach((group) => {
+    group.members?.forEach((m) => memberSet.add(m.internId));
+  });
+  const totalMembers = memberSet.size;
 
   const cards = [
     {
-      title: t("admin.department.totalDepartments"),
-      value: totalDepartments,
-      icon: Building2,
+      title: t("leader.taskGroups.totalGroups"),
+      value: totalGroups,
+      icon: Layers,
       iconBg: "from-sky-500/20 to-cyan-400/10",
     },
     {
-      title: t("admin.department.totalPositions"),
-      value: totalPositions,
-      icon: Briefcase,
+      title: t("leader.taskGroups.activeGroups"),
+      value: activeGroups,
+      icon: CheckCircle2,
       iconBg: "from-emerald-500/20 to-green-400/10",
     },
     {
-      title: t("admin.department.assignedLeaders"),
-      value: departmentsWithLeader,
+      title: t("leader.taskGroups.totalMembers"),
+      value: totalMembers,
       icon: Users,
       iconBg: "from-purple-500/20 to-indigo-400/10",
     },
@@ -47,13 +49,13 @@ export default function DepartmentStats() {
       <div className="flex items-center gap-3 rounded-3xl border border-rose-500/20 bg-rose-500/10 p-6 backdrop-blur-xl shadow-inner">
         <AlertTriangle className="h-5 w-5 shrink-0 text-rose-400" />
         <p className="text-sm text-rose-300">
-          {t("admin.department.loadStatsError")}
+          {t("leader.taskGroups.loadStatsError")}
         </p>
       </div>
     );
   }
 
-  if (isPending) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <Spinner size="lg" />

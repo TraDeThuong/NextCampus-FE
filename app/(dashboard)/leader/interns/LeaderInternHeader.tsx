@@ -8,15 +8,19 @@ export default function LeaderInternHeader() {
   const t = useTranslations("leader.interns");
 
   return (
-    <MetalCard>
-      <div className="rounded-3xl p-6">
+    <MetalCard className="p-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-sky-500/20 to-cyan-400/10">
-            <Users className="h-6 w-6 text-cyan-300" />
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-sky-500/20 to-cyan-400/10 shadow-lg">
+            <Users className="h-6 w-6 text-cyan-300 shrink-0" />
           </div>
-          <div>
-            <h2 className="text-2xl font-bold metal-text">{t("title")}</h2>
-            <p className="mt-1 text-sm text-slate-500">{t("description")}</p>
+          <div className="space-y-1">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight metal-text">
+              {t("title")}
+            </h1>
+            <p className="text-xs sm:text-sm text-muted">
+              {t("description")}
+            </p>
           </div>
         </div>
       </div>

@@ -56,7 +56,11 @@ export default function TaskGroupQuotaAllocationModal({
   // Equal split calculation
   const calculatedAssignments = useMemo(() => {
     if (members.length === 0 || unassignedTasks.length === 0) {
-      return [] as { internId: string; internName: string; task: TaskGroupTask }[];
+      return [] as {
+        internId: string;
+        internName: string;
+        task: TaskGroupTask;
+      }[];
     }
 
     const assignments: {
@@ -145,25 +149,27 @@ export default function TaskGroupQuotaAllocationModal({
     <div className="px-2 py-4 text-left">
       {/* Header with standard icon wrapper */}
       <div className="flex items-center gap-2 mb-1">
-        <PieChart className="w-5 h-5 text-cyan-400 shrink-0" />
-        <h2 className="text-lg font-bold text-white">
+        <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-cyan-400/30 bg-cyan-500/10 text-cyan-400 shrink-0">
+          <PieChart className="w-4 h-4" />
+        </div>
+        <h2 className="text-lg font-bold text-foreground">
           {t("leader.taskGroups.allocationModalTitle")}
         </h2>
       </div>
-      <p className="text-xs text-slate-400 mb-6">
+      <p className="text-xs text-muted mb-6">
         {t("leader.taskGroups.allocationModalDesc")} (
         <span className="text-cyan-300 font-medium">{taskGroup.name}</span>)
       </p>
 
       {/* Task Summary Badges */}
-      <div className="grid grid-cols-3 gap-3 mb-6 p-3 rounded-2xl border border-white/10 bg-white/[0.02]">
+      <div className="grid grid-cols-3 gap-3 mb-6 p-3 rounded-2xl border border-border bg-card/60">
         <div className="text-center">
-          <p className="text-xs text-slate-400 mb-0.5">
+          <p className="text-xs text-muted mb-0.5">
             {t("leader.taskGroups.totalTasks")}
           </p>
-          <p className="text-lg font-bold text-white">{tasks.length}</p>
+          <p className="text-lg font-bold text-foreground">{tasks.length}</p>
         </div>
-        <div className="text-center border-x border-white/5">
+        <div className="text-center border-x border-border/60">
           <p className="text-xs text-emerald-400 mb-0.5">
             {t("leader.taskGroups.assignedTasks")}
           </p>
@@ -182,14 +188,14 @@ export default function TaskGroupQuotaAllocationModal({
       </div>
 
       {/* Mode selection tabs */}
-      <div className="flex items-center gap-2 mb-5 p-1 bg-[#090d16] border border-white/10 rounded-xl">
+      <div className="flex items-center gap-2 mb-5 p-1 bg-card/80 border border-border rounded-xl">
         <button
           type="button"
           onClick={() => setMode("equal")}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition active:scale-[0.98] ${
             mode === "equal"
-              ? "bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 shadow-sm"
-              : "text-slate-400 hover:text-white"
+              ? "bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 shadow-xs"
+              : "text-muted hover:text-foreground"
           }`}
         >
           <Sparkles className="w-4 h-4 shrink-0" />
@@ -199,10 +205,10 @@ export default function TaskGroupQuotaAllocationModal({
         <button
           type="button"
           onClick={() => setMode("custom")}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition active:scale-[0.98] ${
             mode === "custom"
-              ? "bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 shadow-sm"
-              : "text-slate-400 hover:text-white"
+              ? "bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 shadow-xs"
+              : "text-muted hover:text-foreground"
           }`}
         >
           <Sliders className="w-4 h-4 shrink-0" />
@@ -215,16 +221,16 @@ export default function TaskGroupQuotaAllocationModal({
           <Loader2 className="h-6 w-6 text-cyan-400 animate-spin" />
         </div>
       ) : members.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-8 text-center border border-dashed border-white/10 rounded-2xl">
+        <div className="flex flex-col items-center justify-center py-8 text-center border border-dashed border-border rounded-2xl bg-card/30">
           <AlertCircle className="w-8 h-8 text-amber-400 mb-2" />
-          <p className="text-sm text-slate-300">
+          <p className="text-sm text-foreground">
             {t("leader.taskGroups.noMembersToAllocate")}
           </p>
         </div>
       ) : unassignedTasks.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-8 text-center border border-dashed border-white/10 rounded-2xl">
+        <div className="flex flex-col items-center justify-center py-8 text-center border border-dashed border-border rounded-2xl bg-card/30">
           <CheckCircle2 className="w-8 h-8 text-emerald-400 mb-2" />
-          <p className="text-sm text-slate-300">
+          <p className="text-sm text-foreground">
             {t("leader.taskGroups.noUnassignedTasks")}
           </p>
         </div>
@@ -233,8 +239,8 @@ export default function TaskGroupQuotaAllocationModal({
           {/* Members Quota Configuration */}
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Users className="w-4 h-4 text-slate-400 shrink-0" />
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <Users className="w-4 h-4 text-muted shrink-0" />
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">
                 {t("leader.taskGroups.membersSectionTitle")} ({members.length})
               </h3>
             </div>
@@ -248,13 +254,13 @@ export default function TaskGroupQuotaAllocationModal({
                 return (
                   <div
                     key={member.internId}
-                    className="flex items-center justify-between gap-3 p-2.5 rounded-xl border border-white/5 bg-white/[0.02]"
+                    className="flex items-center justify-between gap-3 p-2.5 rounded-xl border border-border bg-card/50"
                   >
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-white truncate">
+                      <p className="text-sm font-medium text-foreground truncate">
                         {member.intern.fullName}
                       </p>
-                      <p className="text-xs text-slate-400 truncate">
+                      <p className="text-xs text-muted truncate">
                         {member.intern.position?.name ||
                           member.intern.department?.name ||
                           member.intern.user.email}
@@ -264,7 +270,7 @@ export default function TaskGroupQuotaAllocationModal({
                     <div className="flex items-center gap-2 shrink-0">
                       {mode === "custom" ? (
                         <div className="flex items-center gap-1.5">
-                          <label className="text-xs text-slate-400">
+                          <label className="text-xs text-muted">
                             {t("leader.taskGroups.taskQuotaLabel")}:
                           </label>
                           <input
@@ -278,11 +284,11 @@ export default function TaskGroupQuotaAllocationModal({
                                 parseInt(e.target.value, 10) || 0,
                               )
                             }
-                            className="w-16 rounded-lg border border-white/10 bg-white/5 py-1 px-2 text-center text-xs text-white outline-none focus:border-cyan-400/50"
+                            className="h-8 w-16 rounded-lg border border-border bg-card py-1 px-2 text-center text-xs text-foreground outline-none focus:border-cyan-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                         </div>
                       ) : (
-                        <span className="inline-flex items-center gap-1 rounded-md bg-cyan-400/10 px-2 py-0.5 text-xs font-medium text-cyan-300 ring-1 ring-inset ring-cyan-400/20">
+                        <span className="inline-flex items-center gap-1 rounded-md bg-cyan-400/10 border border-cyan-400/20 px-2 py-0.5 text-xs font-medium text-cyan-300">
                           {t("leader.taskGroups.tasksCount", {
                             count: assignedCount,
                           })}
@@ -297,7 +303,7 @@ export default function TaskGroupQuotaAllocationModal({
 
           {/* Allocation Preview List */}
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted mb-2">
               {t("leader.taskGroups.previewAllocation")} (
               {calculatedAssignments.length} / {unassignedTasks.length})
             </h3>
@@ -306,9 +312,9 @@ export default function TaskGroupQuotaAllocationModal({
               {calculatedAssignments.slice(0, 10).map((assignment) => (
                 <div
                   key={assignment.task.id}
-                  className="flex items-center justify-between text-xs py-1 px-2 rounded-lg bg-white/[0.01] border border-white/5"
+                  className="flex items-center justify-between text-xs py-1.5 px-3 rounded-lg bg-card/40 border border-border"
                 >
-                  <span className="text-slate-300 truncate max-w-[200px]">
+                  <span className="text-foreground/90 truncate max-w-[200px]">
                     {assignment.task.title}
                   </span>
                   <div className="flex items-center gap-1 text-cyan-400 font-medium shrink-0">
@@ -319,7 +325,7 @@ export default function TaskGroupQuotaAllocationModal({
               ))}
 
               {calculatedAssignments.length > 10 && (
-                <p className="text-[11px] text-slate-500 text-center italic py-1">
+                <p className="text-[11px] text-muted text-center italic py-1">
                   + {calculatedAssignments.length - 10} task khác...
                 </p>
               )}
@@ -329,12 +335,12 @@ export default function TaskGroupQuotaAllocationModal({
       )}
 
       {/* Modal Actions */}
-      <div className="flex justify-end gap-3 pt-5 mt-4 border-t border-white/10">
+      <div className="flex justify-end gap-3 pt-5 mt-4 border-t border-border/40">
         <button
           type="button"
           onClick={onCloseModal}
           disabled={isSubmitting}
-          className="rounded-xl border border-white/10 bg-white/5 px-5 py-2 text-sm text-slate-300 hover:text-white transition"
+          className="h-[42px] sm:h-[46px] rounded-xl border border-border bg-card px-5 text-sm font-medium text-muted hover:text-foreground hover:border-border-strong active:scale-95 transition disabled:opacity-50"
         >
           {t("leader.taskGroups.cancel")}
         </button>
@@ -347,15 +353,15 @@ export default function TaskGroupQuotaAllocationModal({
             calculatedAssignments.length === 0 ||
             members.length === 0
           }
-          className="flex items-center gap-2 rounded-xl bg-cyan-600 px-5 py-2 text-sm font-semibold text-white hover:bg-cyan-500 disabled:opacity-50 transition"
+          className="h-[42px] sm:h-[46px] inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-(--primary-main) to-(--primary-light) px-6 text-sm font-semibold text-white shadow-lg transition hover:brightness-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              {t("leader.taskGroups.applying")}
+              <span>{t("leader.taskGroups.applying")}</span>
             </>
           ) : (
-            t("leader.taskGroups.applyAllocation")
+            <span>{t("leader.taskGroups.applyAllocation")}</span>
           )}
         </button>
       </div>

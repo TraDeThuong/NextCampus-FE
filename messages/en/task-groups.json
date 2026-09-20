@@ -65,7 +65,16 @@
       "noMembersToAllocate": "This group has no members yet. Please add members before allocating tasks.",
       "allocationSuccess": "Successfully allocated {count} tasks to members.",
       "allocationFailed": "Failed to allocate tasks. Please try again.",
-      "taskQuotaLabel": "Task Quota Target"
+      "taskQuotaLabel": "Task Quota Target",
+      "totalGroups": "Total Task Groups",
+      "activeGroups": "Active Groups",
+      "totalMembers": "Total Members",
+      "loadStatsError": "Failed to load task group statistics",
+      "loadError": "Failed to load task groups. Please try again later.",
+      "noFilterResults": "No task groups match your filter criteria.",
+      "resetFilter": "Reset filters",
+      "reload": "Refresh data",
+      "activeFiltersCount": "({count} active filters)"
     }
   },
   "taskGroups": {
@@ -133,6 +142,15 @@
     "noMembersToAllocate": "This group has no members yet. Please add members before allocating tasks.",
     "allocationSuccess": "Successfully allocated {count} tasks to members.",
     "allocationFailed": "Failed to allocate tasks. Please try again.",
-    "taskQuotaLabel": "Task Quota Target"
+    "taskQuotaLabel": "Task Quota Target",
+    "totalGroups": "Total Task Groups",
+    "activeGroups": "Active Groups",
+    "totalMembers": "Total Members",
+    "loadStatsError": "Failed to load task group statistics",
+    "loadError": "Failed to load task groups. Please try again later.",
+    "noFilterResults": "No task groups match your filter criteria.",
+    "resetFilter": "Reset filters",
+    "reload": "Refresh data",
+    "activeFiltersCount": "({count} active filters)"
   }
 }

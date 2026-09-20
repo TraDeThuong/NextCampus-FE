@@ -74,9 +74,45 @@ export interface TaskGroupSuccessResponse {
   data: TaskGroup;
 }
 
+export interface TaskGroupPaginatedPayload {
+  data: TaskGroup[];
+  meta?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export type TaskGroupData = TaskGroup[] | TaskGroupPaginatedPayload;
+
 export interface TaskGroupListResponse {
   success: boolean;
   data: TaskGroup[];
+  meta?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export interface TaskGroupApiResponse {
+  success?: boolean;
+  data?: TaskGroupData;
+  meta?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export function extractTaskGroups(data?: TaskGroupData | null): TaskGroup[] {
+  if (!data) return [];
+  if (Array.isArray(data)) return data;
+  if ("data" in data && Array.isArray(data.data)) return data.data;
+  return [];
 }
 
 export interface TaskGroupProgressResponse {

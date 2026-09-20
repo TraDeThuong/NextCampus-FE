@@ -1,6 +1,7 @@
 import api from "@/lib/axios";
 import type {
   TaskGroupListResponse,
+  TaskGroupApiResponse,
   TaskGroupSuccessResponse,
   TaskGroupProgressResponse,
   TaskGroupTasksResponse,
@@ -18,8 +19,29 @@ import type { MessageSuccessResponse } from "@/types/auth";
 export const taskGroupService = {
   // GET /task-groups
   getAll: async (params?: TaskGroupQueryParams): Promise<TaskGroupListResponse> => {
-    const response = await api.get<TaskGroupListResponse>("/task-groups", { params });
-    return response.data;
+    const response = await api.get<TaskGroupApiResponse>("/task-groups", { params });
+    const payload = response.data;
+
+    // Normalize response: BE v2 returns { success: true, data: { data: [...], meta: {...} } }
+    // while FE types and legacy callers expect { success: true, data: [...], meta: {...} }
+    if (
+      payload &&
+      payload.data &&
+      !Array.isArray(payload.data) &&
+      Array.isArray(payload.data.data)
+    ) {
+      return {
+        success: payload.success ?? true,
+        data: payload.data.data,
+        meta: payload.data.meta,
+      };
+    }
+
+    return {
+      success: payload?.success ?? true,
+      data: Array.isArray(payload?.data) ? payload.data : [],
+      meta: payload?.meta,
+    };
   },
 
   // GET /task-groups/:id

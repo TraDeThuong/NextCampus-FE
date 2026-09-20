@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Layers, Loader2, X, Search, Check } from "lucide-react";
+import { Layers, Loader2, X, Search, Check, AlertCircle } from "lucide-react";
 import { useUpdateTaskGroup } from "@/hooks/task-group/useUpdateTaskGroup";
 import { useDepartments } from "@/hooks/department/useDepartments";
 import { useInterns } from "@/hooks/intern/useInterns";
+import Select, { type SelectOption } from "@/components/ui/Select";
 import type { TaskGroup, TaskGroupStatus } from "@/types/task-group";
 
 interface TaskGroupEditModalProps {
@@ -22,15 +23,17 @@ export default function TaskGroupEditModal({
   const { data: deptData } = useDepartments();
   const { data: internsData } = useInterns({ limit: 100 });
 
-  const departments = deptData?.data ?? [];
-  const allInterns = internsData?.data ?? [];
+  const departments = useMemo(() => deptData?.data ?? [], [deptData]);
+  const allInterns = useMemo(() => internsData?.data ?? [], [internsData]);
 
   const [name, setName] = useState(taskGroup.name);
   const [description, setDescription] = useState(taskGroup.description || "");
   const [departmentId, setDepartmentId] = useState<string>(
     taskGroup.departmentId || "",
   );
-  const [status, setStatus] = useState<TaskGroupStatus>(taskGroup.status || "ACTIVE");
+  const [status, setStatus] = useState<TaskGroupStatus>(
+    taskGroup.status || "ACTIVE",
+  );
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>(
     taskGroup.members?.map((m) => m.internId) || [],
   );
@@ -40,14 +43,36 @@ export default function TaskGroupEditModal({
   );
   const [nameError, setNameError] = useState("");
 
-  const filteredInterns = allInterns.filter((intern) => {
-    if (!intern.user?.isActive && intern.status !== "ACTIVE") return false;
-    const matchesSearch =
-      intern.fullName.toLowerCase().includes(searchIntern.toLowerCase()) ||
-      (intern.user?.email || "").toLowerCase().includes(searchIntern.toLowerCase());
-    const matchesDept = !departmentId || intern.department?.id === departmentId;
-    return matchesSearch && matchesDept;
-  });
+  const deptOptions: SelectOption[] = useMemo(
+    () => [
+      { value: "", label: t("leader.taskGroups.selectDept") },
+      ...departments.map((dept) => ({
+        value: dept.id,
+        label: dept.name,
+      })),
+    ],
+    [departments, t],
+  );
+
+  const statusOptions: SelectOption[] = useMemo(
+    () => [
+      { value: "ACTIVE", label: t("leader.taskGroups.statusActive") },
+      { value: "COMPLETED", label: t("leader.taskGroups.statusCompleted") },
+      { value: "ARCHIVED", label: t("leader.taskGroups.statusArchived") },
+    ],
+    [t],
+  );
+
+  const filteredInterns = useMemo(() => {
+    return allInterns.filter((intern) => {
+      if (!intern.user?.isActive && intern.status !== "ACTIVE") return false;
+      const matchesSearch =
+        intern.fullName.toLowerCase().includes(searchIntern.toLowerCase()) ||
+        (intern.user?.email || "").toLowerCase().includes(searchIntern.toLowerCase());
+      const matchesDept = !departmentId || intern.department?.id === departmentId;
+      return matchesSearch && matchesDept;
+    });
+  }, [allInterns, searchIntern, departmentId]);
 
   const toggleMember = (id: string) => {
     setSelectedMemberIds((prev) =>
@@ -85,20 +110,22 @@ export default function TaskGroupEditModal({
 
   return (
     <div className="px-2 py-4 text-left">
-      <div className="flex items-center gap-2 mb-2">
-        <Layers className="w-5 h-5 text-cyan-400 shrink-0" />
-        <h2 className="text-lg font-bold text-white">
+      <div className="flex items-center gap-2 mb-1">
+        <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-cyan-400/30 bg-cyan-500/10 text-cyan-400 shrink-0">
+          <Layers className="w-4 h-4" />
+        </div>
+        <h2 className="text-lg font-bold text-foreground">
           {t("leader.taskGroups.editTitle")}
         </h2>
       </div>
-      <p className="text-xs text-slate-400 mb-5">
+      <p className="text-xs text-muted mb-5">
         {t("leader.taskGroups.editDescription")}
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Name */}
-        <div>
-          <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center gap-1">
             {t("leader.taskGroups.nameLabel")}
           </label>
           <input
@@ -109,16 +136,28 @@ export default function TaskGroupEditModal({
               if (nameError) setNameError("");
             }}
             placeholder={t("leader.taskGroups.namePlaceholder")}
-            className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 px-3 text-sm text-white outline-none transition focus:border-cyan-400/50 placeholder:text-slate-600"
+            className={`
+              w-full rounded-xl border bg-card px-4 py-2.5 sm:py-3
+              h-[42px] sm:h-[46px] text-sm text-foreground shadow-xs
+              outline-none transition-all duration-200 placeholder:text-muted
+              ${
+                nameError
+                  ? "border-destructive focus:ring-2 focus:ring-destructive/30"
+                  : "border-border hover:border-border-strong focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20"
+              }
+            `}
           />
           {nameError && (
-            <p className="text-xs text-red-400 mt-1">{nameError}</p>
+            <p className="text-xs text-destructive flex items-center gap-1.5 mt-0.5 animate-fadeIn">
+              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+              <span>{nameError}</span>
+            </p>
           )}
         </div>
 
         {/* Description */}
-        <div>
-          <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center gap-1">
             {t("leader.taskGroups.descLabel")}
           </label>
           <textarea
@@ -126,49 +165,32 @@ export default function TaskGroupEditModal({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder={t("leader.taskGroups.descPlaceholder")}
-            className="w-full rounded-xl border border-white/10 bg-white/5 py-2 px-3 text-sm text-white outline-none transition focus:border-cyan-400/50 placeholder:text-slate-600 resize-none"
+            className="w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground shadow-xs outline-none transition hover:border-border-strong focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 placeholder:text-muted resize-none"
           />
         </div>
 
         {/* Department & Status */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
-              {t("leader.taskGroups.deptLabel")}
-            </label>
-            <select
-              value={departmentId}
-              onChange={(e) => setDepartmentId(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-[#0f172a] py-2.5 px-3 text-sm text-white outline-none transition focus:border-cyan-400/50"
-            >
-              <option value="">{t("leader.taskGroups.selectDept")}</option>
-              {departments.map((dept) => (
-                <option key={dept.id} value={dept.id}>
-                  {dept.name}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Select
+            label={t("leader.taskGroups.deptLabel")}
+            placeholder={t("leader.taskGroups.selectDept")}
+            options={deptOptions}
+            value={departmentId}
+            onChange={(val) => setDepartmentId(val)}
+            searchable={departments.length > 6}
+          />
 
-          <div>
-            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
-              {t("leader.taskGroups.statusLabel")}
-            </label>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as TaskGroupStatus)}
-              className="w-full rounded-xl border border-white/10 bg-[#0f172a] py-2.5 px-3 text-sm text-white outline-none transition focus:border-cyan-400/50"
-            >
-              <option value="ACTIVE">{t("leader.taskGroups.statusActive")}</option>
-              <option value="COMPLETED">{t("leader.taskGroups.statusCompleted")}</option>
-              <option value="ARCHIVED">{t("leader.taskGroups.statusArchived")}</option>
-            </select>
-          </div>
+          <Select
+            label={t("leader.taskGroups.statusLabel")}
+            options={statusOptions}
+            value={status}
+            onChange={(val) => setStatus(val as TaskGroupStatus)}
+          />
         </div>
 
         {/* Max workload days */}
-        <div>
-          <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center gap-1">
             {t("leader.taskGroups.maxWorkloadLabel")}
           </label>
           <input
@@ -176,34 +198,38 @@ export default function TaskGroupEditModal({
             min={1}
             max={90}
             value={maxWorkloadDays}
-            onChange={(e) => setMaxWorkloadDays(parseInt(e.target.value, 10) || 14)}
-            className="w-full rounded-xl border border-white/10 bg-white/5 py-2 px-3 text-sm text-white outline-none transition focus:border-cyan-400/50"
+            onChange={(e) =>
+              setMaxWorkloadDays(parseInt(e.target.value, 10) || 14)
+            }
+            className="w-full rounded-xl border border-border bg-card px-4 h-[42px] sm:h-[46px] text-sm text-foreground shadow-xs outline-none transition hover:border-border-strong focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
         </div>
 
         {/* Member allocation multi-select */}
-        <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
-              {t("leader.taskGroups.selectMembersLabel")} ({selectedMemberIds.length})
-            </label>
-          </div>
+        <div className="flex flex-col gap-1.5 pt-1">
+          <label className="text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center justify-between">
+            <span>{t("leader.taskGroups.selectMembersLabel")}</span>
+            <span className="text-xs text-cyan-400 font-semibold">
+              ({selectedMemberIds.length})
+            </span>
+          </label>
 
           {/* Selected chips */}
           {selectedMemberIds.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mb-2 max-h-20 overflow-y-auto p-2 bg-white/[0.02] border border-white/5 rounded-xl">
+            <div className="flex flex-wrap gap-1.5 mb-1 max-h-24 overflow-y-auto p-2 bg-card/80 border border-border rounded-xl">
               {selectedMemberIds.map((id) => {
                 const intern = allInterns.find((i) => i.id === id);
                 return (
                   <span
                     key={id}
-                    className="inline-flex items-center gap-1 rounded-lg bg-cyan-500/10 px-2 py-0.5 text-xs text-cyan-300 ring-1 ring-inset ring-cyan-500/20"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-cyan-500/10 border border-cyan-400/20 px-2.5 py-1 text-xs text-cyan-300 shadow-xs"
                   >
-                    {intern?.fullName || id}
+                    <span>{intern?.fullName || id}</span>
                     <button
                       type="button"
                       onClick={() => toggleMember(id)}
-                      className="hover:text-red-400 transition"
+                      className="hover:text-rose-400 transition"
+                      aria-label="Remove member"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -214,21 +240,21 @@ export default function TaskGroupEditModal({
           )}
 
           {/* Search intern input */}
-          <div className="relative mb-2">
-            <Search className="w-4 h-4 absolute left-3 top-3 text-slate-500" />
+          <div className="relative">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
             <input
               type="text"
               value={searchIntern}
               onChange={(e) => setSearchIntern(e.target.value)}
               placeholder={t("leader.taskGroups.searchInternPlaceholder")}
-              className="w-full rounded-xl border border-white/10 bg-white/5 py-2 pl-9 pr-3 text-xs text-white outline-none transition focus:border-cyan-400/50 placeholder:text-slate-600"
+              className="w-full rounded-xl border border-border bg-card/60 h-[38px] pl-9 pr-3 text-xs text-foreground shadow-xs outline-none transition hover:border-border-strong focus:border-cyan-400 placeholder:text-muted"
             />
           </div>
 
-          {/* Interns list searchable and scrollable max-h-48 */}
-          <div className="max-h-40 overflow-y-auto space-y-1 rounded-xl border border-white/5 bg-[#090d16] p-1.5 custom-scrollbar">
+          {/* Interns list searchable and scrollable */}
+          <div className="max-h-40 overflow-y-auto space-y-1 rounded-xl border border-border bg-card/40 p-1.5 custom-scrollbar">
             {filteredInterns.length === 0 ? (
-              <p className="text-xs text-slate-500 py-3 text-center italic">
+              <p className="text-xs text-muted py-4 text-center italic">
                 {t("leader.taskGroups.noMembers")}
               </p>
             ) : (
@@ -238,19 +264,25 @@ export default function TaskGroupEditModal({
                   <div
                     key={intern.id}
                     onClick={() => toggleMember(intern.id)}
-                    className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition text-xs ${
+                    className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition text-xs select-none ${
                       isSelected
-                        ? "bg-cyan-500/20 text-cyan-300 border border-cyan-400/30"
-                        : "text-slate-300 hover:bg-white/5"
+                        ? "bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 font-medium"
+                        : "text-foreground/80 hover:bg-card border border-transparent"
                     }`}
                   >
-                    <div>
-                      <p className="font-medium text-white">{intern.fullName}</p>
-                      <p className="text-[11px] text-slate-400">
-                        {intern.position?.name || intern.department?.name || intern.user?.email}
+                    <div className="min-w-0 flex-1 pr-2">
+                      <p className="font-medium text-foreground truncate">
+                        {intern.fullName}
+                      </p>
+                      <p className="text-[11px] text-muted truncate">
+                        {intern.position?.name ||
+                          intern.department?.name ||
+                          intern.user?.email}
                       </p>
                     </div>
-                    {isSelected && <Check className="w-4 h-4 text-cyan-400 shrink-0" />}
+                    {isSelected && (
+                      <Check className="w-4 h-4 text-cyan-400 shrink-0" />
+                    )}
                   </div>
                 );
               })
@@ -259,27 +291,27 @@ export default function TaskGroupEditModal({
         </div>
 
         {/* Modal Buttons */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+        <div className="flex justify-end gap-3 pt-4 border-t border-border/40">
           <button
             type="button"
             onClick={onCloseModal}
             disabled={isPending}
-            className="rounded-xl border border-white/10 bg-white/5 px-5 py-2 text-sm text-slate-300 hover:text-white transition"
+            className="h-[42px] sm:h-[46px] rounded-xl border border-border bg-card px-5 text-sm font-medium text-muted hover:text-foreground hover:border-border-strong active:scale-95 transition disabled:opacity-50"
           >
             {t("leader.taskGroups.cancel")}
           </button>
           <button
             type="submit"
             disabled={isPending || !name.trim()}
-            className="flex items-center gap-2 rounded-xl bg-cyan-600 px-5 py-2 text-sm font-semibold text-white hover:bg-cyan-500 disabled:opacity-50 transition"
+            className="h-[42px] sm:h-[46px] inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-(--primary-main) to-(--primary-light) px-6 text-sm font-semibold text-white shadow-lg transition hover:brightness-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isPending ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                {t("leader.taskGroups.updating")}
+                <span>{t("leader.taskGroups.updating")}</span>
               </>
             ) : (
-              t("leader.taskGroups.saveChanges")
+              <span>{t("leader.taskGroups.saveChanges")}</span>
             )}
           </button>
         </div>

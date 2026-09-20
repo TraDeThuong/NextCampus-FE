@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import Spinner from "@/components/ui/Spinner";
 import TaskGroupHeader from "./TaskGroupHeader";
+import TaskGroupStats from "./TaskGroupStats";
 import TaskGroupFilter from "./TaskGroupFilter";
 import TaskGroupList from "./TaskGroupList";
 
@@ -22,6 +23,7 @@ export default function LeaderTaskGroupsPage() {
           </div>
         }
       >
+        <TaskGroupStats />
         <TaskGroupFilter />
         <TaskGroupList />
       </Suspense>

@@ -172,3 +172,14 @@ Chỉ lưu các quyết định kiến trúc và UI/UX đã được xác nhận
     * Khoảng cách giữa nhãn và ô nhập: Đồng bộ `gap-1.5`.
     * Thông báo lỗi: Đồng bộ `text-xs text-danger flex items-center gap-1.5 mt-0.5 animate-fadeIn` kèm icon `<AlertCircle className="w-3.5 h-3.5 shrink-0" />`.
 
+- **2026-09-20 — Quy Chuẩn Tinh Gọn Cho Thẻ Bộ Lọc (Clean & Minimalist Filter Card Layout)**:
+  - **Tuyệt đối KHÔNG đặt tiêu đề hay nút Làm mới dữ liệu (Reload Button) bên trong thẻ bộ lọc (`MetalCard` Filter)**: Thẻ bộ lọc không được tự ý thêm các thanh tiêu đề (như *"Phòng ban & Trạng thái"*) hay nút reload bên trong card lọc làm cồng kềnh, phân tán giao diện.
+  - **Bố cục chuẩn**: Thẻ bộ lọc chỉ chứa trực tiếp lưới các ô điều khiển (Search Input, `FilterSelect`...). Nút Làm mới dữ liệu chuẩn (`Table.ReloadButton`) nếu có bảng dữ liệu thì đặt tại header cột thao tác của Table; không đặt tùy tiện vào card filter.
+  - **Nút Đặt lại bộ lọc (`RotateCcw`)**: Chỉ xuất hiện tại đường viền chân thẻ card (`border-t border-border/40 pt-3`) khi có ít nhất 1 filter/search đang hoạt động (`hasFilters`), giữ cho giao diện mặc định luôn thoáng đãng và tinh gọn.
+
+- **2026-09-20 — Chuẩn Hóa Tương Thích Dữ Liệu Phân Trang Backend v2 (Task Group Response Normalization)**:
+  - **Vấn đề**: Backend v2 trả về cấu trúc phân trang `{ success: true, data: { data: [...], meta: {...} } }`, trong khi Frontend types hoặc các component kế thừa kỳ vọng `data` là mảng phẳng `TaskGroup[]`. Nếu lấy trực tiếp `data?.data`, giá trị nhận được là object chứa `data` và `meta`, dẫn đến lỗi runtime `TypeError: taskGroups.filter is not a function`.
+  - **Quy chuẩn xử lý 2 tầng**:
+    * *Tầng Service (`services/*.service.ts`)*: Luôn kiểm tra và normalize dữ liệu trước khi trả về: nếu phát hiện `payload.data.data` là mảng thì unwrap về `{ success, data: payload.data.data, meta: payload.data.meta }`.
+    * *Tầng Entity & Helper (`types/*.ts`)*: Cung cấp hàm trích xuất an toàn (ví dụ: `extractTaskGroups(data)`), kiểm tra `Array.isArray(data)` và `Array.isArray(data.data)` để không bao giờ bị crash giao diện dù backend trả về dạng nào.
+
