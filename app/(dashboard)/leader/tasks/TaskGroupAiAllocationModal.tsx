@@ -14,6 +14,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
+import Select from "@/components/ui/Select";
 import {
   useGroupAiRecommendation,
   useConfirmGroupAiAllocation,
@@ -299,19 +300,18 @@ export default function TaskGroupAiAllocationModal({
                             <User className="h-3 w-3 text-sky-400" />
                             Người phụ trách chính (Owner) *
                           </label>
-                          <select
+                          <Select
                             value={currentDraft?.internId ?? ""}
-                            onChange={(e) => handleOwnerChange(task.taskId, e.target.value)}
-                            className="w-full rounded-xl border border-slate-700 bg-[#121624] px-3 py-2 text-xs text-white outline-none focus:border-sky-500"
-                          >
-                            <option value="">-- Chưa chọn Owner --</option>
-                            {interns.map((i) => (
-                              <option key={i.id} value={i.id}>
-                                {i.fullName} {i.position?.name ? `(${i.position.name})` : ""}
-                                {task.suggestedOwner?.id === i.id ? " ★ AI gợi ý" : ""}
-                              </option>
-                            ))}
-                          </select>
+                            onChange={(val) => handleOwnerChange(task.taskId, val)}
+                            placeholder="-- Chưa chọn Owner --"
+                            options={[
+                              { value: "", label: "-- Chưa chọn Owner --" },
+                              ...interns.map((i) => ({
+                                value: i.id,
+                                label: `${i.fullName} ${i.position?.name ? `(${i.position.name})` : ""}${task.suggestedOwner?.id === i.id ? " ★ AI gợi ý" : ""}`,
+                              })),
+                            ]}
+                          />
                         </div>
 
                         {/* Support select */}
@@ -320,21 +320,20 @@ export default function TaskGroupAiAllocationModal({
                             <Users className="h-3 w-3 text-violet-400" />
                             Người hỗ trợ (Support) (Không bắt buộc)
                           </label>
-                          <select
+                          <Select
                             value={currentDraft?.supportId ?? ""}
-                            onChange={(e) => handleSupportChange(task.taskId, e.target.value)}
-                            className="w-full rounded-xl border border-slate-700 bg-[#121624] px-3 py-2 text-xs text-white outline-none focus:border-violet-500"
-                          >
-                            <option value="">-- Không có Support --</option>
-                            {interns
-                              .filter((i) => i.id !== currentDraft?.internId)
-                              .map((i) => (
-                                <option key={i.id} value={i.id}>
-                                  {i.fullName} {i.position?.name ? `(${i.position.name})` : ""}
-                                  {task.suggestedSupport?.id === i.id ? " ★ AI gợi ý" : ""}
-                                </option>
-                              ))}
-                          </select>
+                            onChange={(val) => handleSupportChange(task.taskId, val)}
+                            placeholder="-- Không có Support --"
+                            options={[
+                              { value: "", label: "-- Không có Support --" },
+                              ...interns
+                                .filter((i) => i.id !== currentDraft?.internId)
+                                .map((i) => ({
+                                  value: i.id,
+                                  label: `${i.fullName} ${i.position?.name ? `(${i.position.name})` : ""}${task.suggestedSupport?.id === i.id ? " ★ AI gợi ý" : ""}`,
+                                })),
+                            ]}
+                          />
                         </div>
                       </div>
                     </div>

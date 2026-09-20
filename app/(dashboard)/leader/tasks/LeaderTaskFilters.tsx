@@ -1,9 +1,12 @@
 "use client";
 
+import { useMemo, useRef } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { X, RotateCcw } from "lucide-react";
 import FilterSelect from "@/components/ui/FilterSelect";
 import SortSelect from "@/components/ui/SortSelect";
+import { DateRangePicker } from "@/components/ui/DatePicker";
 import MetalCard from "@/components/ui/MetalCard";
 
 export default function LeaderTaskFilters() {
@@ -12,68 +15,368 @@ export default function LeaderTaskFilters() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const STATUS_OPTIONS = [
-    { value: "TODO", label: t("statusTodo") },
-    { value: "IN_PROGRESS", label: t("statusInProgress") },
-    { value: "REVIEW", label: t("statusReview") },
-    { value: "DONE", label: t("statusDone") },
-    { value: "BLOCKED", label: t("statusBlocked") },
-    { value: "PENDING_APPROVAL", label: t("statusPendingApproval") },
-  ];
+  const paramCode = searchParams.get("code") ?? "";
+  const paramTitle = searchParams.get("title") ?? "";
+  const paramOwner = searchParams.get("owner") ?? "";
+  const paramStatus = searchParams.get("status") ?? "";
+  const paramPhase = searchParams.get("phase") ?? "";
+  const paramDeadlineFrom = searchParams.get("deadlineFrom") ?? "";
+  const paramDeadlineTo = searchParams.get("deadlineTo") ?? "";
+  const paramSortBy = searchParams.get("sortBy") ?? "";
+  const paramOrder = searchParams.get("order") ?? "";
 
-  const SORT_OPTIONS = [
-    { sortBy: "createdAt", order: "desc", label: t("sortNewestFirst") },
-    { sortBy: "createdAt", order: "asc", label: t("sortOldestFirst") },
-    { sortBy: "title", order: "asc", label: t("sortTitleAZ") },
-    { sortBy: "title", order: "desc", label: t("sortTitleZA") },
-    { sortBy: "deadline", order: "asc", label: t("sortDeadlineEarliest") },
-    { sortBy: "deadline", order: "desc", label: t("sortDeadlineLatest") },
-    { sortBy: "priority", order: "desc", label: t("sortPriorityHighLow") },
-    { sortBy: "priority", order: "asc", label: t("sortPriorityLowHigh") },
-  ];
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  function updateParam(key: string, value: string) {
+  const STATUS_OPTIONS = useMemo(
+    () => [
+      { value: "TODO", label: t("statusTodo") },
+      { value: "IN_PROGRESS", label: t("statusInProgress") },
+      { value: "REVIEW", label: t("statusReview") },
+      { value: "DONE", label: t("statusDone") },
+      { value: "BLOCKED", label: t("statusBlocked") },
+      { value: "PENDING_APPROVAL", label: t("statusPendingApproval") },
+    ],
+    [t],
+  );
+
+  const SORT_OPTIONS = useMemo(
+    () => [
+      { sortBy: "createdAt", order: "desc", label: t("sortNewestFirst") },
+      { sortBy: "createdAt", order: "asc", label: t("sortOldestFirst") },
+      { sortBy: "title", order: "asc", label: t("sortTitleAZ") },
+      { sortBy: "title", order: "desc", label: t("sortTitleZA") },
+      { sortBy: "deadline", order: "asc", label: t("sortDeadlineEarliest") },
+      { sortBy: "deadline", order: "desc", label: t("sortDeadlineLatest") },
+      { sortBy: "priority", order: "desc", label: t("sortPriorityHighLow") },
+      { sortBy: "priority", order: "asc", label: t("sortPriorityLowHigh") },
+    ],
+    [t],
+  );
+
+  const handleDebouncedParam = (key: string, val: string) => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      const trimmed = val.trim();
+      if (trimmed) {
+        params.set(key, trimmed);
+      } else {
+        params.delete(key);
+      }
+      params.set("page", "1");
+      router.push(`${pathname}?${params.toString()}`);
+    }, 300);
+  };
+
+  const handleClearParam = (key: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    if (!value) { params.delete(key); } else { params.set(key, value); }
+    params.delete(key);
     params.set("page", "1");
     router.push(`${pathname}?${params.toString()}`);
-  }
+  };
+
+  const handleDateRangeChange = (start: string, end: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (start) {
+      params.set("deadlineFrom", start);
+    } else {
+      params.delete("deadlineFrom");
+    }
+    if (end) {
+      params.set("deadlineTo", end);
+    } else {
+      params.delete("deadlineTo");
+    }
+    params.set("page", "1");
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const handleClearDateRange = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("deadlineFrom");
+    params.delete("deadlineTo");
+    params.set("page", "1");
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const handleClearAll = () => {
+    const params = new URLSearchParams();
+    const taskGroupId = searchParams.get("taskGroupId");
+    if (taskGroupId) params.set("taskGroupId", taskGroupId);
+    params.set("page", "1");
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const activeFilterCount =
+    (paramCode ? 1 : 0) +
+    (paramTitle ? 1 : 0) +
+    (paramOwner ? 1 : 0) +
+    (paramStatus ? 1 : 0) +
+    (paramPhase ? 1 : 0) +
+    (paramDeadlineFrom || paramDeadlineTo ? 1 : 0) +
+    (paramSortBy && (paramSortBy !== "createdAt" || paramOrder !== "desc") ? 1 : 0);
 
   return (
     <MetalCard className="px-6 py-5">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <div className="flex flex-col gap-3">
-          <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">{t("searchCode")}</label>
-          <input type="text" placeholder={t("searchCodePlaceholder")} defaultValue={searchParams.get("code") ?? ""} onChange={(e) => updateParam("code", e.target.value)} className="w-full rounded-2xl border border-border bg-card px-5 py-3 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted" />
-        </div>
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-end">
+          {/* 1. Code Search */}
+          <div className="flex flex-col gap-3">
+            <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">
+              {t("searchCode")}
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                key={`code-${paramCode}`}
+                defaultValue={paramCode}
+                placeholder={t("searchCodePlaceholder")}
+                onChange={(e) => handleDebouncedParam("code", e.target.value)}
+                className="w-full h-[46px] rounded-2xl border border-border bg-card px-5 pr-10 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted"
+              />
+              {paramCode && (
+                <button
+                  type="button"
+                  onClick={() => handleClearParam("code")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-foreground transition p-0.5 rounded cursor-pointer"
+                  aria-label="Clear code search"
+                >
+                  <X className="h-4 w-4 shrink-0" />
+                </button>
+              )}
+            </div>
+          </div>
 
-        <div className="flex flex-col gap-3">
-          <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">{t("searchTitle")}</label>
-          <input type="text" placeholder={t("searchTitlePlaceholder")} defaultValue={searchParams.get("title") ?? ""} onChange={(e) => updateParam("title", e.target.value)} className="w-full rounded-2xl border border-border bg-card px-5 py-3 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted" />
-        </div>
+          {/* 2. Title Search */}
+          <div className="flex flex-col gap-3">
+            <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">
+              {t("searchTitle")}
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                key={`title-${paramTitle}`}
+                defaultValue={paramTitle}
+                placeholder={t("searchTitlePlaceholder")}
+                onChange={(e) => handleDebouncedParam("title", e.target.value)}
+                className="w-full h-[46px] rounded-2xl border border-border bg-card px-5 pr-10 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted"
+              />
+              {paramTitle && (
+                <button
+                  type="button"
+                  onClick={() => handleClearParam("title")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-foreground transition p-0.5 rounded cursor-pointer"
+                  aria-label="Clear title search"
+                >
+                  <X className="h-4 w-4 shrink-0" />
+                </button>
+              )}
+            </div>
+          </div>
 
-        <div className="flex flex-col gap-3">
-          <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">{t("searchOwner")}</label>
-          <input type="text" placeholder={t("searchOwnerPlaceholder")} defaultValue={searchParams.get("owner") ?? ""} onChange={(e) => updateParam("owner", e.target.value)} className="w-full rounded-2xl border border-border bg-card px-5 py-3 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted" />
-        </div>
+          {/* 3. Owner Search */}
+          <div className="flex flex-col gap-3">
+            <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">
+              {t("searchOwner")}
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                key={`owner-${paramOwner}`}
+                defaultValue={paramOwner}
+                placeholder={t("searchOwnerPlaceholder")}
+                onChange={(e) => handleDebouncedParam("owner", e.target.value)}
+                className="w-full h-[46px] rounded-2xl border border-border bg-card px-5 pr-10 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted"
+              />
+              {paramOwner && (
+                <button
+                  type="button"
+                  onClick={() => handleClearParam("owner")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-foreground transition p-0.5 rounded cursor-pointer"
+                  aria-label="Clear owner search"
+                >
+                  <X className="h-4 w-4 shrink-0" />
+                </button>
+              )}
+            </div>
+          </div>
 
-        <FilterSelect label={t("status")} filterField="status" options={STATUS_OPTIONS} />
+          {/* 4. Status Filter */}
+          <FilterSelect
+            label={t("status")}
+            filterField="status"
+            options={STATUS_OPTIONS}
+          />
 
-        <div className="flex flex-col gap-3">
-          <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">{t("searchPhase")}</label>
-          <input type="text" placeholder={t("searchPhasePlaceholder")} defaultValue={searchParams.get("phase") ?? ""} onChange={(e) => updateParam("phase", e.target.value)} className="w-full rounded-2xl border border-border bg-card px-5 py-3 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted" />
-        </div>
+          {/* 5. Phase Search */}
+          <div className="flex flex-col gap-3">
+            <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">
+              {t("searchPhase")}
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                key={`phase-${paramPhase}`}
+                defaultValue={paramPhase}
+                placeholder={t("searchPhasePlaceholder")}
+                onChange={(e) => handleDebouncedParam("phase", e.target.value)}
+                className="w-full h-[46px] rounded-2xl border border-border bg-card px-5 pr-10 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)] placeholder:text-muted"
+              />
+              {paramPhase && (
+                <button
+                  type="button"
+                  onClick={() => handleClearParam("phase")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-foreground transition p-0.5 rounded cursor-pointer"
+                  aria-label="Clear phase search"
+                >
+                  <X className="h-4 w-4 shrink-0" />
+                </button>
+              )}
+            </div>
+          </div>
 
-        <SortSelect label={t("sort")} options={SORT_OPTIONS} />
+          {/* 6. Sort Select */}
+          <SortSelect label={t("sort")} options={SORT_OPTIONS} />
 
-        <div className="flex flex-col gap-3 xl:col-span-6">
-          <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">{t("deadline")}</label>
-          <div className="flex items-center gap-2">
-            <input type="date" defaultValue={searchParams.get("deadlineFrom") ?? ""} onChange={(e) => updateParam("deadlineFrom", e.target.value)} className="w-full rounded-2xl border border-border bg-card px-4 py-2.5 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)]" />
-            <span className="shrink-0 text-sm text-muted">-</span>
-            <input type="date" defaultValue={searchParams.get("deadlineTo") ?? ""} onChange={(e) => updateParam("deadlineTo", e.target.value)} className="w-full rounded-2xl border border-border bg-card px-4 py-2.5 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-primary-light focus:shadow-[0_0_28px_rgba(21,174,245,0.18)]" />
+          {/* 7. Deadline DateRangePicker (Zero native date input) */}
+          <div className="flex flex-col gap-3 sm:col-span-2">
+            <label className="metal-text metal-glow text-sm font-semibold uppercase tracking-[0.18em]">
+              {t("deadline")}
+            </label>
+            <DateRangePicker
+              startDate={paramDeadlineFrom}
+              endDate={paramDeadlineTo}
+              onChange={handleDateRangeChange}
+              onClear={handleClearDateRange}
+              placeholder={t("filterDeadline")}
+              className="w-full [&>button]:w-full [&>button]:h-[46px] [&>button]:rounded-2xl [&>button]:px-5 [&>button]:text-sm [&>button]:justify-start [&>button]:text-left [&>button>[role=button]]:ml-auto"
+            />
           </div>
         </div>
+
+        {/* Active Filter Pills & Reset Button */}
+        {activeFilterCount > 0 && (
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-border dark:border-white/5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs text-muted font-medium">
+                {t("activeFilters")}:
+              </span>
+
+              {paramCode && (
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-400/20 bg-cyan-500/10 px-2.5 py-1 text-xs text-cyan-300">
+                  {t("searchCode")}: {paramCode}
+                  <button
+                    type="button"
+                    onClick={() => handleClearParam("code")}
+                    className="hover:text-rose-400 transition cursor-pointer"
+                    aria-label="Remove code filter"
+                  >
+                    <X className="h-3 w-3 shrink-0" />
+                  </button>
+                </span>
+              )}
+
+              {paramTitle && (
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-400/20 bg-cyan-500/10 px-2.5 py-1 text-xs text-cyan-300">
+                  {t("searchTitle")}: {paramTitle}
+                  <button
+                    type="button"
+                    onClick={() => handleClearParam("title")}
+                    className="hover:text-rose-400 transition cursor-pointer"
+                    aria-label="Remove title filter"
+                  >
+                    <X className="h-3 w-3 shrink-0" />
+                  </button>
+                </span>
+              )}
+
+              {paramOwner && (
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-400/20 bg-cyan-500/10 px-2.5 py-1 text-xs text-cyan-300">
+                  {t("searchOwner")}: {paramOwner}
+                  <button
+                    type="button"
+                    onClick={() => handleClearParam("owner")}
+                    className="hover:text-rose-400 transition cursor-pointer"
+                    aria-label="Remove owner filter"
+                  >
+                    <X className="h-3 w-3 shrink-0" />
+                  </button>
+                </span>
+              )}
+
+              {paramStatus && (
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-400/20 bg-cyan-500/10 px-2.5 py-1 text-xs text-cyan-300">
+                  {t("status")}: {STATUS_OPTIONS.find((s) => s.value === paramStatus)?.label ?? paramStatus}
+                  <button
+                    type="button"
+                    onClick={() => handleClearParam("status")}
+                    className="hover:text-rose-400 transition cursor-pointer"
+                    aria-label="Remove status filter"
+                  >
+                    <X className="h-3 w-3 shrink-0" />
+                  </button>
+                </span>
+              )}
+
+              {paramPhase && (
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-400/20 bg-cyan-500/10 px-2.5 py-1 text-xs text-cyan-300">
+                  {t("searchPhase")}: {paramPhase}
+                  <button
+                    type="button"
+                    onClick={() => handleClearParam("phase")}
+                    className="hover:text-rose-400 transition cursor-pointer"
+                    aria-label="Remove phase filter"
+                  >
+                    <X className="h-3 w-3 shrink-0" />
+                  </button>
+                </span>
+              )}
+
+              {(paramDeadlineFrom || paramDeadlineTo) && (
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-400/20 bg-cyan-500/10 px-2.5 py-1 text-xs text-cyan-300">
+                  {t("deadline")}: {paramDeadlineFrom || "..."} → {paramDeadlineTo || "..."}
+                  <button
+                    type="button"
+                    onClick={handleClearDateRange}
+                    className="hover:text-rose-400 transition cursor-pointer"
+                    aria-label="Remove deadline filter"
+                  >
+                    <X className="h-3 w-3 shrink-0" />
+                  </button>
+                </span>
+              )}
+
+              {paramSortBy && (paramSortBy !== "createdAt" || paramOrder !== "desc") && (
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-400/20 bg-cyan-500/10 px-2.5 py-1 text-xs text-cyan-300">
+                  {t("sort")}: {SORT_OPTIONS.find((s) => s.sortBy === paramSortBy && s.order === paramOrder)?.label ?? `${paramSortBy}:${paramOrder}`}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const params = new URLSearchParams(searchParams.toString());
+                      params.delete("sortBy");
+                      params.delete("order");
+                      params.set("page", "1");
+                      router.push(`${pathname}?${params.toString()}`);
+                    }}
+                    className="hover:text-rose-400 transition cursor-pointer"
+                    aria-label="Remove sort filter"
+                  >
+                    <X className="h-3 w-3 shrink-0" />
+                  </button>
+                </span>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={handleClearAll}
+              className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-cyan-400 transition py-1 px-2.5 rounded-lg hover:bg-card active:scale-95 cursor-pointer"
+            >
+              <RotateCcw className="h-3.5 w-3.5 shrink-0" />
+              <span>{t("clearFilters")}</span>
+            </button>
+          </div>
+        )}
       </div>
     </MetalCard>
   );

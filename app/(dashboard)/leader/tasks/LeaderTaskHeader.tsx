@@ -1,10 +1,9 @@
 "use client";
 
-import { FileSpreadsheet, Plus, Layers } from "lucide-react";
+import { FileSpreadsheet, Plus, Layers, CheckSquare } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import MetalCard from "@/components/ui/MetalCard";
-import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import TaskImportModal from "./TaskImportModal";
 import TaskCreateModal from "./TaskCreateModal";
@@ -14,44 +13,62 @@ export default function LeaderTaskHeader() {
   const t = useTranslations("leader.tasks");
 
   return (
-    <MetalCard>
-      <div className="rounded-3xl p-6">
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-2xl font-bold metal-text">{t("title")}</h2>
-            <p className="mt-1 text-sm text-slate-500">{t("description")}</p>
-          </div>
+    <Modal>
+      <MetalCard>
+        <div className="p-6">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <CheckSquare className="h-6 w-6 shrink-0 text-cyan-400" />
+                <h2 className="text-2xl font-bold metal-text">{t("title")}</h2>
+              </div>
+              <p className="mt-1 text-sm text-muted">{t("description")}</p>
+            </div>
 
-          <div className="flex items-center gap-3">
-            <Modal>
+            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
               <Modal.Open opens="import">
-                <Button variant="glass" size="md">
-                  <FileSpreadsheet className="h-4 w-4 mr-2" />{t("importTasks")}
-                </Button>
+                <button
+                  type="button"
+                  className="flex items-center gap-2 rounded-xl border border-border dark:border-white/10 bg-card/60 px-4 py-2.5 text-sm font-medium text-muted transition hover:border-white/20 hover:bg-card hover:text-foreground active:scale-95 shadow-sm cursor-pointer"
+                >
+                  <FileSpreadsheet className="h-4 w-4 shrink-0 text-emerald-400" />
+                  <span>{t("importTasks")}</span>
+                </button>
               </Modal.Open>
-              <Modal.Window name="import" size="md"><TaskImportModal /></Modal.Window>
-            </Modal>
 
-            <Modal>
               <Modal.Open opens="create-task">
-                <Button variant="primary" size="md">
-                  <Plus className="h-4 w-4 mr-2" />{t("createTask")}
-                </Button>
+                <button
+                  type="button"
+                  className="flex items-center gap-2 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2.5 text-sm font-medium text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20 active:scale-95 shadow-sm cursor-pointer"
+                >
+                  <Plus className="h-4 w-4 shrink-0" />
+                  <span>{t("createTask")}</span>
+                </button>
               </Modal.Open>
-              <Modal.Window name="create-task" size="md"><TaskCreateModal /></Modal.Window>
-            </Modal>
 
-            <Modal>
               <Modal.Open opens="create-group">
-                <Button variant="glass" size="md">
-                  <Layers className="h-4 w-4 mr-2" />{t("createGroup")}
-                </Button>
+                <button
+                  type="button"
+                  className="flex items-center gap-2 rounded-xl border border-purple-400/30 bg-purple-500/10 px-4 py-2.5 text-sm font-medium text-purple-300 transition hover:border-purple-400/50 hover:bg-purple-500/20 active:scale-95 shadow-sm cursor-pointer"
+                >
+                  <Layers className="h-4 w-4 shrink-0" />
+                  <span>{t("createGroup")}</span>
+                </button>
               </Modal.Open>
-              <Modal.Window name="create-group" size="sm"><TaskGroupCreateModal /></Modal.Window>
-            </Modal>
+            </div>
           </div>
         </div>
-      </div>
-    </MetalCard>
+      </MetalCard>
+
+      <Modal.Window name="import" size="lg">
+        <TaskImportModal />
+      </Modal.Window>
+      <Modal.Window name="create-task" size="lg">
+        <TaskCreateModal />
+      </Modal.Window>
+      <Modal.Window name="create-group" size="sm">
+        <TaskGroupCreateModal />
+      </Modal.Window>
+    </Modal>
   );
 }

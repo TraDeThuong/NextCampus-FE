@@ -117,6 +117,34 @@ Chỉ lưu các quyết định kiến trúc và UI/UX đã được xác nhận
       - Chiều cao & lật thông minh: Khi không đủ chỗ ở dưới hoặc trên, tự động kẹp `top = Math.max(10, window.innerHeight - popoverHeight - 10)` và bật `max-h-[calc(100dvh-20px)] overflow-y-auto`.
       - Hàng phím tắt presets: Chuyển sang cuộn ngang `overflow-x-auto no-scrollbar` thay vì `flex-wrap` nhiều hàng, tiết kiệm tối đa chiều cao hiển thị.
 
+- **2026-09-20 — Chuẩn Hóa Thanh Cuộn Đồng Bộ Cho Toàn Bộ Dropdown, Popover & Select (Unified Dropdown Scrollbars)**:
+  - **Vấn đề**: Các dropdown (`SortSelect`, `FilterSelect`, `DatePicker`, `Select`, `InlineAssignCell`) trước đây thiếu định nghĩa class CSS hoặc dùng class không tồn tại (`scrollbar-dropdown`), dẫn đến trình duyệt hiển thị thanh cuộn mặc định của hệ điều hành (to bản, vuông xám, có mũi tên) làm phá vỡ ngôn ngữ thiết kế Cyberpunk Glassmorphism.
+  - **Quy chuẩn bắt buộc**:
+    * Mọi khu vực cuộn trong Dropdown, Popover, Select, DatePicker, Menu hành động phải sử dụng class `.scrollbar-dropdown` (hoặc `.custom-scrollbar`).
+    * Cả hai class đã được chuẩn hóa trong `globals.css`:
+      ```css
+      .scrollbar-dropdown, .custom-scrollbar {
+        scrollbar-width: thin !important;
+        scrollbar-color: rgba(255, 255, 255, 0.15) transparent !important;
+      }
+      .scrollbar-dropdown::-webkit-scrollbar, .custom-scrollbar::-webkit-scrollbar {
+        width: 5px !important;
+        height: 5px !important;
+      }
+      .scrollbar-dropdown::-webkit-scrollbar-track, .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent !important;
+      }
+      .scrollbar-dropdown::-webkit-scrollbar-thumb, .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.12) !important;
+        border-radius: 9999px !important;
+        transition: background-color 0.2s ease !important;
+      }
+      .scrollbar-dropdown::-webkit-scrollbar-thumb:hover, .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(34, 211, 238, 0.35) !important; /* cyan neon glow */
+      }
+      ```
+    * Đặc điểm: Siêu mỏng 5px, track trong suốt, thanh trượt bo tròn viên thuốc trắng mờ và phát sáng cyan neon khi hover, hỗ trợ cả WebKit (Chrome, Edge, Safari) và chuẩn W3C/Firefox (`scrollbar-width`, `scrollbar-color`).
+
 ---
 
 ## 2. Quyết định Kỹ thuật & Luồng Dữ Liệu
@@ -182,4 +210,22 @@ Chỉ lưu các quyết định kiến trúc và UI/UX đã được xác nhận
   - **Quy chuẩn xử lý 2 tầng**:
     * *Tầng Service (`services/*.service.ts`)*: Luôn kiểm tra và normalize dữ liệu trước khi trả về: nếu phát hiện `payload.data.data` là mảng thì unwrap về `{ success, data: payload.data.data, meta: payload.data.meta }`.
     * *Tầng Entity & Helper (`types/*.ts`)*: Cung cấp hàm trích xuất an toàn (ví dụ: `extractTaskGroups(data)`), kiểm tra `Array.isArray(data)` và `Array.isArray(data.data)` để không bao giờ bị crash giao diện dù backend trả về dạng nào.
+
+- **2026-09-20 — Chuẩn Hóa Giao Diện Modal (Modal Header, Stepper, Scroll & Window Sizing)**:
+  - **Header Chuẩn Hóa (Rule 44 Compliant)**:
+    * Luôn sử dụng sticky header bọc trong flex container riêng biệt: `sticky top-0 z-20 bg-[#0c1222]/95 backdrop-blur-xl pb-4 pt-1 -mt-1 border-b border-white/10 pr-10 sm:pr-12`.
+    * **Khoảng đệm phải `pr-10 sm:pr-12`**: Bắt buộc có để ngăn tiêu đề, badge hoặc nội dung modal va chạm/che khuất nút đóng tuyệt đối `HiXMark` ở góc trên cùng bên phải (`absolute right-3 top-3 sm:right-4 sm:top-4 z-30`).
+    * **Khung chứa Icon + Heading**: Bọc trong `<div className="flex items-center gap-3 min-w-0">`. Khung icon bo góc chuẩn `h-11 w-11 shrink-0 items-center justify-center rounded-2xl` kèm viền và shadow phát sáng đặc trưng theo ngữ cảnh (cyan cho task, purple cho task group, emerald cho import).
+  - **Thanh Tiến Trình (Stepper Indicator) Responsive Mobile**:
+    * Stepper tròn: `h-9 w-9 sm:h-10 sm:w-10 rounded-full font-bold`.
+    * Đường nối giữa các bước: Responsive linh hoạt `mx-1 sm:mx-3 mb-6 sm:mb-8 h-px w-8 sm:w-14 md:w-20` (hoàn thành: `bg-emerald-500/40`, chưa tới: `bg-white/10`).
+    * Mô tả phụ: Ẩn trên thiết bị di động nhỏ (`hidden sm:block`) để bảo đảm stepper không bị bẻ hàng hay tràn layout.
+  - **Kích Thước Cửa Sổ Modal (`size="sm" | "md" | "lg" | "xl"`)**:
+    * Form đơn giản, ít trường (như `TaskGroupCreateModal`): Sử dụng `size="sm"` (`max-w-[min(96vw,36rem)]`).
+    * Form nhiều bước, có lưới chia 3 cột hoặc xem trước bảng dữ liệu nhiều cột (như `TaskCreateModal`, `TaskImportModal`): Bắt buộc sử dụng `size="lg"` (`max-w-[min(98vw,72rem)]`) để các trường kế hoạch và bảng preview hiển thị thoáng đãng, không bị co cụm chật chội.
+  - **Tránh Xung Đột Cuộn & Chiều Cao Cố Định**:
+    * Thành phần `Modal.Window` đã tích hợp sẵn container cuộn: `<div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">`.
+    * Các modal con bên trong **tuyệt đối không bọc thêm các lớp có `style={{ maxHeight: 'calc(100vh - ...)' }}` hoặc `overflow-hidden` ở root** gây ra hiện tượng 2 thanh cuộn lồng nhau (dual scrollbars) hoặc làm cắt cụt popover của `Select` / `DatePicker`.
+    * Các bảng dữ liệu nhiều cột trong modal preview phải được bọc trong `<div className="overflow-x-auto scrollbar-dropdown rounded-2xl border border-white/10 bg-card/40">`.
+
 

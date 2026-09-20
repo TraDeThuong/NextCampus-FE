@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Layers, Loader2 } from "lucide-react";
+import { Layers, Loader2, AlertCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Button from "@/components/ui/Button";
+import Select from "@/components/ui/Select";
 import { useCreateTaskGroup } from "@/hooks/task-group/useCreateTaskGroup";
 import { useDepartments } from "@/hooks/department/useDepartments";
 import type { CreateTaskGroupPayload } from "@/types/task-group";
@@ -14,6 +16,7 @@ interface Props {
 }
 
 export default function TaskGroupCreateModal({ onCloseModal }: Props) {
+  const t = useTranslations("taskGroups");
   const createTaskGroup = useCreateTaskGroup();
   const { data: deptData, isLoading: deptsLoading } = useDepartments();
   const departments = deptData?.data ?? [];
@@ -24,9 +27,12 @@ export default function TaskGroupCreateModal({ onCloseModal }: Props) {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<CreateTaskGroupPayload>({
     defaultValues: {
+      departmentId: "",
       maxWorkloadDays: 10,
       maxActiveTasks: null,
       requireAllMembers: false,
@@ -54,57 +60,73 @@ export default function TaskGroupCreateModal({ onCloseModal }: Props) {
   const isPending = createTaskGroup.isPending;
 
   return (
-    <div className="px-2 py-6 text-center">
-      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary-main/10 text-primary-light">
-        <Layers className="h-6 w-6" />
+    <div className="flex flex-col">
+      {/* Sticky Header (Rule 44 Compliant: Icon + Heading inside a dedicated flex container) */}
+      <div className="sticky top-0 z-20 bg-[#0c1222]/95 backdrop-blur-xl pb-4 pt-1 -mt-1 border-b border-white/10 pr-10 sm:pr-12">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-purple-500/15 border border-purple-500/30 text-purple-300 shadow-[0_0_12px_rgba(168,85,247,0.2)]">
+              <Layers className="h-5 w-5 shrink-0" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-xl font-bold metal-text truncate">
+                {t("createTitle")}
+              </h3>
+              <p className="text-xs text-muted mt-0.5 truncate">
+                {t("createDescription")}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
-      <h3 className="mt-4 text-base font-semibold text-white">
-        Create Task Group
-      </h3>
-      <p className="mt-2 text-sm text-slate-400">
-        Create a new group to organize tasks.
-      </p>
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="mt-6 space-y-4 text-left"
+        className="mt-5 space-y-4 text-left"
       >
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-slate-300">
-            Group Name *
+          <label className="mb-1.5 flex items-center gap-1 text-xs sm:text-sm font-medium text-foreground/90 select-none">
+            {t("nameLabel")}
           </label>
           <input
             type="text"
-            placeholder="e.g. Backend Crawl Project"
-            {...register("name", { required: "Name is required" })}
-            className="w-full rounded-xl border border-white/10 bg-white/5 py-3 px-4 text-sm text-white outline-none transition focus:border-primary-light/50 placeholder:text-slate-600"
+            placeholder={t("namePlaceholder")}
+            {...register("name", { required: t("nameRequired") })}
+            className={`w-full h-[42px] sm:h-[46px] rounded-xl border bg-card px-4 text-xs sm:text-sm text-foreground outline-none transition placeholder:text-muted ${
+              errors.name
+                ? "border-red-400/60 focus:border-red-400"
+                : "border-border focus:border-primary-light/40"
+            }`}
           />
           {errors.name && (
-            <p className="mt-1 text-sm text-red-400">{errors.name.message}</p>
+            <p className="mt-1 flex items-center gap-1.5 text-xs text-red-400 animate-fadeIn">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+              {errors.name.message}
+            </p>
           )}
         </div>
 
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-slate-300">
-            Department (Phòng ban)
+          <label className="mb-1.5 flex items-center gap-1 text-xs sm:text-sm font-medium text-foreground/90 select-none">
+            {t("deptLabel")}
           </label>
-          <select
-            {...register("departmentId", {
-              onChange: (event) => {
-                setDepartmentId(event.target.value);
-                setMemberIds([]);
-              },
-            })}
-            className="w-full rounded-xl border border-white/10 bg-[#121624] py-3 px-4 text-sm text-white outline-none transition focus:border-primary-light/50"
+          <Select
+            value={watch("departmentId") ?? ""}
+            onChange={(val) => {
+              setValue("departmentId", val);
+              setDepartmentId(val);
+              setMemberIds([]);
+            }}
             disabled={deptsLoading}
-          >
-            <option value="">-- Tất cả phòng ban (Chung) --</option>
-            {departments.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
-            ))}
-          </select>
+            placeholder={t("selectDept")}
+            options={[
+              { value: "", label: t("allDepartments") },
+              ...departments.map((d) => ({
+                value: d.id,
+                label: d.name,
+              })),
+            ]}
+          />
         </div>
 
         <TaskGroupMemberSelector
@@ -115,19 +137,19 @@ export default function TaskGroupCreateModal({ onCloseModal }: Props) {
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-slate-300">
-              Tải tối đa (ngày)
+            <label className="mb-1.5 flex items-center gap-1 text-xs sm:text-sm font-medium text-foreground/90 select-none">
+              {t("maxWorkloadLabel")}
             </label>
             <input
               type="number"
               min={0.5}
               step={0.5}
               {...register("maxWorkloadDays", { valueAsNumber: true })}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-primary-light/50"
+              className="w-full h-[42px] sm:h-[46px] rounded-xl border border-border bg-card px-4 text-xs sm:text-sm text-foreground outline-none transition focus:border-primary-light/40"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-slate-300">
+            <label className="mb-1.5 flex items-center gap-1 text-xs sm:text-sm font-medium text-foreground/90 select-none">
               Số task active tối đa
             </label>
             <input
@@ -137,53 +159,53 @@ export default function TaskGroupCreateModal({ onCloseModal }: Props) {
               {...register("maxActiveTasks", {
                 setValueAs: (value) => (value === "" || value === null || value === undefined) ? null : Number(value),
               })}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-primary-light/50 placeholder:text-slate-600"
+              className="w-full h-[42px] sm:h-[46px] rounded-xl border border-border bg-card px-4 text-xs sm:text-sm text-foreground outline-none transition focus:border-primary-light/40 placeholder:text-muted"
             />
           </div>
         </div>
 
-        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-white/[0.03] p-3 hover:bg-white/[0.05] transition-colors">
           <input
             type="checkbox"
             {...register("requireAllMembers")}
-            className="mt-0.5 h-4 w-4 accent-sky-500"
+            className="mt-0.5 h-4 w-4 rounded accent-purple-500"
           />
-          <span>
-            <span className="block text-sm text-white">Dùng đủ thành viên</span>
-            <span className="block text-[11px] text-slate-500">
+          <span className="select-none">
+            <span className="block text-xs sm:text-sm font-medium text-foreground">Dùng đủ thành viên</span>
+            <span className="block text-xs text-muted mt-0.5">
               Khi xác nhận, mỗi thành viên phải tham gia ít nhất một task với vai trò Owner hoặc Support.
             </span>
           </span>
         </label>
 
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-slate-300">
-            Description
+          <label className="mb-1.5 flex items-center gap-1 text-xs sm:text-sm font-medium text-foreground/90 select-none">
+            {t("descLabel")}
           </label>
           <textarea
             rows={2}
-            placeholder="Description (optional)"
+            placeholder={t("descPlaceholder")}
             {...register("description")}
-            className="w-full rounded-xl border border-white/10 bg-white/5 py-3 px-4 text-sm text-white outline-none transition focus:border-primary-light/50 placeholder:text-slate-600 resize-none"
+            className="w-full rounded-xl border border-border bg-card p-3 text-xs sm:text-sm text-foreground outline-none transition focus:border-primary-light/40 placeholder:text-muted resize-none"
           />
         </div>
 
-        <div className="flex justify-end gap-3 pt-2">
-          <button
+        <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+          <Button
             type="button"
+            variant="glass"
             onClick={onCloseModal}
             disabled={isPending}
-            className="rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm text-slate-300 transition hover:text-white disabled:opacity-50"
           >
-            Cancel
-          </button>
-          <Button type="submit" variant="glass" disabled={isPending}>
+            {t("cancel")}
+          </Button>
+          <Button type="submit" variant="primary" isLoading={isPending} disabled={isPending}>
             {isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             ) : (
               <Layers className="h-4 w-4 mr-2" />
             )}
-            Create Group
+            {t("createGroup")}
           </Button>
         </div>
       </form>

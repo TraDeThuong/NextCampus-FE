@@ -30,8 +30,8 @@ export default function InternSidebar() {
   const menus = [
     { name: t("intern.nav.dashboard"),        href: "/intern/dashboard",         icon: LayoutDashboard },
     { name: t("intern.nav.task"),             href: "/intern/task",              icon: CheckSquare },
-    { name: t("intern.nav.dailyReport"),      href: "/intern/daily-report",      icon: FileClock },
     { name: t("intern.nav.meetings"),         href: "/intern/meetings",          icon: LuAlarmClock },
+    { name: t("intern.nav.dailyReport"),      href: "/intern/daily-report",      icon: FileClock },
     { name: t("intern.nav.weeklyEvaluation"), href: "/intern/weekly-evaluation", icon: ClipboardCheck },
     { name: t("intern.nav.profile"),          href: "/intern/profile",           icon: UserRoundPen },
   ];

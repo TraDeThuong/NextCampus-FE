@@ -12,11 +12,21 @@ import Table from "@/components/ui/Table";
 import { useTaskAnalytics } from "@/hooks/task/useTaskAnalytics";
 import { useTaskGroups } from "@/hooks/task-group/useTaskGroups";
 import { useTasks } from "@/hooks/task/useTasks";
+import { extractTaskGroups } from "@/types/task-group";
 import type { TaskStatusDistribution, TaskQueryParams } from "@/types/task";
+import { DateRangePicker } from "@/components/ui/DatePicker";
 
 type TimePreset = "week" | "month" | "custom";
 type ModalType = "tasks" | "groups" | "done";
 type DateRange = { from: string; to: string; queryFrom: string; queryTo: string };
+
+const STAT_COLOR_STYLES: Record<string, { bg: string; text: string; bar: string }> = {
+  blue: { bg: "bg-blue-500/10 text-blue-400", text: "text-blue-400", bar: "bg-blue-500/40" },
+  purple: { bg: "bg-purple-500/10 text-purple-400", text: "text-purple-400", bar: "bg-purple-500/40" },
+  emerald: { bg: "bg-emerald-500/10 text-emerald-400", text: "text-emerald-400", bar: "bg-emerald-500/40" },
+  amber: { bg: "bg-amber-500/10 text-amber-400", text: "text-amber-400", bar: "bg-amber-500/40" },
+  red: { bg: "bg-rose-500/10 text-rose-400", text: "text-rose-400", bar: "bg-rose-500/40" },
+};
 
 function formatLocalDate(date: Date): string {
   const year = date.getFullYear();
@@ -98,17 +108,18 @@ export default function LeaderTaskStats() {
   const analytics = response?.data;
 
   const { data: taskGroupsData } = useTaskGroups();
-  const totalGroups = taskGroupsData?.data?.length ?? 0;
+  const groupsList = useMemo(() => extractTaskGroups(taskGroupsData?.data), [taskGroupsData]);
+  const totalGroups = taskGroupsData?.meta?.total ?? groupsList.length;
 
   const { data: reviewTasksData, isLoading: reviewLoading } = useTasks({ status: "REVIEW", limit: 10 });
   const reviewTasks = reviewTasksData?.data ?? [];
-  const reviewTaskCount = reviewTasksData?.meta.total ?? 0;
+  const reviewTaskCount = reviewTasksData?.meta?.total ?? reviewTasks.length;
 
   const overview = analytics?.overview;
-  const doneCount = overview ? getStatusCount(overview.byStatus, "DONE") : 0;
-  const inProgressCount = overview ? getStatusCount(overview.byStatus, "IN_PROGRESS") : 0;
-  const highPriorityCount = overview?.byPriority.find((p) => p.priority === "HIGH")?.count ?? 0;
-  const completionRate = overview && overview.totalTasks > 0 ? Math.round((doneCount / overview.totalTasks) * 100) : 0;
+  const doneCount = overview?.byStatus ? getStatusCount(overview.byStatus, "DONE") : 0;
+  const inProgressCount = overview?.byStatus ? getStatusCount(overview.byStatus, "IN_PROGRESS") : 0;
+  const highPriorityCount = overview?.byPriority?.find((p) => p.priority === "HIGH")?.count ?? 0;
+  const completionRate = overview && typeof overview.totalTasks === "number" && overview.totalTasks > 0 ? Math.round((doneCount / overview.totalTasks) * 100) : 0;
 
   const presetLabel = preset === "week" ? `${getWeekRange().from} – ${getWeekRange().to}` : preset === "month" ? `${getMonthRange().from} – ${getMonthRange().to}` : customFrom || customTo ? `${customFrom || "…"} – ${customTo || "…"}` : t("customRange");
 
@@ -136,11 +147,20 @@ export default function LeaderTaskStats() {
           <Button variant={preset === "month" ? "primary" : "glass"} size="sm" onClick={() => setPreset("month")}><Calendar className="h-3.5 w-3.5" />{t("thisMonth")}</Button>
           <Button variant={preset === "custom" ? "primary" : "glass"} size="sm" onClick={() => setPreset("custom")}><Clock className="h-3.5 w-3.5" />{t("custom")}</Button>
           {preset === "custom" && (
-            <div className="flex items-center gap-2">
-              <input type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)} className="rounded-xl border border-border bg-card px-3 py-1.5 text-sm text-foreground focus:border-primary-light/40 focus:outline-none" />
-              <span className="text-sm text-muted">–</span>
-              <input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} className="rounded-xl border border-border bg-card px-3 py-1.5 text-sm text-foreground focus:border-primary-light/40 focus:outline-none" />
-            </div>
+            <DateRangePicker
+              startDate={customFrom}
+              endDate={customTo}
+              onChange={(from, to) => {
+                setCustomFrom(from);
+                setCustomTo(to);
+              }}
+              onClear={() => {
+                setCustomFrom("");
+                setCustomTo("");
+              }}
+              placeholder={t("customRange")}
+              className="w-auto [&>button]:h-[38px] [&>button]:px-3.5 [&>button]:text-xs [&>button]:rounded-xl"
+            />
           )}
           <span className="ml-2 text-xs text-muted">{t("deadline")}: {presetLabel}</span>
         </div>
@@ -148,23 +168,23 @@ export default function LeaderTaskStats() {
         {isLoading ? (
           <div className="flex items-center justify-center py-12"><Spinner /></div>
         ) : overview ? (
-          <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-[minmax(0,700px)_minmax(280px,1fr)]">
-            <div className="grid grid-cols-2 gap-4">
-              <StatButton icon={<Timer className="h-5 w-5 text-blue-400" />} color="blue" value={overview.totalTasks} label={t("totalTasks")} onClick={() => setModal({ type: "tasks", title: t("totalTasks"), filters: dateFilters })} />
-              <StatButton icon={<Layers className="h-5 w-5 text-purple-400" />} color="purple" value={totalGroups} label={t("totalGroups")} onClick={() => setModal({ type: "groups", title: t("totalGroups"), filters: {}, groups: taskGroupsData?.data ?? [] })} />
-              <StatButton icon={<CheckCircle className="h-5 w-5 text-emerald-400" />} color="emerald" value={doneCount} label={t("done")} sub={`${completionRate}%`} onClick={() => setModal({ type: "done", title: t("done"), filters: { ...dateFilters, status: "DONE" } })} />
-              <StatButton icon={<Clock className="h-5 w-5 text-amber-400" />} color="amber" value={inProgressCount} label={t("inProgress")} onClick={() => setModal({ type: "tasks", title: t("inProgress"), filters: { ...dateFilters, status: "IN_PROGRESS" } })} />
-              <StatButton icon={<AlertTriangle className="h-5 w-5 text-red-400" />} color="red" value={overview.overdueTasks} label={t("overdue")} onClick={() => setModal({ type: "tasks", title: t("overdue"), filters: { ...dateFilters, deadlineTo: overdueDeadlineTo, statusNot: "DONE" } })} />
-              <StatButton icon={<AlertTriangle className="h-5 w-5 text-red-400" />} color="red" value={highPriorityCount} label={t("highPriority")} onClick={() => setModal({ type: "tasks", title: t("highPriority"), filters: { ...dateFilters, priority: "HIGH" } })} />
+          <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-[minmax(0,720px)_minmax(300px,1fr)]">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+              <StatButton icon={<Timer className="h-5 w-5 sm:h-6 sm:w-6 text-blue-400" />} color="blue" value={overview.totalTasks} label={t("totalTasks")} onClick={() => setModal({ type: "tasks", title: t("totalTasks"), filters: dateFilters })} />
+              <StatButton icon={<Layers className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400" />} color="purple" value={totalGroups} label={t("totalGroups")} onClick={() => setModal({ type: "groups", title: t("totalGroups"), filters: {}, groups: groupsList })} />
+              <StatButton icon={<CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-400" />} color="emerald" value={doneCount} label={t("done")} sub={`${completionRate}%`} onClick={() => setModal({ type: "done", title: t("done"), filters: { ...dateFilters, status: "DONE" } })} />
+              <StatButton icon={<Clock className="h-5 w-5 sm:h-6 sm:w-6 text-amber-400" />} color="amber" value={inProgressCount} label={t("inProgress")} onClick={() => setModal({ type: "tasks", title: t("inProgress"), filters: { ...dateFilters, status: "IN_PROGRESS" } })} />
+              <StatButton icon={<AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-rose-400" />} color="red" value={overview.overdueTasks} label={t("overdue")} onClick={() => setModal({ type: "tasks", title: t("overdue"), filters: { ...dateFilters, deadlineTo: overdueDeadlineTo, statusNot: "DONE" } })} />
+              <StatButton icon={<AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-rose-400" />} color="red" value={highPriorityCount} label={t("highPriority")} onClick={() => setModal({ type: "tasks", title: t("highPriority"), filters: { ...dateFilters, priority: "HIGH" } })} />
             </div>
 
             <MetalCard className="relative overflow-hidden border-purple-500/30 shadow-[0_0_30px_rgba(168,85,247,0.12)]">
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/8 via-transparent to-fuchsia-500/5 pointer-events-none" />
               <div className="absolute -top-20 -right-20 h-40 w-40 rounded-full bg-purple-500/10 blur-[80px] pointer-events-none" />
-              <div className="relative p-4">
+              <div className="relative p-4 sm:p-5">
                 <div className="mb-3 flex items-center gap-2">
                   <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-500/20"><Eye className="h-4 w-4 text-purple-300" /></div>
-                  <h3 className="text-md font-bold tracking-wide uppercase bg-gradient-to-r from-purple-300 via-fuchsia-300 to-purple-200 bg-clip-text text-transparent">{t("awaitingReview")}</h3>
+                  <h3 className="text-sm sm:text-base font-bold tracking-wide uppercase bg-gradient-to-r from-purple-300 via-fuchsia-300 to-purple-200 bg-clip-text text-transparent">{t("awaitingReview")}</h3>
                   {!reviewLoading && <span className="ml-auto rounded-full bg-purple-500/30 px-2.5 py-0.5 text-xs font-bold text-purple-200 border border-purple-400/30">{reviewTaskCount}</span>}
                 </div>
                 {reviewLoading ? (
@@ -172,9 +192,9 @@ export default function LeaderTaskStats() {
                 ) : reviewTasks.length === 0 ? (
                   <p className="py-6 text-center text-xs text-muted">{t("noTasksAwaitingReview")}</p>
                 ) : (
-                  <div className="space-y-2 max-h-[320px] overflow-y-auto custom-scrollbar">
+                  <div className="space-y-2 max-h-[320px] overflow-y-auto custom-scrollbar pr-1">
                     {reviewTasks.map((task) => (
-                      <button key={task.id} onClick={() => task.assignment?.id && openReview(task.assignment.id)} className="w-full text-left rounded-xl border border-purple-400/20 bg-purple-500/10 px-3 py-2.5 hover:border-purple-400/40 hover:bg-purple-500/20 transition-all cursor-pointer">
+                      <button key={task.id} onClick={() => task.assignment?.id && openReview(task.assignment.id)} className="w-full text-left rounded-xl border border-purple-400/20 bg-purple-500/10 px-3 py-2.5 hover:border-purple-400/40 hover:bg-purple-500/20 active:scale-[0.99] transition-all cursor-pointer">
                         <div className="flex items-center justify-between gap-2">
                           <span className="font-mono text-xs font-bold text-purple-300/80">{task.code ?? "—"}</span>
                           <span className="inline-flex rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-purple-500/30 text-purple-200 border border-purple-400/30">REVIEW</span>
@@ -201,7 +221,7 @@ export default function LeaderTaskStats() {
           <div className="relative w-fit min-w-[420px] max-w-[90vw] max-h-[85vh] overflow-auto rounded-4xl border border-border bg-card p-6 shadow-glass">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold metal-text">{modal.title}</h3>
-              <button onClick={() => setModal(null)} className="rounded-xl border border-border bg-card p-1.5 text-muted hover:bg-card-hover hover:text-foreground"><X className="h-4 w-4" /></button>
+              <button onClick={() => setModal(null)} className="rounded-xl border border-border bg-card p-1.5 text-muted hover:bg-card-hover hover:text-foreground cursor-pointer"><X className="h-4 w-4" /></button>
             </div>
             {modal.type === "groups" ? <GroupTable groups={modal.groups ?? []} /> :
              modal.type === "done" ? <DoneTaskTable filters={modal.filters} /> :
@@ -214,15 +234,51 @@ export default function LeaderTaskStats() {
   );
 }
 
-function StatButton({ icon, color, value, label, sub, onClick }: { icon: React.ReactNode; color: string; value: number; label: string; sub?: string; onClick: () => void }) {
+function StatButton({
+  icon,
+  color,
+  value,
+  label,
+  sub,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  color: "blue" | "purple" | "emerald" | "amber" | "red";
+  value: number;
+  label: string;
+  sub?: string;
+  onClick: () => void;
+}) {
+  const styles = STAT_COLOR_STYLES[color] ?? STAT_COLOR_STYLES.blue;
+
   return (
-    <button className="text-left hover:cursor-pointer" onClick={onClick}>
-      <MetalCard>
-        <div className="flex items-center gap-3 p-4">
-          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-${color}-500/10`}>{icon}</div>
-          <div className="min-w-0">
-            <p className="text-xl font-bold text-foreground">{value}</p>
-            <p className="text-xs text-muted">{label}{sub && <span className={`ml-2 font-medium text-${color}-400`}>{sub}</span>}</p>
+    <button
+      type="button"
+      className="group w-full text-left transition-transform active:scale-[0.98] cursor-pointer"
+      onClick={onClick}
+    >
+      <MetalCard className="h-full">
+        <div className="flex flex-col justify-between p-4 sm:p-5 lg:p-6 h-full">
+          <div className="flex items-center justify-between gap-2">
+            <div
+              className={`flex h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl ${styles.bg} transition-all duration-500 group-hover:rotate-6 group-hover:scale-110`}
+            >
+              {icon}
+            </div>
+            {sub && (
+              <span className={`text-xs sm:text-sm font-bold ${styles.text}`}>
+                {sub}
+              </span>
+            )}
+          </div>
+          <div className="mt-3 sm:mt-4 min-w-0">
+            <p className="text-2xl sm:text-4xl lg:text-5xl font-bold leading-none text-foreground truncate">
+              {value}
+            </p>
+            <p className="mt-2 text-[11px] sm:text-xs font-medium uppercase tracking-[0.1em] sm:tracking-[0.2em] text-muted truncate">
+              {label}
+            </p>
+            <div className={`mt-3 sm:mt-4 h-[2px] w-10 sm:w-16 rounded-full ${styles.bar}`} />
           </div>
         </div>
       </MetalCard>

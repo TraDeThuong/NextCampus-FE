@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useContext, useRef } from "react";
+import { useState, useContext, useRef, useMemo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -21,6 +21,9 @@ import {
 import { toast } from "react-hot-toast";
 import axios from "axios";
 import Button from "@/components/ui/Button";
+import Select from "@/components/ui/Select";
+import { DatePicker } from "@/components/ui/DatePicker";
+import { extractTaskGroups } from "@/types/task-group";
 import { useCreateTask } from "@/hooks/task/useCreateTask";
 import { useTaskGroups } from "@/hooks/task-group/useTaskGroups";
 import { useInterns } from "@/hooks/intern/useInterns";
@@ -231,13 +234,14 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
   };
 
   const { data: taskGroupsData } = useTaskGroups();
-  const taskGroups = taskGroupsData?.data ?? [];
+  const taskGroups = useMemo(() => extractTaskGroups(taskGroupsData?.data), [taskGroupsData]);
 
   const {
     register,
     handleSubmit,
     reset,
     watch,
+    setValue,
     trigger,
     formState: { errors },
   } = useForm<CreateTaskPayload>({
@@ -247,6 +251,30 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
   const deadlineVal = watch("deadline");
   const startDateVal = watch("startDate");
   const estDaysVal = watch("estDays");
+
+  useEffect(() => {
+    register("startDate", {
+      validate: (v) => {
+        if (!v) return true;
+        if (v < TODAY) return "Start date cannot be in the past";
+        if (deadlineVal && v > deadlineVal) return "Start date must be on or before deadline";
+        return true;
+      },
+    });
+    register("deadline", {
+      required: "Deadline is required",
+      validate: (v) => {
+        if (!v) return true;
+        if (v < TODAY) return "Deadline cannot be in the past";
+        if (startDateVal && v < startDateVal) return "Deadline must be on or after start date";
+        return true;
+      },
+    });
+    register("priority", {
+      validate: (v) => !v || ["HIGH", "MEDIUM", "LOW"].includes(v) || "Invalid priority",
+    });
+    register("taskGroupId");
+  }, [register, deadlineVal, startDateVal]);
   const availableWorkingDays = startDateVal && deadlineVal
     ? countWorkingDaysInclusive(startDateVal, deadlineVal)
     : null;
@@ -420,7 +448,7 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
   const isPending = createTask.isPending || isUploading;
 
   const inputClass = (name: keyof CreateTaskPayload, extra = "") =>
-    `w-full rounded-xl border px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus:outline-none ${
+    `w-full h-[42px] sm:h-[46px] rounded-xl border px-4 text-xs sm:text-sm text-foreground placeholder:text-muted focus:outline-none transition ${
       errors[name]
         ? "border-red-400/60 focus:border-red-400"
         : "border-border bg-card focus:border-primary-light/40"
@@ -428,56 +456,70 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
 
   const ErrorMsg = ({ name }: { name: keyof CreateTaskPayload }) =>
     errors[name] ? (
-      <p className="mt-1 text-xs text-red-400">{errors[name]?.message}</p>
+      <p className="mt-1 flex items-center gap-1.5 text-xs text-red-400 animate-fadeIn">
+        <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+        {errors[name]?.message}
+      </p>
     ) : null;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-main/10 text-primary-light">
-          <Plus className="h-5 w-5" />
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold metal-text">Create Task</h3>
-          <p className="text-sm text-muted">
-            Step {step} of 3 — {step === 1 ? "Basic Info" : step === 2 ? "Planning" : "Finish"}
-          </p>
+    <div className="flex flex-col">
+      {/* Sticky Header (Rule 44 Compliant: Icon + Heading inside a dedicated flex container) */}
+      <div className="sticky top-0 z-20 bg-[#0c1222]/95 backdrop-blur-xl pb-4 pt-1 -mt-1 border-b border-white/10 pr-10 sm:pr-12">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.2)]">
+              <Plus className="h-5 w-5 shrink-0" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-xl font-bold metal-text truncate">
+                Tạo Công Việc
+              </h3>
+              <p className="text-xs text-muted mt-0.5 truncate">
+                {step === 1
+                  ? "Bước 1/3 — Thông tin cơ bản & Phân nhóm"
+                  : step === 2
+                  ? "Bước 2/3 — Kế hoạch, Thời hạn & Mô tả"
+                  : "Bước 3/3 — Đính kèm tệp & Giao việc"}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Stepper indicator */}
-      <div className="flex items-center justify-center gap-0">
+      <div className="my-5 flex items-center justify-center">
         {[
-          { num: 1, label: "Basic Info", desc: "Task name & category" },
-          { num: 2, label: "Planning", desc: "Schedule & description" },
-          { num: 3, label: "Finish", desc: "Upload files & assign intern" },
+          { num: 1, label: "Cơ bản", desc: "Tên & phân nhóm" },
+          { num: 2, label: "Kế hoạch", desc: "Thời hạn & chi tiết" },
+          { num: 3, label: "Hoàn tất", desc: "Tệp & giao việc" },
         ].map((s, i, arr) => (
           <div key={s.num} className="flex items-center">
             <div className="flex flex-col items-center gap-1.5">
               <div
-                className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold transition-all duration-300 ${
+                className={`flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full text-xs sm:text-sm font-bold transition-all duration-300 ${
                   step > s.num
                     ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
                     : step === s.num
-                    ? "bg-primary-main/20 text-primary-light border border-primary-light/40 shadow-[0_0_16px_rgba(21,174,245,0.25)]"
+                    ? "bg-cyan-500/20 text-cyan-300 border border-cyan-400/50 shadow-[0_0_16px_rgba(6,182,212,0.3)]"
                     : "bg-white/5 text-muted border border-white/10"
                 }`}
               >
                 {step > s.num ? <CheckCircle2 className="h-4 w-4" /> : s.num}
               </div>
               <span
-                className={`text-xs font-semibold uppercase tracking-wider transition-colors duration-300 ${
+                className={`text-[11px] sm:text-xs font-semibold uppercase tracking-wider transition-colors duration-300 ${
                   step === s.num ? "metal-text metal-glow" : step > s.num ? "text-emerald-400" : "text-muted"
                 }`}
               >
                 {s.label}
               </span>
-              <span className={`text-[10px] leading-tight text-center max-w-[100px] transition-colors duration-300 ${step === s.num ? "text-muted" : "text-muted/50"}`}>
+              <span className={`hidden sm:block text-[10px] leading-tight text-center max-w-[100px] transition-colors duration-300 ${step === s.num ? "text-muted" : "text-muted/50"}`}>
                 {s.desc}
               </span>
             </div>
             {i < arr.length - 1 && (
-              <div className={`mx-2 mb-8 h-px w-10 transition-colors duration-300 ${step > s.num ? "bg-emerald-500/40" : "bg-white/10"}`} />
+              <div className={`mx-1 sm:mx-3 mb-6 sm:mb-8 h-px w-8 sm:w-14 md:w-20 transition-colors duration-300 ${step > s.num ? "bg-emerald-500/40" : "bg-white/10"}`} />
             )}
           </div>
         ))}
@@ -488,33 +530,32 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
         {step === 1 && (
           <>
             <div>
+              <label className="mb-1.5 flex items-center gap-1 text-xs sm:text-sm font-medium text-foreground/90 select-none">
+                Tiêu đề <span className="text-red-400">*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="VD: Xây dựng API xác thực người dùng..."
+                {...register("title", {
+                  required: "Vui lòng nhập tiêu đề công việc",
+                  maxLength: { value: 255, message: "Tiêu đề không được vượt quá 255 ký tự" },
+                })}
+                className={inputClass("title")}
+              />
+              <ErrorMsg name="title" />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">
-                  Title <span className="text-red-400">*</span>
+                <label className="mb-1.5 flex items-center gap-1 text-xs sm:text-sm font-medium text-foreground/90 select-none">
+                  Mã công việc
                 </label>
                 <input
                   type="text"
-                  placeholder="Task title"
-                  {...register("title", {
-                    required: "Title is required",
-                    maxLength: { value: 255, message: "Title must be under 255 characters" },
-                  })}
-                  className={inputClass("title")}
-                />
-                <ErrorMsg name="title" />
-              </div>
-
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Code</label>
-                <input
-                  type="text"
-                  placeholder="e.g. BE1-01"
+                  placeholder="VD: BE1-01"
                   {...register("code", {
-                    pattern: { value: /^[A-Za-z0-9._-]*$/, message: "Only letters, numbers, . _ - allowed" },
-                    maxLength: { value: 50, message: "Code must be under 50 characters" },
+                    pattern: { value: /^[A-Za-z0-9._-]*$/, message: "Chỉ cho phép chữ, số, dấu . _ -" },
+                    maxLength: { value: 50, message: "Mã không được vượt quá 50 ký tự" },
                   })}
                   className={inputClass("code")}
                 />
@@ -522,35 +563,44 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Priority</label>
-                <select
-                  {...register("priority", {
-                    validate: (v) => !v || ["HIGH", "MEDIUM", "LOW"].includes(v) || "Invalid priority",
-                  })}
-                  className={inputClass("priority", "bg-card")}
-                >
-                  <option value="">Select priority...</option>
-                  <option value="HIGH">P0 — High</option>
-                  <option value="MEDIUM">P1 — Medium</option>
-                  <option value="LOW">P2 — Low</option>
-                </select>
+                <label className="mb-1.5 flex items-center gap-1 text-xs sm:text-sm font-medium text-foreground/90 select-none">
+                  Mức độ ưu tiên
+                </label>
+                <Select
+                  value={watch("priority") ?? ""}
+                  onChange={(v) => {
+                    setValue("priority", (v || undefined) as CreateTaskPayload["priority"], { shouldValidate: true });
+                  }}
+                  placeholder="Chọn mức độ..."
+                  options={[
+                    { value: "", label: "Chọn mức độ..." },
+                    { value: "HIGH", label: "P0 — Cao" },
+                    { value: "MEDIUM", label: "P1 — Trung bình" },
+                    { value: "LOW", label: "P2 — Thấp" },
+                  ]}
+                />
                 <ErrorMsg name="priority" />
               </div>
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Task Group</label>
-              <select
-                {...register("taskGroupId")}
-                className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground focus:border-primary-light/40 focus:outline-none"
-              >
-                <option value="">No group...</option>
-                {taskGroups.map((tg) => (
-                  <option key={tg.id} value={tg.id}>
-                    {tg.name}
-                  </option>
-                ))}
-              </select>
+              <label className="mb-1.5 flex items-center gap-1 text-xs sm:text-sm font-medium text-foreground/90 select-none">
+                Nhóm công việc
+              </label>
+              <Select
+                value={watch("taskGroupId") ?? ""}
+                onChange={(v) => {
+                  setValue("taskGroupId", v || undefined, { shouldValidate: true });
+                }}
+                placeholder="Không chọn nhóm..."
+                options={[
+                  { value: "", label: "Không chọn nhóm..." },
+                  ...taskGroups.map((tg) => ({
+                    value: tg.id,
+                    label: tg.name,
+                  })),
+                ]}
+              />
             </div>
           </>
         )}
@@ -558,67 +608,64 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
         {/* ─── Step 2: Planning ─── */}
         {step === 2 && (
           <>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-3">
               <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Start Date</label>
-                <input
-                  type="date"
-                  min={TODAY}
-                  {...register("startDate", {
-                    validate: (v) => {
-                      if (!v) return true;
-                      if (v < TODAY) return "Start date cannot be in the past";
-                      if (deadlineVal && v > deadlineVal) return "Start date must be on or before deadline";
-                      return true;
-                    },
-                  })}
-                  className={inputClass("startDate")}
+                <label className="mb-1.5 flex items-center gap-1 text-xs sm:text-sm font-medium text-foreground/90 select-none">
+                  Ngày bắt đầu
+                </label>
+                <DatePicker
+                  value={watch("startDate") ?? ""}
+                  minDate={TODAY}
+                  placeholder="YYYY-MM-DD"
+                  onChange={(d) => {
+                    setValue("startDate", d, { shouldValidate: true });
+                  }}
+                  onClear={() => {
+                    setValue("startDate", "", { shouldValidate: true });
+                  }}
                 />
                 <ErrorMsg name="startDate" />
-                <p className="mt-1 text-[11px] text-muted">Optional planned start date.</p>
+                <p className="mt-1 text-[11px] text-muted">Ngày dự kiến khởi động (tuỳ chọn).</p>
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">
-                  Est. Days <span className="text-red-400">*</span>
+                <label className="mb-1.5 flex items-center gap-1 text-xs sm:text-sm font-medium text-foreground/90 select-none">
+                  Số ngày ước tính <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="number"
                   step="any"
                   min={0.1}
-                  placeholder="Number of days"
+                  placeholder="VD: 3.5"
                   {...register("estDays", {
                     valueAsNumber: true,
-                    required: "Estimated days is required",
-                    min: { value: 0.1, message: "Must be at least 0.1 days" },
-                    max: { value: 365, message: "Must be at most 365 days" },
+                    required: "Vui lòng nhập số ngày ước tính",
+                    min: { value: 0.1, message: "Tối thiểu 0.1 ngày" },
+                    max: { value: 365, message: "Tối đa 365 ngày" },
                   })}
                   className={inputClass("estDays")}
                 />
                 <ErrorMsg name="estDays" />
-                <p className="mt-1 text-[11px] text-muted">Used to calculate assignment workload.</p>
+                <p className="mt-1 text-[11px] text-muted">Dùng để tính toán workload thành viên.</p>
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">
-                  Deadline <span className="text-red-400">*</span>
+                <label className="mb-1.5 flex items-center gap-1 text-xs sm:text-sm font-medium text-foreground/90 select-none">
+                  Hạn chót <span className="text-red-400">*</span>
                 </label>
-                <input
-                  type="date"
-                  min={startDateVal || TODAY}
-                  {...register("deadline", {
-                    required: "Deadline is required",
-                    validate: (v) => {
-                      if (!v) return true;
-                      if (v < TODAY) return "Deadline cannot be in the past";
-                      if (startDateVal && v < startDateVal) return "Deadline must be on or after start date";
-                      return true;
-                    },
-                  })}
-                  className={inputClass("deadline")}
+                <DatePicker
+                  value={watch("deadline") ?? ""}
+                  minDate={startDateVal || TODAY}
+                  placeholder="YYYY-MM-DD"
+                  onChange={(d) => {
+                    setValue("deadline", d, { shouldValidate: true });
+                  }}
+                  onClear={() => {
+                    setValue("deadline", "", { shouldValidate: true });
+                  }}
                 />
                 <ErrorMsg name="deadline" />
-                <p className="mt-1 text-[11px] text-muted">The committed completion date.</p>
+                <p className="mt-1 text-[11px] text-muted">Thời hạn hoàn thành cam kết.</p>
               </div>
             </div>
 
@@ -626,30 +673,33 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
               <div className="flex items-start gap-2 rounded-xl border border-amber-400/25 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                 <p>
-                  The schedule has {availableWorkingDays} working day{availableWorkingDays === 1 ? "" : "s"},
-                  but the task is estimated at {estDaysVal} days. Consider extending the deadline.
+                  Lịch trình chỉ có {availableWorkingDays} ngày làm việc, nhưng task ước tính {estDaysVal} ngày. Cân nhắc gia hạn deadline.
                 </p>
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Phase</label>
+                <label className="mb-1.5 flex items-center gap-1 text-xs sm:text-sm font-medium text-foreground/90 select-none">
+                  Giai đoạn
+                </label>
                 <input
                   type="text"
-                  placeholder="e.g. Phase 1 - Foundation"
-                  {...register("phase", { maxLength: { value: 100, message: "Phase must be under 100 characters" } })}
+                  placeholder="VD: Phase 1 - Foundation"
+                  {...register("phase", { maxLength: { value: 100, message: "Tối đa 100 ký tự" } })}
                   className={inputClass("phase")}
                 />
                 <ErrorMsg name="phase" />
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Module</label>
+                <label className="mb-1.5 flex items-center gap-1 text-xs sm:text-sm font-medium text-foreground/90 select-none">
+                  Module
+                </label>
                 <input
                   type="text"
-                  placeholder="e.g. Setup"
-                  {...register("module", { maxLength: { value: 100, message: "Module must be under 100 characters" } })}
+                  placeholder="VD: Setup"
+                  {...register("module", { maxLength: { value: 100, message: "Tối đa 100 ký tự" } })}
                   className={inputClass("module")}
                 />
                 <ErrorMsg name="module" />
@@ -657,34 +707,40 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Description</label>
+              <label className="mb-1.5 flex items-center gap-1 text-xs sm:text-sm font-medium text-foreground/90 select-none">
+                Mô tả chi tiết
+              </label>
               <textarea
                 rows={2}
-                placeholder="Task description..."
-                {...register("description", { maxLength: { value: 2000, message: "Description must be under 2000 characters" } })}
+                placeholder="Mô tả bối cảnh và yêu cầu chi tiết của công việc..."
+                {...register("description", { maxLength: { value: 2000, message: "Mô tả tối đa 2000 ký tự" } })}
                 className={inputClass("description", "resize-none")}
               />
               <ErrorMsg name="description" />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Acceptance Criteria</label>
+                <label className="mb-1.5 flex items-center gap-1 text-xs sm:text-sm font-medium text-foreground/90 select-none">
+                  Tiêu chí chấp nhận (DoD)
+                </label>
                 <textarea
                   rows={2}
-                  placeholder="Acceptance criteria..."
-                  {...register("acceptanceCriteria", { maxLength: { value: 2000, message: "Must be under 2000 characters" } })}
+                  placeholder="Tiêu chí để đánh giá task hoàn thành..."
+                  {...register("acceptanceCriteria", { maxLength: { value: 2000, message: "Tối đa 2000 ký tự" } })}
                   className={inputClass("acceptanceCriteria", "resize-none")}
                 />
                 <ErrorMsg name="acceptanceCriteria" />
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Notes</label>
+                <label className="mb-1.5 flex items-center gap-1 text-xs sm:text-sm font-medium text-foreground/90 select-none">
+                  Ghi chú bổ sung
+                </label>
                 <textarea
                   rows={2}
-                  placeholder="Additional notes..."
-                  {...register("taskNotes", { maxLength: { value: 2000, message: "Must be under 2000 characters" } })}
+                  placeholder="Ghi chú kỹ thuật hoặc lưu ý thêm..."
+                  {...register("taskNotes", { maxLength: { value: 2000, message: "Tối đa 2000 ký tự" } })}
                   className={inputClass("taskNotes", "resize-none")}
                 />
                 <ErrorMsg name="taskNotes" />
@@ -698,18 +754,20 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
           <>
             {/* Attachments */}
             <div>
-              <div className="mb-1 flex items-center justify-between">
-                <label className="text-sm font-medium text-foreground">Attachments</label>
+              <div className="mb-1.5 flex items-center justify-between">
+                <label className="flex items-center gap-1 text-xs sm:text-sm font-medium text-foreground/90 select-none">
+                  Tài liệu đính kèm
+                </label>
                 {(fileItems.length > 0 || linkItems.length > 0) && (
                   <span className="text-xs text-muted">
-                    {fileItems.length > 0 && `${fileItems.length} file${fileItems.length > 1 ? "s" : ""}`}
+                    {fileItems.length > 0 && `${fileItems.length} tệp`}
                     {fileItems.length > 0 && linkItems.length > 0 && ", "}
-                    {linkItems.length > 0 && `${linkItems.length} link${linkItems.length > 1 ? "s" : ""}`}
+                    {linkItems.length > 0 && `${linkItems.length} liên kết`}
                   </span>
                 )}
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {fileItems.length < MAX_FILES && (
                   <div className="space-y-1">
                     <input
@@ -717,16 +775,16 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
                       multiple
                       disabled={isUploading}
                       onChange={handleFilesChange}
-                      className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-primary-main/10 file:px-3 file:py-1 file:text-xs file:text-primary-light file:cursor-pointer focus:border-primary-light/40 focus:outline-none disabled:opacity-50"
+                      className="w-full h-[42px] sm:h-[46px] rounded-xl border border-border bg-card px-4 py-2 text-xs sm:text-sm text-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/15 file:px-3 file:py-1 file:text-xs file:font-medium file:text-cyan-300 file:cursor-pointer focus:border-primary-light/40 focus:outline-none transition disabled:opacity-50"
                     />
-                    <p className="text-[11px] text-zinc-500">
-                      Up to {MAX_FILES} files, {UPLOAD_LIMITS_MB.taskAttachment} MB each.
+                    <p className="text-[11px] text-muted">
+                      Tối đa {MAX_FILES} tệp, mỗi tệp dung lượng tối đa {UPLOAD_LIMITS_MB.taskAttachment} MB.
                     </p>
                   </div>
                 )}
                 {fileItems.length >= MAX_FILES && (
                   <p className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-2.5 text-xs text-amber-300">
-                    File limit reached ({MAX_FILES} max). Remove some files to add more.
+                    Đã đạt giới hạn ({MAX_FILES} tệp tối đa). Hãy xoá bớt để thêm tệp mới.
                   </p>
                 )}
 
@@ -738,26 +796,26 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
                       disabled={isUploading}
                       onChange={(e) => { setLinkUrl(e.target.value); if (linkErr) setLinkErr(""); }}
                       onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addLink(); } }}
-                      placeholder="Or paste a URL..."
-                      className="flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-primary-light/40 focus:outline-none disabled:opacity-50"
+                      placeholder="Hoặc dán liên kết tài liệu (URL)..."
+                      className="flex-1 h-[42px] sm:h-[46px] rounded-xl border border-border bg-card px-4 text-xs sm:text-sm text-foreground placeholder:text-muted focus:border-primary-light/40 focus:outline-none transition disabled:opacity-50"
                     />
-                    <Button type="button" variant="glass" size="sm" onClick={addLink} disabled={!linkUrl.trim() || isUploading}>
-                      <Link className="h-3 w-3" />
-                      Add
+                    <Button type="button" variant="glass" size="md" onClick={addLink} disabled={!linkUrl.trim() || isUploading}>
+                      <Link className="h-3.5 w-3.5 mr-1" />
+                      Thêm link
                     </Button>
                   </div>
                 )}
                 {linkErr && <p className="text-xs text-red-400">{linkErr}</p>}
 
                 {(fileItems.length > 0 || linkItems.length > 0) && (
-                  <div className="mt-3 space-y-1.5">
+                  <div className="mt-3 space-y-1.5 max-h-44 overflow-y-auto scrollbar-dropdown pr-1">
                     {(fileItems.length + linkItems.length > 3 && !isUploading) && (
                       <button
                         type="button"
                         onClick={() => { setFileItems([]); setLinkItems([]); setFileStatuses({}); setLinkStatuses({}); }}
-                        className="mb-1 text-xs text-muted hover:text-red-400 transition-colors"
+                        className="mb-1 text-xs text-muted hover:text-red-400 transition-colors cursor-pointer"
                       >
-                        Clear all
+                        Xoá tất cả
                       </button>
                     )}
 
@@ -774,12 +832,12 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
                             <p className="text-xs text-muted">{formatFileSize(f.size)}</p>
                           </div>
                           <div className="shrink-0">
-                            {status === "uploading" && <Loader2 className="h-4 w-4 animate-spin text-info" />}
+                            {status === "uploading" && <Loader2 className="h-4 w-4 animate-spin text-cyan-400" />}
                             {status === "success" && <CheckCircle2 className="h-4 w-4 text-emerald-400" />}
                             {status === "error" && <AlertCircle className="h-4 w-4 text-red-400" />}
                           </div>
                           {!isUploading && (
-                            <button type="button" onClick={() => removeFile(f.id)} className="shrink-0 rounded p-0.5 text-muted hover:bg-white/10 hover:text-red-400">
+                            <button type="button" onClick={() => removeFile(f.id)} className="shrink-0 rounded p-1 text-muted hover:bg-white/10 hover:text-red-400 cursor-pointer transition-colors">
                               <X className="h-3.5 w-3.5" />
                             </button>
                           )}
@@ -798,12 +856,12 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
                             <p className="truncate text-xs text-muted">{domain}</p>
                           </div>
                           <div className="shrink-0">
-                            {status === "uploading" && <Loader2 className="h-4 w-4 animate-spin text-info" />}
+                            {status === "uploading" && <Loader2 className="h-4 w-4 animate-spin text-cyan-400" />}
                             {status === "success" && <CheckCircle2 className="h-4 w-4 text-emerald-400" />}
                             {status === "error" && <AlertCircle className="h-4 w-4 text-red-400" />}
                           </div>
                           {!isUploading && (
-                            <button type="button" onClick={() => removeLink(l.id)} className="shrink-0 rounded p-0.5 text-muted hover:bg-white/10 hover:text-red-400">
+                            <button type="button" onClick={() => removeLink(l.id)} className="shrink-0 rounded p-1 text-muted hover:bg-white/10 hover:text-red-400 cursor-pointer transition-colors">
                               <X className="h-3.5 w-3.5" />
                             </button>
                           )}
@@ -814,15 +872,17 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
                 )}
 
                 {fileItems.length === 0 && linkItems.length === 0 && (
-                  <p className="mt-2 text-xs text-muted italic">No attachments added. You can upload files or paste URLs above.</p>
+                  <p className="mt-2 text-xs text-muted italic">Chưa có tệp hay liên kết nào được đính kèm.</p>
                 )}
               </div>
             </div>
 
             {/* Assign to Intern */}
-            <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Assign to Intern</label>
-              <div className="flex gap-1.5 mb-2">
+            <div className="pt-2 border-t border-white/10">
+              <label className="mb-2 flex items-center gap-1 text-xs sm:text-sm font-medium text-foreground/90 select-none">
+                Phân công thực tập sinh
+              </label>
+              <div className="flex gap-2 mb-3">
                 {(["none", "my", "other"] as const).map((mode) => (
                   <button
                     key={mode}
@@ -835,37 +895,37 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
                       lookupAssignmentIntern.reset();
                     }}
                     disabled={isUploading}
-                    className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                    className={`rounded-xl px-3 py-2 text-xs font-medium transition cursor-pointer ${
                       assignMode === mode
-                        ? "bg-primary-main/20 text-primary-light border border-primary-light/30"
-                        : "bg-white/5 text-muted border border-white/5 hover:bg-white/10"
+                        ? "bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
+                        : "bg-white/5 text-muted border border-white/10 hover:bg-white/10 hover:text-foreground"
                     }`}
                   >
-                    {mode === "none" && "None"}
+                    {mode === "none" && "Chưa giao việc"}
                     {mode === "my" && (
-                      <span className="flex items-center gap-1"><UserCheck className="h-3 w-3" />My Team</span>
+                      <span className="flex items-center gap-1.5"><UserCheck className="h-3.5 w-3.5" />TTS nhóm tôi</span>
                     )}
                     {mode === "other" && (
-                      <span className="flex items-center gap-1"><Users className="h-3 w-3" />Other Teams</span>
+                      <span className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5" />TTS nhóm khác</span>
                     )}
                   </button>
                 ))}
               </div>
 
               {assignMode === "my" && (
-                <select
+                <Select
                   value={selectedInternId}
-                  onChange={(e) => setSelectedInternId(e.target.value)}
+                  onChange={(val) => setSelectedInternId(val)}
                   disabled={isUploading}
-                  className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground focus:border-primary-light/40 focus:outline-none disabled:opacity-50"
-                >
-                  <option value="">Select your intern...</option>
-                  {myInterns.map((intern) => (
-                    <option key={intern.id} value={intern.id}>
-                      {intern.fullName}
-                    </option>
-                  ))}
-                </select>
+                  placeholder="Chọn thực tập sinh trong nhóm..."
+                  options={[
+                    { value: "", label: "Chọn thực tập sinh trong nhóm..." },
+                    ...myInterns.map((intern) => ({
+                      value: intern.id,
+                      label: `${intern.fullName} (${intern.user.email})`,
+                    })),
+                  ]}
+                />
               )}
 
               {assignMode === "other" && (
@@ -886,9 +946,9 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
                           void handleOtherInternLookup();
                         }
                       }}
-                      placeholder="Enter the intern's exact email..."
+                      placeholder="Nhập chính xác email thực tập sinh..."
                       disabled={isUploading || lookupAssignmentIntern.isPending}
-                      className="min-w-0 flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-primary-light/40 focus:outline-none disabled:opacity-50"
+                      className="min-w-0 flex-1 h-[42px] sm:h-[46px] rounded-xl border border-border bg-card px-4 text-xs sm:text-sm text-foreground placeholder:text-muted focus:border-primary-light/40 focus:outline-none transition disabled:opacity-50"
                     />
                     <Button
                       type="button"
@@ -900,13 +960,16 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
                       {lookupAssignmentIntern.isPending ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        "Check"
+                        "Kiểm tra"
                       )}
                     </Button>
                   </div>
 
                   {otherInternEmailError && (
-                    <p className="text-xs text-red-400">{otherInternEmailError}</p>
+                    <p className="text-xs text-red-400 flex items-center gap-1.5 animate-fadeIn">
+                      <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                      {otherInternEmailError}
+                    </p>
                   )}
 
                   {selectedInternId && lookupAssignmentIntern.data?.data && (
@@ -922,24 +985,24 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
 
                   {!selectedInternId && !otherInternEmailError && (
                     <p className="text-xs text-muted">
-                      Enter the exact email to verify the intern and their leader.
+                      Nhập email để hệ thống xác minh tài khoản TTS và Leader quản lý.
                     </p>
                   )}
                 </div>
               )}
 
               {assignMode === "my" && myInterns.length === 0 && (
-                <p className="text-xs text-muted italic">No interns available.</p>
+                <p className="text-xs text-muted italic">Hiện chưa có thực tập sinh nào trong nhóm phụ trách.</p>
               )}
             </div>
           </>
         )}
 
         {/* Navigation */}
-        <div className="flex items-center justify-between pt-2">
+        <div className="flex items-center justify-between pt-3 border-t border-white/10">
           {step > 1 ? (
             <Button type="button" variant="glass" size="md" disabled={isPending} onClick={() => setStep((s) => s - 1)}>
-              ← Back
+              ← Quay lại
             </Button>
           ) : (
             <div />
@@ -947,11 +1010,11 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
 
           <div className="flex items-center gap-3">
             <Button type="button" variant="glass" size="md" disabled={isPending} onClick={onCloseModal}>
-              Cancel
+              Hủy
             </Button>
             {step < 3 ? (
               <Button type="button" variant="primary" size="md" onClick={handleNext}>
-                Next →
+                Tiếp tục →
               </Button>
             ) : (
               <Button
@@ -961,8 +1024,8 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
                 isLoading={isPending}
                 disabled={isPending || (assignMode === "other" && !selectedInternId)}
               >
-                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-                Create Task
+                {isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
+                Tạo công việc
               </Button>
             )}
           </div>

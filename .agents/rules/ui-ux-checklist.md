@@ -61,9 +61,14 @@ Table là thành phần dễ bị "vỡ" giao diện nhất khi lên code. Phả
 
 ## 🔽 3. Menu thả xuống (Dropdown / Select)
 
-1. **Chiều dài danh sách (Max Height & Scrollbar)**:
+1. **Chiều dài danh sách & Thanh cuộn đồng bộ (Max Height & Unified Scrollbar)**:
    - Tuyệt đối không để menu kéo dài vô tận khi có nhiều mục.
-   - Bắt buộc giới hạn chiều cao tối đa và bật cuộn nội dung: `max-h-60 overflow-y-auto`. Thanh cuộn thiết kế gọn gàng, tinh tế.
+   - Bắt buộc giới hạn chiều cao tối đa và bật cuộn nội dung: `max-h-60 overflow-y-auto` (hoặc `max-h-[240px]` / `max-h-[260px]`).
+   - **Thanh cuộn đồng bộ (Bắt buộc dùng `scrollbar-dropdown` hoặc `custom-scrollbar`)**:
+     * Tuyệt đối KHÔNG để thanh cuộn trình duyệt mặc định (to bản, vuông xám, có 2 nút mũi tên gây thô vỡ giao diện Cyberpunk).
+     * Mọi vùng cuộn của Dropdown/Popover/Select/DatePicker bắt buộc gắn class `scrollbar-dropdown` (đã định nghĩa sẵn trong `globals.css`).
+     * Chuẩn hiển thị: Chiều rộng siêu mỏng `5px`, track trong suốt (`background: transparent`), con trượt bo tròn viên thuốc (`rounded-full`), màu trắng mờ `rgba(255, 255, 255, 0.12)`, khi hover phát sáng cyan neon `rgba(34, 211, 238, 0.35)`.
+     * Hỗ trợ chuẩn W3C & Firefox: `scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.15) transparent;`.
 2. **Tìm kiếm (Searchable)**:
    - Khi danh sách vượt quá 8-10 mục (như danh sách nhân sự, trường học, vị trí tuyển dụng), bắt buộc tích hợp ô tìm kiếm lọc nhanh (Search input) ở ngay đầu menu thả xuống.
 3. **Chọn nhiều (Multi-select)**:
@@ -177,3 +182,21 @@ Table là thành phần dễ bị "vỡ" giao diện nhất khi lên code. Phả
        - Tiêu đề card: `text-[11px] sm:text-xs font-medium uppercase tracking-[0.1em] sm:tracking-[0.2em] text-muted truncate` (hoặc `line-clamp-2`)
        - Đường line phân cách: `mt-3 sm:mt-4 h-[2px] w-10 sm:w-16 rounded-full`
 
+---
+
+## 🪟 7. Chuẩn hóa Hộp thoại (Modals & Dialogs)
+
+1. **Header chuẩn hóa (Rule 44 Compliant)**:
+   - Sử dụng sticky header: `sticky top-0 z-20 bg-[#0c1222]/95 backdrop-blur-xl pb-4 pt-1 -mt-1 border-b border-white/10 pr-10 sm:pr-12`.
+   - Bắt buộc có khoảng đệm phải `pr-10 sm:pr-12` để chống đè nút đóng `HiXMark` ở góc trên cùng bên phải.
+   - Icon container: `h-11 w-11 shrink-0 items-center justify-center rounded-2xl` kèm viền và shadow phát sáng theo ngữ cảnh.
+2. **Thanh tiến trình (Stepper)**:
+   - Nút số bo tròn: `h-9 w-9 sm:h-10 sm:w-10 rounded-full font-bold`.
+   - Đường nối responsive: `mx-1 sm:mx-3 mb-6 sm:mb-8 h-px w-8 sm:w-14 md:w-20`.
+   - Mô tả bước phụ: Ẩn trên mobile (`hidden sm:block`) chống vỡ bố cục ngang.
+3. **Kích thước cửa sổ modal (`size="sm" | "md" | "lg" | "xl"`)**:
+   - Modal ít trường (`TaskGroupCreateModal`): `size="sm"` (`max-w-[min(96vw,36rem)]`).
+   - Modal wizard/kế hoạch nhiều cột/bảng preview (`TaskCreateModal`, `TaskImportModal`): `size="lg"` (`max-w-[min(98vw,72rem)]`).
+4. **Chống xung đột thanh cuộn (No Conflicting Nested Scroll)**:
+   - Tuyệt đối không đặt `style={{ maxHeight: 'calc(100vh - ...)' }}` hoặc `overflow-hidden` ở container con bên trong làm xung đột với container cuộn của `Modal.Window`.
+   - Bảng dữ liệu nhiều cột trong modal phải bọc trong `<div className="overflow-x-auto scrollbar-dropdown rounded-2xl border border-white/10 bg-card/40">`.

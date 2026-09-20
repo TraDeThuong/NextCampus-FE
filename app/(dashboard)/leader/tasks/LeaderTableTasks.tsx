@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo, useContext } from "react";
-import { Layers, MoreHorizontal, Eye, Pencil, Trash2, Loader2, ChevronLeft, ChevronRight, Check, ChevronDown, UserPlus, UserX, Sparkles, Building, RotateCcw } from "lucide-react";
+import { useState, useRef, useEffect, useMemo, useContext, useCallback, useId } from "react";
+import { createPortal } from "react-dom";
+import { Layers, MoreVertical, Eye, Pencil, Trash2, Loader2, ChevronLeft, ChevronRight, Check, ChevronDown, UserPlus, UserX, Sparkles, Building, RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import TaskAiRecommendationModal from "./TaskAiRecommendationModal";
 import TaskGroupAiAllocationModal from "./TaskGroupAiAllocationModal";
@@ -11,6 +12,7 @@ import Spinner from "@/components/ui/Spinner";
 import Table from "@/components/ui/Table";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
+import Select from "@/components/ui/Select";
 import { useTaskGroups } from "@/hooks/task-group/useTaskGroups";
 import { useTaskGroup } from "@/hooks/task-group/useTaskGroup";
 import { useUpdateTaskGroup } from "@/hooks/task-group/useUpdateTaskGroup";
@@ -28,8 +30,8 @@ import TaskEditModal from "./TaskEditModal";
 import TaskGroupMemberSelector from "./TaskGroupMemberSelector";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
-import type { TaskGroup, UpdateTaskGroupPayload } from "@/types/task-group";
-import type { TaskQueryParams } from "@/types/task";
+import { extractTaskGroups, type TaskGroup, type UpdateTaskGroupPayload } from "@/types/task-group";
+import type { Task, TaskQueryParams } from "@/types/task";
 
 type GroupAction = { type: "view" | "edit" | "delete"; groupId: string; groupName: string } | null;
 
@@ -41,16 +43,12 @@ const checkIsOverdue = (deadline: string) => {
 
 export default function LeaderTableTasks() {
   const t = useTranslations("leader.tasks");
-  const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [action, setAction] = useState<GroupAction>(null);
   const [taskAction, setTaskAction] = useState<{ type: "edit" | "delete"; taskId: string; taskTitle: string } | null>(null);
-  const [taskMenuOpen, setTaskMenuOpen] = useState<string | null>(null);
   const [aiTask, setAiTask] = useState<{ taskId: string; taskTitle: string; isAssigned: boolean } | null>(null);
   const [groupAiModal, setGroupAiModal] = useState<{ groupId: string; groupName: string } | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const taskTriggerRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const taskMenuRef = useRef<HTMLDivElement>(null);
 
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -58,18 +56,8 @@ export default function LeaderTableTasks() {
 
   const taskGroupId = searchParams.get("taskGroupId") ?? null;
 
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(null);
-      if (taskMenuRef.current && !taskMenuRef.current.contains(e.target as Node)) setTaskMenuOpen(null);
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
-
   const openTaskAction = (a: { type: "edit" | "delete"; taskId: string; taskTitle: string }) => {
     setTaskAction(a);
-    setTaskMenuOpen(null);
     taskTriggerRef.current?.click();
   };
 
@@ -85,7 +73,7 @@ export default function LeaderTableTasks() {
   };
 
   const { data: groupsData, isLoading: groupsLoading } = useTaskGroups();
-  const groups = groupsData?.data ?? [];
+  const groups = useMemo(() => extractTaskGroups(groupsData?.data), [groupsData]);
 
   const params: TaskQueryParams = useMemo(() => {
     const p: TaskQueryParams = {};
@@ -149,7 +137,7 @@ export default function LeaderTableTasks() {
         <MetalCard className="min-h-[240px] min-w-0">
           <div className="min-w-0 p-4 pb-24">
             <div className="mb-3 flex items-center gap-2">
-              <Layers className="h-4 w-4 text-primary-light" />
+              <Layers className="h-4 w-4 shrink-0 text-cyan-400" />
               <h3 className="text-sm font-semibold metal-text">{t("taskGroups")}</h3>
             </div>
             {groupsLoading ? (
@@ -162,37 +150,23 @@ export default function LeaderTableTasks() {
                     p.delete("taskGroupId");
                     p.set("page", "1");
                     router.push(`${pathname}?${p.toString()}`);
-                  }} className={`w-full rounded-xl px-3 py-2 text-left text-sm transition ${taskGroupId === null ? "bg-primary-main/10 text-primary-light font-medium" : "text-muted hover:bg-white/5 hover:text-foreground"}`}>
+                  }} className={`w-full rounded-xl px-3 py-2 text-left text-sm transition cursor-pointer ${taskGroupId === null ? "bg-primary-main/10 text-primary-light font-medium" : "text-muted hover:bg-white/5 hover:text-foreground"}`}>
                     {t("allTasks")}
                   </button>
                 </li>
                 {groups.map((g) => (
-                  <li key={g.id} className="group relative flex items-center">
-                    <button onClick={() => {
+                  <TaskGroupItem
+                    key={g.id}
+                    group={g}
+                    isSelected={taskGroupId === g.id}
+                    onSelect={() => {
                       const p = new URLSearchParams(searchParams.toString());
                       p.set("taskGroupId", g.id);
                       p.set("page", "1");
                       router.push(`${pathname}?${p.toString()}`);
-                    }} className={`flex-1 min-w-0 rounded-xl px-3 py-2 text-left text-sm transition ${taskGroupId === g.id ? "bg-primary-main/10 text-primary-light font-medium" : "text-muted hover:bg-white/5 hover:text-foreground"}`}>
-                      <span className="truncate block font-medium">{g.name}</span>
-                      {g.department?.name && (
-                        <span className="truncate flex items-center gap-1 text-[10px] text-sky-400 font-normal mt-0.5">
-                          <Building className="h-2.5 w-2.5 shrink-0" />
-                          {g.department.name}
-                        </span>
-                      )}
-                    </button>
-                    <button onClick={(e) => { e.stopPropagation(); setMenuOpen(menuOpen === g.id ? null : g.id); }} className="mr-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted opacity-0 transition hover:bg-white/10 hover:text-foreground group-hover:opacity-100">
-                      <MoreHorizontal className="h-3.5 w-3.5" />
-                    </button>
-                    {menuOpen === g.id && (
-                      <div ref={menuRef} className="absolute right-0 top-full z-50 mt-1 w-32 rounded-xl border border-border bg-[#0f172a] p-1 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl">
-                        <button onClick={() => { setMenuOpen(null); openAction({ type: "view", groupId: g.id, groupName: g.name }); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground"><Eye className="h-3 w-3" />{t("view")}</button>
-                        <button onClick={() => { setMenuOpen(null); openAction({ type: "edit", groupId: g.id, groupName: g.name }); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground"><Pencil className="h-3 w-3" />{t("edit")}</button>
-                        <button onClick={() => { setMenuOpen(null); openAction({ type: "delete", groupId: g.id, groupName: g.name }); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-red-400 hover:bg-red-500/10"><Trash2 className="h-3 w-3" />{t("delete")}</button>
-                      </div>
-                    )}
-                  </li>
+                    }}
+                    onOpenAction={openAction}
+                  />
                 ))}
               </ul>
             )}
@@ -221,10 +195,10 @@ export default function LeaderTableTasks() {
                       setGroupAiModal({ groupId: currentGroup.id, groupName: currentGroup.name });
                     }
                   }}
-                  className="flex items-center gap-1.5 text-xs text-sky-400 border border-sky-500/20 hover:bg-sky-500/10 transition-all font-semibold"
+                  className="flex items-center gap-1.5 text-xs text-sky-400 border border-sky-500/20 hover:bg-sky-500/10 transition-all font-semibold active:scale-95 cursor-pointer"
                 >
                   <Sparkles className="h-3.5 w-3.5 mr-1 animate-pulse" />
-                  AI Phân công
+                  <span>AI Phân công</span>
                 </Button>
               )}
             </div>
@@ -234,147 +208,42 @@ export default function LeaderTableTasks() {
               <>
                 {/* Mobile Card List (md:hidden) */}
                 <div className="md:hidden space-y-3">
-                  {tasks.map((task) => {
-                    const isCompleted = task.assignment?.status === "DONE";
-                    const isBlocked = task.assignment?.status === "BLOCKED";
+                  {tasks.map((task) => (
+                    <TaskCardItem
+                      key={task.id}
+                      task={task}
+                      pathname={pathname}
+                      onOpenReview={handleOpenReview}
+                      onUnblockTask={handleUnblockTask}
+                      isUnblocking={unblockTask.isPending}
+                      onOpenTaskAction={openTaskAction}
+                      onOpenAiAssign={(tData) => setAiTask(tData)}
+                    />
+                  ))}
 
-                    return (
-                      <div
-                        key={task.id}
-                        className={`rounded-2xl border p-4 space-y-3 transition-all ${
-                          isCompleted
-                            ? "border-emerald-500/30 bg-emerald-500/[0.03]"
-                            : isBlocked
-                            ? "border-rose-500/30 bg-rose-500/[0.03]"
-                            : "border-border bg-card/60"
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="font-mono text-xs text-muted bg-white/5 px-2 py-0.5 rounded border border-white/5">
-                              {task.code ?? "—"}
-                            </span>
-                            <PriorityBadge priority={task.priority} />
-                            <StatusBadge
-                              status={task.assignment?.status ?? "TODO"}
-                              assignmentId={task.assignment?.id}
-                              taskId={task.id}
-                              onReviewClick={handleOpenReview}
-                              onUnblockClick={handleUnblockTask}
-                              isUnblocking={unblockTask.isPending}
-                            />
-                          </div>
-
-                          <div className="relative">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setTaskMenuOpen(taskMenuOpen === task.id ? null : task.id);
-                              }}
-                              className="flex h-8 w-8 items-center justify-center rounded-lg text-muted hover:bg-white/10 hover:text-foreground transition"
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </button>
-                            {taskMenuOpen === task.id && (
-                              <div
-                                ref={taskMenuRef}
-                                className="absolute right-0 top-full z-50 mt-1 w-44 rounded-xl border border-border bg-[#0f172a] p-1 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl"
-                              >
-                                {(!task.assignment || !task.assignment.internId) && !checkIsOverdue(task.deadline) && (
-                                  <button
-                                    onClick={() => {
-                                      setTaskMenuOpen(null);
-                                      setAiTask({ taskId: task.id, taskTitle: task.title, isAssigned: false });
-                                    }}
-                                    className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-sky-400 hover:bg-sky-500/10 transition font-medium"
-                                  >
-                                    <Sparkles className="h-3.5 w-3.5 shrink-0" />
-                                    {t("aiAssign")}
-                                  </button>
-                                )}
-                                {isBlocked && task.assignment?.id && (
-                                  <button
-                                    onClick={() => {
-                                      setTaskMenuOpen(null);
-                                      handleUnblockTask(task.assignment!.id);
-                                    }}
-                                    disabled={unblockTask.isPending}
-                                    className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-sky-400 hover:bg-sky-500/10 transition font-medium"
-                                  >
-                                    <RotateCcw className="h-3.5 w-3.5 shrink-0" />
-                                    {t("unblockTask")}
-                                  </button>
-                                )}
-                                <button
-                                  onClick={() => {
-                                    setTaskMenuOpen(null);
-                                    router.push(`${pathname}/${task.id}`);
-                                  }}
-                                  className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground"
-                                >
-                                  <Eye className="h-3.5 w-3.5" />
-                                  {t("view")}
-                                </button>
-                                <button
-                                  onClick={() => openTaskAction({ type: "edit", taskId: task.id, taskTitle: task.title })}
-                                  disabled={isCompleted}
-                                  title={isCompleted ? t("completedTaskReadOnly") : undefined}
-                                  className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted"
-                                >
-                                  <Pencil className="h-3.5 w-3.5" />
-                                  {t("edit")}
-                                </button>
-                                <button
-                                  onClick={() => openTaskAction({ type: "delete", taskId: task.id, taskTitle: task.title })}
-                                  disabled={isCompleted}
-                                  title={isCompleted ? t("completedTaskReadOnly") : undefined}
-                                  className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-red-400 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-red-400"
-                                >
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                  {t("delete")}
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div>
-                          <button
-                            onClick={() => router.push(`${pathname}/${task.id}`)}
-                            title={task.title}
-                            className="text-sm font-semibold text-foreground hover:text-primary-light transition text-left line-clamp-2 block"
-                          >
-                            {task.title}
-                          </button>
-                        </div>
-
-                        {isCompleted && (
-                          <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs text-emerald-300 font-medium">
-                            <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-                            <span>{t("completedTaskReadOnly")}</span>
-                          </div>
-                        )}
-
-                        <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-border/40">
-                          <div>
-                            <span className="text-muted block text-[11px] mb-0.5">{t("colOwner")}</span>
-                            <InlineAssignCell
-                              taskId={task.id}
-                              assignment={task.assignment}
-                              deadline={task.deadline}
-                              taskGroupDepartmentId={task.taskGroup?.departmentId}
-                            />
-                          </div>
-                          <div>
-                            <span className="text-muted block text-[11px] mb-0.5">{t("colDeadline")}</span>
-                            <span className="text-foreground font-medium">
-                              {new Date(task.deadline).toLocaleDateString("vi-VN")}
-                            </span>
-                          </div>
-                        </div>
+                  {meta && meta.totalPages > 1 && (
+                    <div className="flex w-full items-center justify-between gap-4 border-t border-border/40 dark:border-white/5 pt-4 text-sm text-muted">
+                      <p className="text-muted text-xs">
+                        {t("pagination", { page: meta.page, totalPages: meta.totalPages, total: meta.total })}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <button
+                          disabled={meta.page <= 1}
+                          onClick={() => goToPage(meta.page - 1)}
+                          className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-1.5 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer"
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                        </button>
+                        <button
+                          disabled={meta.page >= meta.totalPages}
+                          onClick={() => goToPage(meta.page + 1)}
+                          className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-1.5 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer"
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                        </button>
                       </div>
-                    );
-                  })}
+                    </div>
+                  )}
                 </div>
 
                 {/* Desktop Table View (hidden md:block) */}
@@ -388,160 +257,54 @@ export default function LeaderTableTasks() {
                       <div>{t("colPriority")}</div>
                       <div>{t("colStatus")}</div>
                       <div>{t("colDeadline")}</div>
-                      <Table.ReloadButton onReload={tasksRefetch} isReloading={tasksFetching} />
+                      <div className="flex items-center justify-end">
+                        <Table.ReloadButton onReload={tasksRefetch} isReloading={tasksFetching} />
+                      </div>
                     </Table.Header>
                     <Table.Body
                       data={tasks}
-                      render={(task) => {
-                        const isCompleted = task.assignment?.status === "DONE";
-                        const isBlocked = task.assignment?.status === "BLOCKED";
-
-                        return (
-                          <Table.Row key={task.id}>
-                            <div className="font-mono text-xs text-muted">{task.code ?? "—"}</div>
-                            <div className="min-w-0 pr-2">
-                              <button
-                                onClick={() => router.push(`${pathname}/${task.id}`)}
-                                title={task.title}
-                                className="truncate block text-sm text-left hover:text-primary-light transition cursor-pointer max-w-[240px] font-medium"
-                              >
-                                {task.title}
-                              </button>
-                              {isCompleted && (
-                                <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-medium mt-0.5" title={t("completedTaskReadOnly")}>
-                                  <Check className="h-2.5 w-2.5" />
-                                  {t("completedTaskReadOnly")}
-                                </span>
-                              )}
-                            </div>
-                            <InlineAssignCell
-                              taskId={task.id}
-                              assignment={task.assignment}
-                              deadline={task.deadline}
-                              taskGroupDepartmentId={task.taskGroup?.departmentId}
-                            />
-                            <div className="truncate text-sm text-muted">
-                              {task.assignment?.support?.fullName ?? "—"}
-                            </div>
-                            <div>
-                              <PriorityBadge priority={task.priority} />
-                            </div>
-                            <div>
-                              <StatusBadge
-                                status={task.assignment?.status ?? "TODO"}
-                                assignmentId={task.assignment?.id}
-                                taskId={task.id}
-                                onReviewClick={handleOpenReview}
-                                onUnblockClick={handleUnblockTask}
-                                isUnblocking={unblockTask.isPending}
-                              />
-                            </div>
-                            <div className="text-sm text-muted">
-                              {new Date(task.deadline).toLocaleDateString("vi-VN")}
-                            </div>
-                            <div className="relative text-center">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setTaskMenuOpen(taskMenuOpen === task.id ? null : task.id);
-                                }}
-                                className="flex h-7 w-7 items-center justify-center rounded-lg text-muted hover:bg-white/10 hover:text-foreground"
-                              >
-                                <MoreHorizontal className="h-3.5 w-3.5" />
-                              </button>
-                              {taskMenuOpen === task.id && (
-                                <div
-                                  ref={taskMenuRef}
-                                  className="absolute right-0 top-full z-50 mt-1 w-44 rounded-xl border border-border bg-[#0f172a] p-1 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl"
-                                >
-                                  {(!task.assignment || !task.assignment.internId) && !checkIsOverdue(task.deadline) && (
-                                    <button
-                                      onClick={() => {
-                                        setTaskMenuOpen(null);
-                                        setAiTask({ taskId: task.id, taskTitle: task.title, isAssigned: false });
-                                      }}
-                                      className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-sky-400 hover:bg-sky-500/10 transition font-medium"
-                                    >
-                                      <Sparkles className="h-3 w-3 shrink-0" />
-                                      {t("aiAssign")}
-                                    </button>
-                                  )}
-                                  {isBlocked && task.assignment?.id && (
-                                    <button
-                                      onClick={() => {
-                                        setTaskMenuOpen(null);
-                                        handleUnblockTask(task.assignment!.id);
-                                      }}
-                                      disabled={unblockTask.isPending}
-                                      className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-sky-400 hover:bg-sky-500/10 transition font-medium"
-                                    >
-                                      <RotateCcw className="h-3 w-3 shrink-0" />
-                                      {t("unblockTask")}
-                                    </button>
-                                  )}
-                                  <button
-                                    onClick={() => {
-                                      setTaskMenuOpen(null);
-                                      router.push(`${pathname}/${task.id}`);
-                                    }}
-                                    className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground"
-                                  >
-                                    <Eye className="h-3 w-3" />
-                                    {t("view")}
-                                  </button>
-                                  <button
-                                    onClick={() => openTaskAction({ type: "edit", taskId: task.id, taskTitle: task.title })}
-                                    disabled={isCompleted}
-                                    title={isCompleted ? t("completedTaskReadOnly") : undefined}
-                                    className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted"
-                                  >
-                                    <Pencil className="h-3 w-3" />
-                                    {t("edit")}
-                                  </button>
-                                  <button
-                                    onClick={() => openTaskAction({ type: "delete", taskId: task.id, taskTitle: task.title })}
-                                    disabled={isCompleted}
-                                    title={isCompleted ? t("completedTaskReadOnly") : undefined}
-                                    className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-red-400 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-red-400"
-                                  >
-                                    <Trash2 className="h-3 w-3" />
-                                    {t("delete")}
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          </Table.Row>
-                        );
-                      }}
+                      render={(task) => (
+                        <TaskTableRow
+                          key={task.id}
+                          task={task}
+                          pathname={pathname}
+                          onOpenReview={handleOpenReview}
+                          onUnblockTask={handleUnblockTask}
+                          isUnblocking={unblockTask.isPending}
+                          onOpenTaskAction={openTaskAction}
+                          onOpenAiAssign={(tData) => setAiTask(tData)}
+                        />
+                      )}
                     />
+                    {meta && meta.totalPages > 1 && (
+                      <Table.Footer>
+                        <div className="flex w-full items-center justify-between gap-4 text-sm">
+                          <p className="text-muted">
+                            {t("pagination", { page: meta.page, totalPages: meta.totalPages, total: meta.total })}
+                          </p>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              disabled={meta.page <= 1}
+                              onClick={() => goToPage(meta.page - 1)}
+                              className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer"
+                            >
+                              <ChevronLeft className="h-4 w-4" />
+                            </button>
+                            <button
+                              type="button"
+                              disabled={meta.page >= meta.totalPages}
+                              onClick={() => goToPage(meta.page + 1)}
+                              className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer"
+                            >
+                              <ChevronRight className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </Table.Footer>
+                    )}
                   </Table>
                 </div>
-
-                {meta && meta.totalPages > 1 && (
-                  <div className="mt-4 flex w-full items-center justify-between gap-4 border-t border-white/5 px-2 pt-4 text-sm text-muted">
-                    <p className="text-muted">
-                      {t("pagination", { page: meta.page, totalPages: meta.totalPages, total: meta.total })}
-                    </p>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        disabled={meta.page <= 1}
-                        onClick={() => goToPage(meta.page - 1)}
-                        className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:opacity-30"
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                      </button>
-
-                      <button
-                        disabled={meta.page >= meta.totalPages}
-                        onClick={() => goToPage(meta.page + 1)}
-                        className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:opacity-30"
-                      >
-                        <ChevronRight className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                )}
               </>
             ) : (
               <p className="py-12 text-center text-sm text-muted">{t("noTasksFound")}</p>
@@ -587,6 +350,737 @@ export default function LeaderTableTasks() {
       />
     )}
     </>
+  );
+}
+
+/* ─── Task Group Item with Portal 3-Dots Menu ──────────────── */
+
+function TaskGroupItem({
+  group,
+  isSelected,
+  onSelect,
+  onOpenAction,
+}: {
+  group: TaskGroup;
+  isSelected: boolean;
+  onSelect: () => void;
+  onOpenAction: (a: GroupAction) => void;
+}) {
+  const t = useTranslations("leader.tasks");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuId = useId();
+
+  const updateMenuPosition = useCallback(() => {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    if (rect.bottom < 0 || rect.top > vh || rect.right < 0 || rect.left > vw) {
+      setMenuOpen(false);
+      return;
+    }
+
+    const MENU_WIDTH = 150;
+    const ESTIMATED_HEIGHT = 130;
+    const spaceBelow = vh - rect.bottom;
+    const spaceAbove = rect.top;
+
+    const openUpward = spaceBelow < ESTIMATED_HEIGHT && spaceAbove > spaceBelow;
+    const maxHeight = openUpward
+      ? Math.min(220, Math.max(100, spaceAbove - 16))
+      : Math.min(220, Math.max(100, spaceBelow - 16));
+
+    const left = Math.max(8, Math.min(rect.right - MENU_WIDTH, vw - MENU_WIDTH - 8));
+
+    setMenuStyle({
+      position: "fixed",
+      top: openUpward ? undefined : rect.bottom + 6,
+      bottom: openUpward ? vh - rect.top + 6 : undefined,
+      left,
+      width: MENU_WIDTH,
+      maxHeight,
+      overflowY: "auto",
+      zIndex: 9999,
+    });
+  }, []);
+
+  const toggleMenu = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!menuOpen) {
+      updateMenuPosition();
+      setMenuOpen(true);
+    } else {
+      setMenuOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    updateMenuPosition();
+
+    function handleOutside(e: MouseEvent | TouchEvent) {
+      const target = e.target as Node;
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(target) &&
+        triggerRef.current &&
+        !triggerRef.current.contains(target)
+      ) {
+        setMenuOpen(false);
+      }
+    }
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setMenuOpen(false);
+        triggerRef.current?.focus();
+      }
+    }
+
+    window.addEventListener("scroll", updateMenuPosition, true);
+    window.addEventListener("resize", updateMenuPosition);
+    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("touchstart", handleOutside, { passive: true });
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("scroll", updateMenuPosition, true);
+      window.removeEventListener("resize", updateMenuPosition);
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("touchstart", handleOutside);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [menuOpen, updateMenuPosition]);
+
+  return (
+    <li className="group relative flex items-center">
+      <button
+        onClick={onSelect}
+        className={`flex-1 min-w-0 rounded-xl px-3 py-2 text-left text-sm transition cursor-pointer ${
+          isSelected
+            ? "bg-primary-main/10 text-primary-light font-medium"
+            : "text-muted hover:bg-white/5 hover:text-foreground"
+        }`}
+      >
+        <span className="truncate block font-medium">{group.name}</span>
+        {group.department?.name && (
+          <span className="truncate flex items-center gap-1 text-[10px] text-sky-400 font-normal mt-0.5">
+            <Building className="h-2.5 w-2.5 shrink-0" />
+            {group.department.name}
+          </span>
+        )}
+      </button>
+
+      <button
+        ref={triggerRef}
+        type="button"
+        aria-label={`Actions for group ${group.name}`}
+        aria-haspopup="menu"
+        aria-expanded={menuOpen}
+        aria-controls={`group-actions-${menuId}`}
+        onClick={toggleMenu}
+        className="mr-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted opacity-0 transition hover:bg-white/10 hover:text-foreground group-hover:opacity-100 cursor-pointer"
+      >
+        <MoreVertical className="h-3.5 w-3.5" />
+      </button>
+
+      {menuOpen &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            id={`group-actions-${menuId}`}
+            ref={menuRef}
+            role="menu"
+            style={menuStyle}
+            className="rounded-2xl border border-white/10 bg-[#0c1322]/95 p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn text-left scrollbar-dropdown"
+          >
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setMenuOpen(false);
+                onOpenAction({ type: "view", groupId: group.id, groupName: group.name });
+              }}
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground active:scale-95 transition cursor-pointer"
+            >
+              <Eye className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
+              <span>{t("view")}</span>
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setMenuOpen(false);
+                onOpenAction({ type: "edit", groupId: group.id, groupName: group.name });
+              }}
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground active:scale-95 transition cursor-pointer"
+            >
+              <Pencil className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+              <span>{t("edit")}</span>
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setMenuOpen(false);
+                onOpenAction({ type: "delete", groupId: group.id, groupName: group.name });
+              }}
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-xs text-rose-400 hover:bg-rose-500/10 active:scale-95 transition cursor-pointer"
+            >
+              <Trash2 className="h-3.5 w-3.5 shrink-0" />
+              <span>{t("delete")}</span>
+            </button>
+          </div>,
+          document.body,
+        )}
+    </li>
+  );
+}
+
+/* ─── Task Row Desktop with Portal 3-Dots Menu ──────────────── */
+
+function TaskTableRow({
+  task,
+  pathname,
+  onOpenReview,
+  onUnblockTask,
+  isUnblocking,
+  onOpenTaskAction,
+  onOpenAiAssign,
+}: {
+  task: Task;
+  pathname: string;
+  onOpenReview: (aId: string) => void;
+  onUnblockTask: (aId: string) => void;
+  isUnblocking: boolean;
+  onOpenTaskAction: (a: { type: "edit" | "delete"; taskId: string; taskTitle: string }) => void;
+  onOpenAiAssign: (a: { taskId: string; taskTitle: string; isAssigned: boolean }) => void;
+}) {
+  const t = useTranslations("leader.tasks");
+  const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuId = useId();
+
+  const isCompleted = task.assignment?.status === "DONE";
+  const isBlocked = task.assignment?.status === "BLOCKED";
+
+  const updateMenuPosition = useCallback(() => {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    if (rect.bottom < 0 || rect.top > vh || rect.right < 0 || rect.left > vw) {
+      setMenuOpen(false);
+      return;
+    }
+
+    const MENU_WIDTH = 180;
+    const ESTIMATED_HEIGHT = 180;
+    const spaceBelow = vh - rect.bottom;
+    const spaceAbove = rect.top;
+
+    const openUpward = spaceBelow < ESTIMATED_HEIGHT && spaceAbove > spaceBelow;
+    const maxHeight = openUpward
+      ? Math.min(260, Math.max(100, spaceAbove - 16))
+      : Math.min(260, Math.max(100, spaceBelow - 16));
+
+    const left = Math.max(8, Math.min(rect.right - MENU_WIDTH, vw - MENU_WIDTH - 8));
+
+    setMenuStyle({
+      position: "fixed",
+      top: openUpward ? undefined : rect.bottom + 6,
+      bottom: openUpward ? vh - rect.top + 6 : undefined,
+      left,
+      width: MENU_WIDTH,
+      maxHeight,
+      overflowY: "auto",
+      zIndex: 9999,
+    });
+  }, []);
+
+  const toggleMenu = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!menuOpen) {
+      updateMenuPosition();
+      setMenuOpen(true);
+    } else {
+      setMenuOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    updateMenuPosition();
+
+    function handleOutside(e: MouseEvent | TouchEvent) {
+      const target = e.target as Node;
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(target) &&
+        triggerRef.current &&
+        !triggerRef.current.contains(target)
+      ) {
+        setMenuOpen(false);
+      }
+    }
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setMenuOpen(false);
+        triggerRef.current?.focus();
+      }
+    }
+
+    window.addEventListener("scroll", updateMenuPosition, true);
+    window.addEventListener("resize", updateMenuPosition);
+    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("touchstart", handleOutside, { passive: true });
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("scroll", updateMenuPosition, true);
+      window.removeEventListener("resize", updateMenuPosition);
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("touchstart", handleOutside);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [menuOpen, updateMenuPosition]);
+
+  return (
+    <Table.Row key={task.id}>
+      <div className="font-mono text-xs text-muted">{task.code ?? "—"}</div>
+      <div className="min-w-0 pr-2">
+        <button
+          type="button"
+          onClick={() => router.push(`${pathname}/${task.id}`)}
+          title={task.title}
+          className="truncate block text-sm text-left hover:text-primary-light transition cursor-pointer max-w-[240px] font-medium"
+        >
+          {task.title}
+        </button>
+        {isCompleted && (
+          <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-medium mt-0.5" title={t("completedTaskReadOnly")}>
+            <Check className="h-2.5 w-2.5" />
+            <span>{t("completedTaskReadOnly")}</span>
+          </span>
+        )}
+      </div>
+      <InlineAssignCell
+        taskId={task.id}
+        assignment={task.assignment}
+        deadline={task.deadline}
+        taskGroupDepartmentId={task.taskGroup?.departmentId}
+      />
+      <div className="truncate text-sm text-muted">
+        {task.assignment?.support?.fullName ?? "—"}
+      </div>
+      <div>
+        <PriorityBadge priority={task.priority} />
+      </div>
+      <div>
+        <StatusBadge
+          status={task.assignment?.status ?? "TODO"}
+          assignmentId={task.assignment?.id}
+          taskId={task.id}
+          onReviewClick={onOpenReview}
+          onUnblockClick={onUnblockTask}
+          isUnblocking={isUnblocking}
+        />
+      </div>
+      <div className="text-sm text-muted">
+        {new Date(task.deadline).toLocaleDateString("vi-VN")}
+      </div>
+      <div className="relative text-right">
+        <button
+          ref={triggerRef}
+          type="button"
+          aria-label={`Actions for task ${task.title}`}
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
+          aria-controls={`task-actions-${menuId}`}
+          onClick={toggleMenu}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-card/40 text-muted transition hover:border-white/20 hover:bg-card hover:text-foreground active:scale-95 cursor-pointer"
+        >
+          <MoreVertical className="h-4 w-4 shrink-0" />
+        </button>
+
+        {menuOpen &&
+          typeof document !== "undefined" &&
+          createPortal(
+            <div
+              id={`task-actions-${menuId}`}
+              ref={menuRef}
+              role="menu"
+              style={menuStyle}
+              className="rounded-2xl border border-white/10 bg-[#0c1322]/95 p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn text-left scrollbar-dropdown"
+            >
+              {(!task.assignment || !task.assignment.internId) && !checkIsOverdue(task.deadline) && (
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onOpenAiAssign({ taskId: task.id, taskTitle: task.title, isAssigned: false });
+                  }}
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-sky-400 hover:bg-sky-500/10 active:scale-95 transition font-medium cursor-pointer"
+                >
+                  <Sparkles className="h-3.5 w-3.5 shrink-0" />
+                  <span>{t("aiAssign")}</span>
+                </button>
+              )}
+
+              {isBlocked && task.assignment?.id && (
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onUnblockTask(task.assignment!.id);
+                  }}
+                  disabled={isUnblocking}
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-sky-400 hover:bg-sky-500/10 active:scale-95 transition font-medium disabled:opacity-50 cursor-pointer"
+                >
+                  <RotateCcw className="h-3.5 w-3.5 shrink-0" />
+                  <span>{t("unblockTask")}</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setMenuOpen(false);
+                  router.push(`${pathname}/${task.id}`);
+                }}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-muted hover:bg-white/5 hover:text-foreground active:scale-95 transition cursor-pointer"
+              >
+                <Eye className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
+                <span>{t("view")}</span>
+              </button>
+
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onOpenTaskAction({ type: "edit", taskId: task.id, taskTitle: task.title });
+                }}
+                disabled={isCompleted}
+                title={isCompleted ? t("completedTaskReadOnly") : undefined}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-muted hover:bg-white/5 hover:text-foreground active:scale-95 transition disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted cursor-pointer"
+              >
+                <Pencil className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+                <span>{t("edit")}</span>
+              </button>
+
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onOpenTaskAction({ type: "delete", taskId: task.id, taskTitle: task.title });
+                }}
+                disabled={isCompleted}
+                title={isCompleted ? t("completedTaskReadOnly") : undefined}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-rose-400 hover:bg-rose-500/10 active:scale-95 transition disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-rose-400 cursor-pointer"
+              >
+                <Trash2 className="h-3.5 w-3.5 shrink-0" />
+                <span>{t("delete")}</span>
+              </button>
+            </div>,
+            document.body,
+          )}
+      </div>
+    </Table.Row>
+  );
+}
+
+/* ─── Task Card Mobile with Portal 3-Dots Menu ──────────────── */
+
+function TaskCardItem({
+  task,
+  pathname,
+  onOpenReview,
+  onUnblockTask,
+  isUnblocking,
+  onOpenTaskAction,
+  onOpenAiAssign,
+}: {
+  task: Task;
+  pathname: string;
+  onOpenReview: (aId: string) => void;
+  onUnblockTask: (aId: string) => void;
+  isUnblocking: boolean;
+  onOpenTaskAction: (a: { type: "edit" | "delete"; taskId: string; taskTitle: string }) => void;
+  onOpenAiAssign: (a: { taskId: string; taskTitle: string; isAssigned: boolean }) => void;
+}) {
+  const t = useTranslations("leader.tasks");
+  const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuId = useId();
+
+  const isCompleted = task.assignment?.status === "DONE";
+  const isBlocked = task.assignment?.status === "BLOCKED";
+
+  const updateMenuPosition = useCallback(() => {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    if (rect.bottom < 0 || rect.top > vh || rect.right < 0 || rect.left > vw) {
+      setMenuOpen(false);
+      return;
+    }
+
+    const MENU_WIDTH = 180;
+    const ESTIMATED_HEIGHT = 180;
+    const spaceBelow = vh - rect.bottom;
+    const spaceAbove = rect.top;
+
+    const openUpward = spaceBelow < ESTIMATED_HEIGHT && spaceAbove > spaceBelow;
+    const maxHeight = openUpward
+      ? Math.min(260, Math.max(100, spaceAbove - 16))
+      : Math.min(260, Math.max(100, spaceBelow - 16));
+
+    const left = Math.max(8, Math.min(rect.right - MENU_WIDTH, vw - MENU_WIDTH - 8));
+
+    setMenuStyle({
+      position: "fixed",
+      top: openUpward ? undefined : rect.bottom + 6,
+      bottom: openUpward ? vh - rect.top + 6 : undefined,
+      left,
+      width: MENU_WIDTH,
+      maxHeight,
+      overflowY: "auto",
+      zIndex: 9999,
+    });
+  }, []);
+
+  const toggleMenu = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!menuOpen) {
+      updateMenuPosition();
+      setMenuOpen(true);
+    } else {
+      setMenuOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    updateMenuPosition();
+
+    function handleOutside(e: MouseEvent | TouchEvent) {
+      const target = e.target as Node;
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(target) &&
+        triggerRef.current &&
+        !triggerRef.current.contains(target)
+      ) {
+        setMenuOpen(false);
+      }
+    }
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setMenuOpen(false);
+        triggerRef.current?.focus();
+      }
+    }
+
+    window.addEventListener("scroll", updateMenuPosition, true);
+    window.addEventListener("resize", updateMenuPosition);
+    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("touchstart", handleOutside, { passive: true });
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("scroll", updateMenuPosition, true);
+      window.removeEventListener("resize", updateMenuPosition);
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("touchstart", handleOutside);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [menuOpen, updateMenuPosition]);
+
+  return (
+    <div
+      className={`rounded-2xl border p-4 space-y-3 transition-all ${
+        isCompleted
+          ? "border-emerald-500/30 bg-emerald-500/[0.03]"
+          : isBlocked
+          ? "border-rose-500/30 bg-rose-500/[0.03]"
+          : "border-border bg-card/60"
+      }`}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-mono text-xs text-muted bg-white/5 px-2 py-0.5 rounded border border-white/5">
+            {task.code ?? "—"}
+          </span>
+          <PriorityBadge priority={task.priority} />
+          <StatusBadge
+            status={task.assignment?.status ?? "TODO"}
+            assignmentId={task.assignment?.id}
+            taskId={task.id}
+            onReviewClick={onOpenReview}
+            onUnblockClick={onUnblockTask}
+            isUnblocking={isUnblocking}
+          />
+        </div>
+
+        <div className="relative">
+          <button
+            ref={triggerRef}
+            type="button"
+            aria-label={`Actions for task ${task.title}`}
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            aria-controls={`task-card-actions-${menuId}`}
+            onClick={toggleMenu}
+            className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-card/40 text-muted hover:bg-white/10 hover:text-foreground active:scale-95 transition cursor-pointer"
+          >
+            <MoreVertical className="h-4 w-4" />
+          </button>
+
+          {menuOpen &&
+            typeof document !== "undefined" &&
+            createPortal(
+              <div
+                id={`task-card-actions-${menuId}`}
+                ref={menuRef}
+                role="menu"
+                style={menuStyle}
+                className="rounded-2xl border border-white/10 bg-[#0c1322]/95 p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn text-left scrollbar-dropdown"
+              >
+                {(!task.assignment || !task.assignment.internId) && !checkIsOverdue(task.deadline) && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onOpenAiAssign({ taskId: task.id, taskTitle: task.title, isAssigned: false });
+                    }}
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-sky-400 hover:bg-sky-500/10 active:scale-95 transition font-medium cursor-pointer"
+                  >
+                    <Sparkles className="h-3.5 w-3.5 shrink-0" />
+                    <span>{t("aiAssign")}</span>
+                  </button>
+                )}
+
+                {isBlocked && task.assignment?.id && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onUnblockTask(task.assignment!.id);
+                    }}
+                    disabled={isUnblocking}
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-sky-400 hover:bg-sky-500/10 active:scale-95 transition font-medium disabled:opacity-50 cursor-pointer"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5 shrink-0" />
+                    <span>{t("unblockTask")}</span>
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    router.push(`${pathname}/${task.id}`);
+                  }}
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-muted hover:bg-white/5 hover:text-foreground active:scale-95 transition cursor-pointer"
+                >
+                  <Eye className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
+                  <span>{t("view")}</span>
+                </button>
+
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onOpenTaskAction({ type: "edit", taskId: task.id, taskTitle: task.title });
+                  }}
+                  disabled={isCompleted}
+                  title={isCompleted ? t("completedTaskReadOnly") : undefined}
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-muted hover:bg-white/5 hover:text-foreground active:scale-95 transition disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted cursor-pointer"
+                >
+                  <Pencil className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+                  <span>{t("edit")}</span>
+                </button>
+
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onOpenTaskAction({ type: "delete", taskId: task.id, taskTitle: task.title });
+                  }}
+                  disabled={isCompleted}
+                  title={isCompleted ? t("completedTaskReadOnly") : undefined}
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-rose-400 hover:bg-rose-500/10 active:scale-95 transition disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-rose-400 cursor-pointer"
+                >
+                  <Trash2 className="h-3.5 w-3.5 shrink-0" />
+                  <span>{t("delete")}</span>
+                </button>
+              </div>,
+              document.body,
+            )}
+        </div>
+      </div>
+
+      <div>
+        <button
+          type="button"
+          onClick={() => router.push(`${pathname}/${task.id}`)}
+          title={task.title}
+          className="text-sm font-semibold text-foreground hover:text-primary-light transition text-left line-clamp-2 block cursor-pointer"
+        >
+          {task.title}
+        </button>
+      </div>
+
+      {isCompleted && (
+        <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs text-emerald-300 font-medium">
+          <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+          <span>{t("completedTaskReadOnly")}</span>
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-border/40">
+        <div>
+          <span className="text-muted block text-[11px] mb-0.5">{t("colOwner")}</span>
+          <InlineAssignCell
+            taskId={task.id}
+            assignment={task.assignment}
+            deadline={task.deadline}
+            taskGroupDepartmentId={task.taskGroup?.departmentId}
+          />
+        </div>
+        <div>
+          <span className="text-muted block text-[11px] mb-0.5">{t("colDeadline")}</span>
+          <span className="text-foreground font-medium">
+            {new Date(task.deadline).toLocaleDateString("vi-VN")}
+          </span>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -697,7 +1191,13 @@ function EditGroupForm({ group, onClose }: { group: TaskGroup; onClose: () => vo
   const [memberIds, setMemberIds] = useState(
     group.members?.map((member) => member.internId) ?? [],
   );
-  const { register, handleSubmit, formState: { errors } } = useForm<UpdateTaskGroupPayload>({
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<UpdateTaskGroupPayload>({
     defaultValues: {
       name: group.name,
       description: group.description ?? "",
@@ -736,28 +1236,29 @@ function EditGroupForm({ group, onClose }: { group: TaskGroup; onClose: () => vo
       </div>
       <div className="space-y-4">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-foreground">{te("name")}</label>
-          <input type="text" {...register("name", { required: te("nameRequired") })} placeholder={te("namePlaceholder")} className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-primary-light/40 focus:outline-none" />
+          <label className="mb-1.5 block text-xs sm:text-sm font-medium text-foreground">{te("name")}</label>
+          <input
+            type="text"
+            {...register("name", { required: te("nameRequired") })}
+            placeholder={te("namePlaceholder")}
+            className="w-full h-[42px] sm:h-[46px] rounded-xl border border-border bg-card px-4 text-xs sm:text-sm text-foreground placeholder:text-muted focus:border-primary-light/40 focus:outline-none"
+          />
           {errors.name && <p className="mt-1 text-xs text-red-400">{errors.name.message}</p>}
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-foreground">{te("department")}</label>
-          <select
-            {...register("departmentId", {
-              onChange: (event) => {
-                setDepartmentId(event.target.value);
-                setMemberIds([]);
-              },
-            })}
-            className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground focus:border-primary-light/40 focus:outline-none"
-          >
-            <option value="">{te("allDepartments")}</option>
-            {departments.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
-            ))}
-          </select>
+          <label className="mb-1.5 block text-xs sm:text-sm font-medium text-foreground">{te("department")}</label>
+          <Select
+            value={watch("departmentId") ?? ""}
+            onChange={(val) => {
+              setValue("departmentId", val);
+              setDepartmentId(val);
+              setMemberIds([]);
+            }}
+            options={[
+              { value: "", label: te("allDepartments") },
+              ...departments.map((d) => ({ value: d.id, label: d.name })),
+            ]}
+          />
         </div>
         <TaskGroupMemberSelector
           departmentId={departmentId}
@@ -766,24 +1267,43 @@ function EditGroupForm({ group, onClose }: { group: TaskGroup; onClose: () => vo
         />
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">{te("maxWorkload")}</label>
-            <input type="number" min={0.5} step={0.5} {...register("maxWorkloadDays", { valueAsNumber: true })} className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground focus:border-primary-light/40 focus:outline-none" />
+            <label className="mb-1.5 block text-xs sm:text-sm font-medium text-foreground">{te("maxWorkload")}</label>
+            <input
+              type="number"
+              min={0.5}
+              step={0.5}
+              {...register("maxWorkloadDays", { valueAsNumber: true })}
+              className="w-full h-[42px] sm:h-[46px] rounded-xl border border-border bg-card px-4 text-xs sm:text-sm text-foreground focus:border-primary-light/40 focus:outline-none"
+            />
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">{te("maxActiveTasks")}</label>
-            <input type="number" min={1} placeholder={te("unlimitedPlaceholder")} {...register("maxActiveTasks", { setValueAs: (value) => (value === "" || value === null || value === undefined) ? null : Number(value) })} className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-primary-light/40 focus:outline-none" />
+            <label className="mb-1.5 block text-xs sm:text-sm font-medium text-foreground">{te("maxActiveTasks")}</label>
+            <input
+              type="number"
+              min={1}
+              placeholder={te("unlimitedPlaceholder")}
+              {...register("maxActiveTasks", {
+                setValueAs: (value) => (value === "" || value === null || value === undefined ? null : Number(value)),
+              })}
+              className="w-full h-[42px] sm:h-[46px] rounded-xl border border-border bg-card px-4 text-xs sm:text-sm text-foreground placeholder:text-muted focus:border-primary-light/40 focus:outline-none"
+            />
           </div>
         </div>
         <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-white/5 p-3">
           <input type="checkbox" {...register("requireAllMembers")} className="mt-0.5 h-4 w-4 accent-sky-500" />
           <span>
-            <span className="block text-sm text-foreground">{te("requireAllMembers")}</span>
+            <span className="block text-xs sm:text-sm font-medium text-foreground">{te("requireAllMembers")}</span>
             <span className="block text-xs text-muted">{te("requireAllMembersDesc")}</span>
           </span>
         </label>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-foreground">{te("description")}</label>
-          <textarea rows={3} {...register("description")} placeholder={te("descriptionPlaceholder")} className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-primary-light/40 focus:outline-none resize-none" />
+          <label className="mb-1.5 block text-xs sm:text-sm font-medium text-foreground">{te("description")}</label>
+          <textarea
+            rows={3}
+            {...register("description")}
+            placeholder={te("descriptionPlaceholder")}
+            className="w-full rounded-xl border border-border bg-card p-3 text-xs sm:text-sm text-foreground placeholder:text-muted focus:border-primary-light/40 focus:outline-none resize-none"
+          />
         </div>
       </div>
       <div className="flex justify-end gap-3 pt-1">
@@ -907,7 +1427,9 @@ function InlineAssignCell({
   const [open, setOpen] = useState(false);
   const [otherInternEmail, setOtherInternEmail] = useState("");
   const [otherInternEmailError, setOtherInternEmailError] = useState("");
-  const cellRef = useRef<HTMLDivElement>(null);
+  const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
 
   const { data: myInternsData } = useInterns({ leaderId: currentUserId });
   const myInterns = myInternsData?.data ?? [];
@@ -923,21 +1445,90 @@ function InlineAssignCell({
   const isCompleted = assignment?.status === "DONE";
   const canClick = !isCompleted && (!isOverdue || !!assignment);
 
-  console.log("InlineAssignCell Debug:", { taskId, taskGroupDepartmentId, isOverdue });
-
   // Filter interns by taskGroup department if it belongs to a department
   const filteredMyInterns = taskGroupDepartmentId
     ? myInterns.filter((i) => i.department?.id === taskGroupDepartmentId)
     : myInterns;
+
+  const updatePosition = useCallback(() => {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    const POPOVER_WIDTH = 320;
+    const ESTIMATED_HEIGHT = 300;
+    const vh = window.innerHeight;
+    const vw = window.innerWidth;
+
+    const spaceBelow = vh - rect.bottom;
+    const spaceAbove = rect.top;
+    const openUpward = spaceBelow < ESTIMATED_HEIGHT && spaceAbove > spaceBelow;
+    const maxHeight = openUpward
+      ? Math.min(360, Math.max(120, spaceAbove - 16))
+      : Math.min(360, Math.max(120, spaceBelow - 16));
+
+    let left = rect.left;
+    if (left + POPOVER_WIDTH > vw - 16) {
+      left = Math.max(16, vw - POPOVER_WIDTH - 16);
+    }
+    if (left < 16) left = 16;
+
+    setPopoverStyle({
+      position: "fixed",
+      top: openUpward ? undefined : rect.bottom + 6,
+      bottom: openUpward ? vh - rect.top + 6 : undefined,
+      left,
+      width: POPOVER_WIDTH,
+      maxHeight,
+      overflowY: "auto",
+      zIndex: 9999,
+    });
+  }, []);
+
+  const toggleOpen = () => {
+    if (!open) {
+      updatePosition();
+      setOpen(true);
+    } else {
+      setOpen(false);
+    }
+  };
+
   useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (cellRef.current && !cellRef.current.contains(e.target as Node)) {
+    if (!open) return;
+    updatePosition();
+
+    function handleOutside(e: MouseEvent | TouchEvent) {
+      const target = e.target as Node;
+      if (
+        popoverRef.current &&
+        !popoverRef.current.contains(target) &&
+        triggerRef.current &&
+        !triggerRef.current.contains(target)
+      ) {
         setOpen(false);
       }
     }
-    if (open) document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [open]);
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
+    }
+
+    window.addEventListener("scroll", updatePosition, true);
+    window.addEventListener("resize", updatePosition);
+    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("touchstart", handleOutside, { passive: true });
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("scroll", updatePosition, true);
+      window.removeEventListener("resize", updatePosition);
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("touchstart", handleOutside);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open, updatePosition]);
 
   async function handleAssign(internId: string, internEmail?: string) {
     try {
@@ -994,9 +1585,11 @@ function InlineAssignCell({
   const assigneeEmail = myInterns.find((i) => i.id === assignment?.internId)?.user?.email;
 
   return (
-    <div ref={cellRef} className="relative">
+    <div className="relative">
       <button
-        onClick={() => setOpen(!open)}
+        ref={triggerRef}
+        type="button"
+        onClick={toggleOpen}
         disabled={isPending || !canClick}
         title={isCompleted ? t("completedTaskReadOnly") : undefined}
         className={`flex w-full items-center gap-1 rounded-lg px-2 py-1 text-sm transition hover:bg-white/5 disabled:opacity-50 ${
@@ -1007,7 +1600,7 @@ function InlineAssignCell({
           <Loader2 className="h-3 w-3 animate-spin shrink-0" />
         ) : assigneeName ? (
           <div className="truncate text-left">
-            <span className="block truncate text-sm">{assigneeName}</span>
+            <span className="block truncate text-sm font-medium">{assigneeName}</span>
             {assigneeEmail && (
               <span className="block truncate text-[11px] text-muted">{assigneeEmail}</span>
             )}
@@ -1021,117 +1614,126 @@ function InlineAssignCell({
         {!isPending && canClick && <ChevronDown className="h-3 w-3 shrink-0 text-muted" />}
       </button>
 
-      {open && (
-        <div className="absolute left-0 top-full z-50 mt-1 w-80 rounded-xl border border-border bg-[#1a1d2e] p-1 shadow-lg">
-          {/* My Team & Other Teams (Only show if not overdue) */}
-          {!isOverdue && (
-            <>
-              {filteredMyInterns.length > 0 && (
-                <>
-                  <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted">
-                    {t("myTeam")}
-                  </div>
-                  {filteredMyInterns.map((intern) => (
-                    <button
-                      key={intern.id}
-                      onClick={() => handleAssign(intern.id)}
+      {open &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            ref={popoverRef}
+            style={popoverStyle}
+            className="rounded-2xl border border-white/10 bg-[#0c1322]/95 p-2 shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn text-left scrollbar-dropdown"
+          >
+            {/* My Team & Other Teams (Only show if not overdue) */}
+            {!isOverdue && (
+              <>
+                {filteredMyInterns.length > 0 && (
+                  <>
+                    <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted">
+                      {t("myTeam")}
+                    </div>
+                    {filteredMyInterns.map((intern) => (
+                      <button
+                        key={intern.id}
+                        type="button"
+                        onClick={() => handleAssign(intern.id)}
+                        disabled={isPending}
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-foreground hover:bg-white/5 transition disabled:opacity-50 cursor-pointer"
+                      >
+                        <span className="truncate flex-1 text-left">{intern.fullName}</span>
+                        {currentInternId === intern.id && (
+                          <Check className="h-3.5 w-3.5 shrink-0 text-primary-light" />
+                        )}
+                      </button>
+                    ))}
+                  </>
+                )}
+
+                <div className="mt-0.5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted">
+                  {t("otherTeams")}
+                </div>
+                <div className="space-y-2 px-2 pb-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="email"
+                      value={otherInternEmail}
+                      onChange={(event) => {
+                        setOtherInternEmail(event.target.value);
+                        setOtherInternEmailError("");
+                        lookupAssignmentIntern.reset();
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                          event.preventDefault();
+                          void handleOtherInternLookup();
+                        }
+                      }}
+                      placeholder={
+                        t.has("otherTeamEmailPlaceholder")
+                          ? t("otherTeamEmailPlaceholder")
+                          : "Exact intern email..."
+                      }
                       disabled={isPending}
-                      className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-foreground hover:bg-white/5 transition disabled:opacity-50"
+                      className="min-w-0 flex-1 rounded-lg border border-border bg-card px-3 py-2 text-xs text-foreground placeholder:text-muted focus:border-primary-light/40 focus:outline-none disabled:opacity-50"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => void handleOtherInternLookup()}
+                      disabled={isPending}
+                      className="rounded-lg border border-border bg-white/5 px-3 py-2 text-xs text-foreground hover:bg-white/10 disabled:opacity-50 cursor-pointer"
                     >
-                      <span className="truncate flex-1 text-left">{intern.fullName}</span>
-                      {currentInternId === intern.id && (
-                        <Check className="h-3.5 w-3.5 shrink-0 text-primary-light" />
+                      {lookupAssignmentIntern.isPending ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : t.has("checkEmail") ? (
+                        t("checkEmail")
+                      ) : (
+                        "Check"
                       )}
                     </button>
-                  ))}
-                </>
-              )}
-
-              <div className="mt-0.5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted">
-                {t("otherTeams")}
-              </div>
-              <div className="space-y-2 px-2 pb-2">
-                <div className="flex gap-2">
-                  <input
-                    type="email"
-                    value={otherInternEmail}
-                    onChange={(event) => {
-                      setOtherInternEmail(event.target.value);
-                      setOtherInternEmailError("");
-                      lookupAssignmentIntern.reset();
-                    }}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") {
-                        event.preventDefault();
-                        void handleOtherInternLookup();
-                      }
-                    }}
-                    placeholder={
-                      t.has("otherTeamEmailPlaceholder")
-                        ? t("otherTeamEmailPlaceholder")
-                        : "Exact intern email..."
-                    }
-                    disabled={isPending}
-                    className="min-w-0 flex-1 rounded-lg border border-border bg-card px-3 py-2 text-xs text-foreground placeholder:text-muted focus:border-primary-light/40 focus:outline-none disabled:opacity-50"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => void handleOtherInternLookup()}
-                    disabled={isPending}
-                    className="rounded-lg border border-border bg-white/5 px-3 py-2 text-xs text-foreground hover:bg-white/10 disabled:opacity-50"
-                  >
-                    {lookupAssignmentIntern.isPending ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : t.has("checkEmail") ? (
-                      t("checkEmail")
-                    ) : (
-                      "Check"
-                    )}
-                  </button>
-                </div>
-                {otherInternEmailError && <p className="text-xs text-red-400">{otherInternEmailError}</p>}
-                {lookupAssignmentIntern.data?.data && !otherInternEmailError && (
-                  <button
-                    type="button"
-                    onClick={() => handleAssign(lookupAssignmentIntern.data.data.id, lookupAssignmentIntern.data.data.email)}
-                    disabled={isPending}
-                    className="flex w-full items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-2 text-left hover:bg-emerald-500/10 disabled:opacity-50"
-                  >
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-medium text-emerald-300">{lookupAssignmentIntern.data.data.fullName}</span>
-                      <span className="block truncate text-[11px] text-slate-400">
-                        {t.has("internLeader")
-                          ? t("internLeader", {
-                              name:
-                                lookupAssignmentIntern.data.data.leader.fullName ||
-                                lookupAssignmentIntern.data.data.leader.email,
-                            })
-                          : `Leader: ${lookupAssignmentIntern.data.data.leader.fullName || lookupAssignmentIntern.data.data.leader.email}`}
+                  </div>
+                  {otherInternEmailError && <p className="text-xs text-red-400">{otherInternEmailError}</p>}
+                  {lookupAssignmentIntern.data?.data && !otherInternEmailError && (
+                    <button
+                      type="button"
+                      onClick={() => handleAssign(lookupAssignmentIntern.data.data.id, lookupAssignmentIntern.data.data.email)}
+                      disabled={isPending}
+                      className="flex w-full items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-2 text-left hover:bg-emerald-500/10 disabled:opacity-50 cursor-pointer"
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-medium text-emerald-300">{lookupAssignmentIntern.data.data.fullName}</span>
+                        <span className="block truncate text-[11px] text-slate-400">
+                          {t.has("internLeader")
+                            ? t("internLeader", {
+                                name:
+                                  lookupAssignmentIntern.data.data.leader.fullName ||
+                                  lookupAssignmentIntern.data.data.leader.email,
+                              })
+                            : `Leader: ${lookupAssignmentIntern.data.data.leader.fullName || lookupAssignmentIntern.data.data.leader.email}`}
+                        </span>
                       </span>
-                    </span>
-                    <UserPlus className="h-3.5 w-3.5 shrink-0 text-emerald-300" />
-                  </button>
-                )}
-              </div>
-            </>
-          )}
+                      <UserPlus className="h-3.5 w-3.5 shrink-0 text-emerald-300" />
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
 
-          {/* Unassign */}
-          {assignment && (
-            <>
-              {!isOverdue && <div className="my-0.5 border-t border-border" />}
-              <button
-                onClick={handleUnassign}
-                disabled={isPending}
-                className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-red-400 hover:bg-red-500/10 transition disabled:opacity-50"
-              >
-                <UserX className="h-3.5 w-3.5" />
-                {t("unassign")}
-              </button>
-            </>
-          )}
-        </div>
-      )}
+            {/* Unassign */}
+            {assignment && (
+              <>
+                {!isOverdue && <div className="my-0.5 border-t border-border" />}
+                <button
+                  type="button"
+                  onClick={handleUnassign}
+                  disabled={isPending}
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-red-400 hover:bg-red-500/10 transition disabled:opacity-50 cursor-pointer"
+                >
+                  <UserX className="h-3.5 w-3.5" />
+                  {t("unassign")}
+                </button>
+              </>
+            )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

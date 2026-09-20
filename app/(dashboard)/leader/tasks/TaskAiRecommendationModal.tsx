@@ -330,7 +330,7 @@ export default function TaskAiRecommendationModal({
               <div className="min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <h2 className="text-lg font-bold text-white">Đề xuất phân công bằng AI</h2>
-                  {data?.meta.aiFailed && (
+                  {data?.meta?.aiFailed && (
                     <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-400">
                       Fallback
                     </span>
@@ -439,7 +439,7 @@ export default function TaskAiRecommendationModal({
                   }`}
                 >
                   <BarChart3 className="h-3.5 w-3.5" />
-                  Bảng xếp hạng ứng viên ({data.meta.totalEvaluated})
+                  Bảng xếp hạng ứng viên ({data?.meta?.totalEvaluated ?? 0})
                 </button>
               </div>
 

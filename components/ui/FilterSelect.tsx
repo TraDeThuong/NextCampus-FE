@@ -176,7 +176,7 @@ export default function FilterSelect({
                         }
                     }}
                     disabled={disabled}
-                    className={`flex w-full items-center justify-between rounded-2xl border border-border bg-card px-5 py-3 text-sm font-medium shadow-glass backdrop-blur-xl transition-all duration-300 outline-none ${
+                    className={`flex h-[46px] w-full items-center justify-between rounded-2xl border border-border bg-card px-5 text-sm font-medium shadow-glass backdrop-blur-xl transition-all duration-300 outline-none ${
                         disabled
                             ? "opacity-50 cursor-not-allowed"
                             : "hover:border-border-strong hover:bg-card-hover cursor-pointer"

@@ -44,7 +44,7 @@ export default function TaskGroupMemberSelector({
         </label>
         <span className="text-xs text-sky-400">Đã chọn {selectedIds.length}</span>
       </div>
-      <div className="max-h-48 space-y-1 overflow-y-auto rounded-xl border border-white/10 bg-white/[0.03] p-2">
+      <div className="max-h-48 space-y-1 overflow-y-auto scrollbar-dropdown rounded-xl border border-white/10 bg-white/[0.03] p-2">
         {isLoading ? (
           <p className="px-2 py-3 text-center text-xs text-slate-500">
             Đang tải danh sách TTS...

@@ -89,7 +89,7 @@ function ColumnRow({
 
 export default function TaskImportInstructions({ onClose }: TaskImportInstructionsProps) {
   return (
-    <div className="max-h-[40vh] overflow-y-auto rounded-2xl border border-border bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,transparent_100%)] p-6">
+    <div className="max-h-[40vh] overflow-y-auto scrollbar-dropdown rounded-2xl border border-border bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,transparent_100%)] p-6">
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-lg font-semibold metal-text">

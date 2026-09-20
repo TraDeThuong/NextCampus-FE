@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useContext } from "react";
+import { useState, useContext, useMemo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -9,6 +9,9 @@ import { toast } from "react-hot-toast";
 import axios from "axios";
 import Button from "@/components/ui/Button";
 import Spinner from "@/components/ui/Spinner";
+import Select from "@/components/ui/Select";
+import { DatePicker } from "@/components/ui/DatePicker";
+import { extractTaskGroups } from "@/types/task-group";
 import { useUpdateTask } from "@/hooks/task/useUpdateTask";
 import { useTask } from "@/hooks/task/useTask";
 import { useTaskGroups } from "@/hooks/task-group/useTaskGroups";
@@ -81,7 +84,7 @@ export default function TaskEditModal({ taskId, onClose, onCloseModal }: Props) 
   const task = taskData?.data;
 
   const { data: taskGroupsData } = useTaskGroups();
-  const taskGroups = taskGroupsData?.data ?? [];
+  const taskGroups = useMemo(() => extractTaskGroups(taskGroupsData?.data), [taskGroupsData]);
 
   const { data: myInternsData } = useInterns({ leaderId: currentUserId });
   const myInterns = myInternsData?.data ?? [];
@@ -163,7 +166,7 @@ export default function TaskEditModal({ taskId, onClose, onCloseModal }: Props) 
     setLinkStatuses((prev) => { const n = { ...prev }; delete n[id]; return n; });
   };
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<UpdateTaskPayload>({
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<UpdateTaskPayload>({
     mode: "onBlur",
     values: task ? {
       title: task.title, description: task.description ?? "",
@@ -177,6 +180,24 @@ export default function TaskEditModal({ taskId, onClose, onCloseModal }: Props) 
   });
 
   const deadlineVal = watch("deadline");
+
+  useEffect(() => {
+    register("startDate", {
+      validate: (v) => {
+        if (!v) return true;
+        if (deadlineVal && v > deadlineVal) return tm("startDateBeforeDeadline");
+        return true;
+      },
+    });
+    register("deadline", {
+      required: tm("deadlineRequired"),
+      validate: (v) => !v || v >= TODAY || tm("deadlinePast"),
+    });
+    register("priority", {
+      validate: (v) => !v || ["HIGH", "MEDIUM", "LOW"].includes(v) || tm("invalidPriority"),
+    });
+    register("taskGroupId");
+  }, [register, deadlineVal, tm]);
 
   const onSubmit = async (data: UpdateTaskPayload) => {
     if (task?.assignment?.status === "DONE") {
@@ -288,7 +309,7 @@ export default function TaskEditModal({ taskId, onClose, onCloseModal }: Props) 
   const existingAttachments = task.attachments ?? [];
 
   const inputClass = (name: keyof UpdateTaskPayload, extra = "") =>
-    `w-full rounded-xl border px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus:outline-none ${errors[name] ? "border-red-400/60 focus:border-red-400" : "border-border bg-card focus:border-primary-light/40"} ${extra}`;
+    `w-full h-[42px] sm:h-[46px] rounded-xl border px-4 text-xs sm:text-sm text-foreground placeholder:text-muted focus:outline-none ${errors[name] ? "border-red-400/60 focus:border-red-400" : "border-border bg-card focus:border-primary-light/40"} ${extra}`;
 
   const ErrorMsg = ({ name }: { name: keyof UpdateTaskPayload }) =>
     errors[name] ? <p className="mt-1 text-xs text-red-400">{errors[name]?.message}</p> : null;
@@ -303,43 +324,59 @@ export default function TaskEditModal({ taskId, onClose, onCloseModal }: Props) 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-foreground">{tm("titleLabel")} <span className="text-red-400">*</span></label>
+            <label className="mb-1 block text-xs sm:text-sm font-medium text-foreground">{tm("titleLabel")} <span className="text-red-400">*</span></label>
             <input type="text" placeholder={tm("titlePlaceholder")} {...register("title", { required: tm("titleRequired"), maxLength: { value: 255, message: tm("titleMaxLength") } })} className={inputClass("title")} />
             <ErrorMsg name="title" />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-foreground">{tm("deadline")} <span className="text-red-400">*</span></label>
-            <input type="date" {...register("deadline", { required: tm("deadlineRequired"), validate: (v) => !v || v >= TODAY || tm("deadlinePast") })} className={inputClass("deadline")} />
+            <label className="mb-1 block text-xs sm:text-sm font-medium text-foreground">{tm("deadline")} <span className="text-red-400">*</span></label>
+            <DatePicker
+              value={watch("deadline") ?? ""}
+              minDate={watch("startDate") || TODAY}
+              placeholder="YYYY-MM-DD"
+              onChange={(d) => setValue("deadline", d, { shouldValidate: true })}
+              onClear={() => setValue("deadline", "", { shouldValidate: true })}
+            />
             <ErrorMsg name="deadline" />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-foreground">{tm("code")}</label>
+            <label className="mb-1 block text-xs sm:text-sm font-medium text-foreground">{tm("code")}</label>
             <input type="text" placeholder={tm("codePlaceholder")} {...register("code", { pattern: { value: /^[A-Za-z0-9._-]*$/, message: tm("codePattern") }, maxLength: { value: 50, message: tm("codeMaxLength") } })} className={inputClass("code")} />
             <ErrorMsg name="code" />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-foreground">{tm("priority")}</label>
-            <select {...register("priority", { validate: (v) => !v || ["HIGH", "MEDIUM", "LOW"].includes(v) || tm("invalidPriority") })} className={inputClass("priority", "bg-card")}>
-              <option value="">{tm("selectPriority")}</option>
-              <option value="HIGH">{tm("priorityHigh")}</option>
-              <option value="MEDIUM">{tm("priorityMedium")}</option>
-              <option value="LOW">{tm("priorityLow")}</option>
-            </select>
+            <label className="mb-1 block text-xs sm:text-sm font-medium text-foreground">{tm("priority")}</label>
+            <Select
+              value={watch("priority") ?? ""}
+              onChange={(v) => setValue("priority", (v || undefined) as UpdateTaskPayload["priority"], { shouldValidate: true })}
+              placeholder={tm("selectPriority")}
+              options={[
+                { value: "", label: tm("selectPriority") },
+                { value: "HIGH", label: tm("priorityHigh") },
+                { value: "MEDIUM", label: tm("priorityMedium") },
+                { value: "LOW", label: tm("priorityLow") },
+              ]}
+            />
             <ErrorMsg name="priority" />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-foreground">{tm("startDate")}</label>
-            <input type="date" {...register("startDate", { validate: (v) => { if (!v) return true; if (deadlineVal && v > deadlineVal) return tm("startDateBeforeDeadline"); return true; } })} className={inputClass("startDate")} />
+            <label className="mb-1 block text-xs sm:text-sm font-medium text-foreground">{tm("startDate")}</label>
+            <DatePicker
+              value={watch("startDate") ?? ""}
+              placeholder="YYYY-MM-DD"
+              onChange={(d) => setValue("startDate", d, { shouldValidate: true })}
+              onClear={() => setValue("startDate", "", { shouldValidate: true })}
+            />
             <ErrorMsg name="startDate" />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-foreground">{tm("estDays")}</label>
+            <label className="mb-1 block text-xs sm:text-sm font-medium text-foreground">{tm("estDays")}</label>
             <input type="number" step="any" min={0.1} placeholder={tm("estDaysPlaceholder")} {...register("estDays", { valueAsNumber: true, min: { value: 0.1, message: tm("estDaysMin") }, max: { value: 365, message: tm("estDaysMax") } })} className={inputClass("estDays")} />
             <ErrorMsg name="estDays" />
           </div>
@@ -347,23 +384,28 @@ export default function TaskEditModal({ taskId, onClose, onCloseModal }: Props) 
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-foreground">{tm("phase")}</label>
+            <label className="mb-1 block text-xs sm:text-sm font-medium text-foreground">{tm("phase")}</label>
             <input type="text" placeholder={tm("phasePlaceholder")} {...register("phase", { maxLength: { value: 100, message: tm("phaseMaxLength") } })} className={inputClass("phase")} />
             <ErrorMsg name="phase" />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-foreground">{tm("module")}</label>
+            <label className="mb-1 block text-xs sm:text-sm font-medium text-foreground">{tm("module")}</label>
             <input type="text" placeholder={tm("modulePlaceholder")} {...register("module", { maxLength: { value: 100, message: tm("moduleMaxLength") } })} className={inputClass("module")} />
             <ErrorMsg name="module" />
           </div>
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-foreground">{tm("taskGroup")}</label>
-          <select {...register("taskGroupId")} className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground focus:border-primary-light/40 focus:outline-none">
-            <option value="">{tm("noGroup")}</option>
-            {taskGroups.map((tg) => <option key={tg.id} value={tg.id}>{tg.name}</option>)}
-          </select>
+          <label className="mb-1 block text-xs sm:text-sm font-medium text-foreground">{tm("taskGroup")}</label>
+          <Select
+            value={watch("taskGroupId") ?? ""}
+            onChange={(v) => setValue("taskGroupId", v || undefined, { shouldValidate: true })}
+            placeholder={tm("noGroup")}
+            options={[
+              { value: "", label: tm("noGroup") },
+              ...taskGroups.map((tg) => ({ value: tg.id, label: tg.name })),
+            ]}
+          />
         </div>
 
         <div>
@@ -504,10 +546,16 @@ export default function TaskEditModal({ taskId, onClose, onCloseModal }: Props) 
           </div>
 
           {assignMode === "my" && (
-            <select value={selectedInternId} onChange={(e) => setSelectedInternId(e.target.value)} disabled={isPending} className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground focus:border-primary-light/40 focus:outline-none disabled:opacity-50">
-              <option value="">{tm("selectYourIntern")}</option>
-              {myInterns.map((intern) => <option key={intern.id} value={intern.id}>{intern.fullName}</option>)}
-            </select>
+            <Select
+              value={selectedInternId}
+              onChange={(val) => setSelectedInternId(val)}
+              disabled={isPending}
+              placeholder={tm("selectYourIntern")}
+              options={[
+                { value: "", label: tm("selectYourIntern") },
+                ...myInterns.map((intern) => ({ value: intern.id, label: intern.fullName })),
+              ]}
+            />
           )}
           {assignMode === "other" && (
             <div className="space-y-2">
