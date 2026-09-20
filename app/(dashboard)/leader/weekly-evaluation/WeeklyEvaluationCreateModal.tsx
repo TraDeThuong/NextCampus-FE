@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useMemo, useContext } from "react";
-import { Loader2, Sparkles, ChevronDown, ChevronUp, Info } from "lucide-react";
+import { Sparkles, ChevronDown, ChevronUp, Info, Bot } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useTranslations } from "next-intl";
 import Button from "@/components/ui/Button";
+import Select from "@/components/ui/Select";
 import { useCreateWeeklyEvaluation } from "@/hooks/weekly-evaluation/useCreateWeeklyEvaluation";
 import { useAiSuggestion } from "@/hooks/weekly-evaluation/useAiSuggestion";
 import { useInterns } from "@/hooks/intern/useInterns";
@@ -15,6 +16,7 @@ import { CRITERIA_SECTIONS, DEFAULT_RATINGS, RATING_SCORES, RATING_COLORS } from
 
 interface Props {
   onCloseModal?: () => void;
+  onSuccess?: () => void;
 }
 
 const RATING_LEVELS: RatingLevel[] = ["TOT", "KHA", "TB", "TBY", "YEU"];
@@ -64,10 +66,12 @@ function RatingSelector({
   value,
   onChange,
   aiValue,
+  disabled = false,
 }: {
   value: RatingLevel;
   onChange: (v: RatingLevel) => void;
   aiValue?: RatingLevel;
+  disabled?: boolean;
 }) {
   const tRatings = useTranslations("leader.weeklyEvaluation.ratings");
   return (
@@ -80,18 +84,19 @@ function RatingSelector({
           <button
             key={level}
             type="button"
+            disabled={disabled}
             onClick={() => onChange(level)}
-            className={`px-3 py-1 text-xs font-semibold rounded-lg border transition-all duration-150 ${
+            className={`px-2.5 sm:px-3 py-1 text-xs font-semibold rounded-lg border transition-all duration-200 cursor-pointer select-none active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed ${
               isSelected
                 ? `${RATING_COLORS[level]} border-current ring-1 ring-current scale-105 shadow-sm`
                 : isAi
-                ? "border-sky-400/40 text-sky-300 bg-sky-500/10 opacity-80"
-                : "border-white/10 text-slate-400 bg-white/[0.03] hover:border-white/20 hover:text-slate-300"
+                ? "border-sky-400/40 text-sky-300 bg-sky-500/10 hover:bg-sky-500/20"
+                : "border-white/10 text-muted bg-white/[0.03] hover:border-white/20 hover:text-foreground hover:bg-white/[0.06]"
             }`}
             title={isAi ? `AI gợi ý: ${label}` : label}
           >
             {label}
-            {isAi && <span className="ml-1 opacity-70 text-[9px] font-bold">AI</span>}
+            {isAi && <span className="ml-1 opacity-80 text-[9px] font-bold text-sky-400">AI</span>}
           </button>
         );
       })}
@@ -99,7 +104,7 @@ function RatingSelector({
   );
 }
 
-export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
+export default function WeeklyEvaluationCreateModal({ onCloseModal, onSuccess }: Props) {
   const t = useTranslations("leader.weeklyEvaluation.createModal");
   const tSections = useTranslations("leader.weeklyEvaluation.sections");
   const tCriteria = useTranslations("leader.weeklyEvaluation.criteria");
@@ -333,63 +338,55 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
     };
     try {
       await createEvaluation.mutateAsync(payload);
+      onSuccess?.();
       onCloseModal?.();
     } catch (err: unknown) {
       console.error(err);
     }
   };
 
-  const inputClass =
-    "w-full rounded-xl border border-white/10 px-4 py-2.5 text-sm text-foreground bg-white/5 placeholder:text-muted focus:outline-none focus:border-cyan-500/50";
+  const internOptions = useMemo(
+    () =>
+      interns.map((i) => ({
+        value: i.id,
+        label: `${i.fullName || i.user?.fullName || "Intern"} (${i.user?.email || ""})`,
+      })),
+    [interns],
+  );
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-500/10 text-cyan-400">
-          <Sparkles className="h-5 w-5" />
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold metal-text">{t("title")}</h3>
-          <p className="text-sm text-slate-400">{t("description")}</p>
+    <div className="flex flex-col">
+      {/* Standardized Sticky Modal Header (Rule 215-218) */}
+      <div className="sticky top-0 z-20 bg-[#0c1222]/95 backdrop-blur-xl pb-4 pt-1 -mt-1 border-b border-white/10 pr-10 sm:pr-12">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-cyan-500/20 bg-cyan-500/10 text-cyan-400 shadow-[0_0_16px_rgba(6,182,212,0.15)]">
+            <Sparkles className="h-5 w-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-lg sm:text-xl font-bold metal-text truncate">{t("title")}</h3>
+            <p className="text-xs sm:text-sm text-muted truncate">{t("description")}</p>
+          </div>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="space-y-5 pt-5">
+        {/* Row 1: Intern Select & Week Input (Uniform Height Rule 195-202) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-300">
-              {t("intern")} <span className="text-red-400">*</span>
-            </label>
-            {internsLoading ? (
-              <div className="flex items-center gap-2 text-sm text-slate-400 py-2.5">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                {t("loadingInterns")}
-              </div>
-            ) : (
-              <select
-                value={internId}
-                onChange={(e) => handleInternChange(e.target.value)}
-                className={inputClass}
-                required
-              >
-                <option value="" className="bg-slate-900 text-slate-300">
-                  {t("selectIntern")}
-                </option>
-                {interns.map((i) => (
-                  <option
-                    key={i.id}
-                    value={i.id}
-                    className="bg-slate-900 text-slate-300"
-                  >
-                    {i.fullName} ({i.user?.email})
-                  </option>
-                ))}
-              </select>
-            )}
+            <Select
+              label={t("intern")}
+              required
+              placeholder={t("selectIntern")}
+              options={internOptions}
+              value={internId}
+              onChange={handleInternChange}
+              searchable
+              disabled={internsLoading}
+            />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-300">
-              {t("week")} <span className="text-red-400">*</span>
+            <label className="text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center gap-1 mb-1.5">
+              {t("week")} <span className="text-destructive">*</span>
             </label>
             <input
               type="number"
@@ -397,12 +394,12 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
               max={maxWeek}
               value={week}
               onChange={(e) => setWeek(Number(e.target.value))}
-              className={inputClass}
+              className="h-[42px] sm:h-[46px] w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-foreground placeholder:text-muted transition focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
               required
             />
             {selectedIntern && (
-              <div className="mt-1 space-y-1">
-                <p className="text-[11px] text-slate-400">
+              <div className="mt-1.5 space-y-1">
+                <p className="text-[11px] text-muted">
                   {t("currentWeek", { week: maxWeek, max: maxWeek })}
                 </p>
                 {Number(week) === maxWeek && !isWeekendAllowedForCurrentWeek && (
@@ -411,7 +408,7 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
                   </p>
                 )}
                 {evaluatedWeeks.includes(Number(week)) && (
-                  <p className="text-[11px] text-red-400 font-semibold">
+                  <p className="text-[11px] text-destructive font-semibold">
                     {t("weekAlreadyEvaluated")}
                   </p>
                 )}
@@ -422,9 +419,9 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
 
         {/* Human-in-the-Loop AI Draft Preview banner */}
         {aiRatings && (
-          <div className="flex items-center justify-between rounded-xl border border-sky-400/30 bg-sky-500/10 px-4 py-3 text-xs text-sky-200">
-            <div className="flex items-center gap-2.5">
-              <Sparkles className="h-4 w-4 shrink-0 text-sky-400" />
+          <div className="flex items-center justify-between rounded-xl border border-sky-400/30 bg-sky-500/10 p-3 sm:p-4 text-xs text-sky-200">
+            <div className="flex items-start gap-2.5 min-w-0">
+              <Bot className="h-4 w-4 shrink-0 text-sky-400 mt-0.5" />
               <div>
                 <span className="font-semibold">{t("draftPreviewNotice")}</span>
                 <p className="text-[11px] text-sky-300/80 mt-0.5">
@@ -432,14 +429,15 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
                 </p>
               </div>
             </div>
-            <span className="rounded-md border border-sky-400/40 bg-sky-500/20 px-2.5 py-1 font-bold uppercase text-[10px] text-sky-300 shrink-0 ml-2">
+            <span className="rounded-md border border-sky-400/40 bg-sky-500/20 px-2.5 py-1 font-bold uppercase text-[10px] text-sky-300 shrink-0 ml-3">
               {t("draftBadge")}
             </span>
           </div>
         )}
 
-        <div className="flex justify-between items-center">
-          <p className="text-xs text-slate-400">{t("selectRatings")}</p>
+        {/* AI Action trigger & Helper */}
+        <div className="flex justify-between items-center flex-wrap gap-2">
+          <p className="text-xs text-muted">{t("selectRatings")}</p>
           <Button
             type="button"
             variant="glass"
@@ -447,43 +445,43 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
             onClick={handleGetAiSuggestion}
             isLoading={aiSuggestion.isPending}
             disabled={aiSuggestion.isPending || !internId}
+            className="flex items-center gap-1.5"
           >
-            <Sparkles className="h-3.5 w-3.5 mr-1 text-cyan-400" />
-            {t("getAiSuggestion")}
+            <Sparkles className="h-3.5 w-3.5 text-cyan-400 shrink-0" />
+            <span>{t("getAiSuggestion")}</span>
           </Button>
         </div>
 
         {/* 3-Group Score preview bar */}
-        <div className="flex items-center gap-2 sm:gap-3 rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-3 flex-wrap sm:flex-nowrap">
-          <div className="text-center flex-1 min-w-[70px]">
-            <div className="text-[11px] text-slate-400 mb-0.5">I. Kỷ luật</div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-3.5">
+          <div className="text-center p-2 rounded-xl bg-white/[0.02]">
+            <div className="text-[11px] text-muted mb-0.5">I. Kỷ luật</div>
             <div className="text-sm sm:text-base font-bold text-cyan-300">
               {scores.group1.toFixed(1)}
             </div>
           </div>
-          <div className="text-center flex-1 min-w-[70px]">
-            <div className="text-[11px] text-slate-400 mb-0.5">II. Chuyên môn</div>
+          <div className="text-center p-2 rounded-xl bg-white/[0.02]">
+            <div className="text-[11px] text-muted mb-0.5">II. Chuyên môn</div>
             <div className="text-sm sm:text-base font-bold text-cyan-300">
               {scores.group2.toFixed(1)}
             </div>
           </div>
-          <div className="text-center flex-1 min-w-[70px]">
-            <div className="text-[11px] text-slate-400 mb-0.5">III. Đề tài</div>
+          <div className="text-center p-2 rounded-xl bg-white/[0.02]">
+            <div className="text-[11px] text-muted mb-0.5">III. Đề tài</div>
             <div className="text-sm sm:text-base font-bold text-cyan-300">
               {scores.group3.toFixed(1)}
             </div>
           </div>
-          <div className="h-8 w-px bg-white/10 hidden sm:block" />
-          <div className="text-center flex-[1.3] min-w-[90px]">
-            <div className="text-[11px] text-slate-400 mb-0.5">{t("totalScore")}</div>
+          <div className="text-center p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30">
+            <div className="text-[11px] text-cyan-200 mb-0.5 font-medium">{t("totalScore")}</div>
             <div className="text-lg sm:text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-300">
               {scores.totalScore.toFixed(2)}
             </div>
           </div>
         </div>
 
-        {/* 12 Criteria grouped by 3 sections with tooltips */}
-        <div className="space-y-3 border-t border-white/5 pt-4">
+        {/* 12 Criteria grouped by 3 sections */}
+        <div className="space-y-3 border-t border-white/10 pt-4">
           {CRITERIA_SECTIONS.map((section) => (
             <div
               key={section.id}
@@ -492,23 +490,23 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
               <button
                 type="button"
                 onClick={() => toggleSection(section.id)}
-                className="w-full flex items-center justify-between px-4 py-3 bg-white/[0.03] hover:bg-white/[0.05] transition-colors"
+                className="w-full flex items-center justify-between px-4 py-3 bg-white/[0.03] hover:bg-white/[0.06] transition-colors cursor-pointer"
               >
-                <div className="flex items-center gap-2">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-md bg-cyan-500/20 text-xs font-bold text-cyan-300">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-md bg-cyan-500/20 text-xs font-bold text-cyan-300 shrink-0">
                     {section.id}
                   </span>
-                  <span className="text-sm font-semibold text-slate-200">
+                  <span className="text-sm font-semibold text-foreground">
                     {tSections(section.id)}
                   </span>
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-muted">
                     {t("criteriaCount", { count: section.criteria.length })}
                   </span>
                 </div>
                 {expandedSections[section.id] ? (
-                  <ChevronUp className="h-4 w-4 text-slate-400" />
+                  <ChevronUp className="h-4 w-4 text-muted shrink-0" />
                 ) : (
-                  <ChevronDown className="h-4 w-4 text-slate-400" />
+                  <ChevronDown className="h-4 w-4 text-muted shrink-0" />
                 )}
               </button>
 
@@ -520,18 +518,18 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
                       className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors"
                     >
                       <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <span className="text-xs text-slate-500 font-mono shrink-0">
+                        <span className="text-xs text-muted font-mono shrink-0">
                           {idx + 1}.
                         </span>
                         <span
-                          className="text-sm text-slate-300 truncate"
+                          className="text-xs sm:text-sm text-foreground/90 truncate"
                           title={criterion.tooltip}
                         >
                           {tCriteria(criterion.key)}
                         </span>
                         {criterion.tooltip && (
                           <span
-                            className="text-slate-500 hover:text-cyan-400 cursor-help transition shrink-0"
+                            className="text-muted hover:text-cyan-400 cursor-help transition shrink-0"
                             title={criterion.tooltip}
                           >
                             <Info className="h-3.5 w-3.5" />
@@ -545,7 +543,7 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
                         )}
                       </div>
 
-                      <div className="shrink-0 pl-5 sm:pl-0">
+                      <div className="shrink-0 pl-4 sm:pl-0">
                         <RatingSelector
                           value={ratings[criterion.key]}
                           onChange={(v) => setRating(criterion.key, v)}
@@ -560,9 +558,9 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
           ))}
         </div>
 
-        {/* Comment */}
+        {/* Comment Section */}
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-300">
+          <label className="text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center gap-1 mb-1.5">
             {t("comment")}
           </label>
           <textarea
@@ -571,21 +569,22 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             maxLength={2000}
-            className={`${inputClass} resize-none`}
+            className="w-full rounded-xl border border-white/10 bg-white/5 p-4 text-xs sm:text-sm text-foreground placeholder:text-muted transition focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 resize-none scrollbar-dropdown"
           />
           {aiComment && aiComment !== comment && (
             <button
               type="button"
-              className="mt-1.5 text-xs text-cyan-400/80 hover:text-cyan-300 flex items-center gap-1 transition"
+              className="mt-1.5 text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1.5 transition cursor-pointer"
               onClick={() => setComment(aiComment)}
             >
-              <Sparkles className="h-3 w-3" />
-              {t("useAiComment")}
+              <Sparkles className="h-3.5 w-3.5 shrink-0" />
+              <span>{t("useAiComment")}</span>
             </button>
           )}
         </div>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
+        {/* Modal Actions */}
+        <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
           <Button
             type="button"
             variant="glass"
@@ -596,7 +595,7 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal }: Props) {
           </Button>
           <Button
             type="submit"
-            variant="metal-blue"
+            variant="primary"
             size="md"
             isLoading={createEvaluation.isPending}
           >

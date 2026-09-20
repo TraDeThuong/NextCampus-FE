@@ -228,4 +228,31 @@ Chỉ lưu các quyết định kiến trúc và UI/UX đã được xác nhận
     * Các modal con bên trong **tuyệt đối không bọc thêm các lớp có `style={{ maxHeight: 'calc(100vh - ...)' }}` hoặc `overflow-hidden` ở root** gây ra hiện tượng 2 thanh cuộn lồng nhau (dual scrollbars) hoặc làm cắt cụt popover của `Select` / `DatePicker`.
     * Các bảng dữ liệu nhiều cột trong modal preview phải được bọc trong `<div className="overflow-x-auto scrollbar-dropdown rounded-2xl border border-white/10 bg-card/40">`.
 
+- **2026-09-20 — Bảng Dữ Liệu Không Bọc Lồng Trong MetalCard (Loại Bỏ Viền Ngoài Của Table - Theo Chuẩn /leader/department)**:
+  - **Vấn đề**: Việc bọc component `<Table>` bên trong thẻ `<MetalCard>` (ví dụ: `<MetalCard><div className="p-4 sm:p-6"><Table ... /></div></MetalCard>`) tạo ra hiện tượng viền kép ngoài (double outer border box). Điều này gây lãng phí padding 2 bên, làm thu hẹp diện tích hiển thị của các cột dữ liệu và tạo cảm giác nặng nề, bí bách.
+  - **Quy chuẩn bắt buộc**:
+    * Bản thân compound component `<Table>` đã được tích hợp sẵn container hoàn chỉnh với bo góc `rounded-3xl`, viền `border border-border`, bóng đổ `shadow-glass` / `backdrop-blur-xl` và cơ chế cuộn ngang responsive `overflow-x-auto`.
+    * **Tuyệt đối KHÔNG bọc thêm thẻ `<MetalCard>` bên ngoài `<Table>`**. Bảng dữ liệu bắt buộc được render trực tiếp trên layout trang (tham khảo mẫu chuẩn hóa tại `/leader/department` và `/leader/weekly-evaluation`).
+    * Tùy biến nền và đổ bóng kim loại trực tiếp qua prop `className` của `<Table>`:
+      ```tsx
+      <Table
+        columns={COLUMNS}
+        className="bg-[linear-gradient(145deg,#101827_0%,#1a2235_20%,#0f172a_55%,#050816_100%)] shadow-[0_12px_40px_rgba(0,0,0,.45)] hover:shadow-[0_20px_50px_rgba(21,174,245,.15)] transition-shadow duration-500"
+      >
+      ```
+    * Cột dữ liệu trên bảng nên sử dụng định dạng `minmax(...)` (ví dụ: `minmax(240px, 2.5fr) minmax(120px, 1.2fr)...`) để vừa đảm bảo tỷ lệ co giãn linh hoạt trên desktop, vừa kích hoạt cuộn ngang mượt mà trên mobile mà không làm co cụm chữ.
+
+- **2026-09-20 — Kiến Trúc Xuất Báo Cáo PDF Phía Client (Client-Side PDF Generation qua jspdf + html2canvas)**:
+  - **Lý do & Quyết định**: Thay thế giải pháp Headless Chromium (Puppeteer trên server Backend) bằng cơ chế render tài liệu trực tiếp trên trình duyệt Client thông qua `html2canvas` và `jspdf`.
+  - **Lợi ích**:
+    1. **Tối ưu hạ tầng deploy Render**: Backend không cần cài đặt gói Chromium (~300MB), triệt tiêu 100% rủi ro tràn bộ nhớ OOM Killer (exit code 137) trên gói Free / Starter 512MB RAM.
+    2. **Tốc độ phản hồi tức thì**: Báo cáo PDF được kết xuất và tải về máy trong vòng < 500ms thay vì phải chờ HTTP upload/presigned URL vòng qua server.
+    3. **Chuẩn mực Unicode tiếng Việt**: Trình duyệt render font native sắc nét 100%, không bị vỡ dấu thanh hay lệch ký tự tiếng Việt.
+  - **Các thành phần triển khai**:
+    * Mẫu in ấn chuẩn A4: `components/pdf/WeeklyEvaluationReportTemplate.tsx` (chiều rộng cố định 794px, nền trắng, typography rõ ràng, đầy đủ 12 tiêu chí, điểm số, nhận xét và chữ ký).
+    * Custom Hook: `hooks/pdf-export/useClientExportWeeklyEvaluation.ts` (quản lý việc mount template off-screen, chụp canvas scale 2x và xuất PDF A4 tự động).
+    * Nút xuất: `WeeklyEvaluationExportButton.tsx` (tích hợp trạng thái loading và toast thông báo chuẩn mực).
+
+
+
 

@@ -18,7 +18,30 @@
       "notYet": "Not yet",
       "view": "View",
       "deleteConfirm": "Are you sure you want to delete this evaluation?",
-      "pagination": "Page {page} / {totalPages}",
+      "pagination": "Page {page} of {totalPages} (Total {total} evaluations)",
+      "stats": {
+        "totalEvaluations": "Total Evaluations",
+        "totalEvaluationsSub": "Completed reviews",
+        "averageScore": "Average Score",
+        "averageScoreSub": "On a 10.0 scale",
+        "goodRate": "Good / Excellent Rate",
+        "goodRateSub": "Scored 6.5 or above",
+        "aiAssisted": "AI-Assisted",
+        "aiAssistedSub": "12-criteria suggestions"
+      },
+      "filter": {
+        "searchPlaceholder": "Search by intern name or email...",
+        "intern": "Intern",
+        "week": "Week",
+        "rating": "Rating",
+        "reset": "Reset filters",
+        "weekOption": "Week {n}"
+      },
+      "emptyTitle": "No evaluations found",
+      "emptyFilteredTitle": "No matching evaluations",
+      "emptyDescription": "Start creating your first weekly evaluation for your interns.",
+      "emptyFilteredDescription": "Try adjusting your search query or active filters.",
+      "clearFilter": "Clear filters",
       "createModal": {
         "title": "Create Weekly Evaluation",
         "description": "Evaluate intern competencies across 12 criteria and 5 rating levels.",
@@ -208,7 +231,30 @@
     "notYet": "Not yet",
     "view": "View",
     "deleteConfirm": "Are you sure you want to delete this evaluation?",
-    "pagination": "Page {page} / {totalPages}",
+    "pagination": "Page {page} of {totalPages} (Total {total} evaluations)",
+    "stats": {
+      "totalEvaluations": "Total Evaluations",
+      "totalEvaluationsSub": "Completed reviews",
+      "averageScore": "Average Score",
+      "averageScoreSub": "On a 10.0 scale",
+      "goodRate": "Good / Excellent Rate",
+      "goodRateSub": "Scored 6.5 or above",
+      "aiAssisted": "AI-Assisted",
+      "aiAssistedSub": "12-criteria suggestions"
+    },
+    "filter": {
+      "searchPlaceholder": "Search by intern name or email...",
+      "intern": "Intern",
+      "week": "Week",
+      "rating": "Rating",
+      "reset": "Reset filters",
+      "weekOption": "Week {n}"
+    },
+    "emptyTitle": "No evaluations found",
+    "emptyFilteredTitle": "No matching evaluations",
+    "emptyDescription": "Start creating your first weekly evaluation for your interns.",
+    "emptyFilteredDescription": "Try adjusting your search query or active filters.",
+    "clearFilter": "Clear filters",
     "createModal": {
       "title": "Create Weekly Evaluation",
       "description": "Evaluate intern competencies across 12 criteria and 5 rating levels.",

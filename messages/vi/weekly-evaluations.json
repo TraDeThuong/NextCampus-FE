@@ -18,7 +18,30 @@
       "notYet": "Chưa",
       "view": "Xem",
       "deleteConfirm": "Bạn có chắc chắn muốn xóa đánh giá này không?",
-      "pagination": "Trang {page} / {totalPages}",
+      "pagination": "Trang {page} / {totalPages} (Tổng {total} đánh giá)",
+      "stats": {
+        "totalEvaluations": "Tổng đánh giá",
+        "totalEvaluationsSub": "Số lượt đã thực hiện",
+        "averageScore": "Điểm trung bình",
+        "averageScoreSub": "Thang điểm 10.0",
+        "goodRate": "Tỷ lệ Tốt / Khá",
+        "goodRateSub": "Đạt điểm từ 6.5 trở lên",
+        "aiAssisted": "Hỗ trợ bởi AI",
+        "aiAssistedSub": "Gợi ý 12 tiêu chí"
+      },
+      "filter": {
+        "searchPlaceholder": "Tìm theo tên hoặc email thực tập sinh...",
+        "intern": "Thực tập sinh",
+        "week": "Tuần",
+        "rating": "Xếp loại",
+        "reset": "Đặt lại bộ lọc",
+        "weekOption": "Tuần {n}"
+      },
+      "emptyTitle": "Chưa có đánh giá nào",
+      "emptyFilteredTitle": "Không tìm thấy đánh giá phù hợp",
+      "emptyDescription": "Bắt đầu tạo đánh giá tuần đầu tiên cho các thực tập sinh của bạn.",
+      "emptyFilteredDescription": "Thử điều chỉnh lại từ khóa tìm kiếm hoặc các tiêu chí bộ lọc.",
+      "clearFilter": "Xóa bộ lọc",
       "createModal": {
         "title": "Tạo Đánh Giá Tuần",
         "description": "Đánh giá năng lực của thực tập sinh theo 12 tiêu chí và 5 mức xếp loại.",
@@ -208,7 +231,30 @@
     "notYet": "Chưa",
     "view": "Xem",
     "deleteConfirm": "Bạn có chắc chắn muốn xóa đánh giá này không?",
-    "pagination": "Trang {page} / {totalPages}",
+    "pagination": "Trang {page} / {totalPages} (Tổng {total} đánh giá)",
+    "stats": {
+      "totalEvaluations": "Tổng đánh giá",
+      "totalEvaluationsSub": "Số lượt đã thực hiện",
+      "averageScore": "Điểm trung bình",
+      "averageScoreSub": "Thang điểm 10.0",
+      "goodRate": "Tỷ lệ Tốt / Khá",
+      "goodRateSub": "Đạt điểm từ 6.5 trở lên",
+      "aiAssisted": "Hỗ trợ bởi AI",
+      "aiAssistedSub": "Gợi ý 12 tiêu chí"
+    },
+    "filter": {
+      "searchPlaceholder": "Tìm theo tên hoặc email thực tập sinh...",
+      "intern": "Thực tập sinh",
+      "week": "Tuần",
+      "rating": "Xếp loại",
+      "reset": "Đặt lại bộ lọc",
+      "weekOption": "Tuần {n}"
+    },
+    "emptyTitle": "Chưa có đánh giá nào",
+    "emptyFilteredTitle": "Không tìm thấy đánh giá phù hợp",
+    "emptyDescription": "Bắt đầu tạo đánh giá tuần đầu tiên cho các thực tập sinh của bạn.",
+    "emptyFilteredDescription": "Thử điều chỉnh lại từ khóa tìm kiếm hoặc các tiêu chí bộ lọc.",
+    "clearFilter": "Xóa bộ lọc",
     "createModal": {
       "title": "Tạo Đánh Giá Tuần",
       "description": "Đánh giá năng lực của thực tập sinh theo 12 tiêu chí và 5 mức xếp loại.",

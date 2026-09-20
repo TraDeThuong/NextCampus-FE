@@ -1,9 +1,4 @@
-"use client";
-
-import { useMutation } from "@tanstack/react-query";
-import { toast } from "react-hot-toast";
-import { useTranslations } from "next-intl";
-import { pdfExportService } from "@/services/pdf-export.service";
+import { useClientExportWeeklyEvaluation } from "./useClientExportWeeklyEvaluation";
 
 export function triggerDownload(fileUrl: string, defaultName = "bao-cao-danh-gia-tuan.pdf") {
   try {
@@ -25,23 +20,6 @@ export function triggerDownload(fileUrl: string, defaultName = "bao-cao-danh-gia
 }
 
 export function useExportWeeklyEvaluation() {
-  const t = useTranslations("pdfExport");
-
-  return useMutation({
-    mutationFn: (id: string) => pdfExportService.exportWeeklyEvaluation(id),
-
-    onSuccess: (response) => {
-      const fileUrl = response.data?.fileUrl;
-      if (fileUrl) {
-        triggerDownload(fileUrl, "bao-cao-danh-gia-tuan.pdf");
-        toast.success(t("exportSuccess"));
-      } else {
-        toast.error(t("exportFailed"));
-      }
-    },
-
-    onError: () => {
-      toast.error(t("exportFailed"));
-    },
-  });
+  return useClientExportWeeklyEvaluation();
 }
+
