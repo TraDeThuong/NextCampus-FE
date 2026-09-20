@@ -2,13 +2,16 @@
 
 import { useState, useMemo, useCallback } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { Loader2, FileText, Users, FileCheck, AlertCircle, CalendarDays, Filter, RotateCcw } from "lucide-react";
+import { Users, CalendarDays, FileText } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Spinner from "@/components/ui/Spinner";
 import MetalCard from "@/components/ui/MetalCard";
-import StatsCard from "@/components/stats/StatsCard";
+import LeaderDailyReportsHeader from "./LeaderDailyReportsHeader";
+import LeaderDailyReportsStats from "./LeaderDailyReportsStats";
+import LeaderDailyReportsFilter, { type FilterMode } from "./LeaderDailyReportsFilter";
+import LeaderInternList from "./LeaderInternList";
 import InternCalendar from "@/app/(dashboard)/intern/daily-report/InternCalendar";
 import ReportDetail from "@/app/(dashboard)/intern/daily-report/ReportDetail";
-import LeaderInternList from "./LeaderInternList";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { useInterns } from "@/hooks/intern/useInterns";
 import { useInternDetail } from "@/hooks/intern/useInternDetail";
@@ -43,19 +46,22 @@ export default function LeaderDailyReportContent() {
   const selectedReportId = searchParams.get("id");
   const urlInternId = searchParams.get("internId");
 
-  const { state: { user } } = useAuth();
+  const {
+    state: { user },
+  } = useAuth();
   const leaderId = user?.id;
 
-  // Fetch interns assigned to this leader
-  const { data: internsData, isLoading: internsLoading } = useInterns(
-    leaderId ? { leaderId, limit: 100 } : undefined,
-  );
-  const interns = useMemo(
-    () => internsData?.data ?? [],
-    [internsData?.data],
-  );
+  // 1. Fetch interns assigned to this leader
+  const {
+    data: internsData,
+    isLoading: internsLoading,
+    isFetching: internsFetching,
+    refetch: refetchInterns,
+  } = useInterns(leaderId ? { leaderId, limit: 100 } : undefined);
 
-  // Leader-wide stats: fetch today's and this week's reports
+  const interns = useMemo(() => internsData?.data ?? [], [internsData?.data]);
+
+  // 2. Overview Stats (Today & This Week)
   const todayStr = useMemo(() => isoDate(new Date()), []);
   const mondayStr = useMemo(() => {
     const d = new Date();
@@ -63,7 +69,11 @@ export default function LeaderDailyReportContent() {
     return isoDate(d);
   }, []);
 
-  const { data: todayReportsData } = useDailyReports({
+  const {
+    data: todayReportsData,
+    isFetching: todayFetching,
+    refetch: refetchToday,
+  } = useDailyReports({
     date: todayStr,
     from: todayStr,
     to: todayStr,
@@ -72,7 +82,11 @@ export default function LeaderDailyReportContent() {
     limit: 100,
   });
 
-  const { data: weekReportsData } = useDailyReports({
+  const {
+    data: weekReportsData,
+    isFetching: weekFetching,
+    refetch: refetchWeek,
+  } = useDailyReports({
     from: mondayStr,
     to: todayStr,
     createdAtFrom: mondayStr,
@@ -80,8 +94,8 @@ export default function LeaderDailyReportContent() {
     limit: 100,
   });
 
-  // Leader-wide stats
-  const overviewStats = useMemo(() => {
+  // Calculate stats & today submitted set
+  const { overviewStats, todaySubmittedSet } = useMemo(() => {
     const totalInterns = interns.length;
     const internIdSet = new Set(interns.map((i) => i.id));
 
@@ -111,36 +125,52 @@ export default function LeaderDailyReportContent() {
     const weekRate =
       expectedWeek > 0 ? Math.round((weekSubmitted / expectedWeek) * 100) : 0;
 
-    return { totalInterns, submittedToday, missingToday, weekRate, weekWorkingDays };
+    return {
+      overviewStats: {
+        totalInterns,
+        submittedToday,
+        missingToday,
+        weekRate,
+        weekWorkingDays,
+      },
+      todaySubmittedSet: todayUniqueInterns,
+    };
   }, [interns, todayReportsData, weekReportsData]);
 
-  // Selected intern
+  // 3. Selection & Filtering State
   const [selectedInternId, setSelectedInternId] = useState<string | null>(
     urlInternId ?? null,
   );
+  const activeInternId = selectedInternId ?? urlInternId ?? (interns[0]?.id ?? null);
   const [missingDate, setMissingDate] = useState<string | null>(null);
 
   // Date filters
-  const [filterMode, setFilterMode] = useState<"all" | "single" | "range">("all");
+  const [filterMode, setFilterMode] = useState<FilterMode>("all");
   const [singleDate, setSingleDate] = useState<string>("");
   const [fromDate, setFromDate] = useState<string>("");
   const [toDate, setToDate] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  // Mobile / Tablet tab selector ("interns" | "calendar" | "detail")
+  const [mobileTab, setMobileTab] = useState<"interns" | "calendar" | "detail">(
+    selectedReportId ? "detail" : "calendar",
+  );
 
   const handleSelectIntern = useCallback(
     (id: string) => {
       setSelectedInternId(id);
+      setMissingDate(null);
       router.replace(`${pathname}?internId=${id}`);
+      // On mobile, auto-switch to calendar view
+      setMobileTab("calendar");
     },
     [router, pathname],
   );
 
-  // Selected intern detail
-  const { data: internData } = useInternDetail(
-    selectedInternId ?? undefined,
-  );
+  // 4. Selected Intern Detail & Active Range
+  const { data: internData } = useInternDetail(activeInternId ?? undefined);
   const selectedIntern = internData?.data;
 
-  // Date range from selected intern
   const dateRange = useMemo(() => {
     if (!selectedIntern) return null;
     const start = new Date(selectedIntern.startDate);
@@ -152,12 +182,12 @@ export default function LeaderDailyReportContent() {
     return { start, end };
   }, [selectedIntern]);
 
-  // Query filter calculation based on filter mode
+  // 5. Query Filter Calculation
   const activeQueryParams = useMemo(() => {
-    if (!selectedInternId) return undefined;
+    if (!activeInternId) return undefined;
     if (filterMode === "single" && singleDate) {
       return {
-        internId: selectedInternId,
+        internId: activeInternId,
         date: singleDate,
         from: singleDate,
         to: singleDate,
@@ -166,7 +196,7 @@ export default function LeaderDailyReportContent() {
     }
     if (filterMode === "range" && (fromDate || toDate)) {
       return {
-        internId: selectedInternId,
+        internId: activeInternId,
         from: fromDate || undefined,
         to: toDate || undefined,
         limit: 100,
@@ -174,7 +204,7 @@ export default function LeaderDailyReportContent() {
     }
     if (dateRange) {
       return {
-        internId: selectedInternId,
+        internId: activeInternId,
         from: isoDate(dateRange.start),
         to: isoDate(dateRange.end),
         createdAtFrom: isoDate(dateRange.start),
@@ -182,13 +212,17 @@ export default function LeaderDailyReportContent() {
         limit: 100,
       };
     }
-    return { internId: selectedInternId, limit: 100 };
-  }, [selectedInternId, filterMode, singleDate, fromDate, toDate, dateRange]);
+    return { internId: activeInternId, limit: 100 };
+  }, [activeInternId, filterMode, singleDate, fromDate, toDate, dateRange]);
 
   // Fetch reports for selected intern
-  const { data: reportsData } = useDailyReports(activeQueryParams);
+  const {
+    data: reportsData,
+    isFetching: reportsFetching,
+    refetch: refetchReports,
+  } = useDailyReports(activeQueryParams);
 
-  const { data: singleReportData } = useDailyReport(
+  const { data: singleReportData, isFetching: singleReportFetching, refetch: refetchSingleReport } = useDailyReport(
     selectedReportId ?? undefined,
   );
 
@@ -196,7 +230,9 @@ export default function LeaderDailyReportContent() {
     const map = new Map<string, DailyReport>();
     if (reportsData?.data) {
       for (const r of reportsData.data) {
-        const dateKey = r.date ? isoDate(new Date(r.date)) : dateStrFromISO(r.createdAt);
+        const dateKey = r.date
+          ? isoDate(new Date(r.date))
+          : dateStrFromISO(r.createdAt);
         map.set(dateKey, r);
       }
     }
@@ -214,211 +250,188 @@ export default function LeaderDailyReportContent() {
 
   const handleSelectDate = useCallback(
     (dateStr: string, report?: DailyReport) => {
+      if (!activeInternId) return;
       if (report) {
         setMissingDate(null);
         router.replace(
-          `${pathname}?internId=${selectedInternId}&id=${report.id}`,
+          `${pathname}?internId=${activeInternId}&id=${report.id}`,
         );
+        setMobileTab("detail");
       } else {
-        router.replace(`${pathname}?internId=${selectedInternId}`);
+        router.replace(`${pathname}?internId=${activeInternId}`);
         setMissingDate(dateStr);
+        setMobileTab("detail");
       }
     },
-    [router, pathname, selectedInternId],
+    [router, pathname, activeInternId],
   );
+
+  const handleResetFilters = useCallback(() => {
+    setFilterMode("all");
+    setSingleDate("");
+    setFromDate("");
+    setToDate("");
+    setSearchQuery("");
+  }, []);
+
+  const hasFilters = useMemo(() => {
+    return (
+      filterMode !== "all" ||
+      !!singleDate ||
+      !!fromDate ||
+      !!toDate ||
+      !!searchQuery.trim()
+    );
+  }, [filterMode, singleDate, fromDate, toDate, searchQuery]);
+
+  const isReloading =
+    internsFetching || todayFetching || weekFetching || reportsFetching || singleReportFetching;
+
+  const handleReload = useCallback(() => {
+    refetchInterns();
+    refetchToday();
+    refetchWeek();
+    refetchReports();
+    if (selectedReportId) refetchSingleReport();
+  }, [refetchInterns, refetchToday, refetchWeek, refetchReports, selectedReportId, refetchSingleReport]);
 
   if (internsLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-cyan-400" />
+        <Spinner size="lg" />
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <MetalCard>
-        <div className="rounded-3xl p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-cyan-500/20 to-cyan-400/10">
-                <FileText className="h-6 w-6 text-cyan-300" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold metal-text">{t("title")}</h2>
-                <p className="mt-1 text-sm text-slate-500">
-                  {selectedIntern
-                    ? `${selectedIntern.fullName} — ${selectedIntern.department?.name ?? ""}`
-                    : t("description")}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </MetalCard>
+      {/* 1. Header with Rule 44 compliance and local Reload */}
+      <LeaderDailyReportsHeader
+        selectedIntern={selectedIntern}
+        onReload={handleReload}
+        isReloading={isReloading}
+      />
 
-      {/* Overview stats */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <StatsCard
-          title={t("totalInterns")}
-          value={overviewStats.totalInterns}
-          subtitle={t("assignedToYou")}
-          icon={<Users className="h-5 w-5 text-slate-400" />}
-        />
-        <StatsCard
-          title={t("submittedToday")}
-          value={overviewStats.submittedToday}
-          subtitle={t("percentOfInterns", { percent: overviewStats.totalInterns > 0 ? Math.round((overviewStats.submittedToday / overviewStats.totalInterns) * 100) : 0 })}
-          icon={<FileCheck className="h-5 w-5 text-emerald-400" />}
-        />
-        <StatsCard
-          title={t("missingToday")}
-          value={overviewStats.missingToday}
-          subtitle={t("notSubmittedYet")}
-          icon={<AlertCircle className="h-5 w-5 text-red-400" />}
-        />
-        <StatsCard
-          title={t("weekRate")}
-          value={`${overviewStats.weekRate}%`}
-          subtitle={t("workingDays", { days: overviewStats.weekWorkingDays })}
-          icon={<CalendarDays className="h-5 w-5 text-indigo-400" />}
-        />
+      {/* 2. Overview KPI Stats with MetalCard and Micro-interaction */}
+      <LeaderDailyReportsStats stats={overviewStats} />
+
+      {/* 3. Minimalist Filter Card with Cyberpunk DatePicker */}
+      <LeaderDailyReportsFilter
+        filterMode={filterMode}
+        onModeChange={setFilterMode}
+        singleDate={singleDate}
+        onSingleDateChange={setSingleDate}
+        fromDate={fromDate}
+        toDate={toDate}
+        onDateRangeChange={(start, end) => {
+          setFromDate(start);
+          setToDate(end);
+        }}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        onReset={handleResetFilters}
+        hasFilters={hasFilters}
+      />
+
+      {/* 4. Mobile Tab Switcher (Visible only on < lg) */}
+      <div className="lg:hidden flex items-center rounded-2xl border border-white/10 bg-white/5 p-1 text-xs">
+        <button
+          type="button"
+          onClick={() => setMobileTab("interns")}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-medium transition cursor-pointer select-none ${
+            mobileTab === "interns"
+              ? "bg-cyan-500/20 text-cyan-300 shadow-sm"
+              : "text-muted hover:text-foreground"
+          }`}
+        >
+          <Users className="h-4 w-4 shrink-0" />
+          <span>{t("tabs.interns")}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileTab("calendar")}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-medium transition cursor-pointer select-none ${
+            mobileTab === "calendar"
+              ? "bg-cyan-500/20 text-cyan-300 shadow-sm"
+              : "text-muted hover:text-foreground"
+          }`}
+        >
+          <CalendarDays className="h-4 w-4 shrink-0" />
+          <span>{t("tabs.calendar")}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileTab("detail")}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-medium transition cursor-pointer select-none ${
+            mobileTab === "detail"
+              ? "bg-cyan-500/20 text-cyan-300 shadow-sm"
+              : "text-muted hover:text-foreground"
+          }`}
+        >
+          <FileText className="h-4 w-4 shrink-0" />
+          <span>{t("tabs.detail")}</span>
+        </button>
       </div>
 
-      {/* Filter toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/5 bg-white/[0.02] p-3.5 px-5">
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-          <Filter className="h-4 w-4 text-cyan-400" />
-          <span>Bộ lọc ngày báo cáo (Asia/Ho_Chi_Minh):</span>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex rounded-xl bg-white/5 p-1 border border-white/10 text-xs">
-            <button
-              type="button"
-              onClick={() => setFilterMode("all")}
-              className={`px-3 py-1 rounded-lg transition ${
-                filterMode === "all"
-                  ? "bg-cyan-500/20 text-cyan-300 font-medium"
-                  : "text-slate-400 hover:text-slate-200"
-              }`}
-            >
-              Kỳ thực tập
-            </button>
-            <button
-              type="button"
-              onClick={() => setFilterMode("single")}
-              className={`px-3 py-1 rounded-lg transition ${
-                filterMode === "single"
-                  ? "bg-cyan-500/20 text-cyan-300 font-medium"
-                  : "text-slate-400 hover:text-slate-200"
-              }`}
-            >
-              Theo ngày
-            </button>
-            <button
-              type="button"
-              onClick={() => setFilterMode("range")}
-              className={`px-3 py-1 rounded-lg transition ${
-                filterMode === "range"
-                  ? "bg-cyan-500/20 text-cyan-300 font-medium"
-                  : "text-slate-400 hover:text-slate-200"
-              }`}
-            >
-              Khoảng ngày
-            </button>
-          </div>
-
-          {filterMode === "single" && (
-            <input
-              type="date"
-              value={singleDate}
-              onChange={(e) => setSingleDate(e.target.value)}
-              className="rounded-xl border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200 focus:outline-none focus:border-cyan-500/50"
+      {/* 5. Main 3-Column / Seamless Area (Rule 46: Borderless Layout) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column: Intern List (Col 3 on lg) */}
+        <div
+          className={`lg:col-span-3 ${
+            mobileTab !== "interns" ? "hidden lg:block" : "block"
+          }`}
+        >
+          <MetalCard className="p-4 sm:p-5 flex flex-col">
+            <LeaderInternList
+              interns={interns}
+              selectedId={activeInternId}
+              onSelect={handleSelectIntern}
+              todaySubmittedSet={todaySubmittedSet}
+              searchQuery={searchQuery}
             />
-          )}
-
-          {filterMode === "range" && (
-            <div className="flex items-center gap-1.5 text-xs text-slate-400">
-              <span>Từ</span>
-              <input
-                type="date"
-                value={fromDate}
-                onChange={(e) => setFromDate(e.target.value)}
-                className="rounded-xl border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200 focus:outline-none focus:border-cyan-500/50"
-              />
-              <span>đến</span>
-              <input
-                type="date"
-                value={toDate}
-                onChange={(e) => setToDate(e.target.value)}
-                className="rounded-xl border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200 focus:outline-none focus:border-cyan-500/50"
-              />
-            </div>
-          )}
-
-          {filterMode !== "all" && (
-            <button
-              type="button"
-              onClick={() => {
-                setFilterMode("all");
-                setSingleDate("");
-                setFromDate("");
-                setToDate("");
-              }}
-              className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition"
-            >
-              <RotateCcw className="h-3 w-3" />
-              Đặt lại
-            </button>
-          )}
+          </MetalCard>
         </div>
-      </div>
 
-      {/* 3-column layout in a shared card */}
-      <MetalCard>
-        <div className="rounded-3xl p-4">
-          <div className="flex gap-4" style={{ minHeight: "calc(100vh - 500px)" }}>
-            {/* Left: Intern list */}
-            <div className="w-56 shrink-0 border-r border-white/5 pr-4 overflow-y-auto">
-              <LeaderInternList
-                interns={interns}
-                selectedId={selectedInternId}
-                onSelect={handleSelectIntern}
+        {/* Middle Column: Calendar (Col 4 on lg) */}
+        <div
+          className={`lg:col-span-4 ${
+            mobileTab !== "calendar" ? "hidden lg:block" : "block"
+          }`}
+        >
+          <MetalCard className="p-4 sm:p-5">
+            {dateRange ? (
+              <InternCalendar
+                startDate={dateRange.start}
+                endDate={dateRange.end}
+                reportsMap={reportsMap}
+                selectedReportId={selectedReportId}
+                onSelectDate={handleSelectDate}
               />
-            </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <CalendarDays className="h-10 w-10 text-slate-600 mb-3 opacity-40" />
+                <p className="text-sm text-muted">{t("selectCalendar")}</p>
+              </div>
+            )}
+          </MetalCard>
+        </div>
 
-            {/* Middle: Calendar */}
-            <div className="w-80 shrink-0 border-r border-white/5 pr-4 overflow-y-auto">
-              {dateRange ? (
-                <InternCalendar
-                  startDate={dateRange.start}
-                  endDate={dateRange.end}
-                  reportsMap={reportsMap}
-                  selectedReportId={selectedReportId}
-                  onSelectDate={handleSelectDate}
-                />
-              ) : (
-                <div className="flex items-center justify-center min-h-[300px] text-center">
-                  <p className="text-sm text-slate-500">
-                    {t("selectCalendar")}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Right: Report detail */}
-            <div className="flex-1 min-w-0 overflow-y-auto">
-              <ReportDetail
-                report={selectedReport}
-                isLoading={!!selectedReportId && !selectedReport}
-                missingDate={missingDate}
-              />
-            </div>
+        {/* Right Column: Report Detail (Col 5 on lg - Rule 46: Borderless Right Panel) */}
+        <div
+          className={`lg:col-span-5 ${
+            mobileTab !== "detail" ? "hidden lg:block" : "block"
+          }`}
+        >
+          <div className="overflow-y-auto custom-scrollbar">
+            <ReportDetail
+              report={selectedReport}
+              isLoading={!!selectedReportId && !selectedReport}
+              missingDate={missingDate}
+              borderless={true}
+            />
           </div>
         </div>
-      </MetalCard>
+      </div>
     </div>
   );
 }
