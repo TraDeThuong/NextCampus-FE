@@ -91,10 +91,10 @@ function Open({ children, opens }: OpenProps) {
 }
 
 const windowSizes = {
-  sm: "max-w-[min(96vw,36rem)] p-4 sm:p-6",
-  md: "max-w-[min(96vw,56rem)] p-4 sm:p-8",
-  lg: "max-w-[min(98vw,72rem)] p-4 sm:p-8 md:p-10",
-  xl: "max-w-[min(98vw,90rem)] p-4 sm:p-8 md:p-10",
+  sm: "w-full max-w-[calc(100vw-0.75rem)] sm:max-w-xl p-2.5 sm:p-6",
+  md: "w-full max-w-[calc(100vw-0.75rem)] sm:max-w-3xl md:max-w-4xl p-2.5 sm:p-6 md:p-8",
+  lg: "w-full max-w-[calc(100vw-0.75rem)] sm:max-w-5xl md:max-w-6xl p-2.5 sm:p-6 md:p-10",
+  xl: "w-full max-w-[calc(100vw-0.75rem)] sm:max-w-6xl md:max-w-7xl p-2.5 sm:p-6 md:p-10",
 };
 
 function Window({ children, name, size = "lg", title, onClose }: WindowProps) {
@@ -111,7 +111,7 @@ function Window({ children, name, size = "lg", title, onClose }: WindowProps) {
 
   const isVisible = name ? ctx?.openName === name : true;
 
-  // Keyboard Escape listener & body scroll lock
+  // Keyboard Escape listener & body/main scroll lock
   useEffect(() => {
     if (!isVisible) return;
 
@@ -125,9 +125,19 @@ function Window({ children, name, size = "lg", title, onClose }: WindowProps) {
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
+    // Lock main container in DashboardLayout to avoid background page double scrollbar
+    const mainEl = document.querySelector("main");
+    const originalMainOverflow = mainEl ? mainEl.style.overflow : "";
+    if (mainEl) {
+      mainEl.style.overflow = "hidden";
+    }
+
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = originalOverflow;
+      if (mainEl) {
+        mainEl.style.overflow = originalMainOverflow;
+      }
     };
   }, [isVisible, handleClose]);
 
@@ -143,19 +153,21 @@ function Window({ children, name, size = "lg", title, onClose }: WindowProps) {
         fixed inset-0 z-[1000]
         flex items-center justify-center
         bg-black/70
-        p-2.5 sm:p-6
+        p-1 sm:p-6
         backdrop-blur-md
         animate-fadeIn
+        overflow-hidden
       "
     >
       <div
         ref={ref}
         className={`
           relative w-full
-          max-h-[calc(100dvh-1.25rem)] sm:max-h-[calc(100vh-3rem)]
+          max-h-[calc(100dvh-1rem)] sm:max-h-[calc(100vh-3rem)]
           flex flex-col
+          overflow-hidden
 
-          rounded-2xl sm:rounded-[2rem]
+          rounded-xl sm:rounded-[2rem]
           border border-border
           bg-[#0c1222]/95 dark:bg-[#0c1222]/95
           shadow-glass
@@ -166,14 +178,14 @@ function Window({ children, name, size = "lg", title, onClose }: WindowProps) {
           before:pointer-events-none
           before:absolute
           before:inset-0
-          before:rounded-2xl sm:before:rounded-[2rem]
+          before:rounded-xl sm:before:rounded-[2rem]
           before:border
           before:border-white/10
 
           after:pointer-events-none
           after:absolute
           after:inset-0
-          after:rounded-2xl sm:after:rounded-[2rem]
+          after:rounded-xl sm:after:rounded-[2rem]
           after:shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]
 
           ${windowSizes[size]}
@@ -192,8 +204,8 @@ function Window({ children, name, size = "lg", title, onClose }: WindowProps) {
         />
 
         {title && (
-          <div className="mb-4 pr-12">
-            <h2 className="text-lg sm:text-xl font-semibold metal-text truncate">
+          <div className="mb-4 pr-10 sm:pr-12">
+            <h2 className="text-base sm:text-xl font-semibold metal-text truncate">
               {title}
             </h2>
           </div>
@@ -204,10 +216,10 @@ function Window({ children, name, size = "lg", title, onClose }: WindowProps) {
           onClick={handleClose}
           aria-label="Đóng"
           className="
-            absolute right-3 top-3 sm:right-4 sm:top-4 z-30
-            flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center
+            absolute right-2 top-2 sm:right-4 sm:top-4 z-30
+            flex h-8 w-8 sm:h-11 sm:w-11 items-center justify-center
 
-            rounded-xl sm:rounded-2xl
+            rounded-lg sm:rounded-2xl
             border border-border
             bg-card
 
@@ -226,7 +238,7 @@ function Window({ children, name, size = "lg", title, onClose }: WindowProps) {
             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-light
           "
         >
-          <HiXMark className="h-5 w-5 sm:h-6 sm:w-6 shrink-0" />
+          <HiXMark className="h-4 w-4 sm:h-6 sm:w-6 shrink-0" />
         </button>
 
         <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">

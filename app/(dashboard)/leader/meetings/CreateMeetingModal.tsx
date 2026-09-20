@@ -1,14 +1,30 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Calendar, Loader2, Users } from "lucide-react";
+import {
+  Calendar,
+  Users,
+  AlertCircle,
+  Clock,
+  Video,
+  MapPin,
+  FileEdit,
+  User,
+  Search,
+  CheckSquare,
+  Square,
+} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { useTranslations } from "next-intl";
 import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import Textarea from "@/components/ui/Textarea";
+import Select from "@/components/ui/Select";
+import { DatePicker } from "@/components/ui/DatePicker";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { useCreateMeeting } from "@/hooks/meeting/useCreateMeeting";
 import { internService } from "@/services/intern.service";
@@ -17,52 +33,171 @@ import { meetingService } from "@/services/meeting.service";
 import { departmentService } from "@/services/department.service";
 import type { CreateMeetingPayload, MeetingType } from "@/types/meeting";
 
-interface Props { onCloseModal?: () => void; defaultDate?: Date; }
-
-function toLocalDatetimeString(d: Date) { const offset = d.getTimezoneOffset(); const local = new Date(d.getTime() - offset * 60000); return local.toISOString().slice(0, 16); }
-
-function useCreateMeetingSchema(t: ReturnType<typeof useTranslations>) {
-  return z.object({
-    title: z.string().min(1, t("titleRequired")).max(200, t("titleTooLong")),
-    description: z.string().optional().default(""),
-    departmentId: z.string().optional(),
-    meetingType: z.enum(["ONLINE", "OFFLINE", "HYBRID"]),
-    location: z.string().optional().default(""),
-    meetingLink: z.string().optional().default(""),
-    startTime: z.string().min(1, t("startTimeRequired")),
-    endTime: z.string().min(1, t("endTimeRequired")),
-    status: z.enum(["DRAFT", "SCHEDULED"]),
-  }).superRefine((d, ctx) => {
-    if (new Date(d.startTime) >= new Date(d.endTime)) { ctx.addIssue({ code: z.ZodIssueCode.custom, message: t("startBeforeEnd"), path: ["endTime"] }); }
-    if ((d.meetingType === "ONLINE" || d.meetingType === "HYBRID") && !d.meetingLink) { ctx.addIssue({ code: z.ZodIssueCode.custom, message: t("linkRequired"), path: ["meetingLink"] }); }
-    if (d.status === "SCHEDULED" && new Date(d.startTime) <= new Date()) { ctx.addIssue({ code: z.ZodIssueCode.custom, message: t("startTimeFuture"), path: ["startTime"] }); }
-  });
+interface Props {
+  onCloseModal?: () => void;
+  defaultDate?: Date;
 }
 
-interface FormValues { title: string; description?: string; departmentId?: string; meetingType: "ONLINE" | "OFFLINE" | "HYBRID"; location?: string; meetingLink?: string; startTime: string; endTime: string; status: "DRAFT" | "SCHEDULED"; }
+function formatDateToIsoDate(d: Date): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function formatTimeToHHMM(d: Date): string {
+  const hours = String(d.getHours()).padStart(2, "0");
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+  return `${hours}:${minutes}`;
+}
+
+const TIME_OPTIONS = [
+  "07:00", "07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30",
+  "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30",
+  "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30",
+  "19:00", "19:30", "20:00", "20:30", "21:00", "21:30", "22:00",
+].map((time) => ({ value: time, label: time }));
+
+function useCreateMeetingSchema(t: ReturnType<typeof useTranslations>) {
+  return useMemo(
+    () =>
+      z
+        .object({
+          title: z
+            .string()
+            .min(1, t("titleRequired"))
+            .max(200, t("titleTooLong")),
+          description: z.string().optional(),
+          departmentId: z.string().optional(),
+          meetingType: z.enum(["ONLINE", "OFFLINE", "HYBRID"]),
+          location: z.string().optional(),
+          meetingLink: z.string().optional(),
+          meetingDate: z.string().min(1, t("dateRequired")),
+          startTimeStr: z.string().min(1, t("startTimeRequired")),
+          endTimeStr: z.string().min(1, t("endTimeRequired")),
+          status: z.enum(["DRAFT", "SCHEDULED"]),
+        })
+        .superRefine((d, ctx) => {
+          if (d.meetingDate && d.startTimeStr && d.endTimeStr) {
+            const startDateTime = new Date(`${d.meetingDate}T${d.startTimeStr}:00`);
+            const endDateTime = new Date(`${d.meetingDate}T${d.endTimeStr}:00`);
+            if (startDateTime >= endDateTime) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: t("startBeforeEnd"),
+                path: ["endTimeStr"],
+              });
+            }
+            if (d.status === "SCHEDULED" && startDateTime <= new Date()) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: t("futureTimeRequired"),
+                path: ["startTimeStr"],
+              });
+            }
+          }
+          if (
+            (d.meetingType === "ONLINE" || d.meetingType === "HYBRID") &&
+            !d.meetingLink?.trim()
+          ) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("linkRequired"),
+              path: ["meetingLink"],
+            });
+          }
+        }),
+    [t],
+  );
+}
+
+interface FormValues {
+  title: string;
+  description?: string;
+  departmentId?: string;
+  meetingType: MeetingType;
+  location?: string;
+  meetingLink?: string;
+  meetingDate: string;
+  startTimeStr: string;
+  endTimeStr: string;
+  status: "DRAFT" | "SCHEDULED";
+}
 
 export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props) {
-  const t = useTranslations("leader.meetings.createModal");
-  const { state } = useAuth(); const currentUser = state.user;
+  const t = useTranslations("leader.meetings");
+  const { state } = useAuth();
+  const currentUser = state.user;
   const createMeeting = useCreateMeeting();
-  const [selectedParticipantIds, setSelectedParticipantIds] = useState<string[]>([]);
 
-  const { data: internsData } = useQuery({ queryKey: ["interns", { leaderId: currentUser?.id }], queryFn: () => internService.getInterns({ leaderId: currentUser!.id, limit: 100 }), enabled: !!currentUser, staleTime: 1000 * 60 * 5 });
-  const { data: leadersData } = useQuery({ queryKey: ["leaders", { limit: 100 }], queryFn: () => leaderService.getLeaders({ limit: 100 }), staleTime: 1000 * 60 * 5 });
-  const { data: departmentsData } = useQuery({ queryKey: ["departments"], queryFn: () => departmentService.getDepartments(), staleTime: 1000 * 60 * 5 });
-  const interns = internsData?.data ?? [];
-  const leaders = (leadersData?.data ?? []).filter((l) => l.userId !== currentUser?.id).map((l) => ({ id: l.userId, fullName: l.user.fullName || l.user.email }));
-  const departments = departmentsData?.data ?? [];
+  const [selectedParticipantIds, setSelectedParticipantIds] = useState<string[]>([]);
+  const [participantSearch, setParticipantSearch] = useState("");
+
+  const initialDate = defaultDate || new Date();
+  const initialDateStr = formatDateToIsoDate(initialDate);
+  const initialStartTime = formatTimeToHHMM(initialDate);
+  const nextHourDate = new Date(initialDate.getTime() + 3600000);
+  const initialEndTime = formatTimeToHHMM(nextHourDate);
+
+  const { data: internsData } = useQuery({
+    queryKey: ["interns", { leaderId: currentUser?.id }],
+    queryFn: () => internService.getInterns({ leaderId: currentUser!.id, limit: 100 }),
+    enabled: !!currentUser,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const { data: leadersData } = useQuery({
+    queryKey: ["leaders", { limit: 100 }],
+    queryFn: () => leaderService.getLeaders({ limit: 100 }),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const { data: departmentsData } = useQuery({
+    queryKey: ["departments"],
+    queryFn: () => departmentService.getDepartments(),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const interns = useMemo(() => internsData?.data ?? [], [internsData]);
+  const leaders = useMemo(
+    () =>
+      (leadersData?.data ?? [])
+        .filter((l) => l.userId !== currentUser?.id)
+        .map((l) => ({ id: l.userId, fullName: l.user.fullName || l.user.email })),
+    [leadersData, currentUser?.id],
+  );
+  const departments = useMemo(() => departmentsData?.data ?? [], [departmentsData]);
 
   const schema = useCreateMeetingSchema(t);
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<FormValues>({
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    control,
+    formState: { errors },
+  } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { meetingType: "ONLINE", status: "SCHEDULED", startTime: defaultDate ? toLocalDatetimeString(defaultDate) : "", endTime: defaultDate ? toLocalDatetimeString(new Date(defaultDate.getTime() + 3600000)) : "", title: "", description: "", location: "", meetingLink: "" },
+    defaultValues: {
+      meetingType: "ONLINE",
+      status: "SCHEDULED",
+      meetingDate: initialDateStr,
+      startTimeStr: initialStartTime,
+      endTimeStr: initialEndTime,
+      title: "",
+      description: "",
+      location: "",
+      meetingLink: "",
+      departmentId: "",
+    },
   });
 
   const watchMeetingType = watch("meetingType");
-  const watchStartTime = watch("startTime");
-  const watchEndTime = watch("endTime");
+  const watchStatus = watch("status");
+  const watchMeetingDate = watch("meetingDate");
+  const watchStartTimeStr = watch("startTimeStr");
+  const watchEndTimeStr = watch("endTimeStr");
 
   const allUserIds = useMemo(() => {
     const ids = new Set<string>();
@@ -77,145 +212,538 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
 
   const queryStartTime = useMemo(() => {
     try {
-      return watchStartTime ? new Date(watchStartTime).toISOString() : "";
+      if (!watchMeetingDate || !watchStartTimeStr) return "";
+      return new Date(`${watchMeetingDate}T${watchStartTimeStr}:00`).toISOString();
     } catch {
       return "";
     }
-  }, [watchStartTime]);
+  }, [watchMeetingDate, watchStartTimeStr]);
 
   const queryEndTime = useMemo(() => {
     try {
-      return watchEndTime ? new Date(watchEndTime).toISOString() : "";
+      if (!watchMeetingDate || !watchEndTimeStr) return "";
+      return new Date(`${watchMeetingDate}T${watchEndTimeStr}:00`).toISOString();
     } catch {
       return "";
     }
-  }, [watchEndTime]);
+  }, [watchMeetingDate, watchEndTimeStr]);
 
   const { data: busyUsersRes } = useQuery({
     queryKey: ["meetings", "busy-users", queryStartTime, queryEndTime, allUserIds.join(",")],
     queryFn: () => meetingService.getBusyUsers(queryStartTime, queryEndTime, allUserIds.join(",")),
-    enabled: !!queryStartTime && !!queryEndTime && new Date(queryStartTime) < new Date(queryEndTime) && allUserIds.length > 0,
+    enabled:
+      !!queryStartTime &&
+      !!queryEndTime &&
+      new Date(queryStartTime) < new Date(queryEndTime) &&
+      allUserIds.length > 0,
     staleTime: 1000 * 30,
   });
   const busyUserIds = useMemo(() => new Set(busyUsersRes?.data ?? []), [busyUsersRes]);
 
-  function toggleParticipant(id: string) { setSelectedParticipantIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]); }
+  const filteredInterns = useMemo(() => {
+    if (!participantSearch.trim()) return interns;
+    const q = participantSearch.trim().toLowerCase();
+    return interns.filter((i) => i.fullName?.toLowerCase().includes(q));
+  }, [interns, participantSearch]);
 
-  function onSubmit(data: FormValues) {
-    if (!currentUser) return;
-    if (selectedParticipantIds.length === 0) { toast.error(t("selectOneParticipant")); return; }
-    const payload: CreateMeetingPayload = { title: data.title, description: data.description || undefined, departmentId: data.departmentId || undefined, hostId: currentUser.id, meetingType: data.meetingType, location: data.location || undefined, meetingLink: data.meetingLink || undefined, startTime: new Date(data.startTime).toISOString(), endTime: new Date(data.endTime).toISOString(), visibility: "PRIVATE", status: data.status, participantIds: selectedParticipantIds };
-    createMeeting.mutate(payload, { onSuccess: () => onCloseModal?.() });
+  const filteredLeaders = useMemo(() => {
+    if (!participantSearch.trim()) return leaders;
+    const q = participantSearch.trim().toLowerCase();
+    return leaders.filter((l) => l.fullName?.toLowerCase().includes(q));
+  }, [leaders, participantSearch]);
+
+  function toggleParticipant(id: string) {
+    setSelectedParticipantIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
   }
 
-  const inputClass = "w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition focus:border-primary-main/50 placeholder:text-slate-600";
-  const labelClass = "text-xs font-semibold uppercase tracking-[0.15em] text-slate-400";
+  function handleSelectAllInterns() {
+    const internIds = filteredInterns.map((i) => i.userId);
+    const allSelected = internIds.every((id) => selectedParticipantIds.includes(id));
+    if (allSelected) {
+      setSelectedParticipantIds((prev) => prev.filter((id) => !internIds.includes(id)));
+    } else {
+      setSelectedParticipantIds((prev) => Array.from(new Set([...prev, ...internIds])));
+    }
+  }
+
+  function handleSelectAllLeaders() {
+    const leaderIds = filteredLeaders.map((l) => l.id);
+    const allSelected = leaderIds.every((id) => selectedParticipantIds.includes(id));
+    if (allSelected) {
+      setSelectedParticipantIds((prev) => prev.filter((id) => !leaderIds.includes(id)));
+    } else {
+      setSelectedParticipantIds((prev) => Array.from(new Set([...prev, ...leaderIds])));
+    }
+  }
+
+  function onSubmit(data: FormValues) {
+    if (!currentUser) {
+      toast.error(t("mustBeLoggedIn"));
+      return;
+    }
+
+    if (selectedParticipantIds.length === 0) {
+      toast.error(t("selectOneParticipant"));
+      return;
+    }
+
+    const startDateTime = new Date(`${data.meetingDate}T${data.startTimeStr}:00`);
+    const endDateTime = new Date(`${data.meetingDate}T${data.endTimeStr}:00`);
+
+    const payload: CreateMeetingPayload = {
+      title: data.title.trim(),
+      description: data.description?.trim() || undefined,
+      departmentId: data.departmentId || undefined,
+      hostId: currentUser.id,
+      meetingType: data.meetingType,
+      location: data.location?.trim() || undefined,
+      meetingLink: data.meetingLink?.trim() || undefined,
+      startTime: startDateTime.toISOString(),
+      endTime: endDateTime.toISOString(),
+      visibility: "PRIVATE",
+      status: data.status,
+      participantIds: selectedParticipantIds,
+    };
+
+    createMeeting.mutate(payload, {
+      onSuccess: () => {
+        onCloseModal?.();
+      },
+    });
+  }
+
+  const MEETING_TYPE_OPTIONS = [
+    { value: "ONLINE", label: t("online"), icon: Video },
+    { value: "OFFLINE", label: t("offline"), icon: MapPin },
+    { value: "HYBRID", label: t("hybrid"), icon: Users },
+  ];
 
   return (
-    <div className="px-1 py-4">
-      <div className="mb-6 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-main/10 text-primary-light"><Calendar className="h-5 w-5" /></div>
-        <div>
-          <h3 className="text-base font-semibold text-white">{t("title")}</h3>
-          <p className="text-xs text-slate-500">{selectedParticipantIds.length > 0 ? t("participantsInvited", { n: selectedParticipantIds.length, plural: selectedParticipantIds.length > 1 ? "s" : "" }) : t("inviteHint")}</p>
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
+      {/* Sticky Header (Rule 44 Compliant) */}
+      <div className="sticky top-0 z-20 bg-[#0c1222]/95 backdrop-blur-xl pb-3 sm:pb-3.5 pt-1 -mt-1 border-b border-white/10 pr-9 sm:pr-12">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.2)]">
+              <Calendar className="h-5 w-5 shrink-0" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-lg sm:text-xl font-bold metal-text truncate">
+                {t("scheduleMeeting")}
+              </h3>
+              <p className="text-xs text-muted mt-0.5 truncate">
+                {selectedParticipantIds.length > 0
+                  ? t("participantsInvited", { n: selectedParticipantIds.length })
+                  : t("inviteHint")}
+              </p>
+            </div>
+          </div>
+
+          {/* Host Badge */}
+          <div className="hidden sm:flex items-center gap-2 rounded-xl border border-white/10 bg-card/40 px-3 py-1.5 text-xs text-muted shrink-0">
+            <User className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
+            <span className="font-medium text-foreground max-w-[140px] truncate">
+              {currentUser?.fullName || currentUser?.email}
+            </span>
+            <span className="rounded bg-cyan-500/15 text-cyan-300 px-1.5 py-0.5 text-[10px] font-semibold border border-cyan-500/20">
+              Host
+            </span>
+          </div>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div><label className={labelClass}>{t("titleLabel")} *</label><input type="text" placeholder={t("titlePlaceholder")} {...register("title")} className={`${inputClass} mt-1`} />{errors.title && <p className="mt-1 text-xs text-red-400">{errors.title.message}</p>}</div>
-        <div><label className={labelClass}>{t("description")}</label><textarea rows={2} placeholder={t("descriptionPlaceholder")} {...register("description")} className={`${inputClass} mt-1 resize-none`} /></div>
-        <div>
-          <label className={labelClass}>{t("host")}</label>
-          <div className="mt-1 flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5">
-            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary-main/20 text-xs text-primary-light">{currentUser?.fullName?.charAt(0) || currentUser?.email?.charAt(0) || "?"}</div>
-            <span className="text-sm text-slate-300">{currentUser?.fullName || currentUser?.email || "You"}</span>
-            <span className="ml-auto text-xs text-slate-600">{t("auto")}</span>
+      {/* Form Fields: Standard 2-Column Responsive Grid */}
+      <div className="py-3 sm:py-4 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
+          {/* Title */}
+          <div className="col-span-full">
+            <Input
+              label={t("formTitle")}
+              required
+              placeholder={t("titlePlaceholder")}
+              leftIcon={<FileEdit className="h-4 w-4 text-cyan-400" />}
+              error={errors.title?.message}
+              {...register("title")}
+            />
           </div>
-        </div>
-        <div>
-          <label className={labelClass}>{t("meetingType")} *</label>
-          <div className="mt-2 flex gap-3">
-            {(["ONLINE", "OFFLINE", "HYBRID"] as MeetingType[]).map((type) => (
-              <label key={type} className="flex items-center gap-2 text-sm text-slate-300"><input type="radio" value={type} {...register("meetingType")} className="accent-primary-main" />{t(type.toLowerCase())}</label>
-            ))}
-          </div>
-          {errors.meetingType && <p className="mt-1 text-xs text-red-400">{errors.meetingType.message}</p>}
-        </div>
-        <div><label className={labelClass}>{t("location")}</label><input type="text" placeholder={t("locationPlaceholder")} {...register("location")} className={`${inputClass} mt-1`} /></div>
-        <div>
-          <label className={labelClass}>Phòng ban</label>
-          <select {...register("departmentId")} className={`${inputClass} mt-1`}>
-            <option value="" className="bg-slate-900 text-slate-400">-- Chọn phòng ban (Tùy chọn) --</option>
-            {departments.map((dept) => (
-              <option key={dept.id} value={dept.id} className="bg-slate-900 text-white">{dept.name}</option>
-            ))}
-          </select>
-        </div>
-        {(watchMeetingType === "ONLINE" || watchMeetingType === "HYBRID") && (
-          <div><label className={labelClass}>{t("meetingLink")} *</label><input type="url" placeholder={t("meetingLinkPlaceholder")} {...register("meetingLink")} className={`${inputClass} mt-1`} />{errors.meetingLink && <p className="mt-1 text-xs text-red-400">{errors.meetingLink.message}</p>}</div>
-        )}
-        <div className="grid grid-cols-2 gap-4">
-          <div><label className={labelClass}>{t("startTime")} *</label><input type="datetime-local" {...register("startTime")} className={`${inputClass} mt-1`} />{errors.startTime && <p className="mt-1 text-xs text-red-400">{errors.startTime.message}</p>}</div>
-          <div><label className={labelClass}>{t("endTime")} *</label><input type="datetime-local" {...register("endTime")} className={`${inputClass} mt-1`} />{errors.endTime && <p className="mt-1 text-xs text-red-400">{errors.endTime.message}</p>}</div>
-        </div>
-        <div className="space-y-3">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {interns.length > 0 && (
-              <div className="min-w-0">
-                <label className={labelClass}><Users className="mr-1 inline h-3.5 w-3.5" />{t("yourInterns")}</label>
-                <div className="mt-1.5 h-[200px] space-y-0.5 overflow-y-auto custom-scrollbar rounded-xl border border-white/10 bg-white/[0.02] p-2">
-                  {interns.map((intern) => {
-                    const isBusy = busyUserIds.has(intern.userId);
-                    return (
-                      <label key={intern.userId} className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition ${selectedParticipantIds.includes(intern.userId) ? "bg-primary-main/10" : "hover:bg-white/5"}`}>
-                        <input type="checkbox" checked={selectedParticipantIds.includes(intern.userId)} onChange={() => toggleParticipant(intern.userId)} className="accent-primary-main" />
-                        <span className="text-sm text-slate-300">{intern.fullName}</span>
-                        {isBusy && (
-                          <span className="ml-auto rounded bg-red-500/10 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
-                            {t("busy")}
-                          </span>
-                        )}
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-            {leaders.length > 0 && (
-              <div className="min-w-0">
-                <label className={labelClass}>{t("otherLeaders")}</label>
-                <div className="mt-1.5 h-[200px] space-y-0.5 overflow-y-auto custom-scrollbar rounded-xl border border-white/10 bg-white/[0.02] p-2">
-                  {leaders.map((leader) => {
-                    const isBusy = busyUserIds.has(leader.id);
-                    return (
-                      <label key={leader.id} className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition ${selectedParticipantIds.includes(leader.id) ? "bg-primary-main/10" : "hover:bg-white/5"}`}>
-                        <input type="checkbox" checked={selectedParticipantIds.includes(leader.id)} onChange={() => toggleParticipant(leader.id)} className="accent-primary-main" />
-                        <span className="text-sm text-slate-300">{leader.fullName}</span>
-                        {isBusy && (
-                          <span className="ml-auto rounded bg-red-500/10 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
-                            {t("busy")}
-                          </span>
-                        )}
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
+
+          {/* Meeting Type Selector */}
+          <div className="col-span-1 flex flex-col gap-1.5">
+            <label className="text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center gap-1">
+              <span>{t("formMeetingType")}</span>
+              <span className="text-danger font-bold">*</span>
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {MEETING_TYPE_OPTIONS.map(({ value, label, icon: IconComponent }) => {
+                const isSelected = watchMeetingType === value;
+                return (
+                  <label
+                    key={value}
+                    className={`
+                      group relative flex items-center justify-center gap-1.5 rounded-xl border px-2
+                      h-[42px] sm:h-[46px]
+                      text-xs font-semibold transition-all duration-200 cursor-pointer select-none
+                      ${
+                        isSelected
+                          ? "border-cyan-400/80 bg-cyan-500/15 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.25)] ring-1 ring-cyan-400/40"
+                          : "border-border/70 dark:border-white/10 bg-card/60 dark:bg-white/[0.03] text-muted hover:text-foreground hover:border-white/20 hover:bg-card-hover"
+                      }
+                    `}
+                  >
+                    <input
+                      type="radio"
+                      value={value}
+                      {...register("meetingType")}
+                      className="sr-only"
+                    />
+                    <IconComponent
+                      className={`h-4 w-4 shrink-0 transition-colors ${
+                        isSelected ? "text-cyan-400" : "text-muted group-hover:text-foreground"
+                      }`}
+                    />
+                    <span className="truncate">{label}</span>
+                  </label>
+                );
+              })}
+            </div>
+            {errors.meetingType && (
+              <p className="text-xs text-danger flex items-center gap-1.5 mt-0.5 animate-fadeIn">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                <span>{errors.meetingType.message}</span>
+              </p>
             )}
           </div>
-          {selectedParticipantIds.length > 0 && <p className="text-xs text-slate-500">{t("selected", { n: selectedParticipantIds.length })}</p>}
-        </div>
-        <div>
-          <label className={labelClass}>{t("status")}</label>
-          <div className="mt-2 flex gap-3">
-            {(["SCHEDULED", "DRAFT"] as const).map((s) => <label key={s} className="flex items-center gap-2 text-sm text-slate-300"><input type="radio" value={s} {...register("status")} className="accent-primary-main" />{s.charAt(0) + s.slice(1).toLowerCase()}</label>)}
+
+          {/* Department Selection */}
+          <div className="col-span-1">
+            <Controller
+              name="departmentId"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  label={t("department")}
+                  placeholder={t("selectDepartment")}
+                  value={field.value || ""}
+                  onChange={(val) => field.onChange(val)}
+                  searchable
+                  options={[
+                    { value: "", label: t("allDepartments") },
+                    ...departments.map((dept) => ({
+                      value: dept.id,
+                      label: dept.name,
+                    })),
+                  ]}
+                  error={errors.departmentId?.message}
+                />
+              )}
+            />
+          </div>
+
+          {/* Date Selection */}
+          <div className="col-span-1">
+            <DatePicker
+              label={t("date")}
+              required
+              value={watchMeetingDate}
+              onChange={(newDate) =>
+                setValue("meetingDate", newDate, { shouldValidate: true })
+              }
+              error={errors.meetingDate?.message}
+            />
+          </div>
+
+          {/* Time Selection */}
+          <div className="col-span-1">
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Controller
+                  name="startTimeStr"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      label={t("startTime")}
+                      required
+                      options={TIME_OPTIONS}
+                      value={field.value}
+                      onChange={(val) => field.onChange(val)}
+                      error={errors.startTimeStr?.message}
+                    />
+                  )}
+                />
+              </div>
+
+              <div>
+                <Controller
+                  name="endTimeStr"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      label={t("endTime")}
+                      required
+                      options={TIME_OPTIONS}
+                      value={field.value}
+                      onChange={(val) => field.onChange(val)}
+                      error={errors.endTimeStr?.message}
+                    />
+                  )}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Meeting Link (ONLINE or HYBRID) */}
+          {(watchMeetingType === "ONLINE" || watchMeetingType === "HYBRID") && (
+            <div className={watchMeetingType === "HYBRID" ? "col-span-1" : "col-span-full"}>
+              <Input
+                label={t("formMeetingLink")}
+                required
+                type="url"
+                leftIcon={<Video className="h-4 w-4 text-cyan-400" />}
+                placeholder={t("linkPlaceholder")}
+                error={errors.meetingLink?.message}
+                {...register("meetingLink")}
+              />
+            </div>
+          )}
+
+          {/* Location (OFFLINE or HYBRID) */}
+          {(watchMeetingType === "OFFLINE" || watchMeetingType === "HYBRID") && (
+            <div className={watchMeetingType === "HYBRID" ? "col-span-1" : "col-span-full"}>
+              <Input
+                label={t("formLocation")}
+                type="text"
+                leftIcon={<MapPin className="h-4 w-4 text-cyan-400" />}
+                placeholder={t("locationPlaceholder")}
+                error={errors.location?.message}
+                {...register("location")}
+              />
+            </div>
+          )}
+
+          {/* Status */}
+          <div className="col-span-1 flex flex-col gap-1.5">
+            <label className="text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center gap-1">
+              <span>{t("formStatus")}</span>
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { value: "SCHEDULED", label: t("scheduled"), icon: Clock },
+                { value: "DRAFT", label: t("draft"), icon: FileEdit },
+              ].map(({ value, label, icon: IconComponent }) => {
+                const isSelected = watchStatus === value;
+                return (
+                  <label
+                    key={value}
+                    className={`
+                      group relative flex items-center justify-center gap-2 rounded-xl border px-3
+                      h-[42px] sm:h-[46px]
+                      text-xs font-semibold transition-all duration-200 cursor-pointer select-none
+                      ${
+                        isSelected
+                          ? "border-cyan-400/80 bg-cyan-500/15 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.25)] ring-1 ring-cyan-400/40"
+                          : "border-border/70 dark:border-white/10 bg-card/60 dark:bg-white/[0.03] text-muted hover:text-foreground hover:border-white/20 hover:bg-card-hover"
+                      }
+                    `}
+                  >
+                    <input
+                      type="radio"
+                      value={value}
+                      {...register("status")}
+                      className="sr-only"
+                    />
+                    <IconComponent
+                      className={`h-4 w-4 shrink-0 transition-colors ${
+                        isSelected ? "text-cyan-400" : "text-muted group-hover:text-foreground"
+                      }`}
+                    />
+                    <span className="truncate">{label}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Description */}
+          <div className="col-span-full">
+            <Textarea
+              label={t("formDescription")}
+              placeholder={t("descriptionPlaceholder")}
+              rows={2}
+              error={errors.description?.message}
+              {...register("description")}
+            />
+          </div>
+
+          {/* Participant Selection: Interns & Leaders */}
+          <div className="col-span-full space-y-3 rounded-xl sm:rounded-2xl border border-border/70 dark:border-white/10 bg-card/40 dark:bg-white/[0.02] p-2.5 sm:p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <label className="text-xs sm:text-sm font-semibold text-foreground/90 flex items-center gap-1.5">
+                <Users className="h-4 w-4 text-cyan-400" />
+                <span>{t("createModal.title")}</span>
+                <span className="text-danger">*</span>
+              </label>
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted pointer-events-none" />
+                <input
+                  type="text"
+                  value={participantSearch}
+                  onChange={(e) => setParticipantSearch(e.target.value)}
+                  placeholder={t("searchParticipants")}
+                  className="w-full rounded-xl border border-border/70 dark:border-white/10 bg-card/60 dark:bg-white/[0.03] pl-8 pr-3 py-1.5 text-xs text-foreground placeholder:text-muted outline-none focus:border-cyan-400/50"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Interns */}
+              <div>
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-xs font-semibold text-muted uppercase tracking-wider">
+                    {t("yourInterns")} ({filteredInterns.length})
+                  </span>
+                  {filteredInterns.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleSelectAllInterns}
+                      className="text-[11px] font-medium text-cyan-400 hover:text-cyan-300 transition"
+                    >
+                      {filteredInterns.every((i) => selectedParticipantIds.includes(i.userId))
+                        ? t("deselectAll")
+                        : t("selectAll")}
+                    </button>
+                  )}
+                </div>
+                <div className="h-44 space-y-1 overflow-y-auto overscroll-contain no-scrollbar pr-1 rounded-xl border border-border/60 dark:border-white/5 bg-card/40 dark:bg-white/[0.02] p-1.5 sm:p-2">
+                  {filteredInterns.length === 0 ? (
+                    <p className="p-3 text-center text-xs text-muted">0</p>
+                  ) : (
+                    filteredInterns.map((intern) => {
+                      const isSelected = selectedParticipantIds.includes(intern.userId);
+                      const isBusy = busyUserIds.has(intern.userId);
+                      return (
+                        <label
+                          key={intern.userId}
+                          onClick={() => toggleParticipant(intern.userId)}
+                          className={`
+                            flex cursor-pointer items-center justify-between rounded-lg px-2.5 py-1.5 transition text-xs select-none
+                            ${
+                              isSelected
+                                ? "bg-cyan-500/15 border border-cyan-500/30 text-cyan-300"
+                                : "hover:bg-card-hover border border-transparent text-foreground"
+                            }
+                          `}
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            {isSelected ? (
+                              <CheckSquare className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
+                            ) : (
+                              <Square className="h-3.5 w-3.5 shrink-0 text-muted" />
+                            )}
+                            <span className="truncate">{intern.fullName}</span>
+                          </div>
+                          {isBusy && (
+                            <span className="rounded bg-rose-500/15 border border-rose-500/30 px-1.5 py-0.5 text-[10px] font-medium text-rose-300 shrink-0">
+                              {t("busy")}
+                            </span>
+                          )}
+                        </label>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+
+              {/* Other Leaders */}
+              <div>
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-xs font-semibold text-muted uppercase tracking-wider">
+                    {t("otherLeaders")} ({filteredLeaders.length})
+                  </span>
+                  {filteredLeaders.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleSelectAllLeaders}
+                      className="text-[11px] font-medium text-cyan-400 hover:text-cyan-300 transition"
+                    >
+                      {filteredLeaders.every((l) => selectedParticipantIds.includes(l.id))
+                        ? t("deselectAll")
+                        : t("selectAll")}
+                    </button>
+                  )}
+                </div>
+                <div className="h-44 space-y-1 overflow-y-auto overscroll-contain no-scrollbar pr-1 rounded-xl border border-border/60 dark:border-white/5 bg-card/40 dark:bg-white/[0.02] p-1.5 sm:p-2">
+                  {filteredLeaders.length === 0 ? (
+                    <p className="p-3 text-center text-xs text-muted">0</p>
+                  ) : (
+                    filteredLeaders.map((leader) => {
+                      const isSelected = selectedParticipantIds.includes(leader.id);
+                      const isBusy = busyUserIds.has(leader.id);
+                      return (
+                        <label
+                          key={leader.id}
+                          onClick={() => toggleParticipant(leader.id)}
+                          className={`
+                            flex cursor-pointer items-center justify-between rounded-lg px-2.5 py-1.5 transition text-xs select-none
+                            ${
+                              isSelected
+                                ? "bg-cyan-500/15 border border-cyan-500/30 text-cyan-300"
+                                : "hover:bg-card-hover border border-transparent text-foreground"
+                            }
+                          `}
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            {isSelected ? (
+                              <CheckSquare className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
+                            ) : (
+                              <Square className="h-3.5 w-3.5 shrink-0 text-muted" />
+                            )}
+                            <span className="truncate">{leader.fullName}</span>
+                          </div>
+                          {isBusy && (
+                            <span className="rounded bg-rose-500/15 border border-rose-500/30 px-1.5 py-0.5 text-[10px] font-medium text-rose-300 shrink-0">
+                              {t("busy")}
+                            </span>
+                          )}
+                        </label>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-1 text-xs text-muted">
+              {selectedParticipantIds.length > 0 ? (
+                <span className="font-medium text-cyan-400">
+                  {t("selected", { n: selectedParticipantIds.length })}
+                </span>
+              ) : (
+                <span className="text-amber-400/80">{t("selectOneParticipant")}</span>
+              )}
+            </div>
           </div>
         </div>
-        <div className="flex justify-end gap-3 border-t border-white/10 pt-4">
-          <button type="button" onClick={onCloseModal} disabled={createMeeting.isPending} className="rounded-xl border border-white/10 bg-white/5 px-5 py-2 text-sm text-slate-300 transition hover:text-white disabled:opacity-50">{t("cancel")}</button>
-          <Button type="submit" disabled={createMeeting.isPending} variant="primary">{createMeeting.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : t("createMeeting")}</Button>
-        </div>
-      </form>
-    </div>
+
+      {/* Sticky Action Footer */}
+      <div className="sticky bottom-0 z-20 bg-[#0c1222]/95 backdrop-blur-xl pt-3 pb-1 -mb-1 border-t border-white/10 flex items-center justify-end gap-2.5 sm:gap-3">
+        <Button
+          type="button"
+          variant="secondary"
+          disabled={createMeeting.isPending}
+          onClick={onCloseModal}
+        >
+          {t("cancel")}
+        </Button>
+        <Button
+          type="submit"
+          variant="primary"
+          isLoading={createMeeting.isPending}
+          className="shadow-lg shadow-cyan-950/40"
+        >
+          {t("createMeeting")}
+        </Button>
+      </div>
+    </form>
   );
 }

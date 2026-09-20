@@ -141,7 +141,7 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
   }
 
   return (
-    <div className="space-y-5 px-1 py-3 max-h-[82vh] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+    <div className="space-y-6 px-0.5 sm:px-1 py-1">
       {/* Title + Status */}
       <div>
         <div className="flex items-start justify-between gap-3">
@@ -312,7 +312,7 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
           <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">
             {t("admin.meetings.participants")}
           </h4>
-          <div className="max-h-[180px] space-y-1 overflow-y-auto rounded-xl border border-border/60 dark:border-white/5 bg-card/40 dark:bg-white/[0.02] p-2 pr-1 scrollbar-thin scrollbar-thumb-white/10">
+          <div className="max-h-[180px] space-y-1 overflow-y-auto overscroll-contain no-scrollbar rounded-xl border border-border/60 dark:border-white/5 bg-card/40 dark:bg-white/[0.02] p-2">
             {meeting.participants.map((p) => {
               const { Icon, color } = INVITATION_ICON[p.invitationStatus] || INVITATION_ICON.PENDING;
               return (

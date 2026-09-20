@@ -313,14 +313,14 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
       {/* Sticky Header (Rule 44 Compliant: Icon + Heading inside a dedicated flex container) */}
-      <div className="sticky top-0 z-20 bg-[#0c1222]/95 backdrop-blur-xl pb-4 pt-1 -mt-1 border-b border-white/10 pr-10 sm:pr-12">
+      <div className="sticky top-0 z-20 bg-[#0c1222]/95 backdrop-blur-xl pb-3 sm:pb-4 pt-1 -mt-1 border-b border-white/10 pr-9 sm:pr-12">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.2)]">
+            <div className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.2)]">
               <Calendar className="h-5 w-5 shrink-0" />
             </div>
             <div className="min-w-0">
-              <h3 className="text-xl font-bold metal-text truncate">
+              <h3 className="text-lg sm:text-xl font-bold metal-text truncate">
                 {t("admin.meetings.scheduleMeeting")}
               </h3>
               <p className="text-xs text-muted mt-0.5 truncate">
@@ -352,7 +352,7 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
       </div>
 
       {/* Form Fields: Standard 2-Column Responsive Grid */}
-      <div className="py-4 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+      <div className="py-3 sm:py-4 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
         {/* Title */}
         <div className="col-span-full">
           <Input
@@ -599,8 +599,8 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
 
         {/* Leader Invitation (Only when Visibility === PRIVATE) */}
         {watchVisibility === "PRIVATE" && (
-          <div className="col-span-full rounded-2xl border border-white/10 bg-card/30 dark:bg-white/[0.02] p-4 shadow-glass backdrop-blur-md">
-            <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="col-span-full rounded-xl sm:rounded-2xl border border-white/10 bg-card/30 dark:bg-white/[0.02] p-2.5 sm:p-4 shadow-glass backdrop-blur-md">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <label className="text-xs sm:text-sm font-semibold text-foreground/90 select-none flex items-center gap-2">
                 <Users className="h-4 w-4 shrink-0 text-cyan-400" />
                 <span>{t("admin.meetings.inviteLeaders")}</span>
@@ -632,7 +632,7 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
 
             {/* Quick search leaders */}
             {leaders.length > 5 && (
-              <div className="relative mt-3">
+              <div className="relative mt-2.5 sm:mt-3">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted pointer-events-none" />
                 <input
                   type="text"
@@ -653,7 +653,7 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
                 {t("admin.meetings.noLeadersAvailable")}
               </p>
             ) : (
-              <div className="mt-3 max-h-44 space-y-1.5 overflow-y-auto rounded-xl border border-white/10 bg-card/60 dark:bg-white/[0.02] p-2 pr-1 custom-scrollbar">
+              <div className="mt-2.5 sm:mt-3 max-h-44 space-y-1.5 overflow-y-auto overscroll-contain rounded-xl border border-white/10 bg-card/60 dark:bg-white/[0.02] p-1.5 sm:p-2 no-scrollbar">
                 {filteredLeaders.map((leader) => {
                   const isBusy = busyUserIds.has(leader.id);
                   const isSelected = selectedLeaderIds.includes(leader.id);
@@ -713,7 +713,7 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
       </div>
 
       {/* Sticky Action Footer (Always pinned at bottom of modal viewport) */}
-      <div className="sticky bottom-0 z-20 bg-[#0c1222]/95 backdrop-blur-xl pt-3.5 pb-1 -mb-1 border-t border-white/10 flex items-center justify-end gap-3">
+      <div className="sticky bottom-0 z-20 bg-[#0c1222]/95 backdrop-blur-xl pt-3 pb-1 -mb-1 border-t border-white/10 flex items-center justify-end gap-2.5 sm:gap-3">
         <Button
           type="button"
           variant="secondary"

@@ -12,23 +12,38 @@ export default function MeetingHeader() {
   return (
     <Modal>
       <MetalCard>
-        <div className="rounded-3xl p-6">
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="p-5 sm:p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-2xl font-bold metal-text">{t("title")}</h2>
-              <p className="mt-1 text-sm text-slate-500">{t("description")}</p>
+              <div className="flex items-center gap-2.5">
+                <Calendar className="h-6 w-6 shrink-0 text-cyan-400" />
+                <h2 className="text-2xl font-bold metal-text">
+                  {t("title")}
+                </h2>
+              </div>
+              <p className="mt-1 text-sm text-muted">
+                {t("description")}
+              </p>
             </div>
+
             <div className="flex items-center gap-3">
               <Modal.Open opens="create-meeting">
-                <button className="flex items-center gap-2 rounded-xl border border-primary-main/30 bg-primary-main/10 px-4 py-2.5 text-sm font-medium text-primary-light transition hover:border-primary-main/50 hover:bg-primary-main/20">
-                  <Calendar className="h-4 w-4" /><Plus className="h-3.5 w-3.5" />{t("scheduleMeeting")}
+                <button
+                  type="button"
+                  className="flex items-center gap-2 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2.5 text-sm font-medium text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20 active:scale-95 shadow-sm"
+                >
+                  <Plus className="h-4 w-4 shrink-0" />
+                  <span>{t("scheduleMeeting")}</span>
                 </button>
               </Modal.Open>
             </div>
           </div>
         </div>
       </MetalCard>
-      <Modal.Window name="create-meeting" size="sm"><CreateMeetingModal /></Modal.Window>
+
+      <Modal.Window name="create-meeting" size="md">
+        <CreateMeetingModal />
+      </Modal.Window>
     </Modal>
   );
 }
