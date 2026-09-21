@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { X, FileText, Link, Video, Loader2, Trash2, AlertTriangle, Paperclip, Download, AlertCircle, Clock, CalendarCheck } from "lucide-react";
+import { X, FileText, Link as LinkIcon, Video, Loader2, Trash2, AlertTriangle, Paperclip, Download, AlertCircle, Clock, CalendarCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useUpdateDailyReport } from "@/hooks/daily-report/useUpdateDailyReport";
 import { useDeleteDailyReport } from "@/hooks/daily-report/useDeleteDailyReport";
@@ -87,7 +87,7 @@ export default function EditDailyReportModal({ report, onClose }: Props) {
     if (isSubmitting) return;
 
     if (!content.trim()) {
-      toast.error("Vui lòng nhập nội dung công việc đã làm");
+      toast.error(tm("requiredContentError"));
       return;
     }
 
@@ -96,16 +96,16 @@ export default function EditDailyReportModal({ report, onClose }: Props) {
       // 1. Upload new attachments to R2 if any
       const uploadedAttachments: CreateReportAttachmentPayload[] = [];
       if (newAttachmentFiles.length > 0) {
-        setUploadStatusText(`Đang tải lên ${newAttachmentFiles.length} tệp đính kèm mới vào R2...`);
+        setUploadStatusText(tm("uploadingAttachments", { count: newAttachmentFiles.length }));
         for (let i = 0; i < newAttachmentFiles.length; i++) {
           const file = newAttachmentFiles[i];
-          setUploadStatusText(`Đang tải (${i + 1}/${newAttachmentFiles.length}): ${file.name}...`);
+          setUploadStatusText(tm("uploadingAttachmentItem", { current: i + 1, total: newAttachmentFiles.length, name: file.name }));
           const uploaded = await uploadFile(file);
           uploadedAttachments.push(uploaded);
         }
       }
 
-      setUploadStatusText("Đang cập nhật báo cáo ngày...");
+      setUploadStatusText(tm("updatingReport"));
 
       // 2. Update report data
       await updateDailyReport.mutateAsync({
@@ -123,7 +123,7 @@ export default function EditDailyReportModal({ report, onClose }: Props) {
 
       // 3. Upload new video file if provided
       if (videoFile) {
-        setUploadStatusText("Đang tải video demo...");
+        setUploadStatusText(tm("uploadingVideo"));
         await uploadVideo.mutateAsync({ id: report.id, file: videoFile });
         setVideoFile(null);
       }
@@ -132,7 +132,7 @@ export default function EditDailyReportModal({ report, onClose }: Props) {
       onClose();
     } catch (err: unknown) {
       console.error(err);
-      const msg = err instanceof Error ? err.message : "Có lỗi xảy ra khi cập nhật báo cáo ngày";
+      const msg = err instanceof Error ? err.message : tm("updateError");
       toast.error(msg);
     } finally {
       setIsSubmitting(false);
@@ -145,65 +145,61 @@ export default function EditDailyReportModal({ report, onClose }: Props) {
     setIsSubmitting(true);
     try {
       await deleteDailyReport.mutateAsync(report.id);
-      toast.success("Báo cáo ngày đã được xóa");
+      toast.success(tm("deleteSuccess"));
       onClose();
     } catch (err: unknown) {
       console.error(err);
-      toast.error("Không thể xóa báo cáo ngày");
+      const msg = err instanceof Error ? err.message : tm("deleteError");
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }
   }
 
-  const isPending =
-    isSubmitting ||
-    updateDailyReport.isPending ||
-    deleteDailyReport.isPending ||
-    uploadVideo.isPending ||
-    deleteAttachment.isPending;
+  const isPending = isSubmitting || updateDailyReport.isPending || deleteDailyReport.isPending || uploadVideo.isPending;
 
   return createPortal(
     <div
-      onClick={() => {
-        if (showDeleteConfirm) setShowDeleteConfirm(false);
-        else onClose();
-      }}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+      onClick={onClose}
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fadeIn"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden rounded-[32px] border border-white/10 bg-[#0d1322] shadow-[0_25px_80px_rgba(0,0,0,0.7)] text-slate-100"
+        className="relative w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden rounded-[28px] border border-white/10 bg-[#0c1222]/95 shadow-[0_25px_80px_rgba(0,0,0,0.7)] text-slate-100"
       >
         <div className="absolute -left-24 -top-24 h-64 w-64 rounded-full bg-cyan-400/10 blur-3xl pointer-events-none" />
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/80 to-transparent" />
 
-        <div className="flex items-start justify-between border-b border-white/10 p-6">
+        {/* Sticky Header with pr-10 sm:pr-12 against close button collision */}
+        <div className="sticky top-0 z-20 bg-[#0c1222]/95 backdrop-blur-xl border-b border-white/10 p-5 sm:p-6 pr-12">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-cyan-500/20 bg-cyan-500/10 text-cyan-400">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-cyan-500/20 bg-cyan-500/10 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.2)]">
               <FileText className="h-5 w-5" />
             </div>
-            <div>
+            <div className="min-w-0">
               <h2 className="text-xl font-bold tracking-tight">
                 <span className="metal-text">{tm("title")}</span>
               </h2>
-              <p className="mt-0.5 text-xs text-slate-400">{tm("description")}</p>
+              <p className="mt-0.5 text-xs text-muted truncate">{tm("description")}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 transition hover:bg-white/10"
+            aria-label="Close"
+            className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 transition hover:bg-white/10 hover:border-white/20 active:scale-95 cursor-pointer"
           >
             <X className="h-4 w-4 text-slate-400 hover:text-white" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5 custom-scrollbar">
-          {/* Content */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 custom-scrollbar">
+          {/* Work Content */}
           <div>
-            <label className="mb-1.5 flex items-center gap-2 text-sm font-semibold text-slate-200">
-              <FileText className="h-4 w-4 text-cyan-400" />
-              {tm("reportContent")} <span className="text-rose-400">*</span>
+            <label className="mb-1.5 flex items-center gap-1.5 text-xs sm:text-sm font-medium text-foreground/90 select-none">
+              <FileText className="h-4 w-4 text-cyan-400 shrink-0" />
+              <span>{tm("reportContent")}</span>
+              <span className="text-rose-400 font-bold">*</span>
             </label>
             <textarea
               value={content}
@@ -212,48 +208,48 @@ export default function EditDailyReportModal({ report, onClose }: Props) {
               rows={4}
               required
               disabled={isPending}
-              className="w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-cyan-400/50 disabled:opacity-50 resize-y"
+              className="w-full rounded-xl border border-white/10 bg-slate-950/60 p-3.5 text-sm text-white placeholder:text-muted outline-none transition focus:border-cyan-400/50 disabled:opacity-50 resize-y custom-scrollbar"
             />
           </div>
 
-          {/* Blockers */}
+          {/* Blockers & Challenges */}
           <div>
-            <label className="mb-1.5 flex items-center gap-2 text-sm font-semibold text-slate-200">
-              <AlertCircle className="h-4 w-4 text-amber-400" />
-              Khó khăn / Vấn đề gặp phải
+            <label className="mb-1.5 flex items-center gap-1.5 text-xs sm:text-sm font-medium text-foreground/90 select-none">
+              <AlertCircle className="h-4 w-4 text-amber-400 shrink-0" />
+              <span>{tm("blockersLabel")}</span>
             </label>
             <textarea
               value={blockers}
               onChange={(e) => setBlockers(e.target.value)}
-              placeholder="Vấn đề phát sinh, vướng mắc cần giải quyết..."
+              placeholder={tm("blockersPlaceholder")}
               rows={2}
               disabled={isPending}
-              className="w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-amber-400/50 disabled:opacity-50 resize-y"
+              className="w-full rounded-xl border border-white/10 bg-slate-950/60 p-3.5 text-sm text-white placeholder:text-muted outline-none transition focus:border-amber-400/50 disabled:opacity-50 resize-y custom-scrollbar"
             />
           </div>
 
-          {/* Next Plan */}
+          {/* Next Day Plan */}
           <div>
-            <label className="mb-1.5 flex items-center gap-2 text-sm font-semibold text-slate-200">
-              <CalendarCheck className="h-4 w-4 text-emerald-400" />
-              Kế hoạch công việc ngày mai
+            <label className="mb-1.5 flex items-center gap-1.5 text-xs sm:text-sm font-medium text-foreground/90 select-none">
+              <CalendarCheck className="h-4 w-4 text-emerald-400 shrink-0" />
+              <span>{tm("nextPlanLabel")}</span>
             </label>
             <textarea
               value={nextPlan}
               onChange={(e) => setNextPlan(e.target.value)}
-              placeholder="Kế hoạch tiếp theo..."
+              placeholder={tm("nextPlanPlaceholder")}
               rows={2}
               disabled={isPending}
-              className="w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-emerald-400/50 disabled:opacity-50 resize-y"
+              className="w-full rounded-xl border border-white/10 bg-slate-950/60 p-3.5 text-sm text-white placeholder:text-muted outline-none transition focus:border-emerald-400/50 disabled:opacity-50 resize-y custom-scrollbar"
             />
           </div>
 
-          {/* Hours Worked & PR Link */}
+          {/* Hours Worked & PR Link Grid (Uniform Field Height: h-[42px] sm:h-[46px]) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="mb-1.5 flex items-center gap-2 text-sm font-semibold text-slate-200">
-                <Clock className="h-4 w-4 text-cyan-400" />
-                Số giờ làm việc (giờ)
+              <label className="mb-1.5 flex items-center gap-1.5 text-xs sm:text-sm font-medium text-foreground/90 select-none">
+                <Clock className="h-4 w-4 text-cyan-400 shrink-0" />
+                <span>{tm("hoursWorkedLabel")}</span>
               </label>
               <input
                 type="number"
@@ -262,15 +258,16 @@ export default function EditDailyReportModal({ report, onClose }: Props) {
                 step={0.5}
                 value={hoursWorked}
                 onChange={(e) => setHoursWorked(Number(e.target.value))}
+                placeholder={tm("hoursWorkedPlaceholder")}
                 disabled={isPending}
-                className="w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-cyan-400/50 disabled:opacity-50 font-mono"
+                className="h-[42px] sm:h-[46px] w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 text-sm text-white placeholder:text-muted outline-none transition focus:border-cyan-400/50 disabled:opacity-50 font-mono"
               />
             </div>
 
             <div>
-              <label className="mb-1.5 flex items-center gap-2 text-sm font-semibold text-slate-200">
-                <Link className="h-4 w-4 text-cyan-400" />
-                {tm("prLink")}
+              <label className="mb-1.5 flex items-center gap-1.5 text-xs sm:text-sm font-medium text-foreground/90 select-none">
+                <LinkIcon className="h-4 w-4 text-cyan-400 shrink-0" />
+                <span>{tm("prLink")}</span>
               </label>
               <input
                 type="url"
@@ -278,16 +275,16 @@ export default function EditDailyReportModal({ report, onClose }: Props) {
                 onChange={(e) => setPrLink(e.target.value)}
                 placeholder={tm("prPlaceholder")}
                 disabled={isPending}
-                className="w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-cyan-400/50 disabled:opacity-50"
+                className="h-[42px] sm:h-[46px] w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 text-sm text-white placeholder:text-muted outline-none transition focus:border-cyan-400/50 disabled:opacity-50"
               />
             </div>
           </div>
 
           {/* Video Demo */}
           <div>
-            <label className="mb-1.5 flex items-center gap-2 text-sm font-semibold text-slate-200">
-              <Video className="h-4 w-4 text-cyan-400" />
-              {tm("videoDemo")}
+            <label className="mb-1.5 flex items-center gap-1.5 text-xs sm:text-sm font-medium text-foreground/90 select-none">
+              <Video className="h-4 w-4 text-cyan-400 shrink-0" />
+              <span>{tm("videoDemo")}</span>
             </label>
             <div className="space-y-2">
               <input
@@ -296,9 +293,9 @@ export default function EditDailyReportModal({ report, onClose }: Props) {
                 onChange={(e) => setVideoLink(e.target.value)}
                 placeholder={tm("videoPlaceholder")}
                 disabled={isPending || !!videoFile}
-                className="w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-cyan-400/50 disabled:opacity-50"
+                className="h-[42px] sm:h-[46px] w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 text-sm text-white placeholder:text-muted outline-none transition focus:border-cyan-400/50 disabled:opacity-50"
               />
-              <div className="flex items-center gap-2 text-xs text-slate-500">
+              <div className="flex items-center gap-2 text-xs text-muted">
                 <span className="h-px flex-1 bg-white/5" />
                 <span>{tc("or")}</span>
                 <span className="h-px flex-1 bg-white/5" />
@@ -310,9 +307,9 @@ export default function EditDailyReportModal({ report, onClose }: Props) {
                     type="button"
                     onClick={() => setVideoFile(null)}
                     disabled={isPending}
-                    className="text-xs text-slate-400 hover:text-red-400"
+                    className="text-xs text-slate-400 hover:text-rose-400 transition cursor-pointer"
                   >
-                    {tc("remove")}
+                    {tm("remove")}
                   </button>
                 </div>
               ) : (
@@ -321,66 +318,83 @@ export default function EditDailyReportModal({ report, onClose }: Props) {
                   accept="video/mp4,video/webm,video/quicktime,video/x-matroska,video/x-msvideo,.mp4,.webm,.mov,.mkv,.avi"
                   disabled={isPending || !!videoLink.trim()}
                   onChange={(e) => handleVideoFileChange(e.target.files?.[0])}
-                  className="w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-2.5 text-sm text-slate-400 file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 file:cursor-pointer outline-none disabled:opacity-50"
+                  className="h-[42px] sm:h-[46px] w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-1.5 text-sm text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 file:cursor-pointer outline-none disabled:opacity-50"
                 />
               )}
-              <p className="text-[11px] text-slate-500">{tc("videoFileHint", { limit: UPLOAD_LIMITS_MB.reportVideo })}</p>
+              <p className="text-[11px] text-muted">{tc("videoFileHint", { limit: UPLOAD_LIMITS_MB.reportVideo })}</p>
             </div>
           </div>
 
-          {/* Attachments */}
+          {/* Existing & New Attachments */}
           <div>
-            <label className="mb-1.5 flex items-center gap-2 text-sm font-semibold text-slate-200">
-              <Paperclip className="h-4 w-4 text-cyan-400" />
-              {tm("attachments")}
+            <label className="mb-1.5 flex items-center gap-1.5 text-xs sm:text-sm font-medium text-foreground/90 select-none">
+              <Paperclip className="h-4 w-4 text-cyan-400 shrink-0" />
+              <span>{tm("attachments")}</span>
             </label>
             <div className="space-y-2">
-              {/* Existing attachments */}
-              {existingAttachments.map((att) => (
-                <div
-                  key={att.id}
-                  className="flex items-center justify-between rounded-xl border border-white/10 bg-slate-950/60 px-4 py-2"
-                >
-                  <a
-                    href={att.fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-slate-300 hover:text-cyan-400 truncate flex items-center gap-2"
-                  >
-                    <Download className="h-3.5 w-3.5 shrink-0" />
-                    {att.fileName}
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => deleteAttachment.mutate({ reportId: report.id, attachmentId: att.id })}
-                    disabled={isPending}
-                    className="text-xs text-slate-400 hover:text-red-400 ml-2 shrink-0 transition"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
+              {/* Existing Attachments */}
+              {existingAttachments.length > 0 && (
+                <div className="space-y-1.5">
+                  {existingAttachments.map((att) => (
+                    <div
+                      key={att.id}
+                      className="flex items-center justify-between rounded-xl border border-white/10 bg-slate-950/60 px-4 py-2"
+                    >
+                      <span className="text-sm text-slate-300 truncate">{att.fileName}</span>
+                      <div className="flex items-center gap-2 ml-2 shrink-0">
+                        {att.fileSize > 0 && (
+                          <span className="text-xs text-muted font-mono">
+                            {(att.fileSize / 1024).toFixed(0)} KB
+                          </span>
+                        )}
+                        <a
+                          href={att.fileUrl}
+                          download
+                          className="text-slate-400 hover:text-cyan-400 transition"
+                          title="Download"
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => deleteAttachment.mutate(att.id)}
+                          disabled={isPending || deleteAttachment.isPending}
+                          className="text-xs text-slate-400 hover:text-rose-400 transition cursor-pointer"
+                        >
+                          {tm("remove")}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
 
-              {/* New attachment files */}
-              {newAttachmentFiles.map((file, i) => (
-                <div
-                  key={`new-${file.name}-${i}`}
-                  className="flex items-center justify-between rounded-xl border border-emerald-400/20 bg-emerald-500/5 px-4 py-2"
-                >
-                  <span className="text-sm text-emerald-300 truncate">{file.name} {tm("newLabel")}</span>
-                  <span className="text-xs text-slate-500 font-mono mx-2">
-                    {(file.size / 1024).toFixed(0)} KB
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setNewAttachmentFiles((prev) => prev.filter((_, idx) => idx !== i))}
-                    disabled={isPending}
-                    className="text-xs text-slate-400 hover:text-red-400 ml-2 shrink-0"
-                  >
-                    {tm("remove")}
-                  </button>
+              {/* Newly Selected Files */}
+              {newAttachmentFiles.length > 0 && (
+                <div className="space-y-1.5">
+                  {newAttachmentFiles.map((file, i) => (
+                    <div
+                      key={`${file.name}-${i}`}
+                      className="flex items-center justify-between rounded-xl border border-cyan-400/20 bg-cyan-500/5 px-4 py-2"
+                    >
+                      <span className="text-sm text-cyan-200 truncate">
+                        {file.name} <span className="text-xs text-cyan-400/70">{tm("newLabel")}</span>
+                      </span>
+                      <span className="text-xs text-muted font-mono mx-2">
+                        {(file.size / 1024).toFixed(0)} KB
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setNewAttachmentFiles((prev) => prev.filter((_, idx) => idx !== i))}
+                        disabled={isPending}
+                        className="text-xs text-slate-400 hover:text-rose-400 ml-2 shrink-0 transition cursor-pointer"
+                      >
+                        {tm("remove")}
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
 
               <input
                 type="file"
@@ -392,13 +406,44 @@ export default function EditDailyReportModal({ report, onClose }: Props) {
                   handleAttachmentFilesChange(files);
                   e.target.value = "";
                 }}
-                className="w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-2.5 text-sm text-slate-400 file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 file:cursor-pointer outline-none disabled:opacity-50"
+                className="h-[42px] sm:h-[46px] w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-1.5 text-sm text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 file:cursor-pointer outline-none disabled:opacity-50"
               />
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[11px] text-muted">
                 {tc("attachmentsHint", { max: MAX_REPORT_ATTACHMENTS, limit: UPLOAD_LIMITS_MB.reportAttachment })}
               </p>
             </div>
           </div>
+
+          {/* Delete Confirm Box */}
+          {showDeleteConfirm && (
+            <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 space-y-3 animate-fadeIn">
+              <div className="flex items-start gap-2.5">
+                <AlertTriangle className="h-5 w-5 text-rose-400 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-sm font-bold text-rose-200">{tm("deleteConfirmTitle")}</h4>
+                  <p className="text-xs text-rose-300/80 mt-0.5">{tm("deleteConfirmDesc")}</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteConfirm(false)}
+                  disabled={isPending}
+                  className="px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 text-xs text-slate-300 hover:bg-white/10 transition cursor-pointer"
+                >
+                  {tm("cancel")}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={isPending}
+                  className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-xs font-medium text-white transition active:scale-95 cursor-pointer shadow-sm"
+                >
+                  {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : tm("delete")}
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Footer Actions */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-white/10">
@@ -407,16 +452,18 @@ export default function EditDailyReportModal({ report, onClose }: Props) {
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 <span>{uploadStatusText}</span>
               </div>
-            ) : (
+            ) : !showDeleteConfirm ? (
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(true)}
                 disabled={isPending}
-                className="flex items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2 text-xs font-semibold text-rose-400 transition hover:bg-rose-500/20 disabled:opacity-50 mr-auto"
+                className="inline-flex items-center gap-1.5 text-xs text-rose-400 hover:text-rose-300 transition cursor-pointer mr-auto"
               >
-                {deleteDailyReport.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-                {tm("delete")}
+                <Trash2 className="h-3.5 w-3.5 shrink-0" />
+                <span>{tm("delete")}</span>
               </button>
+            ) : (
+              <div />
             )}
 
             <div className="flex items-center gap-3 ml-auto">
@@ -424,62 +471,21 @@ export default function EditDailyReportModal({ report, onClose }: Props) {
                 type="button"
                 onClick={onClose}
                 disabled={isPending}
-                className="rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm text-slate-300 transition hover:text-white disabled:opacity-50"
+                className="rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm text-slate-300 transition hover:text-white hover:bg-white/10 active:scale-95 disabled:opacity-50 cursor-pointer"
               >
                 {tm("cancel")}
               </button>
               <button
                 type="submit"
                 disabled={isPending}
-                className="flex items-center gap-2 rounded-xl bg-cyan-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-cyan-500 disabled:opacity-50 cursor-pointer shadow-lg shadow-cyan-600/20"
+                className="flex items-center gap-2 rounded-xl bg-cyan-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-cyan-500 active:scale-95 disabled:opacity-50 cursor-pointer shadow-lg shadow-cyan-600/20"
               >
                 {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
-                {tm("update")}
+                <span>{tm("update")}</span>
               </button>
             </div>
           </div>
         </form>
-
-        {showDeleteConfirm && (
-          <div
-            onClick={() => setShowDeleteConfirm(false)}
-            className="absolute inset-0 z-10 flex items-center justify-center rounded-[32px] bg-black/90 backdrop-blur-sm p-6"
-          >
-            <div
-              onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-sm rounded-2xl border border-rose-500/20 bg-[#0f1520] p-6 shadow-[0_25px_50px_rgba(0,0,0,0.8)]"
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-500/10">
-                  <AlertTriangle className="h-5 w-5 text-rose-400" />
-                </div>
-                <div>
-                  <h3 className="text-base font-semibold text-white">{tm("deleteConfirmTitle")}</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">{tm("deleteConfirmDesc")}</p>
-                </div>
-              </div>
-              <div className="flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowDeleteConfirm(false)}
-                  disabled={isPending}
-                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-slate-300 transition hover:text-white disabled:opacity-50"
-                >
-                  {tm("cancel")}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDelete}
-                  disabled={isPending}
-                  className="flex items-center gap-1.5 rounded-xl bg-rose-600 px-4 py-2 text-xs font-medium text-white transition hover:bg-rose-500 disabled:opacity-50"
-                >
-                  {deleteDailyReport.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-                  {tm("delete")}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>,
     document.body,

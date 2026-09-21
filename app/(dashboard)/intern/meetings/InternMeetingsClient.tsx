@@ -9,8 +9,10 @@ import UpcomingMeetingsCard from "./UpcomingMeetingsCard";
 import RecentNotifications from "@/components/meetings/RecentNotifications";
 import MeetingDetailModal from "./MeetingDetailModal";
 import Modal from "@/components/ui/Modal";
+import { useAuth } from "@/hooks/auth/useAuth";
 
 export default function InternMeetingsClient() {
+  const { state } = useAuth();
   const [selectedMeetingId, setSelectedMeetingId] = useState<string | null>(null);
   const openRef = useRef<HTMLButtonElement>(null);
 
@@ -22,25 +24,40 @@ export default function InternMeetingsClient() {
   return (
     <Modal>
       <div className="space-y-6">
+        {/* Header */}
         <MeetingHeader />
+
+        {/* Full-width Stat Cards (Rule 51: min 2 cols mobile, 4 cols desktop) */}
+        <MeetingStats />
+
+        {/* Main Dashboard: Calendar (2 cols) + Borderless Right Sidebar (1 col, Rule 46) */}
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-          <MeetingStats />
-          <UpcomingMeetingsCard onMeetingClick={handleMeetingClick} />
-          <RecentNotifications />
-        </div>
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+          {/* Main Calendar View */}
           <div className="xl:col-span-2">
-            <MeetingCalendar onMeetingClick={handleMeetingClick} />
+            <MeetingCalendar
+              onMeetingClick={handleMeetingClick}
+              currentUserId={state.user?.id}
+            />
           </div>
-          <div>
+
+          {/* Borderless Right Panel (Rule 46) */}
+          <div className="space-y-6 xl:col-span-1">
+            <UpcomingMeetingsCard onMeetingClick={handleMeetingClick} />
             <WeekMeetingsCard onMeetingClick={handleMeetingClick} />
+            <RecentNotifications />
           </div>
         </div>
+
+        {/* Hidden trigger for Modal.Window */}
         <Modal.Open opens="meeting-detail">
-          <button ref={openRef} className="hidden" />
+          <button ref={openRef} className="hidden" aria-hidden="true" />
         </Modal.Open>
+
         <Modal.Window name="meeting-detail" size="md">
-          <MeetingDetailModal meetingId={selectedMeetingId ?? ""} onCloseModal={() => setSelectedMeetingId(null)} />
+          <MeetingDetailModal
+            meetingId={selectedMeetingId ?? ""}
+            onCloseModal={() => setSelectedMeetingId(null)}
+          />
         </Modal.Window>
       </div>
     </Modal>

@@ -1,12 +1,29 @@
 "use client";
 
+import { Calendar } from "lucide-react";
 import { useTranslations } from "next-intl";
+import MetalCard from "@/components/ui/MetalCard";
 
 export default function MeetingHeader() {
   const t = useTranslations("intern.meetings");
+
   return (
-    <div className="rounded-3xl border border-white/10 bg-gradient-to-b from-[#101827] via-[#1a2235] to-[#0f172a] p-6">
-      <div><h2 className="text-2xl font-bold metal-text">{t("title")}</h2><p className="mt-1 text-sm text-slate-500">{t("description")}</p></div>
-    </div>
+    <MetalCard>
+      <div className="p-5 sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <Calendar className="h-6 w-6 shrink-0 text-cyan-400" />
+              <h2 className="text-2xl font-bold metal-text">
+                {t("title")}
+              </h2>
+            </div>
+            <p className="mt-1 text-sm text-muted">
+              {t("description")}
+            </p>
+          </div>
+        </div>
+      </div>
+    </MetalCard>
   );
 }

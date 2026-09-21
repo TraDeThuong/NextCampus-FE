@@ -1,40 +1,95 @@
 "use client";
 
+import { useMemo } from "react";
 import { Calendar, Clock, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
 import { useMeetings } from "@/hooks/meeting/useMeetings";
+import { useMyApprovedAbsences } from "@/hooks/meeting/useMyApprovedAbsences";
 
 export default function MeetingStats() {
   const t = useTranslations("intern.meetings");
-  const { data: totalData, isPending: t1, isError: e1 } = useMeetings({ limit: 1 });
-  const { data: sData, isPending: t2 } = useMeetings({ status: "SCHEDULED", limit: 1 });
-  const { data: oData, isPending: t3 } = useMeetings({ status: "ONGOING", limit: 1 });
-  const { data: cData, isPending: t4 } = useMeetings({ status: "COMPLETED", limit: 1 });
-  const isPending = t1 || t2 || t3 || t4;
+  const { data, isPending, isError } = useMeetings({ limit: 100, sortBy: "startTime", order: "asc" });
+  const { data: excusedIds } = useMyApprovedAbsences();
+
+  const counts = useMemo(() => {
+    const meetings = data?.data ?? [];
+    const excused = excusedIds ?? new Set<string>();
+    const active = meetings.filter((m) => !excused.has(m.id));
+    return {
+      total: active.length,
+      scheduled: active.filter((m) => m.status === "SCHEDULED").length,
+      completed: active.filter((m) => m.status === "COMPLETED").length,
+      cancelled: active.filter((m) => m.status === "CANCELLED").length,
+    };
+  }, [data, excusedIds]);
 
   const cards = [
-    { title: t("total"), value: totalData?.meta?.total ?? 0, icon: Calendar, iconBg: "from-sky-500/20 to-cyan-400/10" },
-    { title: t("scheduled"), value: sData?.meta?.total ?? 0, icon: Clock, iconBg: "from-blue-500/20 to-indigo-400/10" },
-    { title: t("ongoing"), value: oData?.meta?.total ?? 0, icon: CheckCircle2, iconBg: "from-emerald-500/20 to-green-400/10" },
-    { title: t("completed"), value: cData?.meta?.total ?? 0, icon: XCircle, iconBg: "from-violet-500/20 to-purple-400/10" },
+    {
+      title: t("total"),
+      value: counts.total,
+      icon: Calendar,
+      iconBg: "from-sky-500/25 to-cyan-400/10",
+      accent: "from-sky-400/70",
+    },
+    {
+      title: t("scheduled"),
+      value: counts.scheduled,
+      icon: Clock,
+      iconBg: "from-blue-500/25 to-indigo-400/10",
+      accent: "from-blue-400/70",
+    },
+    {
+      title: t("completed"),
+      value: counts.completed,
+      icon: CheckCircle2,
+      iconBg: "from-emerald-500/25 to-teal-400/10",
+      accent: "from-emerald-400/70",
+    },
+    {
+      title: t("cancelled"),
+      value: counts.cancelled,
+      icon: XCircle,
+      iconBg: "from-rose-500/25 to-red-400/10",
+      accent: "from-rose-400/70",
+    },
   ];
 
-  if (e1) return <div className="flex items-center gap-3 rounded-3xl border border-red-500/20 bg-red-500/5 p-6"><AlertTriangle className="h-5 w-5 text-red-400" /><p className="text-sm text-red-300">{t("statsError")}</p></div>;
-  if (isPending) return <div className="flex items-center justify-center py-12"><Spinner size="lg" /></div>;
+  if (isError) {
+    return (
+      <div className="flex items-center gap-3 rounded-2xl border border-red-500/20 bg-red-500/5 p-5 backdrop-blur-xl">
+        <AlertTriangle className="h-5 w-5 shrink-0 text-red-400" />
+        <p className="text-sm text-red-300">{t("statsError")}</p>
+      </div>
+    );
+  }
+
+  if (isPending) {
+    return (
+      <div className="flex items-center justify-center py-10">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-5">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:grid-cols-4">
       {cards.map((card) => {
         const Icon = card.icon;
         return (
-          <MetalCard key={card.title} className="p-4 sm:p-5 lg:p-6">
+          <MetalCard key={card.title} className="group p-4 sm:p-5 lg:p-6">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] sm:text-xs font-medium uppercase tracking-[0.1em] sm:tracking-[0.2em] text-muted truncate">{card.title}</p>
-                <h3 className="chrome-text mt-2 sm:mt-4 text-3xl sm:text-4xl lg:text-5xl font-bold leading-none">{card.value}</h3>
-                <div className="mt-3 sm:mt-4 h-[2px] w-10 sm:w-16 rounded-full bg-gradient-to-r from-primary-light/70 to-transparent" />
+                <p className="text-[11px] sm:text-xs font-medium uppercase tracking-[0.1em] sm:tracking-[0.2em] text-muted truncate">
+                  {card.title}
+                </p>
+                <h3 className="chrome-text mt-2 sm:mt-4 text-2xl sm:text-4xl lg:text-5xl font-bold leading-none">
+                  {card.value}
+                </h3>
+                <div
+                  className={`mt-3 sm:mt-4 h-[2px] w-10 sm:w-16 rounded-full bg-gradient-to-r ${card.accent} to-transparent`}
+                />
               </div>
               <div
                 className={`
