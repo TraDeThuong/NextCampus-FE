@@ -83,6 +83,130 @@
         "confirmBtn": "Reset to Defaults",
         "cancelBtn": "Cancel",
         "resetSuccessToast": "All parameters have been reset to factory defaults!"
+      },
+      "tabs": {
+        "system": "System Parameters",
+        "maintenance": "System Maintenance",
+        "apiKeys": "API Keys",
+        "webhooks": "Webhooks",
+        "cronJobs": "Scheduled Tasks"
+      },
+      "maintenance": {
+        "title": "System Maintenance Mode",
+        "subtitle": "Control system-wide user access during maintenance, database migrations, or scheduled upgrades",
+        "currentStatus": "Current Status",
+        "statusOnline": "System Online",
+        "statusMaintenance": "Under Full Maintenance",
+        "statusReadOnly": "Read-Only Mode",
+        "enableMode": "Enable Maintenance",
+        "disableMode": "Disable Maintenance",
+        "saveConfig": "Save Maintenance Config",
+        "modeSelect": "Operation Mode",
+        "msgTitle": "Notice Title",
+        "msgBody": "Maintenance Notice Message for Users",
+        "startAt": "Start Time",
+        "estimatedEndAt": "Estimated Completion Time",
+        "bypassRoles": "Allowed Roles (Bypass)",
+        "bypassRolesHint": "Comma-separated, e.g. ADMIN, LEADER",
+        "bypassIps": "Allowed IPs (Bypass)",
+        "bypassIpsHint": "Comma-separated, e.g. 127.0.0.1, 192.168.1.1",
+        "bypassPerms": "Bypass Permissions",
+        "confirmDisable": "Confirm disable maintenance mode?",
+        "confirmDisableDesc": "All users will immediately regain full access to the system.",
+        "confirmEnable": "Confirm enable maintenance mode?",
+        "confirmEnableDesc": "Users without bypass permissions or roles will be blocked and redirected to the maintenance screen."
+      },
+      "apiKeys": {
+        "title": "API Key Management",
+        "subtitle": "Generate and manage programmatic API keys for third-party tools and automated pipelines",
+        "createKey": "Create API Key",
+        "table": {
+          "name": "Key Name",
+          "prefix": "Prefix",
+          "permissions": "Permissions",
+          "status": "Status",
+          "lastUsed": "Last Used",
+          "createdAt": "Created At",
+          "actions": "Actions"
+        },
+        "noKeys": "No API keys created yet.",
+        "revokeConfirm": "Confirm revoke API key",
+        "revokeDesc": "This API key will be permanently deactivated. Any integrations using it will immediately lose access.",
+        "modal": {
+          "title": "Create New API Key",
+          "nameLabel": "Key Identifier Name",
+          "namePlaceholder": "e.g. CI/CD Pipeline, Slack Bot...",
+          "permissionsLabel": "Key Permissions",
+          "expiresLabel": "Expiration Date (Optional)",
+          "submit": "Generate Key",
+          "cancel": "Cancel"
+        },
+        "reveal": {
+          "title": "Save Your Secret API Key",
+          "warning": "This is the ONLY time your full secret key will be displayed. Copy and store it securely now.",
+          "copyBtn": "Copy Key",
+          "copied": "Copied to clipboard!",
+          "close": "I Have Saved This Key"
+        }
+      },
+      "webhooks": {
+        "title": "Webhook Endpoints",
+        "subtitle": "Send real-time event notifications to external web services using HTTP POST payloads",
+        "createWebhook": "Register Webhook",
+        "table": {
+          "url": "Endpoint URL",
+          "events": "Subscribed Events",
+          "status": "Status",
+          "secret": "Signing Secret",
+          "createdAt": "Created At",
+          "actions": "Actions"
+        },
+        "noWebhooks": "No webhook endpoints configured yet.",
+        "allEvents": "All events (*)",
+        "testPing": "Test Ping",
+        "deliveries": "Deliveries",
+        "edit": "Edit",
+        "delete": "Delete",
+        "deleteConfirm": "Confirm delete this webhook endpoint?",
+        "modal": {
+          "createTitle": "Register New Webhook",
+          "editTitle": "Update Webhook Endpoint",
+          "urlLabel": "Endpoint URL (Public HTTPS)",
+          "urlPlaceholder": "https://api.example.com/webhooks/nexcampus",
+          "eventsLabel": "Trigger Events",
+          "secretLabel": "Custom Secret (Optional, min 16 characters)",
+          "secretPlaceholder": "Leave blank to auto-generate a secure secret",
+          "descLabel": "Description",
+          "submit": "Save Endpoint",
+          "cancel": "Cancel"
+        },
+        "deliveriesModal": {
+          "title": "Webhook Delivery Logs",
+          "event": "Event",
+          "status": "Status",
+          "code": "HTTP Code",
+          "attempts": "Attempts",
+          "time": "Timestamp",
+          "actions": "Actions",
+          "retry": "Retry",
+          "noLogs": "No delivery events recorded yet."
+        }
+      },
+      "cronJobs": {
+        "title": "Scheduled Tasks & Background Jobs",
+        "subtitle": "Monitor and manually trigger automated background jobs within the system",
+        "searchPlaceholder": "Search job name or description...",
+        "runNow": "Run Now",
+        "running": "Executing...",
+        "statusReady": "Ready",
+        "resultModal": {
+          "title": "Job Execution Result",
+          "jobName": "Job Name",
+          "duration": "Execution Duration",
+          "status": "Status",
+          "details": "Details & Output",
+          "close": "Close"
+        }
       }
     }
   },

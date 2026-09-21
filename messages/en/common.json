@@ -61,7 +61,20 @@
       "empty": "No notifications",
       "deleteTitle": "Delete this notification",
       "details": "Notification details",
-      "back": "Back to notifications"
+      "back": "Back to notifications",
+      "settings": "Notification Settings",
+      "settingsSaved": "Notification settings saved successfully",
+      "settingsSaveError": "Failed to save notification settings",
+      "channels": "Notification Channels",
+      "emailChannel": "Receive via Email",
+      "inAppChannel": "In-App Notifications",
+      "events": "Event-Specific Preferences",
+      "taskAssigned": "Task Assignments",
+      "submissionReviewed": "Submission Reviews",
+      "dailyReportReminder": "Daily Report Reminders",
+      "meetingSchedule": "Meeting Schedules",
+      "saveSettings": "Save Settings",
+      "readOnlyNotice": "You have view-only access to notification settings (read-only)"
     },
     "theme": {
       "toggle": "Toggle theme",

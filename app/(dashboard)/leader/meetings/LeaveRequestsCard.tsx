@@ -49,6 +49,8 @@ export default function LeaveRequestsCard() {
     staleTime: 1000 * 60 * 2,
   });
 
+  const [showHistory, setShowHistory] = useState(false);
+
   if (!canReview) return null;
 
   const allAbsences = (data?.data ?? []).filter(
@@ -56,7 +58,6 @@ export default function LeaveRequestsCard() {
   );
   const pendingAbsences = allAbsences.filter((a) => a.status === "PENDING");
   const reviewedAbsences = allAbsences.filter((a) => a.status !== "PENDING");
-  const [showHistory, setShowHistory] = useState(false);
 
   // Group pending by meeting
   const pendingByMeeting = new Map<string, AbsenceRequestItem[]>();

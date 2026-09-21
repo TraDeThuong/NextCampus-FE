@@ -6,7 +6,7 @@ import axios from "axios";
 import { departmentService } from "@/services/department.service";
 
 export function useDeleteDepartment(options?: {
-    onSuccess?: (data: any, variables: string) => void;
+    onSuccess?: (data: { success: boolean; message: string }, variables: string) => void;
     onError?: (err: unknown, variables: string) => void;
 }) {
     const queryClient = useQueryClient();

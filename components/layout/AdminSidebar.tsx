@@ -58,7 +58,17 @@ export default function AdminSidebar() {
       { name: t("admin.nav.meetings"),      href: "/admin/meetings",      icon: LuAlarmClock,     permissions: ["MEETING_READ"] },
       { name: t("admin.nav.roles"),         href: "/admin/roles",         icon: ShieldCheck,      permissions: ["ROLE_READ"] },
       { name: t("admin.nav.mails"),         href: "/admin/emails",        icon: MdOutlineMailOutline,  permissions: ["NOTIFICATION_TEMPLATE_READ"] },
-      { name: t("admin.nav.settings"),      href: "/admin/settings",      icon: Settings,         permissions: ["SYSTEM_CONFIG_READ"] },
+      { name: t("admin.nav.settings"),      href: "/admin/settings",      icon: Settings,         permissions: [
+        "SYSTEM_CONFIG_READ",
+        "MAINTENANCE_READ",
+        "MAINTENANCE_MANAGE",
+        "API_KEY_READ",
+        "API_KEY_MANAGE",
+        "WEBHOOK_READ",
+        "WEBHOOK_MANAGE",
+        "CRON_JOB_READ",
+        "CRON_JOB_MANAGE",
+      ] },
       { name: t("admin.nav.activityLogs"), href: "/admin/activity-logs", icon: History,          permissions: ["AUDIT_LOG_READ"] },
       { name: t("admin.nav.profile"),       href: "/admin/profile",       icon: UserRoundPen },
     ];

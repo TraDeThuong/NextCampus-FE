@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Check, BellOff, Info, AlertTriangle, CheckCircle2, ShieldAlert, Trash2, Clock, X } from "lucide-react";
+import { ArrowLeft, Check, BellOff, Info, AlertTriangle, CheckCircle2, ShieldAlert, Trash2, Clock, X, Settings } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useNotifications } from "@/hooks/notification/useNotifications";
 import { useMarkAsRead } from "@/hooks/notification/useMarkAsRead";
 import { useMarkAllAsRead } from "@/hooks/notification/useMarkAllAsRead";
 import { useDeleteNotification } from "@/hooks/notification/useDeleteNotification";
 import { useClearReadNotifications } from "@/hooks/notification/useClearReadNotifications";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 import type { Notification } from "@/types/notification";
 import Spinner from "@/components/ui/Spinner";
+import NotificationSettingsModal from "./NotificationSettingsModal";
 
 interface NotificationDropdownProps {
   onClose?: () => void;
@@ -19,7 +21,12 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
   const t = useTranslations("header.notification");
   const tCommon = useTranslations("common");
   const locale = useLocale();
+  const { can } = useRBAC();
+  const canDelete = can("NOTIFICATION_DELETE");
+  const canReadSettings = can("NOTIFICATION_SETTING_READ");
+
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const { data, isLoading } = useNotifications({ limit: 10, sortBy: "createdAt", order: "desc" });
   const { mutate: markAsRead } = useMarkAsRead();
   const { mutate: markAllAsRead, isPending: isMarkingAllRead } = useMarkAllAsRead();
@@ -126,7 +133,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
                 </button>
               )}
 
-              {readNotifications.length > 0 && (
+              {readNotifications.length > 0 && canDelete && (
                 <button
                   onClick={handleClearRead}
                   disabled={isClearingRead}
@@ -135,6 +142,17 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
                 >
                   <Trash2 size={13} className={isClearingRead ? "animate-spin" : ""} />
                   <span className="hidden sm:inline">{t("clearRead")}</span>
+                </button>
+              )}
+
+              {canReadSettings && (
+                <button
+                  onClick={() => setShowSettingsModal(true)}
+                  className="flex items-center gap-1 text-xs text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer p-1 rounded-lg hover:bg-white/5"
+                  title={t("settings")}
+                  aria-label={t("settings")}
+                >
+                  <Settings size={14} />
                 </button>
               )}
             </>
@@ -223,15 +241,17 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
               </div>
 
               {/* Action buttons on hover */}
-              <div className="absolute right-2 top-2 hidden group-hover:flex items-center gap-1 bg-[#0B1020] p-1 rounded-lg border border-white/10 shadow-lg">
-                <button
-                  onClick={(e) => handleDeleteItem(e, item.id)}
-                  className="text-slate-400 hover:text-red-400 transition-colors p-1 cursor-pointer"
-                  title={t("deleteTitle")}
-                >
-                  <Trash2 size={14} />
-                </button>
-              </div>
+              {canDelete && (
+                <div className="absolute right-2 top-2 hidden group-hover:flex items-center gap-1 bg-[#0B1020] p-1 rounded-lg border border-white/10 shadow-lg">
+                  <button
+                    onClick={(e) => handleDeleteItem(e, item.id)}
+                    className="text-slate-400 hover:text-red-400 transition-colors p-1 cursor-pointer"
+                    title={t("deleteTitle")}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              )}
 
               {!item.isRead && (
                 <span className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(21,174,245,0.8)] shrink-0 mt-1 group-hover:hidden" />
@@ -240,6 +260,10 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
           ))
         )}
       </div>
+
+      {showSettingsModal && (
+        <NotificationSettingsModal onClose={() => setShowSettingsModal(false)} />
+      )}
     </div>
   );
 }

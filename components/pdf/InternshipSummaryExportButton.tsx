@@ -4,6 +4,7 @@ import { FileDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Button from "@/components/ui/Button";
 import { useExportInternshipSummary } from "@/hooks/pdf-export/useExportInternshipSummary";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 interface Props {
   internId: string;
@@ -16,9 +17,14 @@ export default function InternshipSummaryExportButton({
   label,
   className,
 }: Props) {
+  const { can } = useRBAC();
   const t = useTranslations("pdfExport");
   const { mutate, isPending } = useExportInternshipSummary();
   const displayLabel = label ?? t("downloadInternshipSummary");
+
+  if (!can("PDF_EXPORT_SUMMARY")) {
+    return null;
+  }
 
   return (
     <Button

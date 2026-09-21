@@ -4,6 +4,7 @@ import { FileDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Button from "@/components/ui/Button";
 import { useExportWeeklyEvaluation } from "@/hooks/pdf-export/useExportWeeklyEvaluation";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 interface Props {
   id: string;
@@ -16,9 +17,14 @@ export default function WeeklyEvaluationExportButton({
   label,
   className,
 }: Props) {
+  const { can } = useRBAC();
   const t = useTranslations("pdfExport");
   const { mutate, isPending } = useExportWeeklyEvaluation();
   const displayLabel = label ?? t("downloadWeeklyEvaluation");
+
+  if (!can("PDF_EXPORT_WEEKLY_EVALUATION")) {
+    return null;
+  }
 
   return (
     <Button

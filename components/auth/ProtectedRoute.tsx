@@ -6,7 +6,6 @@ import { toast } from "react-hot-toast";
 import { useAuth } from "@/hooks/auth/useAuth";
 import {
   getPortalName,
-  getDashboardPath,
   getFirstAuthorizedPath,
   hasAnyPermission,
   hasAllPermissions,

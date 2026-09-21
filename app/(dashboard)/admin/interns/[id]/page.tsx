@@ -585,7 +585,7 @@ function InternshipInfo({ intern }: { intern: Intern }) {
     const t = useTranslations();
     const locale = useLocale();
     const { can } = useRBAC();
-    const canAssignLeader = can("INTERN_LEADER_ASSIGN") || can("INTERN_UPDATE");
+    const canAssignLeader = can("INTERN_ASSIGN_LEADER") || can("INTERN_UPDATE");
     const canUpdateIntern = can("INTERN_UPDATE");
     const { mutate: updateIntern } = useUpdateIntern();
 

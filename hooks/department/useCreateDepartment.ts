@@ -4,10 +4,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import axios from "axios";
 import { departmentService } from "@/services/department.service";
-import type { CreateDepartmentPayload } from "@/types/department";
+import type { CreateDepartmentPayload, DepartmentSuccessResponse } from "@/types/department";
 
 export function useCreateDepartment(options?: {
-    onSuccess?: (data: any, variables: CreateDepartmentPayload) => void;
+    onSuccess?: (data: DepartmentSuccessResponse, variables: CreateDepartmentPayload) => void;
     onError?: (err: unknown, variables: CreateDepartmentPayload) => void;
 }) {
     const queryClient = useQueryClient();

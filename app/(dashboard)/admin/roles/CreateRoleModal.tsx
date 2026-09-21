@@ -26,7 +26,7 @@ const RESOURCE_FALLBACKS: Record<string, string> = {
   API_KEY: "API Keys",
   WEBHOOK: "Webhooks",
   SYSTEM_CONFIG: "Cấu hình Hệ thống",
-  CRON_JOB: "Tác vụ Tự động (Cron)",
+  CRON_JOB: "Tác vụ Tự động",
   DEPARTMENT: "Phòng ban",
   POSITION: "Vị trí Chuyên môn",
   LEADER: "Người hướng dẫn (Leader)",

@@ -241,7 +241,7 @@ function Window({ children, name, size = "lg", title, onClose }: WindowProps) {
           <HiXMark className="h-4 w-4 sm:h-6 sm:w-6 shrink-0" />
         </button>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
+        <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar px-1.5 py-1">
           {isValidElement(children) &&
           typeof children.type !== "string" &&
           children.type !== Fragment

@@ -83,6 +83,130 @@
         "confirmBtn": "Đặt Về Mặc Định",
         "cancelBtn": "Hủy Bỏ",
         "resetSuccessToast": "Đã khôi phục toàn bộ tham số về giá trị mặc định!"
+      },
+      "tabs": {
+        "system": "Tham Số Hệ Thống",
+        "maintenance": "Bảo Trì Hệ Thống",
+        "apiKeys": "Quản Lý API Keys",
+        "webhooks": "Quản Lý Webhooks",
+        "cronJobs": "Tác Vụ Nền"
+      },
+      "maintenance": {
+        "title": "Chế Độ Bảo Trì Hệ Thống",
+        "subtitle": "Kiểm soát truy cập toàn hệ thống khi thực hiện nâng cấp, sao lưu dữ liệu hoặc sửa chữa khẩn cấp",
+        "currentStatus": "Trạng Thái Hiện Tại",
+        "statusOnline": "Hệ Thống Trực Tuyến",
+        "statusMaintenance": "Đang Bảo Trì Toàn Phần",
+        "statusReadOnly": "Chế Độ Chỉ Đọc (Read-Only)",
+        "enableMode": "Bật Bảo Trì",
+        "disableMode": "Tắt Bảo Trì",
+        "saveConfig": "Lưu Cấu Hình Bảo Trì",
+        "modeSelect": "Chế độ hoạt động",
+        "msgTitle": "Tiêu đề thông báo",
+        "msgBody": "Nội dung chi tiết thông báo người dùng",
+        "startAt": "Thời điểm bắt đầu",
+        "estimatedEndAt": "Dự kiến hoàn tất",
+        "bypassRoles": "Vai trò được phép truy cập (Bypass Roles)",
+        "bypassRolesHint": "Phân cách bằng dấu phẩy, VD: ADMIN, LEADER",
+        "bypassIps": "Địa chỉ IP được phép (Bypass IPs)",
+        "bypassIpsHint": "Phân cách bằng dấu phẩy, VD: 127.0.0.1, 192.168.1.1",
+        "bypassPerms": "Quyền được bypass",
+        "confirmDisable": "Xác nhận tắt chế độ bảo trì?",
+        "confirmDisableDesc": "Toàn bộ người dùng sẽ có thể truy cập lại hệ thống bình thường.",
+        "confirmEnable": "Xác nhận bật chế độ bảo trì?",
+        "confirmEnableDesc": "Các người dùng không nằm trong danh sách miễn trừ sẽ bị chặn truy cập và hiển thị màn hình bảo trì."
+      },
+      "apiKeys": {
+        "title": "Quản Lý Khóa API (API Keys)",
+        "subtitle": "Cấp phát và kiểm soát mã xác thực cho các dịch vụ bên thứ ba hoặc công cụ tự động hóa",
+        "createKey": "Tạo API Key Mới",
+        "table": {
+          "name": "Tên Khóa",
+          "prefix": "Tiền Tố (Prefix)",
+          "permissions": "Quyền Hạn",
+          "status": "Trạng Thái",
+          "lastUsed": "Dùng Gần Nhất",
+          "createdAt": "Ngày Tạo",
+          "actions": "Thao Tác"
+        },
+        "noKeys": "Chưa có API Key nào được tạo.",
+        "revokeConfirm": "Xác nhận thu hồi API Key",
+        "revokeDesc": "Khóa API này sẽ bị vô hiệu hóa vĩnh viễn và không thể khôi phục. Các tích hợp sử dụng khóa này sẽ mất quyền truy cập.",
+        "modal": {
+          "title": "Tạo API Key Mới",
+          "nameLabel": "Tên định danh khóa",
+          "namePlaceholder": "VD: CI/CD Pipeline, Slack Bot...",
+          "permissionsLabel": "Phân quyền cho khóa",
+          "expiresLabel": "Thời hạn khóa (Tùy chọn)",
+          "submit": "Tạo Khóa",
+          "cancel": "Hủy"
+        },
+        "reveal": {
+          "title": "Lưu Trữ API Key Của Bạn",
+          "warning": "Đây là lần DUY NHẤT khóa bí mật này được hiển thị! Hãy sao chép và lưu trữ ở nơi an toàn ngay bây giờ.",
+          "copyBtn": "Sao Chép Khóa",
+          "copied": "Đã sao chép vào bộ nhớ tạm!",
+          "close": "Tôi Đã Lưu Khóa Này"
+        }
+      },
+      "webhooks": {
+        "title": "Cấu Hình Webhook Endpoints",
+        "subtitle": "Gửi thông báo sự kiện theo thời gian thực tới các dịch vụ bên ngoài thông qua giao thức HTTP POST",
+        "createWebhook": "Đăng Ký Webhook",
+        "table": {
+          "url": "Endpoint URL",
+          "events": "Sự Kiện Đăng Ký",
+          "status": "Trạng Thái",
+          "secret": "Khóa Ký (Secret)",
+          "createdAt": "Ngày Tạo",
+          "actions": "Thao Tác"
+        },
+        "noWebhooks": "Chưa có Webhook nào được cấu hình.",
+        "allEvents": "Toàn bộ sự kiện (*)",
+        "testPing": "Gửi Thử (Ping)",
+        "deliveries": "Nhật Ký Gửi",
+        "edit": "Chỉnh Sửa",
+        "delete": "Xóa Endpoint",
+        "deleteConfirm": "Xác nhận xóa Webhook endpoint này?",
+        "modal": {
+          "createTitle": "Đăng Ký Webhook Mới",
+          "editTitle": "Cập Nhật Webhook Endpoint",
+          "urlLabel": "Endpoint URL (HTTPS / Public)",
+          "urlPlaceholder": "https://api.example.com/webhooks/nexcampus",
+          "eventsLabel": "Sự kiện kích hoạt",
+          "secretLabel": "Khóa bí mật (Tùy chọn, tối thiểu 16 ký tự)",
+          "secretPlaceholder": "Để trống để hệ thống tự sinh mã bảo mật",
+          "descLabel": "Mô tả bổ sung",
+          "submit": "Lưu Endpoint",
+          "cancel": "Hủy"
+        },
+        "deliveriesModal": {
+          "title": "Nhật Ký Gửi Tin Webhook",
+          "event": "Sự Kiện",
+          "status": "Trạng Thái",
+          "code": "Mã Phản Hồi",
+          "attempts": "Số Lần Thử",
+          "time": "Thời Điểm",
+          "actions": "Thao Tác",
+          "retry": "Thử Lại",
+          "noLogs": "Chưa có bản tin nào được gửi đi."
+        }
+      },
+      "cronJobs": {
+        "title": "Tác Vụ Nền & Định Kỳ",
+        "subtitle": "Theo dõi và điều khiển các tác vụ chạy định kỳ tự động trong hệ thống",
+        "searchPlaceholder": "Tìm kiếm tên tác vụ hoặc mô tả...",
+        "runNow": "Chạy Ngay",
+        "running": "Đang chạy...",
+        "statusReady": "Sẵn Sàng",
+        "resultModal": {
+          "title": "Kết Quả Thực Thi Tác Vụ",
+          "jobName": "Tên Tác Vụ",
+          "duration": "Thời Gian Thực Thi",
+          "status": "Trạng Thái",
+          "details": "Dữ Liệu Chi Tiết",
+          "close": "Đóng"
+        }
       }
     }
   },

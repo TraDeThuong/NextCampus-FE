@@ -3,10 +3,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { departmentService } from "@/services/department.service";
-import type { UpdateDepartmentPayload } from "@/types/department";
+import type { UpdateDepartmentPayload, DepartmentSuccessResponse } from "@/types/department";
 
 export function useUpdateDepartment(options?: {
-    onSuccess?: (data: any, variables: { id: string; payload: UpdateDepartmentPayload }) => void;
+    onSuccess?: (data: DepartmentSuccessResponse, variables: { id: string; payload: UpdateDepartmentPayload }) => void;
     onError?: (err: unknown, variables: { id: string; payload: UpdateDepartmentPayload }) => void;
 }) {
     const queryClient = useQueryClient();

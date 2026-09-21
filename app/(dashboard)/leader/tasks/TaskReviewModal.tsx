@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 import { useTaskAssignment } from "@/hooks/task-assignment/useTaskAssignment";
 import { useTaskSubmissions } from "@/hooks/task-submission/useTaskSubmissions";
 import { useReviewTaskSubmission } from "@/hooks/task-submission/useReviewTaskSubmission";
@@ -45,6 +46,8 @@ function formatFileSize(bytes: number) {
 
 export default function TaskReviewModal({ assignmentId, onClose }: Props) {
   const queryClient = useQueryClient();
+  const { can } = useRBAC();
+  const canReviewSubmission = can("TASK_SUBMISSION_REVIEW");
   const [reviewComment, setReviewComment] = useState("");
   const [commentError, setCommentError] = useState("");
 
@@ -296,7 +299,7 @@ export default function TaskReviewModal({ assignmentId, onClose }: Props) {
                   <CheckCircle className="h-5 w-5 mx-auto mb-1" />
                   This submission has been approved.
                 </div>
-              ) : (
+              ) : canReviewSubmission ? (
                 <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
                   <div className="flex items-center justify-between mb-2">
                     <label className="text-sm font-medium text-foreground">
@@ -357,7 +360,7 @@ export default function TaskReviewModal({ assignmentId, onClose }: Props) {
                     )}
                   </div>
                 </div>
-              )}
+              ) : null}
             </>
           )}
         </div>

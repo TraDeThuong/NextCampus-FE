@@ -26,7 +26,7 @@ export default function InternRow({ intern }: InternRowProps) {
     const locale = useLocale();
     const router = useRouter();
     const { can } = useRBAC();
-    const canAssignLeader = can("INTERN_LEADER_ASSIGN") || can("INTERN_UPDATE");
+    const canAssignLeader = can("INTERN_ASSIGN_LEADER") || can("INTERN_UPDATE");
     const canUpdateIntern = can("INTERN_UPDATE");
     const canDeleteIntern = can("INTERN_DELETE");
     const canViewIntern = can("INTERN_READ");

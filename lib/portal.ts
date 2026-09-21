@@ -79,9 +79,17 @@ export function getFirstAuthorizedPath(
     if (hasPermission(permissions, "INTERN_READ")) return "/admin/interns";
     if (hasPermission(permissions, "MEETING_READ")) return "/admin/meetings";
     if (hasPermission(permissions, "ROLE_READ")) return "/admin/roles";
-    if (hasPermission(permissions, "NOTIFICATION_TEMPLATE_READ")) return "/admin/emails";
-    if (hasPermission(permissions, "SYSTEM_CONFIG_READ")) return "/admin/settings";
-    if (hasPermission(permissions, "AUDIT_LOG_READ")) return "/admin/activity-logs";
+    if (hasAnyPermission(permissions, [
+      "SYSTEM_CONFIG_READ",
+      "MAINTENANCE_READ",
+      "MAINTENANCE_MANAGE",
+      "API_KEY_READ",
+      "API_KEY_MANAGE",
+      "WEBHOOK_READ",
+      "WEBHOOK_MANAGE",
+      "CRON_JOB_READ",
+      "CRON_JOB_MANAGE",
+    ])) return "/admin/settings";
     return "/admin/profile";
   }
 

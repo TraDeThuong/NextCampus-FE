@@ -61,7 +61,20 @@
       "empty": "Không có thông báo nào",
       "deleteTitle": "Xóa thông báo này",
       "details": "Chi tiết thông báo",
-      "back": "Quay lại danh sách thông báo"
+      "back": "Quay lại danh sách thông báo",
+      "settings": "Cài đặt thông báo",
+      "settingsSaved": "Đã lưu cài đặt thông báo thành công",
+      "settingsSaveError": "Không thể lưu cài đặt thông báo",
+      "channels": "Kênh nhận thông báo",
+      "emailChannel": "Nhận qua Email",
+      "inAppChannel": "Thông báo trong ứng dụng",
+      "events": "Cấu hình theo loại sự kiện",
+      "taskAssigned": "Phân công nhiệm vụ mới",
+      "submissionReviewed": "Đánh giá bài nộp nhiệm vụ",
+      "dailyReportReminder": "Nhắc nhở báo cáo hằng ngày",
+      "meetingSchedule": "Lịch họp và sự kiện",
+      "saveSettings": "Lưu cài đặt",
+      "readOnlyNotice": "Bạn chỉ có quyền xem cấu hình thông báo (chế độ chỉ đọc)"
     },
     "theme": {
       "toggle": "Chuyển giao diện",

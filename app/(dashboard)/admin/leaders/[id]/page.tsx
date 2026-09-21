@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import { useParams, useRouter, useSearchParams, usePathname, notFound } from "next/navigation";
 import Image from "next/image";
 import {

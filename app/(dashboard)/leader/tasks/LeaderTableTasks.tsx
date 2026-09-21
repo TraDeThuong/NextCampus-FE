@@ -1840,7 +1840,7 @@ function StatusBadge({
   const t = useTranslations("leader.tasks");
   const { can } = useRBAC();
   const canUnblock = can("TASK_ASSIGNMENT_UPDATE");
-  const canReview = can("TASK_ASSIGNMENT_APPROVE");
+  const canReview = can("TASK_SUBMISSION_REVIEW");
 
   const colors: Record<string, string> = {
     DONE: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
