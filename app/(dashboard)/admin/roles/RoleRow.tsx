@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import type { Role } from "@/types/rbac";
 import Table from "@/components/ui/Table";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 interface RoleRowProps {
   role: Role;
@@ -32,13 +33,20 @@ export default function RoleRow({
   onOpenDelete,
 }: RoleRowProps) {
   const t = useTranslations();
+  const { can } = useRBAC();
+  const canUsers = can("USER_READ") || can("USER_ROLE_ASSIGN");
+  const canPermissions = can("ROLE_PERMISSION_ASSIGN") || can("ROLE_UPDATE");
+  const canEdit = can("ROLE_UPDATE");
+  const canDelete = can("ROLE_DELETE");
+  const hasAnyAction = canUsers || canPermissions || canEdit || canDelete;
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
 
-  const isDeletable = !role.isSystem && role.userCount === 0;
+  const isDeletable = canDelete && !role.isSystem && role.userCount === 0;
 
   // Standardized 3-Dots Portal Action Menu (Rule 76-82 of AGENTS.md)
   const updateMenuPosition = useCallback(() => {
@@ -174,135 +182,169 @@ export default function RoleRow({
 
       {/* 3. Users Count */}
       <div className="flex items-center">
-        <button
-          type="button"
-          onClick={() => onOpenUsers(role)}
-          title={t("admin.roles.table.usersBtn")}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-border/80 bg-card/60 px-2.5 py-1 text-xs text-muted-foreground transition hover:border-cyan-400/40 hover:text-cyan-400 hover:bg-cyan-500/5 active:scale-95 group/btn cursor-pointer"
-        >
-          <Users className="h-3.5 w-3.5 shrink-0 text-muted group-hover/btn:text-cyan-400" />
-          <span className="font-medium text-foreground group-hover/btn:text-cyan-400">
-            {t("admin.roles.table.usersCountLabel", {
-              count: role.userCount,
-            })}
-          </span>
-        </button>
+        {canUsers ? (
+          <button
+            type="button"
+            onClick={() => onOpenUsers(role)}
+            title={t("admin.roles.table.usersBtn")}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border/80 bg-card/60 px-2.5 py-1 text-xs text-muted-foreground transition hover:border-cyan-400/40 hover:text-cyan-400 hover:bg-cyan-500/5 active:scale-95 group/btn cursor-pointer"
+          >
+            <Users className="h-3.5 w-3.5 shrink-0 text-muted group-hover/btn:text-cyan-400" />
+            <span className="font-medium text-foreground group-hover/btn:text-cyan-400">
+              {t("admin.roles.table.usersCountLabel", {
+                count: role.userCount,
+              })}
+            </span>
+          </button>
+        ) : (
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs text-muted-foreground">
+            <Users className="h-3.5 w-3.5 shrink-0 text-muted" />
+            <span>
+              {t("admin.roles.table.usersCountLabel", {
+                count: role.userCount,
+              })}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* 4. Permissions Count */}
       <div className="flex items-center">
-        <button
-          type="button"
-          onClick={() => onOpenPermissions(role)}
-          title={t("admin.roles.table.permissionsBtn")}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-border/80 bg-card/60 px-2.5 py-1 text-xs text-muted-foreground transition hover:border-emerald-400/40 hover:text-emerald-400 hover:bg-emerald-500/5 active:scale-95 group/btn cursor-pointer"
-        >
-          <KeyRound className="h-3.5 w-3.5 shrink-0 text-cyan-400 group-hover/btn:text-emerald-400" />
-          <span className="font-medium text-foreground group-hover/btn:text-emerald-400">
-            {t("admin.roles.table.permissionsCountLabel", {
-              count: role.permissions?.length ?? 0,
-            })}
-          </span>
-        </button>
+        {canPermissions ? (
+          <button
+            type="button"
+            onClick={() => onOpenPermissions(role)}
+            title={t("admin.roles.table.permissionsBtn")}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border/80 bg-card/60 px-2.5 py-1 text-xs text-muted-foreground transition hover:border-emerald-400/40 hover:text-emerald-400 hover:bg-emerald-500/5 active:scale-95 group/btn cursor-pointer"
+          >
+            <KeyRound className="h-3.5 w-3.5 shrink-0 text-cyan-400 group-hover/btn:text-emerald-400" />
+            <span className="font-medium text-foreground group-hover/btn:text-emerald-400">
+              {t("admin.roles.table.permissionsCountLabel", {
+                count: role.permissions?.length ?? 0,
+              })}
+            </span>
+          </button>
+        ) : (
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs text-muted-foreground">
+            <KeyRound className="h-3.5 w-3.5 shrink-0 text-muted" />
+            <span>
+              {t("admin.roles.table.permissionsCountLabel", {
+                count: role.permissions?.length ?? 0,
+              })}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* 5. Actions 3-Dots Menu Trigger */}
       <div className="flex items-center justify-end">
-        <button
-          ref={triggerRef}
-          type="button"
-          aria-haspopup="menu"
-          aria-expanded={menuOpen}
-          aria-controls={`role-action-menu-${menuId}`}
-          onClick={toggleMenu}
-          className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-card/40 text-muted transition hover:border-white/20 hover:bg-card hover:text-foreground active:scale-95"
-          title={t("admin.roles.table.moreActions")}
-        >
-          <MoreVertical className="h-4 w-4" />
-        </button>
-
-        {menuOpen &&
-          createPortal(
-            <div
-              ref={menuRef}
-              id={`role-action-menu-${menuId}`}
-              role="menu"
-              style={menuStyle}
-              className="rounded-2xl border border-white/10 bg-[#0c1322]/95 p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn"
+        {hasAnyAction && (
+          <>
+            <button
+              ref={triggerRef}
+              type="button"
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              aria-controls={`role-action-menu-${menuId}`}
+              onClick={toggleMenu}
+              className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-card/40 text-muted transition hover:border-white/20 hover:bg-card hover:text-foreground active:scale-95"
+              title={t("admin.roles.table.moreActions")}
             >
-              {/* Users item */}
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onOpenUsers(role);
-                }}
-                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-foreground/90 transition hover:bg-indigo-500/15 hover:text-indigo-300 active:scale-98"
-              >
-                <Users className="h-4 w-4 shrink-0 text-indigo-400" />
-                <span>{t("admin.roles.table.usersBtn")}</span>
-              </button>
+              <MoreVertical className="h-4 w-4" />
+            </button>
 
-              {/* Permissions item */}
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onOpenPermissions(role);
-                }}
-                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-foreground/90 transition hover:bg-cyan-500/15 hover:text-cyan-300 active:scale-98"
-              >
-                <KeyRound className="h-4 w-4 shrink-0 text-cyan-400" />
-                <span>{t("admin.roles.table.permissionsBtn")}</span>
-              </button>
+            {menuOpen &&
+              createPortal(
+                <div
+                  ref={menuRef}
+                  id={`role-action-menu-${menuId}`}
+                  role="menu"
+                  style={menuStyle}
+                  className="rounded-2xl border border-white/10 bg-[#0c1322]/95 p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn"
+                >
+                  {/* Users item */}
+                  {canUsers && (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        onOpenUsers(role);
+                      }}
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-foreground/90 transition hover:bg-indigo-500/15 hover:text-indigo-300 active:scale-98 cursor-pointer"
+                    >
+                      <Users className="h-4 w-4 shrink-0 text-indigo-400" />
+                      <span>{t("admin.roles.table.usersBtn")}</span>
+                    </button>
+                  )}
 
-              {/* Edit item */}
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onOpenEdit(role);
-                }}
-                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-foreground/90 transition hover:bg-white/10 hover:text-foreground active:scale-98"
-              >
-                <Edit2 className="h-4 w-4 shrink-0 text-muted" />
-                <span>{t("admin.roles.table.editBtn")}</span>
-              </button>
+                  {/* Permissions item */}
+                  {canPermissions && (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        onOpenPermissions(role);
+                      }}
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-foreground/90 transition hover:bg-cyan-500/15 hover:text-cyan-300 active:scale-98 cursor-pointer"
+                    >
+                      <KeyRound className="h-4 w-4 shrink-0 text-cyan-400" />
+                      <span>{t("admin.roles.table.permissionsBtn")}</span>
+                    </button>
+                  )}
 
-              {/* Delete item */}
-              <button
-                type="button"
-                role="menuitem"
-                disabled={!isDeletable}
-                onClick={() => {
-                  if (!isDeletable) return;
-                  setMenuOpen(false);
-                  onOpenDelete(role);
-                }}
-                title={
-                  role.isSystem
-                    ? t("admin.roles.table.deleteDisabledSystem")
-                    : role.userCount > 0
-                    ? t("admin.roles.table.deleteDisabledUsers", {
-                        count: role.userCount,
-                      })
-                    : t("admin.roles.table.deleteBtn")
-                }
-                className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs transition active:scale-98 ${
-                  isDeletable
-                    ? "text-rose-400 hover:bg-rose-500/15 hover:text-rose-300 cursor-pointer"
-                    : "text-muted/40 cursor-not-allowed opacity-50"
-                }`}
-              >
-                <Trash2 className="h-4 w-4 shrink-0" />
-                <span>{t("admin.roles.table.deleteBtn")}</span>
-              </button>
-            </div>,
-            document.body,
-          )}
+                  {/* Edit item */}
+                  {canEdit && (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        onOpenEdit(role);
+                      }}
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-foreground/90 transition hover:bg-white/10 hover:text-foreground active:scale-98 cursor-pointer"
+                    >
+                      <Edit2 className="h-4 w-4 shrink-0 text-muted" />
+                      <span>{t("admin.roles.table.editBtn")}</span>
+                    </button>
+                  )}
+
+                  {/* Delete item */}
+                  {canDelete && (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      disabled={!isDeletable}
+                      onClick={() => {
+                        if (!isDeletable) return;
+                        setMenuOpen(false);
+                        onOpenDelete(role);
+                      }}
+                      title={
+                        role.isSystem
+                          ? t("admin.roles.table.deleteDisabledSystem")
+                          : role.userCount > 0
+                          ? t("admin.roles.table.deleteDisabledUsers", {
+                              count: role.userCount,
+                            })
+                          : t("admin.roles.table.deleteBtn")
+                      }
+                      className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs transition active:scale-98 ${
+                        isDeletable
+                          ? "text-rose-400 hover:bg-rose-500/15 hover:text-rose-300 cursor-pointer"
+                          : "text-muted/40 cursor-not-allowed opacity-50"
+                      }`}
+                    >
+                      <Trash2 className="h-4 w-4 shrink-0" />
+                      <span>{t("admin.roles.table.deleteBtn")}</span>
+                    </button>
+                  )}
+                </div>,
+                document.body,
+              )}
+          </>
+        )}
       </div>
     </Table.Row>
   );

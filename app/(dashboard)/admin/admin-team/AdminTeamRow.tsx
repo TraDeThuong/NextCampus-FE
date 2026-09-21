@@ -14,6 +14,7 @@ import InlineSelect from "@/components/ui/InlineSelect";
 import Table from "@/components/ui/Table";
 import Modal from "@/components/ui/Modal";
 import { useAuth } from "@/hooks/auth/useAuth";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 type AdminTeamRowProps = {
     admin: User;
@@ -23,6 +24,9 @@ export default function AdminTeamRow({ admin }: AdminTeamRowProps) {
     const t = useTranslations();
     const locale = useLocale();
     const { state } = useAuth();
+    const { can } = useRBAC();
+    const canUpdate = can("USER_UPDATE");
+    const canDelete = can("USER_DELETE");
     const currentUser = state.user;
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
@@ -102,38 +106,57 @@ export default function AdminTeamRow({ admin }: AdminTeamRowProps) {
 
                 {/* Status */}
                 <div>
-                    <InlineSelect
-                        ariaLabel={t("admin.adminTeam.colStatus")}
-                        value={admin.isActive ? "true" : "false"}
-                        placeholder={t("admin.adminTeam.colStatus")}
-                        loading={togglingActive}
-                        disabled={togglingActive}
-                        onChange={(val) => {
-                            if (val !== null) toggleActive(val === "true");
-                        }}
-                        options={[
-                            { value: "true", label: t("admin.adminTeam.active") },
-                            { value: "false", label: t("admin.adminTeam.inactive") },
-                        ]}
-                        renderTrigger={(label) => (
-                            <span
-                                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
-                                    admin.isActive
-                                        ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-300 hover:border-emerald-400/50"
-                                        : "border-red-400/30 bg-red-500/10 text-red-300 hover:border-red-400/50"
-                                }`}
-                            >
+                    {canUpdate ? (
+                        <InlineSelect
+                            ariaLabel={t("admin.adminTeam.colStatus")}
+                            value={admin.isActive ? "true" : "false"}
+                            placeholder={t("admin.adminTeam.colStatus")}
+                            loading={togglingActive}
+                            disabled={togglingActive}
+                            onChange={(val) => {
+                                if (val !== null) toggleActive(val === "true");
+                            }}
+                            options={[
+                                { value: "true", label: t("admin.adminTeam.active") },
+                                { value: "false", label: t("admin.adminTeam.inactive") },
+                            ]}
+                            renderTrigger={(label) => (
                                 <span
-                                    className={`h-1.5 w-1.5 rounded-full ${
+                                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
                                         admin.isActive
-                                            ? "bg-emerald-400"
-                                            : "bg-red-400"
+                                            ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-300 hover:border-emerald-400/50"
+                                            : "border-red-400/30 bg-red-500/10 text-red-300 hover:border-red-400/50"
                                     }`}
-                                />
-                                {label}
-                            </span>
-                        )}
-                    />
+                                >
+                                    <span
+                                        className={`h-1.5 w-1.5 rounded-full ${
+                                            admin.isActive
+                                                ? "bg-emerald-400"
+                                                : "bg-red-400"
+                                        }`}
+                                    />
+                                    {label}
+                                </span>
+                            )}
+                        />
+                    ) : (
+                        <span
+                            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${
+                                admin.isActive
+                                    ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-300"
+                                    : "border-red-400/30 bg-red-500/10 text-red-300"
+                            }`}
+                        >
+                            <span
+                                className={`h-1.5 w-1.5 rounded-full ${
+                                    admin.isActive
+                                        ? "bg-emerald-400"
+                                        : "bg-red-400"
+                                }`}
+                            />
+                            {admin.isActive ? t("admin.adminTeam.active") : t("admin.adminTeam.inactive")}
+                        </span>
+                    )}
                 </div>
 
                 {/* Joined */}
@@ -141,7 +164,7 @@ export default function AdminTeamRow({ admin }: AdminTeamRowProps) {
 
                 {/* Actions */}
                 <div className="relative" ref={menuRef}>
-                    {currentUser?.id !== admin.id && (
+                    {currentUser?.id !== admin.id && canDelete && (
                         <>
                             <button
                                 type="button"

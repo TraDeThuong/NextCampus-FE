@@ -6,6 +6,7 @@ import MetalCard from "@/components/ui/MetalCard";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import WeeklyEvaluationCreateModal from "./WeeklyEvaluationCreateModal";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 interface WeeklyEvaluationHeaderProps {
   onSuccess?: () => void;
@@ -13,6 +14,8 @@ interface WeeklyEvaluationHeaderProps {
 
 export default function WeeklyEvaluationHeader({ onSuccess }: WeeklyEvaluationHeaderProps) {
   const t = useTranslations("leader.weeklyEvaluation");
+  const { can } = useRBAC();
+  const canCreate = can("WEEKLY_EVALUATION_CREATE");
 
   return (
     <MetalCard>
@@ -29,19 +32,21 @@ export default function WeeklyEvaluationHeader({ onSuccess }: WeeklyEvaluationHe
             </div>
             <p className="mt-1 text-xs sm:text-sm text-muted">{t("description")}</p>
           </div>
-          <div className="flex items-center gap-3 shrink-0">
-            <Modal>
-              <Modal.Open opens="create-evaluation">
-                <Button variant="primary" size="md" className="flex items-center gap-2">
-                  <Plus className="h-4 w-4 shrink-0" />
-                  <span>{t("createEvaluation")}</span>
-                </Button>
-              </Modal.Open>
-              <Modal.Window name="create-evaluation" size="lg">
-                <WeeklyEvaluationCreateModal onSuccess={onSuccess} />
-              </Modal.Window>
-            </Modal>
-          </div>
+          {canCreate && (
+            <div className="flex items-center gap-3 shrink-0">
+              <Modal>
+                <Modal.Open opens="create-evaluation">
+                  <Button variant="primary" size="md" className="flex items-center gap-2">
+                    <Plus className="h-4 w-4 shrink-0" />
+                    <span>{t("createEvaluation")}</span>
+                  </Button>
+                </Modal.Open>
+                <Modal.Window name="create-evaluation" size="lg">
+                  <WeeklyEvaluationCreateModal onSuccess={onSuccess} />
+                </Modal.Window>
+              </Modal>
+            </div>
+          )}
         </div>
       </div>
     </MetalCard>

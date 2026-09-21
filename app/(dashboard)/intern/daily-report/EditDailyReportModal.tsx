@@ -357,7 +357,7 @@ export default function EditDailyReportModal({ report, onClose }: Props) {
                         </a>
                         <button
                           type="button"
-                          onClick={() => deleteAttachment.mutate(att.id)}
+                          onClick={() => deleteAttachment.mutate({ reportId: report.id, attachmentId: att.id })}
                           disabled={isPending || deleteAttachment.isPending}
                           className="text-xs text-slate-400 hover:text-rose-400 transition cursor-pointer"
                         >

@@ -14,6 +14,7 @@ import Modal from "@/components/ui/Modal";
 import Select from "@/components/ui/Select";
 
 import { useRoles } from "@/hooks/rbac/useRoles";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 type FormValues = {
     email: string;
@@ -23,6 +24,7 @@ type FormValues = {
 export default function AdminTeamHeader() {
     const t = useTranslations();
     const queryClient = useQueryClient();
+    const { can } = useRBAC();
 
     const { mutate: createAdmin, isPending } = useMutation({
         mutationFn: ({ email, roleId }: { email: string; roleId?: string }) =>
@@ -50,14 +52,16 @@ export default function AdminTeamHeader() {
                             </p>
                         </div>
 
-                        <div className="flex items-center gap-3">
-                            <Modal.Open opens="invite-admin">
-                                <button className="flex items-center gap-2 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2.5 text-sm font-medium text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20">
-                                    <UserPlus className="h-4 w-4" />
-                                    {t("admin.adminTeam.inviteAdmin")}
-                                </button>
-                            </Modal.Open>
-                        </div>
+                        {can("USER_CREATE") && (
+                            <div className="flex items-center gap-3">
+                                <Modal.Open opens="invite-admin">
+                                    <button className="flex items-center gap-2 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2.5 text-sm font-medium text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20">
+                                        <UserPlus className="h-4 w-4" />
+                                        {t("admin.adminTeam.inviteAdmin")}
+                                    </button>
+                                </Modal.Open>
+                            </div>
+                        )}
                     </div>
                 </div>
             </MetalCard>

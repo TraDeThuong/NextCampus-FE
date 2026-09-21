@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import DailyReportContent from "./DailyReportContent";
 
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations();
   return { title: t("intern.dailyReport.metaTitle") };
@@ -10,8 +12,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function DailyReportPage() {
   return (
-    <Suspense fallback={null}>
-      <DailyReportContent />
-    </Suspense>
+    <ProtectedRoute requiredPermissions={["DAILY_REPORT_READ"]}>
+      <Suspense fallback={null}>
+        <DailyReportContent />
+      </Suspense>
+    </ProtectedRoute>
   );
 }

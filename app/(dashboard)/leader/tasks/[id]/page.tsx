@@ -10,6 +10,7 @@ import { useUnblockTaskAssignment } from "@/hooks/task-assignment/useUnblockTask
 import Spinner from "@/components/ui/Spinner";
 import MetalCard from "@/components/ui/MetalCard";
 import TaskAiRecommendationModal from "../TaskAiRecommendationModal";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 const priorityBadge: Record<string, string> = {
   HIGH: "bg-rose-500/10 text-rose-400 border border-rose-500/20",
@@ -44,6 +45,14 @@ function formatSize(bytes: number) {
 }
 
 export default function TaskDetailPage() {
+  return (
+    <ProtectedRoute requiredPermissions={["TASK_READ"]}>
+      <TaskDetailContent />
+    </ProtectedRoute>
+  );
+}
+
+function TaskDetailContent() {
   const td = useTranslations("leader.tasks.detail");
   const { id } = useParams<{ id: string }>();
   const router = useRouter();

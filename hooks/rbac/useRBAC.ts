@@ -12,7 +12,7 @@ import {
 } from "@/lib/portal";
 
 export function useRBAC() {
-  const { state } = useAuth();
+  const { state, refreshUser } = useAuth();
   const user = state.user;
   const role = user?.role;
   const permissions = useMemo(() => user?.permissions ?? [], [user?.permissions]);
@@ -48,5 +48,6 @@ export function useRBAC() {
     can,
     canAny,
     canAll,
+    refreshUser,
   };
 }

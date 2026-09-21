@@ -4,6 +4,7 @@ import LeaderInternHeader from "./LeaderInternHeader";
 import LeaderInternStats from "./LeaderInternStats";
 import LeaderInternFilters from "./LeaderInternFilters";
 import LeaderInternTable from "./LeaderInternTable";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations();
@@ -12,11 +13,13 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function LeaderInternsPage() {
   return (
-    <div className="space-y-6">
-      <LeaderInternHeader />
-      <LeaderInternStats />
-      <LeaderInternFilters />
-      <LeaderInternTable />
-    </div>
+    <ProtectedRoute requiredPermissions={["INTERN_READ"]}>
+      <div className="space-y-6">
+        <LeaderInternHeader />
+        <LeaderInternStats />
+        <LeaderInternFilters />
+        <LeaderInternTable />
+      </div>
+    </ProtectedRoute>
   );
 }

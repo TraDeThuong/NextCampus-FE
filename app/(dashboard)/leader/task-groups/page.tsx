@@ -6,6 +6,7 @@ import TaskGroupHeader from "./TaskGroupHeader";
 import TaskGroupStats from "./TaskGroupStats";
 import TaskGroupFilter from "./TaskGroupFilter";
 import TaskGroupList from "./TaskGroupList";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations();
@@ -14,19 +15,21 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function LeaderTaskGroupsPage() {
   return (
-    <div className="space-y-6">
-      <TaskGroupHeader />
-      <Suspense
-        fallback={
-          <div className="flex justify-center py-10">
-            <Spinner size="md" />
-          </div>
-        }
-      >
-        <TaskGroupStats />
-        <TaskGroupFilter />
-        <TaskGroupList />
-      </Suspense>
-    </div>
+    <ProtectedRoute requiredPermissions={["TASK_GROUP_READ"]}>
+      <div className="space-y-6">
+        <TaskGroupHeader />
+        <Suspense
+          fallback={
+            <div className="flex justify-center py-10">
+              <Spinner size="md" />
+            </div>
+          }
+        >
+          <TaskGroupStats />
+          <TaskGroupFilter />
+          <TaskGroupList />
+        </Suspense>
+      </div>
+    </ProtectedRoute>
   );
 }

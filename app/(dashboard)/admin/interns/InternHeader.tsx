@@ -11,13 +11,22 @@ import PendingInternsTable from "./PendingInternsTable";
 import MetalCard from "@/components/ui/MetalCard";
 import Modal from "@/components/ui/Modal";
 import { useCreateInvite } from "@/hooks/application/useCreateInvite";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 export default function InternHeader() {
     const t = useTranslations();
+    const { can } = useRBAC();
+    const canCreateIntern = can("INTERN_CREATE");
+    const canCreateInvite = can("APPLICATION_CREATE");
+    const canReadApplications = can("APPLICATION_READ");
+
     const [showDirectModal, setShowDirectModal] = useState(false);
     const [showPending, setShowPending] = useState(false);
 
-    const { data: pendingData } = useApplications({ status: "PENDING" });
+    const { data: pendingData } = useApplications(
+        { status: "PENDING" },
+        { enabled: canReadApplications },
+    );
     const pendingCount = pendingData?.meta?.total ?? 0;
 
     const { mutate: createInvite, isPending } = useCreateInvite();
@@ -39,48 +48,54 @@ export default function InternHeader() {
                         </div>
 
                         <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
-                            <button
-                                type="button"
-                                onClick={() => setShowDirectModal(true)}
-                                className="flex items-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/50 hover:bg-emerald-500/20 active:scale-95 shadow-sm"
-                            >
-                                <UserCheck className="h-4 w-4 shrink-0" />
-                                <span>{t("admin.interns.directAdd")}</span>
-                            </button>
-
-                            <Modal.Open opens="invite-intern">
+                            {canCreateIntern && (
                                 <button
                                     type="button"
-                                    className="flex items-center gap-2 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2.5 text-sm font-medium text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20 active:scale-95 shadow-sm"
+                                    onClick={() => setShowDirectModal(true)}
+                                    className="flex items-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/50 hover:bg-emerald-500/20 active:scale-95 shadow-sm cursor-pointer"
                                 >
-                                    <UserPlus className="h-4 w-4 shrink-0" />
-                                    <span>{t("admin.interns.addIntern")}</span>
+                                    <UserCheck className="h-4 w-4 shrink-0" />
+                                    <span>{t("admin.interns.directAdd")}</span>
                                 </button>
-                            </Modal.Open>
+                            )}
 
-                            <button
-                                type="button"
-                                onClick={() => setShowPending((prev) => !prev)}
-                                className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition active:scale-95 shadow-sm ${
-                                    showPending
-                                        ? "border-cyan-400/50 bg-cyan-500/15 text-cyan-300"
-                                        : "border-border dark:border-white/10 bg-card/60 text-muted hover:border-border-strong hover:bg-card hover:text-foreground"
-                                }`}
-                            >
-                                <Clock className="h-4 w-4 shrink-0" />
-                                <span>{t("admin.interns.pendingInterns")}</span>
-                                {pendingCount > 0 && (
-                                    <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-500/20 px-1.5 text-xs font-semibold text-amber-400">
-                                        {pendingCount}
-                                    </span>
-                                )}
-                            </button>
+                            {canCreateInvite && (
+                                <Modal.Open opens="invite-intern">
+                                    <button
+                                        type="button"
+                                        className="flex items-center gap-2 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2.5 text-sm font-medium text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20 active:scale-95 shadow-sm cursor-pointer"
+                                    >
+                                        <UserPlus className="h-4 w-4 shrink-0" />
+                                        <span>{t("admin.interns.addIntern")}</span>
+                                    </button>
+                                </Modal.Open>
+                            )}
+
+                            {canReadApplications && (
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPending((prev) => !prev)}
+                                    className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition active:scale-95 shadow-sm cursor-pointer ${
+                                        showPending
+                                            ? "border-cyan-400/50 bg-cyan-500/15 text-cyan-300"
+                                            : "border-border dark:border-white/10 bg-card/60 text-muted hover:border-border-strong hover:bg-card hover:text-foreground"
+                                    }`}
+                                >
+                                    <Clock className="h-4 w-4 shrink-0" />
+                                    <span>{t("admin.interns.pendingInterns")}</span>
+                                    {pendingCount > 0 && (
+                                        <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-500/20 px-1.5 text-xs font-semibold text-amber-400">
+                                            {pendingCount}
+                                        </span>
+                                    )}
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
             </MetalCard>
 
-            {showPending && (
+            {canReadApplications && showPending && (
                 <div className="mt-6 animate-fadeIn">
                     <PendingInternsTable />
                 </div>

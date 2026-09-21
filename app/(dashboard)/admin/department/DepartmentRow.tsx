@@ -10,8 +10,9 @@ import {
   Briefcase,
   Building2,
 } from "lucide-react";
-import type { Department } from "@/types/department";
-import type { Leader } from "@/types/leader";
+import { Department } from "@/types/department";
+import { Leader } from "@/types/leader";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 import { useTranslations } from "next-intl";
 import Table from "@/components/ui/Table";
 import DepartmentLeaderSelect from "./DepartmentLeaderSelect";
@@ -36,6 +37,12 @@ export default function DepartmentRow({
   onOpenDelete,
 }: DepartmentRowProps) {
   const t = useTranslations();
+  const { can } = useRBAC();
+  const canEdit = can("DEPARTMENT_UPDATE");
+  const canPositions = can("POSITION_READ") || can("DEPARTMENT_UPDATE");
+  const canDelete = can("DEPARTMENT_DELETE");
+  const hasAnyAction = canEdit || canPositions || canDelete;
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -180,70 +187,80 @@ export default function DepartmentRow({
 
       {/* 5. Actions Dropdown */}
       <div className="relative text-right">
-        <button
-          ref={triggerRef}
-          type="button"
-          aria-label="Department actions"
-          aria-haspopup="menu"
-          aria-expanded={menuOpen}
-          aria-controls={`dept-actions-${menuId}`}
-          onClick={toggleMenu}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-card/40 text-muted transition hover:border-white/20 hover:bg-card hover:text-foreground active:scale-95 cursor-pointer"
-        >
-          <MoreVertical className="h-4 w-4 shrink-0" />
-        </button>
-
-        {menuOpen &&
-          typeof document !== "undefined" &&
-          createPortal(
-            <div
-              id={`dept-actions-${menuId}`}
-              ref={menuRef}
-              role="menu"
-              style={menuStyle}
-              className="rounded-2xl border border-white/10 bg-[#0c1322]/95 p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn text-left"
+        {hasAnyAction && (
+          <>
+            <button
+              ref={triggerRef}
+              type="button"
+              aria-label="Department actions"
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              aria-controls={`dept-actions-${menuId}`}
+              onClick={toggleMenu}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-card/40 text-muted transition hover:border-white/20 hover:bg-card hover:text-foreground active:scale-95 cursor-pointer"
             >
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onOpenEdit(department);
-                }}
-                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground/90 transition hover:bg-white/10 hover:text-foreground active:scale-98 cursor-pointer"
-              >
-                <Edit3 className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
-                <span>{t("admin.department.editDepartment")}</span>
-              </button>
+              <MoreVertical className="h-4 w-4 shrink-0" />
+            </button>
 
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onOpenPositions(department);
-                }}
-                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground/90 transition hover:bg-emerald-500/15 hover:text-emerald-300 active:scale-98 cursor-pointer"
-              >
-                <Settings className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
-                <span>{t("admin.department.positions")}</span>
-              </button>
+            {menuOpen &&
+              typeof document !== "undefined" &&
+              createPortal(
+                <div
+                  id={`dept-actions-${menuId}`}
+                  ref={menuRef}
+                  role="menu"
+                  style={menuStyle}
+                  className="rounded-2xl border border-white/10 bg-[#0c1322]/95 p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn text-left"
+                >
+                  {canEdit && (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        onOpenEdit(department);
+                      }}
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground/90 transition hover:bg-white/10 hover:text-foreground active:scale-98 cursor-pointer"
+                    >
+                      <Edit3 className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
+                      <span>{t("admin.department.editDepartment")}</span>
+                    </button>
+                  )}
 
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onOpenDelete(department);
-                }}
-                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-rose-400 transition hover:bg-rose-500/15 hover:text-rose-300 active:scale-98 cursor-pointer"
-              >
-                <Trash2 className="h-3.5 w-3.5 shrink-0" />
-                <span>{t("admin.department.delete")}</span>
-              </button>
-            </div>,
-            document.body
-          )}
+                  {canPositions && (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        onOpenPositions(department);
+                      }}
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground/90 transition hover:bg-emerald-500/15 hover:text-emerald-300 active:scale-98 cursor-pointer"
+                    >
+                      <Settings className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                      <span>{t("admin.department.positions")}</span>
+                    </button>
+                  )}
+
+                  {canDelete && (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        onOpenDelete(department);
+                      }}
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-rose-400 transition hover:bg-rose-500/15 hover:text-rose-300 active:scale-98 cursor-pointer"
+                    >
+                      <Trash2 className="h-3.5 w-3.5 shrink-0" />
+                      <span>{t("admin.department.delete")}</span>
+                    </button>
+                  )}
+                </div>,
+                document.body
+              )}
+          </>
+        )}
       </div>
     </Table.Row>
   );

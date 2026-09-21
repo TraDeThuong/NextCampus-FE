@@ -22,6 +22,7 @@ import {
   Download,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 import { useTask } from "@/hooks/task/useTask";
 import { useTaskSubmissions } from "@/hooks/task-submission/useTaskSubmissions";
 import { useStartTaskAssignment } from "@/hooks/task-assignment/useStartTaskAssignment";
@@ -61,7 +62,13 @@ export default function TaskDetailModal({
   onEditSubmission,
 }: TaskDetailModalProps) {
   const t = useTranslations("intern.tasks");
-  const { data: taskData, isLoading: taskLoading } = useTask(assignment.taskId);
+  const { can } = useRBAC();
+  const canReadTask = can("TASK_READ");
+  const canReadSubmissions = can("TASK_SUBMISSION_READ");
+  const canStartTask = can("TASK_ASSIGNMENT_UPDATE");
+  const canSubmitTask = can("TASK_SUBMISSION_CREATE");
+
+  const { data: taskData, isLoading: taskLoading } = useTask(assignment.taskId, { enabled: canReadTask });
   const task = taskData?.data ?? null;
   const basicTask = task ?? assignment.task;
 
@@ -76,7 +83,7 @@ export default function TaskDetailModal({
     limit: 20,
     sortBy: "attempt",
     order: "desc",
-  });
+  }, canReadSubmissions);
 
   const submissions = submissionsData?.data ?? [];
   const latestSubmission = submissions[0] ?? null;
@@ -157,7 +164,7 @@ export default function TaskDetailModal({
                 </div>
               )}
 
-              {assignment.status === "TODO" && (
+              {assignment.status === "TODO" && canStartTask && (
                 <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-3">
                   <div className="flex items-center gap-2">
                     <Play className="h-4 w-4 text-cyan-400 shrink-0" />
@@ -206,31 +213,33 @@ export default function TaskDetailModal({
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2.5">
-                      {latestSubmission?.reviewStatus !== "PENDING" && (
-                        <button
-                          onClick={onOpenSubmission}
-                          className="flex items-center gap-1.5 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-xs font-medium text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20 active:scale-95 cursor-pointer shadow-sm"
-                        >
-                          <Send className="h-3.5 w-3.5" />
-                          {t("submitWork")}
-                        </button>
-                      )}
+                    {canSubmitTask && (
+                      <div className="flex items-center gap-2.5">
+                        {latestSubmission?.reviewStatus !== "PENDING" && (
+                          <button
+                            onClick={onOpenSubmission}
+                            className="flex items-center gap-1.5 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-xs font-medium text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20 active:scale-95 cursor-pointer shadow-sm"
+                          >
+                            <Send className="h-3.5 w-3.5" />
+                            {t("submitWork")}
+                          </button>
+                        )}
 
-                      {!showBlockForm && (
-                        <button
-                          type="button"
-                          onClick={() => setShowBlockForm(true)}
-                          className="flex items-center gap-1.5 rounded-xl border border-amber-400/30 bg-amber-500/10 px-3.5 py-2 text-xs font-medium text-amber-300 transition hover:bg-amber-500/20 active:scale-95 cursor-pointer"
-                        >
-                          <AlertTriangle className="h-3.5 w-3.5" />
-                          {t("blockTask")}
-                        </button>
-                      )}
-                    </div>
+                        {!showBlockForm && (
+                          <button
+                            type="button"
+                            onClick={() => setShowBlockForm(true)}
+                            className="flex items-center gap-1.5 rounded-xl border border-amber-400/30 bg-amber-500/10 px-3.5 py-2 text-xs font-medium text-amber-300 transition hover:bg-amber-500/20 active:scale-95 cursor-pointer"
+                          >
+                            <AlertTriangle className="h-3.5 w-3.5" />
+                            {t("blockTask")}
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
 
-                  {showBlockForm && (
+                  {canSubmitTask && showBlockForm && (
                     <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 space-y-3">
                       <div>
                         <label
@@ -416,7 +425,7 @@ export default function TaskDetailModal({
               )}
 
               {/* Submission History */}
-              {submissions.length > 0 && (
+              {canReadSubmissions && submissions.length > 0 && (
                 <div className="space-y-3 pt-4 border-t border-border/60">
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-cyan-400" />

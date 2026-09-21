@@ -7,6 +7,7 @@ import RolesFilter from "./RolesFilter";
 import RolesTable from "./RolesTable";
 import Spinner from "@/components/ui/Spinner";
 import MetalCard from "@/components/ui/MetalCard";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations();
@@ -15,19 +16,21 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function RolesPage() {
   return (
-    <div className="space-y-6">
-      <RolesHeader />
-      <RolesStats />
-      <Suspense
-        fallback={
-          <MetalCard className="flex items-center justify-center py-20">
-            <Spinner size="lg" />
-          </MetalCard>
-        }
-      >
-        <RolesFilter />
-        <RolesTable />
-      </Suspense>
-    </div>
+    <ProtectedRoute requiredPermissions={["ROLE_READ"]}>
+      <div className="space-y-6">
+        <RolesHeader />
+        <RolesStats />
+        <Suspense
+          fallback={
+            <MetalCard className="flex items-center justify-center py-20">
+              <Spinner size="lg" />
+            </MetalCard>
+          }
+        >
+          <RolesFilter />
+          <RolesTable />
+        </Suspense>
+      </div>
+    </ProtectedRoute>
   );
 }

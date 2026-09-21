@@ -19,6 +19,7 @@ import { useTranslations } from "next-intl";
 import Table from "@/components/ui/Table";
 import { useTaskAssignments } from "@/hooks/task-assignment/useTaskAssignments";
 import { useStartTaskAssignment } from "@/hooks/task-assignment/useStartTaskAssignment";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 import type { TaskAssignment, AssignmentStatus } from "@/types/task-assignment";
 import type { TaskSubmission } from "@/types/task-submission";
 import TaskDetailModal from "./TaskDetailModal";
@@ -551,6 +552,16 @@ function TaskTableRowActions({
   onOpenSubmission: () => void;
 }) {
   const t = useTranslations("intern.tasks");
+  const { can, canAny } = useRBAC();
+  const canView = canAny(["TASK_READ", "TASK_ASSIGNMENT_READ"]);
+  const canStart = can("TASK_ASSIGNMENT_UPDATE");
+  const canSubmit = can("TASK_SUBMISSION_CREATE");
+
+  const showStart = canStart && assignment.status === "TODO";
+  const showSubmit = canSubmit && assignment.status === "IN_PROGRESS";
+  const showBlock = canSubmit && assignment.status === "IN_PROGRESS";
+  const hasAnyAction = canView || showStart || showSubmit || showBlock;
+
   const startTaskMutation = useStartTaskAssignment();
   const [menuOpen, setMenuOpen] = useState(false);
   const [coords, setCoords] = useState<{ top: number; left: number }>({
@@ -637,6 +648,10 @@ function TaskTableRowActions({
     };
   }, [menuOpen]);
 
+  if (!hasAnyAction) {
+    return null;
+  }
+
   return (
     <>
       <button
@@ -671,20 +686,22 @@ function TaskTableRowActions({
             onClick={(e) => e.stopPropagation()}
           >
             {/* View Details */}
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                onOpenDetail();
-              }}
-              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-white/5 hover:text-cyan-400 transition cursor-pointer"
-            >
-              <Eye className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
-              <span>{t("viewDetails")}</span>
-            </button>
+            {canView && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onOpenDetail();
+                }}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-white/5 hover:text-cyan-400 transition cursor-pointer"
+              >
+                <Eye className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
+                <span>{t("viewDetails")}</span>
+              </button>
+            )}
 
             {/* Start Task (TODO) */}
-            {assignment.status === "TODO" && (
+            {showStart && (
               <button
                 type="button"
                 onClick={() => {
@@ -700,7 +717,7 @@ function TaskTableRowActions({
             )}
 
             {/* Submit Work (IN_PROGRESS) */}
-            {assignment.status === "IN_PROGRESS" && (
+            {showSubmit && (
               <button
                 type="button"
                 onClick={() => {
@@ -715,7 +732,7 @@ function TaskTableRowActions({
             )}
 
             {/* Report Blocker (IN_PROGRESS) */}
-            {assignment.status === "IN_PROGRESS" && (
+            {showBlock && (
               <button
                 type="button"
                 onClick={() => {

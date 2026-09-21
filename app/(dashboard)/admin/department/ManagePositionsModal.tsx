@@ -21,6 +21,7 @@ import {
   PREDEFINED_POSITIONS,
   GENERAL_POSITIONS,
 } from "@/types/department";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 interface ManagePositionsModalProps {
   isOpen: boolean;
@@ -34,6 +35,11 @@ export default function ManagePositionsModal({
   department,
 }: ManagePositionsModalProps) {
   const t = useTranslations();
+  const { can } = useRBAC();
+  const canCreatePos = can("POSITION_CREATE");
+  const canUpdatePos = can("POSITION_UPDATE");
+  const canDeletePos = can("POSITION_DELETE");
+
   const { mutate: createPosition, isPending: creating } = useCreatePosition();
   const { mutate: updatePosition } = useUpdatePosition();
   const { mutate: deletePosition } = useDeletePosition();
@@ -225,42 +231,46 @@ export default function ManagePositionsModal({
                       </button>
                     ) : (
                       <>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditingPosId(pos.id);
-                            setEditingPosName(pos.name);
-                            setOriginalEditPosTyped(pos.name);
-                            setEditPosSuggestIdx(0);
-                          }}
-                          className="p-1.5 rounded-lg text-muted hover:text-cyan-400 hover:bg-cyan-500/10 transition active:scale-95 cursor-pointer"
-                          aria-label={`Edit ${pos.name}`}
-                          title={t("admin.department.rename")}
-                        >
-                          <Edit3 className="h-4 w-4 shrink-0" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (
-                              confirm(
-                                t("admin.department.deletePositionConfirm", {
-                                  name: pos.name,
-                                })
-                              )
-                            ) {
-                              deletePosition({
-                                id: pos.id,
-                                departmentId: department.id,
-                              });
-                            }
-                          }}
-                          className="p-1.5 rounded-lg text-muted hover:text-rose-400 hover:bg-rose-500/10 transition active:scale-95 cursor-pointer"
-                          aria-label={`Delete ${pos.name}`}
-                          title={t("admin.department.delete")}
-                        >
-                          <Trash2 className="h-4 w-4 shrink-0" />
-                        </button>
+                        {canUpdatePos && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingPosId(pos.id);
+                              setEditingPosName(pos.name);
+                              setOriginalEditPosTyped(pos.name);
+                              setEditPosSuggestIdx(0);
+                            }}
+                            className="p-1.5 rounded-lg text-muted hover:text-cyan-400 hover:bg-cyan-500/10 transition active:scale-95 cursor-pointer"
+                            aria-label={`Edit ${pos.name}`}
+                            title={t("admin.department.rename")}
+                          >
+                            <Edit3 className="h-4 w-4 shrink-0" />
+                          </button>
+                        )}
+                        {canDeletePos && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (
+                                confirm(
+                                  t("admin.department.deletePositionConfirm", {
+                                    name: pos.name,
+                                  })
+                                )
+                              ) {
+                                deletePosition({
+                                  id: pos.id,
+                                  departmentId: department.id,
+                                });
+                              }
+                            }}
+                            className="p-1.5 rounded-lg text-muted hover:text-rose-400 hover:bg-rose-500/10 transition active:scale-95 cursor-pointer"
+                            aria-label={`Delete ${pos.name}`}
+                            title={t("admin.department.delete")}
+                          >
+                            <Trash2 className="h-4 w-4 shrink-0" />
+                          </button>
+                        )}
                       </>
                     )}
                   </div>
@@ -271,10 +281,11 @@ export default function ManagePositionsModal({
         </div>
 
         {/* Add Position Form */}
-        <form
-          onSubmit={handleAddPosition}
-          className="mt-5 border-t border-border pt-4 space-y-2"
-        >
+        {canCreatePos && (
+          <form
+            onSubmit={handleAddPosition}
+            className="mt-5 border-t border-border pt-4 space-y-2"
+          >
           <label className="text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center gap-1">
             {t("admin.department.addPositionField")}
           </label>
@@ -335,6 +346,7 @@ export default function ManagePositionsModal({
             </button>
           </div>
         </form>
+      )}
 
         {/* Close Button */}
         <div className="flex justify-end pt-4 mt-4 border-t border-border">

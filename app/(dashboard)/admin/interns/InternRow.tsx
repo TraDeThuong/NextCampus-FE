@@ -15,6 +15,7 @@ import { usePositions } from "@/hooks/department/usePositions";
 import Table from "@/components/ui/Table";
 import Modal from "@/components/ui/Modal";
 import InlineSelect from "@/components/ui/InlineSelect";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 type InternRowProps = {
     intern: Intern;
@@ -24,6 +25,13 @@ export default function InternRow({ intern }: InternRowProps) {
     const t = useTranslations();
     const locale = useLocale();
     const router = useRouter();
+    const { can } = useRBAC();
+    const canAssignLeader = can("INTERN_LEADER_ASSIGN") || can("INTERN_UPDATE");
+    const canUpdateIntern = can("INTERN_UPDATE");
+    const canDeleteIntern = can("INTERN_DELETE");
+    const canViewIntern = can("INTERN_READ");
+    const hasAnyAction = canViewIntern || canDeleteIntern;
+
     const { mutate: deleteIntern, isPending: isDeleting } = useDeleteIntern();
     const { data: leadersData } = useLeaders();
     const { mutate: updateIntern } = useUpdateIntern();
@@ -248,60 +256,78 @@ export default function InternRow({ intern }: InternRowProps) {
 
                 {/* Leader */}
                 <div className="text-sm text-muted">
-                    <InlineSelect
-                        ariaLabel="Leader"
-                        value={intern.leaderId}
-                        placeholder={t("admin.interns.notSet")}
-                        loading={updatingField === "leader"}
-                        onChange={handleLeaderChange}
-                        options={[
-                            { value: null, label: t("admin.interns.notSet") },
-                            ...leaders.map((l) => ({
-                                value: l.userId,
-                                label: l.user.fullName ? `${l.user.fullName} (${l.user.email})` : l.user.email,
-                            })),
-                        ]}
-                    />
+                    {canAssignLeader ? (
+                        <InlineSelect
+                            ariaLabel="Leader"
+                            value={intern.leaderId}
+                            placeholder={t("admin.interns.notSet")}
+                            loading={updatingField === "leader"}
+                            onChange={handleLeaderChange}
+                            options={[
+                                { value: null, label: t("admin.interns.notSet") },
+                                ...leaders.map((l) => ({
+                                    value: l.userId,
+                                    label: l.user.fullName ? `${l.user.fullName} (${l.user.email})` : l.user.email,
+                                })),
+                            ]}
+                        />
+                    ) : (
+                        <span className="truncate font-medium text-foreground">
+                            {selectedLeader?.user?.fullName ?? selectedLeader?.user?.email ?? t("admin.interns.notSet")}
+                        </span>
+                    )}
                 </div>
 
                 {/* Department */}
                 <div className="text-sm text-muted">
-                    <InlineSelect
-                        ariaLabel="Department"
-                        value={intern.department?.id ?? null}
-                        placeholder={t("admin.interns.notSet")}
-                        loading={updatingField === "department"}
-                        disabled={!intern.leaderId}
-                        onDisabledClick={() => toast.error(t("admin.interns.selectLeaderFirst"))}
-                        onChange={handleDepartmentChange}
-                        options={[
-                            { value: null, label: t("admin.interns.notSet") },
-                            ...allowedDepartments.map((d) => ({
-                                value: d.id,
-                                label: d.name,
-                            })),
-                        ]}
-                    />
+                    {canUpdateIntern ? (
+                        <InlineSelect
+                            ariaLabel="Department"
+                            value={intern.department?.id ?? null}
+                            placeholder={t("admin.interns.notSet")}
+                            loading={updatingField === "department"}
+                            disabled={!intern.leaderId}
+                            onDisabledClick={() => toast.error(t("admin.interns.selectLeaderFirst"))}
+                            onChange={handleDepartmentChange}
+                            options={[
+                                { value: null, label: t("admin.interns.notSet") },
+                                ...allowedDepartments.map((d) => ({
+                                    value: d.id,
+                                    label: d.name,
+                                })),
+                            ]}
+                        />
+                    ) : (
+                        <span className="truncate font-medium text-foreground">
+                            {intern.department?.name ?? t("admin.interns.notSet")}
+                        </span>
+                    )}
                 </div>
 
                 {/* Position */}
                 <div className="text-sm text-muted">
-                    <InlineSelect
-                        ariaLabel="Position"
-                        value={intern.position?.id ?? null}
-                        placeholder={t("admin.interns.notSet")}
-                        loading={updatingField === "position"}
-                        disabled={!intern.department?.id}
-                        onDisabledClick={() => toast.error(t("admin.interns.departmentRequired"))}
-                        onChange={handlePositionChange}
-                        options={[
-                            { value: null, label: t("admin.interns.notSet") },
-                            ...positions.map((p) => ({
-                                value: p.id,
-                                label: p.name,
-                            })),
-                        ]}
-                    />
+                    {canUpdateIntern ? (
+                        <InlineSelect
+                            ariaLabel="Position"
+                            value={intern.position?.id ?? null}
+                            placeholder={t("admin.interns.notSet")}
+                            loading={updatingField === "position"}
+                            disabled={!intern.department?.id}
+                            onDisabledClick={() => toast.error(t("admin.interns.departmentRequired"))}
+                            onChange={handlePositionChange}
+                            options={[
+                                { value: null, label: t("admin.interns.notSet") },
+                                ...positions.map((p) => ({
+                                    value: p.id,
+                                    label: p.name,
+                                })),
+                            ]}
+                        />
+                    ) : (
+                        <span className="truncate text-muted">
+                            {intern.position?.name ?? t("admin.interns.notSet")}
+                        </span>
+                    )}
                 </div>
 
                 {/* Duration */}
@@ -312,46 +338,63 @@ export default function InternRow({ intern }: InternRowProps) {
 
                 {/* Status */}
                 <div>
-                    <InlineSelect
-                        ariaLabel="Status"
-                        value={intern.status}
-                        placeholder={t("admin.interns.colStatus")}
-                        loading={updatingField === "status"}
-                        onChange={(val) => handleStatusChange(val as Intern["status"])}
-                        options={[
-                            { value: "ACTIVE", label: t("admin.interns.active") },
-                            { value: "COMPLETED", label: t("admin.interns.completed") },
-                            { value: "DROPPED", label: t("admin.interns.dropped") },
-                        ]}
-                        renderTrigger={(label) => (
-                            <span
-                                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition ${
-                                    statusBadge[intern.status] ?? ""
-                                }`}
-                            >
-                                <Circle className="h-2 w-2 fill-current" />
-                                {label}
-                            </span>
-                        )}
-                    />
+                    {canUpdateIntern ? (
+                        <InlineSelect
+                            ariaLabel="Status"
+                            value={intern.status}
+                            placeholder={t("admin.interns.colStatus")}
+                            loading={updatingField === "status"}
+                            onChange={(val) => handleStatusChange(val as Intern["status"])}
+                            options={[
+                                { value: "ACTIVE", label: t("admin.interns.active") },
+                                { value: "COMPLETED", label: t("admin.interns.completed") },
+                                { value: "DROPPED", label: t("admin.interns.dropped") },
+                            ]}
+                            renderTrigger={(label) => (
+                                <span
+                                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition ${
+                                        statusBadge[intern.status] ?? ""
+                                    }`}
+                                >
+                                    <Circle className="h-2 w-2 fill-current" />
+                                    {label}
+                                </span>
+                            )}
+                        />
+                    ) : (
+                        <span
+                            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${
+                                statusBadge[intern.status] ?? ""
+                            }`}
+                        >
+                            <Circle className="h-2 w-2 fill-current" />
+                            {intern.status === "ACTIVE"
+                                ? t("admin.interns.active")
+                                : intern.status === "COMPLETED"
+                                  ? t("admin.interns.completed")
+                                  : t("admin.interns.dropped")}
+                        </span>
+                    )}
                 </div>
 
                 {/* Standardized Actions Column with Portal Action Menu */}
                 <div className="flex items-center justify-end">
-                    <button
-                        ref={triggerRef}
-                        type="button"
-                        id={`intern-action-trigger-${menuId}`}
-                        aria-label="Thao tác"
-                        aria-expanded={menuOpen}
-                        aria-haspopup="true"
-                        onClick={toggleMenu}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-muted transition hover:border-white/10 hover:bg-white/5 hover:text-foreground active:scale-95"
-                    >
-                        <MoreVertical className="h-4 w-4" />
-                    </button>
+                    {hasAnyAction && (
+                        <button
+                            ref={triggerRef}
+                            type="button"
+                            id={`intern-action-trigger-${menuId}`}
+                            aria-label="Thao tác"
+                            aria-expanded={menuOpen}
+                            aria-haspopup="true"
+                            onClick={toggleMenu}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-muted transition hover:border-white/10 hover:bg-white/5 hover:text-foreground active:scale-95"
+                        >
+                            <MoreVertical className="h-4 w-4" />
+                        </button>
+                    )}
 
-                    {menuOpen &&
+                    {hasAnyAction && menuOpen &&
                         createPortal(
                             <div
                                 ref={menuRef}
@@ -360,30 +403,34 @@ export default function InternRow({ intern }: InternRowProps) {
                                 style={menuStyle}
                                 className="rounded-2xl border border-white/10 bg-[#0c1322]/95 p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn"
                             >
-                                <button
-                                    type="button"
-                                    role="menuitem"
-                                    onClick={() => {
-                                        setMenuOpen(false);
-                                        router.push(`/admin/interns/${intern.id}`);
-                                    }}
-                                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground/90 transition hover:bg-white/10 hover:text-cyan-400 active:scale-98"
-                                >
-                                    <Eye className="h-4 w-4 shrink-0 text-cyan-400" />
-                                    {t("admin.interns.view")}
-                                </button>
-
-                                <Modal.Open opens={`delete-intern-${intern.id}`}>
+                                {canViewIntern && (
                                     <button
                                         type="button"
                                         role="menuitem"
-                                        onClick={() => setMenuOpen(false)}
-                                        className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-rose-400 transition hover:bg-rose-500/10 hover:text-rose-300 active:scale-98"
+                                        onClick={() => {
+                                            setMenuOpen(false);
+                                            router.push(`/admin/interns/${intern.id}`);
+                                        }}
+                                        className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground/90 transition hover:bg-white/10 hover:text-cyan-400 active:scale-98"
                                     >
-                                        <Trash2 className="h-4 w-4 shrink-0" />
-                                        {t("admin.interns.delete")}
+                                        <Eye className="h-4 w-4 shrink-0 text-cyan-400" />
+                                        {t("admin.interns.view")}
                                     </button>
-                                </Modal.Open>
+                                )}
+
+                                {canDeleteIntern && (
+                                    <Modal.Open opens={`delete-intern-${intern.id}`}>
+                                        <button
+                                            type="button"
+                                            role="menuitem"
+                                            onClick={() => setMenuOpen(false)}
+                                            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-rose-400 transition hover:bg-rose-500/10 hover:text-rose-300 active:scale-98"
+                                        >
+                                            <Trash2 className="h-4 w-4 shrink-0" />
+                                            {t("admin.interns.delete")}
+                                        </button>
+                                    </Modal.Open>
+                                )}
                             </div>,
                             document.body,
                         )}

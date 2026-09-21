@@ -11,6 +11,7 @@ import { leaderService } from "@/services/leader.service";
 import MetalCard from "@/components/ui/MetalCard";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 type FormValues = {
     email: string;
@@ -19,6 +20,7 @@ type FormValues = {
 export default function LeaderHeader() {
     const t = useTranslations();
     const queryClient = useQueryClient();
+    const { can } = useRBAC();
 
     const { mutate: createLeader, isPending } = useMutation({
         mutationFn: async (email: string) => {
@@ -57,17 +59,19 @@ export default function LeaderHeader() {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-3">
-                            <Modal.Open opens="add-leader">
-                                <button
-                                    type="button"
-                                    className="flex items-center gap-2 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2.5 text-sm font-medium text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
-                                >
-                                    <UserPlus className="h-4 w-4 shrink-0" />
-                                    {t("admin.leaders.addLeader")}
-                                </button>
-                            </Modal.Open>
-                        </div>
+                        {can("LEADER_CREATE") && (
+                            <div className="flex items-center gap-3">
+                                <Modal.Open opens="add-leader">
+                                    <button
+                                        type="button"
+                                        className="flex items-center gap-2 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2.5 text-sm font-medium text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+                                    >
+                                        <UserPlus className="h-4 w-4 shrink-0" />
+                                        {t("admin.leaders.addLeader")}
+                                    </button>
+                                </Modal.Open>
+                            </div>
+                        )}
                     </div>
                 </div>
             </MetalCard>

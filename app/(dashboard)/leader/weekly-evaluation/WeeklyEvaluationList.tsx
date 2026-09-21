@@ -12,6 +12,7 @@ import { AuthContext } from "@/contexts/AuthContext";
 import { useWeeklyEvaluations } from "@/hooks/weekly-evaluation/useWeeklyEvaluations";
 import { useDeleteWeeklyEvaluation } from "@/hooks/weekly-evaluation/useDeleteWeeklyEvaluation";
 import { useInterns } from "@/hooks/intern/useInterns";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 import WeeklyEvaluationHeader from "./WeeklyEvaluationHeader";
 import WeeklyEvaluationStats, { type WeeklyEvaluationOverviewStats } from "./WeeklyEvaluationStats";
 import WeeklyEvaluationFilter from "./WeeklyEvaluationFilter";
@@ -27,6 +28,11 @@ export default function WeeklyEvaluationList() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+
+  const { can } = useRBAC();
+  const canReadInterns = can("INTERN_READ");
+  const canCreate = can("WEEKLY_EVALUATION_CREATE");
+  const canDelete = can("WEEKLY_EVALUATION_DELETE");
 
   const deleteEvaluation = useDeleteWeeklyEvaluation();
   const auth = useContext(AuthContext);
@@ -58,11 +64,14 @@ export default function WeeklyEvaluationList() {
   );
 
   // Active interns for filter options
-  const { data: internsData } = useInterns({
-    status: "ACTIVE",
-    leaderId: currentUserId || undefined,
-    limit: 100,
-  });
+  const { data: internsData } = useInterns(
+    {
+      status: "ACTIVE",
+      leaderId: currentUserId || undefined,
+      limit: 100,
+    },
+    { enabled: canReadInterns }
+  );
   const interns = useMemo(() => internsData?.data ?? [], [internsData]);
 
   // Overall evaluations query for accurate stats calculation
@@ -240,7 +249,7 @@ export default function WeeklyEvaluationList() {
                 <Button variant="glass" size="sm" onClick={handleResetFilters}>
                   {t("clearFilter")}
                 </Button>
-              ) : (
+              ) : canCreate ? (
                 <Modal>
                   <Modal.Open opens="create-evaluation-empty">
                     <Button variant="primary" size="sm" className="inline-flex items-center gap-1.5">
@@ -252,7 +261,7 @@ export default function WeeklyEvaluationList() {
                     <WeeklyEvaluationCreateModal onSuccess={refetchBoth} />
                   </Modal.Window>
                 </Modal>
-              )}
+              ) : null}
             </div>
           </div>
         ) : (
@@ -329,15 +338,17 @@ export default function WeeklyEvaluationList() {
                       </Button>
                     </Link>
                     <WeeklyEvaluationExportButton id={item.id} />
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => handleDelete(item.id)}
-                      disabled={deleteEvaluation.isPending}
-                      className="flex items-center justify-center"
-                    >
-                      <Trash2 className="h-3.5 w-3.5 shrink-0" />
-                    </Button>
+                    {canDelete && (
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => handleDelete(item.id)}
+                        disabled={deleteEvaluation.isPending}
+                        className="flex items-center justify-center"
+                      >
+                        <Trash2 className="h-3.5 w-3.5 shrink-0" />
+                      </Button>
+                    )}
                   </div>
                 </Table.Row>
               );

@@ -59,3 +59,52 @@ export function hasAllPermissions(
   if (!userPermissions || !Array.isArray(userPermissions)) return false;
   return permissions.every((perm) => userPermissions.includes(perm));
 }
+
+/**
+ * Determine the first accessible path based on user role and permissions,
+ * falling back to the user's profile page which is always accessible.
+ */
+export function getFirstAuthorizedPath(
+  role?: string | null,
+  permissions: string[] = []
+): string {
+  const portal = getPortalName(role);
+
+  if (portal === "admin") {
+    if (hasPermission(permissions, "STATS_ADMIN_READ")) return "/admin/dashboard";
+    if (hasPermission(permissions, "USER_READ")) return "/admin/admin-team";
+    if (hasPermission(permissions, "DEPARTMENT_READ")) return "/admin/department";
+    if (hasPermission(permissions, "LEADER_READ")) return "/admin/leaders";
+    if (hasPermission(permissions, "APPLICATION_READ")) return "/admin/onboarding";
+    if (hasPermission(permissions, "INTERN_READ")) return "/admin/interns";
+    if (hasPermission(permissions, "MEETING_READ")) return "/admin/meetings";
+    if (hasPermission(permissions, "ROLE_READ")) return "/admin/roles";
+    if (hasPermission(permissions, "NOTIFICATION_TEMPLATE_READ")) return "/admin/emails";
+    if (hasPermission(permissions, "SYSTEM_CONFIG_READ")) return "/admin/settings";
+    if (hasPermission(permissions, "AUDIT_LOG_READ")) return "/admin/activity-logs";
+    return "/admin/profile";
+  }
+
+  if (portal === "leader") {
+    if (hasAnyPermission(permissions, ["STATS_LEADER_READ", "STATS_ADMIN_READ"])) return "/leader/dashboard";
+    if (hasPermission(permissions, "INTERN_READ")) return "/leader/interns";
+    if (hasPermission(permissions, "DEPARTMENT_READ")) return "/leader/department";
+    if (hasPermission(permissions, "TASK_GROUP_READ")) return "/leader/task-groups";
+    if (hasPermission(permissions, "TASK_READ")) return "/leader/tasks";
+    if (hasPermission(permissions, "MEETING_READ")) return "/leader/meetings";
+    if (hasPermission(permissions, "DAILY_REPORT_READ")) return "/leader/daily-reports";
+    if (hasPermission(permissions, "WEEKLY_EVALUATION_READ")) return "/leader/weekly-evaluation";
+    return "/leader/profile";
+  }
+
+  if (portal === "intern") {
+    if (hasAnyPermission(permissions, ["STATS_INTERN_READ", "STATS_LEADER_READ", "STATS_ADMIN_READ"])) return "/intern/dashboard";
+    if (hasAnyPermission(permissions, ["TASK_READ", "TASK_ASSIGNMENT_READ"])) return "/intern/task";
+    if (hasPermission(permissions, "MEETING_READ")) return "/intern/meetings";
+    if (hasPermission(permissions, "DAILY_REPORT_READ")) return "/intern/daily-report";
+    if (hasPermission(permissions, "WEEKLY_EVALUATION_READ")) return "/intern/weekly-evaluation";
+    return "/intern/profile";
+  }
+
+  return "/login";
+}

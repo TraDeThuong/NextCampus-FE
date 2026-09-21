@@ -7,6 +7,7 @@ import type { Department } from "@/types/department";
 import { useCreatePosition } from "@/hooks/department/useCreatePosition";
 import { useUpdatePosition } from "@/hooks/department/useUpdatePosition";
 import { useDeletePosition } from "@/hooks/department/useDeletePosition";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 import { PREDEFINED_POSITIONS, GENERAL_POSITIONS } from "@/types/department";
 import Table from "@/components/ui/Table";
 import Modal from "@/components/ui/Modal";
@@ -17,6 +18,11 @@ type DepartmentRowProps = {
 
 export default function DepartmentRow({ department }: DepartmentRowProps) {
   const t = useTranslations("leader.department");
+  const { can } = useRBAC();
+  const canCreatePos = can("POSITION_CREATE");
+  const canUpdatePos = can("POSITION_UPDATE");
+  const canDeletePos = can("POSITION_DELETE");
+  const canManagePositions = canCreatePos || canUpdatePos || canDeletePos;
 
   return (
     <Modal>
@@ -59,26 +65,45 @@ export default function DepartmentRow({ department }: DepartmentRowProps) {
         </div>
 
         <div className="text-right pr-4">
-          <Modal.Open opens={`leader-manage-positions-${department.id}`}>
-            <button
-              type="button"
-              title={t("managePositions")}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-slate-400 transition hover:border-white/10 hover:bg-white/5 hover:text-white"
-            >
-              <Settings className="h-4 w-4" />
-            </button>
-          </Modal.Open>
+          {canManagePositions && (
+            <Modal.Open opens={`leader-manage-positions-${department.id}`}>
+              <button
+                type="button"
+                title={t("managePositions")}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-slate-400 transition hover:border-white/10 hover:bg-white/5 hover:text-white"
+              >
+                <Settings className="h-4 w-4" />
+              </button>
+            </Modal.Open>
+          )}
         </div>
       </Table.Row>
 
-      <Modal.Window name={`leader-manage-positions-${department.id}`} size="md">
-        <ManagePositions department={department} />
-      </Modal.Window>
+      {canManagePositions && (
+        <Modal.Window name={`leader-manage-positions-${department.id}`} size="md">
+          <ManagePositions
+            department={department}
+            canCreatePos={canCreatePos}
+            canUpdatePos={canUpdatePos}
+            canDeletePos={canDeletePos}
+          />
+        </Modal.Window>
+      )}
     </Modal>
   );
 }
 
-function ManagePositions({ department }: { department: Department }) {
+function ManagePositions({
+  department,
+  canCreatePos,
+  canUpdatePos,
+  canDeletePos,
+}: {
+  department: Department;
+  canCreatePos: boolean;
+  canUpdatePos: boolean;
+  canDeletePos: boolean;
+}) {
   const t = useTranslations("leader.department");
   const { mutate: createPosition, isPending: creating } = useCreatePosition();
   const { mutate: updatePosition } = useUpdatePosition();
@@ -197,16 +222,20 @@ function ManagePositions({ department }: { department: Department }) {
                     </button>
                   ) : (
                     <>
-                      <button type="button" onClick={() => { setEditingPosId(pos.id); setEditingPosName(pos.name); setOriginalEditPosTyped(pos.name); setEditPosSuggestIdx(0); }} className="p-1 rounded-lg hover:bg-white/5 text-slate-400 hover:text-cyan-400 transition">
-                        <Edit3 className="h-4 w-4" />
-                      </button>
-                      <button type="button" onClick={() => {
-                        if (confirm(t("confirmDeletePosition", { name: pos.name }))) {
-                          deletePosition({ id: pos.id, departmentId: department.id });
-                        }
-                      }} className="p-1 rounded-lg hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition">
-                        <X className="h-4 w-4" />
-                      </button>
+                      {canUpdatePos && (
+                        <button type="button" onClick={() => { setEditingPosId(pos.id); setEditingPosName(pos.name); setOriginalEditPosTyped(pos.name); setEditPosSuggestIdx(0); }} className="p-1 rounded-lg hover:bg-white/5 text-slate-400 hover:text-cyan-400 transition">
+                          <Edit3 className="h-4 w-4" />
+                        </button>
+                      )}
+                      {canDeletePos && (
+                        <button type="button" onClick={() => {
+                          if (confirm(t("confirmDeletePosition", { name: pos.name }))) {
+                            deletePosition({ id: pos.id, departmentId: department.id });
+                          }
+                        }} className="p-1 rounded-lg hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition">
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
                     </>
                   )}
                 </div>
@@ -216,37 +245,39 @@ function ManagePositions({ department }: { department: Department }) {
         )}
       </div>
 
-      <form onSubmit={handleAdd} className="flex flex-col gap-2 border-t border-white/10 pt-4">
-        <div className="flex gap-2 relative">
-          <div className="flex-1 relative">
-            <input
-              type="text"
-              list={`leader-positions-list-add-${department.id}`}
-              value={newPositionName}
-              onChange={(e) => { setNewPositionName(e.target.value); setOriginalNewPosTyped(e.target.value); setAddPosSuggestIdx(0); }}
-              onKeyDown={handleAddPosKeyDown}
-              placeholder={t("addPositionPlaceholder")}
-              className="w-full rounded-xl border border-white/10 bg-white/5 py-2 px-4 text-sm text-white outline-none transition focus:border-cyan-400/50 placeholder:text-slate-600"
-              disabled={creating}
-            />
-            <datalist id={`leader-positions-list-add-${department.id}`}>
-              {predefinedForDept.map((posName) => <option key={posName} value={posName} />)}
-            </datalist>
-            {newPosExists && (
-              <p className="absolute left-0 top-full z-10 text-[9px] text-yellow-500 bg-[#0f172a] border border-yellow-500/20 px-1.5 py-0.5 rounded shadow-md whitespace-nowrap mt-0.5">
-                {t("positionExists")}
-              </p>
-            )}
+      {canCreatePos && (
+        <form onSubmit={handleAdd} className="flex flex-col gap-2 border-t border-white/10 pt-4">
+          <div className="flex gap-2 relative">
+            <div className="flex-1 relative">
+              <input
+                type="text"
+                list={`leader-positions-list-add-${department.id}`}
+                value={newPositionName}
+                onChange={(e) => { setNewPositionName(e.target.value); setOriginalNewPosTyped(e.target.value); setAddPosSuggestIdx(0); }}
+                onKeyDown={handleAddPosKeyDown}
+                placeholder={t("addPositionPlaceholder")}
+                className="w-full rounded-xl border border-white/10 bg-white/5 py-2 px-4 text-sm text-white outline-none transition focus:border-cyan-400/50 placeholder:text-slate-600"
+                disabled={creating}
+              />
+              <datalist id={`leader-positions-list-add-${department.id}`}>
+                {predefinedForDept.map((posName) => <option key={posName} value={posName} />)}
+              </datalist>
+              {newPosExists && (
+                <p className="absolute left-0 top-full z-10 text-[9px] text-yellow-500 bg-[#0f172a] border border-yellow-500/20 px-1.5 py-0.5 rounded shadow-md whitespace-nowrap mt-0.5">
+                  {t("positionExists")}
+                </p>
+              )}
+            </div>
+            <button
+              type="submit"
+              disabled={creating || !newPositionName.trim() || newPosExists}
+              className="flex items-center justify-center rounded-xl bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-500 disabled:opacity-50 transition shrink-0"
+            >
+              {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+            </button>
           </div>
-          <button
-            type="submit"
-            disabled={creating || !newPositionName.trim() || newPosExists}
-            className="flex items-center justify-center rounded-xl bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-500 disabled:opacity-50 transition shrink-0"
-          >
-            {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-          </button>
-        </div>
-      </form>
+        </form>
+      )}
     </div>
   );
 }

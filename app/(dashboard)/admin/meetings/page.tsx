@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import MeetingsClient from "./MeetingsClient";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations();
@@ -8,5 +9,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function MeetingsPage() {
-  return <MeetingsClient />;
+  return (
+    <ProtectedRoute requiredPermissions={["MEETING_READ"]}>
+      <MeetingsClient />
+    </ProtectedRoute>
+  );
 }

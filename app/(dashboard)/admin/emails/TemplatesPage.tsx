@@ -11,6 +11,7 @@ import EmailsStats from "./EmailsStats";
 import TemplateSidebar from "./TemplateSidebar";
 import TemplateEditor from "./TemplateEditor";
 import SendNotificationTab from "./SendNotificationTab";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export default function TemplatesPage() {
   const t = useTranslations();
@@ -24,7 +25,11 @@ export default function TemplatesPage() {
     templates.find((tmpl) => tmpl.type === selectedType) ?? null;
 
   return (
-    <div className="space-y-6">
+    <ProtectedRoute
+      requiredPermissions={["NOTIFICATION_TEMPLATE_READ", "NOTIFICATION_READ"]}
+      permissionMode="ANY"
+    >
+      <div className="space-y-6">
       {/* Standardized Header */}
       <EmailsHeader mode={mode} setMode={setMode} />
 
@@ -64,5 +69,6 @@ export default function TemplatesPage() {
         </div>
       )}
     </div>
+    </ProtectedRoute>
   );
 }

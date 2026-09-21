@@ -17,6 +17,7 @@ import TaskGroupQuotaAllocationModal from "@/components/task-group/TaskGroupQuot
 import TaskGroupEditModal from "@/components/task-group/TaskGroupEditModal";
 import { useTaskGroupProgress } from "@/hooks/task-group/useTaskGroupProgress";
 import { useDeleteTaskGroup } from "@/hooks/task-group/useDeleteTaskGroup";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 interface TaskGroupCardProps {
   group: TaskGroup;
@@ -24,6 +25,11 @@ interface TaskGroupCardProps {
 
 export default function TaskGroupCard({ group }: TaskGroupCardProps) {
   const t = useTranslations();
+  const { can } = useRBAC();
+  const canUpdate = can("TASK_GROUP_UPDATE");
+  const canDelete = can("TASK_GROUP_DELETE");
+  const hasActions = canUpdate || canDelete;
+
   const { mutate: deleteGroup, isPending: deleting } = useDeleteTaskGroup();
   const { data: progressData } = useTaskGroupProgress(group.id);
 
@@ -144,64 +150,74 @@ export default function TaskGroupCard({ group }: TaskGroupCardProps) {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-between gap-2 pt-3 border-t border-border/40">
-          <Modal.Open opens={`quota-allocation-${group.id}`}>
-            <button
-              type="button"
-              className="
-                flex-1 flex items-center justify-center gap-1.5 rounded-xl
-                border border-cyan-400/30 bg-cyan-500/10 py-2.5 px-3
-                text-xs font-semibold text-cyan-300
-                transition-all duration-200
-                hover:border-cyan-400/60 hover:bg-cyan-500/20 hover:text-cyan-200
-                active:scale-[0.98]
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400
-                disabled:opacity-50 disabled:pointer-events-none cursor-pointer
-              "
-            >
-              <PieChart className="w-3.5 h-3.5 shrink-0" />
-              <span className="truncate">
-                {t("leader.taskGroups.allocateQuota")}
-              </span>
-            </button>
-          </Modal.Open>
+        {hasActions && (
+          <div className="flex items-center justify-between gap-2 pt-3 border-t border-border/40">
+            {canUpdate ? (
+              <Modal.Open opens={`quota-allocation-${group.id}`}>
+                <button
+                  type="button"
+                  className="
+                    flex-1 flex items-center justify-center gap-1.5 rounded-xl
+                    border border-cyan-400/30 bg-cyan-500/10 py-2.5 px-3
+                    text-xs font-semibold text-cyan-300
+                    transition-all duration-200
+                    hover:border-cyan-400/60 hover:bg-cyan-500/20 hover:text-cyan-200
+                    active:scale-[0.98]
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400
+                    disabled:opacity-50 disabled:pointer-events-none cursor-pointer
+                  "
+                >
+                  <PieChart className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">
+                    {t("leader.taskGroups.allocateQuota")}
+                  </span>
+                </button>
+              </Modal.Open>
+            ) : (
+              <div className="flex-1" />
+            )}
 
-          <div className="flex items-center gap-1 shrink-0">
-            <Modal.Open opens={`edit-task-group-${group.id}`}>
-              <button
-                type="button"
-                className="
-                  p-2.5 rounded-xl border border-border bg-card/60
-                  text-muted hover:text-foreground hover:border-border-strong hover:bg-card
-                  active:scale-95 transition-all duration-200
-                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400
-                  cursor-pointer
-                "
-                title={t("leader.taskGroups.editGroup")}
-                aria-label={t("leader.taskGroups.editGroup")}
-              >
-                <Edit3 className="w-3.5 h-3.5" />
-              </button>
-            </Modal.Open>
+            <div className="flex items-center gap-1 shrink-0">
+              {canUpdate && (
+                <Modal.Open opens={`edit-task-group-${group.id}`}>
+                  <button
+                    type="button"
+                    className="
+                      p-2.5 rounded-xl border border-border bg-card/60
+                      text-muted hover:text-foreground hover:border-border-strong hover:bg-card
+                      active:scale-95 transition-all duration-200
+                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400
+                      cursor-pointer
+                    "
+                    title={t("leader.taskGroups.editGroup")}
+                    aria-label={t("leader.taskGroups.editGroup")}
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                  </button>
+                </Modal.Open>
+              )}
 
-            <Modal.Open opens={`delete-task-group-${group.id}`}>
-              <button
-                type="button"
-                className="
-                  p-2.5 rounded-xl border border-rose-500/20 bg-rose-500/10
-                  text-rose-400 hover:bg-rose-500/20 hover:border-rose-500/40 hover:text-rose-300
-                  active:scale-95 transition-all duration-200
-                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400
-                  cursor-pointer
-                "
-                title={t("leader.taskGroups.deleteGroup")}
-                aria-label={t("leader.taskGroups.deleteGroup")}
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </Modal.Open>
+              {canDelete && (
+                <Modal.Open opens={`delete-task-group-${group.id}`}>
+                  <button
+                    type="button"
+                    className="
+                      p-2.5 rounded-xl border border-rose-500/20 bg-rose-500/10
+                      text-rose-400 hover:bg-rose-500/20 hover:border-rose-500/40 hover:text-rose-300
+                      active:scale-95 transition-all duration-200
+                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400
+                      cursor-pointer
+                    "
+                    title={t("leader.taskGroups.deleteGroup")}
+                    aria-label={t("leader.taskGroups.deleteGroup")}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </Modal.Open>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </MetalCard>
 
       {/* Modal: Quota Allocation */}

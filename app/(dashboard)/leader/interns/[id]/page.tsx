@@ -40,6 +40,7 @@ import StatsCard from "@/components/stats/StatsCard";
 import Table from "@/components/ui/Table";
 import InternTasksModal from "../InternTasksModal";
 import InternshipSummaryExportButton from "@/components/pdf/InternshipSummaryExportButton";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 const assignmentStatusBadge: Record<string, string> = {
   TODO: "border-sky-400/30 bg-sky-500/10 text-sky-400",
@@ -108,6 +109,14 @@ function extractArray<T>(data: unknown): T[] {
 }
 
 export default function LeaderInternDetailPage() {
+  return (
+    <ProtectedRoute requiredPermissions={["INTERN_READ"]}>
+      <LeaderInternDetailContent />
+    </ProtectedRoute>
+  );
+}
+
+function LeaderInternDetailContent() {
   const t = useTranslations("leader.interns");
   const td = useTranslations("leader.interns.detail");
   const params = useParams<{ id: string }>();

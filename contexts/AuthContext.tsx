@@ -24,6 +24,7 @@ interface AuthContextValue {
     login: (token: AuthTokens, user: LoginUser) => void;
     logout: () => Promise<void>;
     updateUser: (user: Partial<LoginUser>) => void;
+    refreshUser: () => Promise<void>;
 }
 
 function authReducer(state: AuthState, action: AuthAction): AuthState {
@@ -99,8 +100,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         dispatch({ type: "UPDATE_USER", user });
     }, []);
 
+    const refreshUser = useCallback(async () => {
+        try {
+            const res = await authService.me();
+            if (res.success && res.data) {
+                dispatch({ type: "SET_USER", user: res.data });
+            }
+        } catch {
+            // Keep current session intact if refresh check fails transiently
+        }
+    }, []);
+
     return (
-        <AuthContext.Provider value={{ state, login, logout, updateUser }}>
+        <AuthContext.Provider value={{ state, login, logout, updateUser, refreshUser }}>
             {children}
         </AuthContext.Provider>
     );

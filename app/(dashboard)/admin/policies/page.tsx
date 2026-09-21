@@ -6,6 +6,7 @@ import PolicyFilter from "./PolicyFilter";
 import PolicyTable from "./PolicyTable";
 import Spinner from "@/components/ui/Spinner";
 import MetalCard from "@/components/ui/MetalCard";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations();
@@ -14,19 +15,21 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function ManagePolicies() {
   return (
-    <div className="space-y-6">
-      <PolicyHeader />
-      <Suspense
-        fallback={
-          <MetalCard className="flex items-center justify-center py-20">
-            <Spinner size="lg" />
-          </MetalCard>
-        }
-      >
-        <PolicyFilter />
-        <PolicyTable />
-      </Suspense>
-    </div>
+    <ProtectedRoute requiredPermissions={["REGULATION_READ"]}>
+      <div className="space-y-6">
+        <PolicyHeader />
+        <Suspense
+          fallback={
+            <MetalCard className="flex items-center justify-center py-20">
+              <Spinner size="lg" />
+            </MetalCard>
+          }
+        >
+          <PolicyFilter />
+          <PolicyTable />
+        </Suspense>
+      </div>
+    </ProtectedRoute>
   );
 }
 

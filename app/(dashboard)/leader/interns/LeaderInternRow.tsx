@@ -21,6 +21,7 @@ import InlineSelect from "@/components/ui/InlineSelect";
 import Table from "@/components/ui/Table";
 import InternTasksModal from "./InternTasksModal";
 import InternOverdueModal from "./InternOverdueModal";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 type LeaderInternRowProps = {
   intern: Intern;
@@ -34,6 +35,8 @@ export default function LeaderInternRow({
   const t = useTranslations("leader.interns");
   const locale = useLocale();
   const router = useRouter();
+  const { can } = useRBAC();
+  const canUpdate = can("INTERN_UPDATE");
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuPos, setMenuPos] = useState<{
@@ -212,32 +215,40 @@ export default function LeaderInternRow({
 
         {/* Department */}
         <div className="text-sm text-muted">
-          <InlineSelect
-            ariaLabel="Department"
-            value={intern.department?.id ?? null}
-            placeholder={t("notSet")}
-            loading={updatingField === "department"}
-            onChange={handleDepartmentChange}
-            options={[
-              { value: null, label: t("notSet") },
-              ...departments.map((d) => ({ value: d.id, label: d.name })),
-            ]}
-          />
+          {canUpdate ? (
+            <InlineSelect
+              ariaLabel="Department"
+              value={intern.department?.id ?? null}
+              placeholder={t("notSet")}
+              loading={updatingField === "department"}
+              onChange={handleDepartmentChange}
+              options={[
+                { value: null, label: t("notSet") },
+                ...departments.map((d) => ({ value: d.id, label: d.name })),
+              ]}
+            />
+          ) : (
+            intern.department?.name ?? "—"
+          )}
         </div>
 
         {/* Position */}
         <div className="text-sm text-muted">
-          <InlineSelect
-            ariaLabel="Position"
-            value={intern.position?.id ?? null}
-            placeholder={t("notSet")}
-            loading={updatingField === "position"}
-            onChange={handlePositionChange}
-            options={[
-              { value: null, label: t("notSet") },
-              ...positions.map((p) => ({ value: p.id, label: p.name })),
-            ]}
-          />
+          {canUpdate ? (
+            <InlineSelect
+              ariaLabel="Position"
+              value={intern.position?.id ?? null}
+              placeholder={t("notSet")}
+              loading={updatingField === "position"}
+              onChange={handlePositionChange}
+              options={[
+                { value: null, label: t("notSet") },
+                ...positions.map((p) => ({ value: p.id, label: p.name })),
+              ]}
+            />
+          ) : (
+            intern.position?.name ?? "—"
+          )}
         </div>
 
         {/* Duration */}

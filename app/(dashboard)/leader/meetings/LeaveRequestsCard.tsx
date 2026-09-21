@@ -9,6 +9,7 @@ import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { useReviewAbsence } from "@/hooks/meeting/useReviewAbsence";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 interface AbsenceRequestItem {
   id: string;
@@ -35,6 +36,8 @@ export default function LeaveRequestsCard() {
   const t = useTranslations("leader.meetings");
   const { state } = useAuth();
   const currentUser = state.user;
+  const { can } = useRBAC();
+  const canReview = can("MEETING_ABSENCE_REVIEW");
 
   const { data, isPending, isError } = useQuery({
     queryKey: ["absences", "all"],
@@ -42,8 +45,11 @@ export default function LeaveRequestsCard() {
       const res = await api.get<AbsencesResponse>("/meetings/absences/pending");
       return res.data;
     },
+    enabled: canReview,
     staleTime: 1000 * 60 * 2,
   });
+
+  if (!canReview) return null;
 
   const allAbsences = (data?.data ?? []).filter(
     (a) => a.meeting.createdBy === currentUser?.id || a.meeting.hostId === currentUser?.id,

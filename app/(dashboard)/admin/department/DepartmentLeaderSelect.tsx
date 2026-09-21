@@ -8,6 +8,7 @@ import { useUpdateLeader } from "@/hooks/leader/useUpdateLeader";
 import type { Department } from "@/types/department";
 import { MAX_LEADER_DEPARTMENTS, type Leader } from "@/types/leader";
 import { toast } from "react-hot-toast";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 type DepartmentLeaderSelectProps = {
   department: Department;
@@ -23,6 +24,8 @@ export default function DepartmentLeaderSelect({
   error,
 }: DepartmentLeaderSelectProps) {
   const t = useTranslations();
+  const { can } = useRBAC();
+  const canAssignLeader = can("LEADER_UPDATE") || can("DEPARTMENT_UPDATE");
   const [open, setOpen] = useState(false);
   const [updatingLeaderId, setUpdatingLeaderId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -168,6 +171,23 @@ export default function DepartmentLeaderSelect({
     const email = l.user.email.toLowerCase();
     return name.includes(q) || email.includes(q);
   });
+
+  if (!canAssignLeader) {
+    return (
+      <div className="py-1 px-1.5">
+        <span
+          className={`min-w-0 truncate text-xs sm:text-sm block ${
+            assignedLeaders.length === 0
+              ? "italic text-muted"
+              : "font-medium text-foreground"
+          }`}
+          title={triggerLabel}
+        >
+          {triggerLabel}
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div className="relative">

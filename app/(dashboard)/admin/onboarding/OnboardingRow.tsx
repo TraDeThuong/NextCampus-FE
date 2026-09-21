@@ -23,6 +23,7 @@ import { useCreateInvite } from "@/hooks/application/useCreateInvite";
 import { useAssignApplication } from "@/hooks/application/useAssignApplication";
 import { useDepartments } from "@/hooks/department/useDepartments";
 import { usePositions } from "@/hooks/department/usePositions";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 import type { ApplicationInviteRow } from "@/types/application";
 import Modal from "@/components/ui/Modal";
 import Table from "@/components/ui/Table";
@@ -58,6 +59,7 @@ export default function OnboardingRow({ invite }: Props) {
     const t = useTranslations();
     const locale = useLocale();
     const router = useRouter();
+    const { can, canAny } = useRBAC();
 
     const [menuOpen, setMenuOpen] = useState(false);
     const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
@@ -76,7 +78,7 @@ export default function OnboardingRow({ invite }: Props) {
 
     const application = invite.application;
     const appStatus = application?.status ?? null;
-    const canAssign = invite.status === "USED" && appStatus === "PENDING";
+    const canAssign = can("APPLICATION_ASSIGN") && invite.status === "USED" && appStatus === "PENDING";
     const assignedDepartmentId = application?.department?.id ?? null;
     const assignedPositionId = application?.position?.id ?? null;
 
@@ -88,6 +90,19 @@ export default function OnboardingRow({ invite }: Props) {
     const positions = positionData?.data ?? [];
 
     const isBusy = revoking || reviewing || deleting || resending || assigning;
+
+    const canRevoke = canAny(["APPLICATION_INVITE_REVOKE", "APPLICATION_DELETE"]);
+    const canReview = canAny(["APPLICATION_REVIEW", "APPLICATION_UPDATE"]);
+    const canDelete = can("APPLICATION_DELETE");
+    const canResend = canAny(["APPLICATION_INVITE_CREATE", "APPLICATION_CREATE"]);
+    const canView = canAny(["APPLICATION_READ", "APPLICATION_INVITE_READ"]);
+
+    const hasMenuActions =
+        ((invite.status === "ACTIVE" || invite.status === "UNUSED") && (canView || canRevoke)) ||
+        (invite.status === "USED" && appStatus === "PENDING" && (canView || canReview)) ||
+        (invite.status === "USED" && appStatus === "APPROVED" && canView) ||
+        (invite.status === "USED" && appStatus === "REJECTED" && (canView || canDelete)) ||
+        ((invite.status === "EXPIRED" || invite.status === "REVOKED") && (canView || canResend));
 
     const candidate = invite.application
         ? invite.application.fullName
@@ -391,24 +406,27 @@ export default function OnboardingRow({ invite }: Props) {
 
                 {/* Actions (with createPortal to avoid clipping inside table) */}
                 <div className="relative flex items-center justify-end">
-                    <button
-                        ref={triggerRef}
-                        type="button"
-                        aria-label="Actions menu"
-                        aria-haspopup="menu"
-                        aria-expanded={menuOpen}
-                        onClick={toggleMenu}
-                        disabled={isBusy}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-muted transition hover:border-border dark:hover:border-white/10 hover:bg-card hover:text-foreground active:scale-95 disabled:opacity-50"
-                    >
-                        {isBusy ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                            <MoreVertical className="h-4 w-4" />
-                        )}
-                    </button>
+                    {hasMenuActions && (
+                        <button
+                            ref={triggerRef}
+                            type="button"
+                            aria-label="Actions menu"
+                            aria-haspopup="menu"
+                            aria-expanded={menuOpen}
+                            onClick={toggleMenu}
+                            disabled={isBusy}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-muted transition hover:border-border dark:hover:border-white/10 hover:bg-card hover:text-foreground active:scale-95 disabled:opacity-50"
+                        >
+                            {isBusy ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                                <MoreVertical className="h-4 w-4" />
+                            )}
+                        </button>
+                    )}
 
-                    {menuOpen &&
+                    {hasMenuActions &&
+                        menuOpen &&
                         !isBusy &&
                         typeof document !== "undefined" &&
                         createPortal(
@@ -423,15 +441,17 @@ export default function OnboardingRow({ invite }: Props) {
                                 {/* ACTIVE / UNUSED: View + Copy link + Revoke */}
                                 {(invite.status === "ACTIVE" || invite.status === "UNUSED") && (
                                     <>
-                                        <button
-                                            type="button"
-                                            role="menuitem"
-                                            onClick={handleView}
-                                            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-muted transition hover:bg-white/5 hover:text-foreground"
-                                        >
-                                            <Eye className="h-4 w-4 shrink-0 text-cyan-400" />
-                                            {t("admin.onboarding.viewDetails")}
-                                        </button>
+                                        {canView && (
+                                            <button
+                                                type="button"
+                                                role="menuitem"
+                                                onClick={handleView}
+                                                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-muted transition hover:bg-white/5 hover:text-foreground"
+                                            >
+                                                <Eye className="h-4 w-4 shrink-0 text-cyan-400" />
+                                                {t("admin.onboarding.viewDetails")}
+                                            </button>
+                                        )}
 
                                         <button
                                             type="button"
@@ -448,17 +468,19 @@ export default function OnboardingRow({ invite }: Props) {
                                                 : t("admin.onboarding.copyLink")}
                                         </button>
 
-                                        <Modal.Open opens={`revoke-${invite.id}`}>
-                                            <button
-                                                type="button"
-                                                role="menuitem"
-                                                onClick={() => setMenuOpen(false)}
-                                                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-rose-400 transition hover:bg-rose-500/10"
-                                            >
-                                                <Ban className="h-4 w-4 shrink-0" />
-                                                {t("admin.onboarding.revoke")}
-                                            </button>
-                                        </Modal.Open>
+                                        {canRevoke && (
+                                            <Modal.Open opens={`revoke-${invite.id}`}>
+                                                <button
+                                                    type="button"
+                                                    role="menuitem"
+                                                    onClick={() => setMenuOpen(false)}
+                                                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-rose-400 transition hover:bg-rose-500/10"
+                                                >
+                                                    <Ban className="h-4 w-4 shrink-0" />
+                                                    {t("admin.onboarding.revoke")}
+                                                </button>
+                                            </Modal.Open>
+                                        )}
                                     </>
                                 )}
 
@@ -466,57 +488,64 @@ export default function OnboardingRow({ invite }: Props) {
                                 {invite.status === "USED" &&
                                     appStatus === "PENDING" && (
                                         <>
-                                            <button
-                                                type="button"
-                                                role="menuitem"
-                                                onClick={handleView}
-                                                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-muted transition hover:bg-white/5 hover:text-foreground"
-                                            >
-                                                <Eye className="h-4 w-4 shrink-0 text-cyan-400" />
-                                                {t("admin.onboarding.viewApplication")}
-                                            </button>
-
-                                            <Modal.Open opens={`approve-${invite.id}`}>
+                                            {canView && (
                                                 <button
                                                     type="button"
                                                     role="menuitem"
-                                                    disabled={
-                                                        !assignedDepartmentId ||
-                                                        !assignedPositionId
-                                                    }
-                                                    title={
-                                                        !assignedDepartmentId ||
-                                                        !assignedPositionId
-                                                            ? t(
-                                                                  "admin.onboarding.assignFirstTooltip",
-                                                              )
-                                                            : undefined
-                                                    }
-                                                    onClick={() => setMenuOpen(false)}
-                                                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-emerald-400 transition hover:bg-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-40"
+                                                    onClick={handleView}
+                                                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-muted transition hover:bg-white/5 hover:text-foreground"
                                                 >
-                                                    <CheckCircle2 className="h-4 w-4 shrink-0" />
-                                                    {t("admin.onboarding.approve")}
+                                                    <Eye className="h-4 w-4 shrink-0 text-cyan-400" />
+                                                    {t("admin.onboarding.viewApplication")}
                                                 </button>
-                                            </Modal.Open>
+                                            )}
 
-                                            <Modal.Open opens={`reject-${invite.id}`}>
-                                                <button
-                                                    type="button"
-                                                    role="menuitem"
-                                                    onClick={() => setMenuOpen(false)}
-                                                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-rose-400 transition hover:bg-rose-500/10"
-                                                >
-                                                    <XCircle className="h-4 w-4 shrink-0" />
-                                                    {t("admin.onboarding.reject")}
-                                                </button>
-                                            </Modal.Open>
+                                            {canReview && (
+                                                <>
+                                                    <Modal.Open opens={`approve-${invite.id}`}>
+                                                        <button
+                                                            type="button"
+                                                            role="menuitem"
+                                                            disabled={
+                                                                !assignedDepartmentId ||
+                                                                !assignedPositionId
+                                                            }
+                                                            title={
+                                                                !assignedDepartmentId ||
+                                                                !assignedPositionId
+                                                                    ? t(
+                                                                          "admin.onboarding.assignFirstTooltip",
+                                                                      )
+                                                                    : undefined
+                                                            }
+                                                            onClick={() => setMenuOpen(false)}
+                                                            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-emerald-400 transition hover:bg-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-40"
+                                                        >
+                                                            <CheckCircle2 className="h-4 w-4 shrink-0" />
+                                                            {t("admin.onboarding.approve")}
+                                                        </button>
+                                                    </Modal.Open>
+
+                                                    <Modal.Open opens={`reject-${invite.id}`}>
+                                                        <button
+                                                            type="button"
+                                                            role="menuitem"
+                                                            onClick={() => setMenuOpen(false)}
+                                                            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-rose-400 transition hover:bg-rose-500/10"
+                                                        >
+                                                            <XCircle className="h-4 w-4 shrink-0" />
+                                                            {t("admin.onboarding.reject")}
+                                                        </button>
+                                                    </Modal.Open>
+                                                </>
+                                            )}
                                         </>
                                     )}
 
                                 {/* USED + APPROVED: View */}
                                 {invite.status === "USED" &&
-                                    appStatus === "APPROVED" && (
+                                    appStatus === "APPROVED" &&
+                                    canView && (
                                         <button
                                             type="button"
                                             role="menuitem"
@@ -532,27 +561,31 @@ export default function OnboardingRow({ invite }: Props) {
                                 {invite.status === "USED" &&
                                     appStatus === "REJECTED" && (
                                         <>
-                                            <button
-                                                type="button"
-                                                role="menuitem"
-                                                onClick={handleView}
-                                                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-muted transition hover:bg-white/5 hover:text-foreground"
-                                            >
-                                                <Eye className="h-4 w-4 shrink-0 text-cyan-400" />
-                                                {t("admin.onboarding.viewApplication")}
-                                            </button>
-
-                                            <Modal.Open opens={`delete-${invite.id}`}>
+                                            {canView && (
                                                 <button
                                                     type="button"
                                                     role="menuitem"
-                                                    onClick={() => setMenuOpen(false)}
-                                                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-rose-400 transition hover:bg-rose-500/10"
+                                                    onClick={handleView}
+                                                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-muted transition hover:bg-white/5 hover:text-foreground"
                                                 >
-                                                    <Trash2 className="h-4 w-4 shrink-0" />
-                                                    {t("admin.onboarding.delete")}
+                                                    <Eye className="h-4 w-4 shrink-0 text-cyan-400" />
+                                                    {t("admin.onboarding.viewApplication")}
                                                 </button>
-                                            </Modal.Open>
+                                            )}
+
+                                            {canDelete && (
+                                                <Modal.Open opens={`delete-${invite.id}`}>
+                                                    <button
+                                                        type="button"
+                                                        role="menuitem"
+                                                        onClick={() => setMenuOpen(false)}
+                                                        className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-rose-400 transition hover:bg-rose-500/10"
+                                                    >
+                                                        <Trash2 className="h-4 w-4 shrink-0" />
+                                                        {t("admin.onboarding.delete")}
+                                                    </button>
+                                                </Modal.Open>
+                                            )}
                                         </>
                                     )}
 
@@ -560,6 +593,54 @@ export default function OnboardingRow({ invite }: Props) {
                                 {(invite.status === "EXPIRED" ||
                                     invite.status === "REVOKED") && (
                                     <>
+                                        {canView && (
+                                            <button
+                                                type="button"
+                                                role="menuitem"
+                                                onClick={handleView}
+                                                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-muted transition hover:bg-white/5 hover:text-foreground"
+                                            >
+                                                <Eye className="h-4 w-4 shrink-0 text-cyan-400" />
+                                                {t("admin.onboarding.viewDetails")}
+                                            </button>
+                                        )}
+
+                                        {canResend && (
+                                            <button
+                                                type="button"
+                                                role="menuitem"
+                                                onClick={() => {
+                                                    setMenuOpen(false);
+                                                    createInvite(
+                                                        { email: invite.email },
+                                                        {
+                                                            onSuccess: () =>
+                                                                toast.success(
+                                                                    t(
+                                                                        "admin.onboarding.createSuccess",
+                                                                    ),
+                                                                ),
+                                                            onError: () =>
+                                                                toast.error(
+                                                                    t(
+                                                                        "admin.onboarding.createError",
+                                                                    ),
+                                                                ),
+                                                        },
+                                                    );
+                                                }}
+                                                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-muted transition hover:bg-white/5 hover:text-foreground"
+                                            >
+                                                <RefreshCw className="h-4 w-4 shrink-0 text-cyan-400" />
+                                                {t("admin.onboarding.resendInvite")}
+                                            </button>
+                                        )}
+                                    </>
+                                )}
+
+                                {/* Fallback View Details if none of the specific statuses matched */}
+                                {!["ACTIVE", "UNUSED", "USED", "EXPIRED", "REVOKED"].includes(invite.status) &&
+                                    canView && (
                                         <button
                                             type="button"
                                             role="menuitem"
@@ -569,50 +650,7 @@ export default function OnboardingRow({ invite }: Props) {
                                             <Eye className="h-4 w-4 shrink-0 text-cyan-400" />
                                             {t("admin.onboarding.viewDetails")}
                                         </button>
-
-                                        <button
-                                            type="button"
-                                            role="menuitem"
-                                            onClick={() => {
-                                                setMenuOpen(false);
-                                                createInvite(
-                                                    { email: invite.email },
-                                                    {
-                                                        onSuccess: () =>
-                                                            toast.success(
-                                                                t(
-                                                                    "admin.onboarding.createSuccess",
-                                                                ),
-                                                            ),
-                                                        onError: () =>
-                                                            toast.error(
-                                                                t(
-                                                                    "admin.onboarding.createError",
-                                                                ),
-                                                            ),
-                                                    },
-                                                );
-                                            }}
-                                            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-muted transition hover:bg-white/5 hover:text-foreground"
-                                        >
-                                            <RefreshCw className="h-4 w-4 shrink-0 text-cyan-400" />
-                                            {t("admin.onboarding.resendInvite")}
-                                        </button>
-                                    </>
-                                )}
-
-                                {/* Fallback View Details if none of the specific statuses matched */}
-                                {!["ACTIVE", "UNUSED", "USED", "EXPIRED", "REVOKED"].includes(invite.status) && (
-                                    <button
-                                        type="button"
-                                        role="menuitem"
-                                        onClick={handleView}
-                                        className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-muted transition hover:bg-white/5 hover:text-foreground"
-                                    >
-                                        <Eye className="h-4 w-4 shrink-0 text-cyan-400" />
-                                        {t("admin.onboarding.viewDetails")}
-                                    </button>
-                                )}
+                                    )}
                             </div>,
                             document.body,
                         )}

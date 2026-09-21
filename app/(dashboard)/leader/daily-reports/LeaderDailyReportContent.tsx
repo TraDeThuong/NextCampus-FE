@@ -17,6 +17,7 @@ import { useInterns } from "@/hooks/intern/useInterns";
 import { useInternDetail } from "@/hooks/intern/useInternDetail";
 import { useDailyReports } from "@/hooks/daily-report/useDailyReports";
 import { useDailyReport } from "@/hooks/daily-report/useDailyReport";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 import type { DailyReport } from "@/types/daily-report";
 
 function isoDate(d: Date): string {
@@ -40,6 +41,8 @@ function dateStrFromISO(iso: string): string {
 
 export default function LeaderDailyReportContent() {
   const t = useTranslations("leader.dailyReports");
+  const { can } = useRBAC();
+  const canReadInterns = can("INTERN_READ");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -57,7 +60,10 @@ export default function LeaderDailyReportContent() {
     isLoading: internsLoading,
     isFetching: internsFetching,
     refetch: refetchInterns,
-  } = useInterns(leaderId ? { leaderId, limit: 100 } : undefined);
+  } = useInterns(
+    leaderId ? { leaderId, limit: 100 } : undefined,
+    { enabled: canReadInterns }
+  );
 
   const interns = useMemo(() => internsData?.data ?? [], [internsData?.data]);
 
@@ -168,7 +174,9 @@ export default function LeaderDailyReportContent() {
   );
 
   // 4. Selected Intern Detail & Active Range
-  const { data: internData } = useInternDetail(activeInternId ?? undefined);
+  const { data: internData } = useInternDetail(activeInternId ?? undefined, {
+    enabled: canReadInterns && Boolean(activeInternId),
+  });
   const selectedIntern = internData?.data;
 
   const dateRange = useMemo(() => {

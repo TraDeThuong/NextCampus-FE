@@ -4,6 +4,8 @@ import DepartmentHeader from "./DepartmentHeader";
 import DepartmentFilter from "./DepartmentFilter";
 import DepartmentTable from "./DepartmentTable";
 
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations();
   return { title: t("leader.department.metaTitle") };
@@ -11,10 +13,12 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function page() {
   return (
-    <div className="space-y-6">
-      <DepartmentHeader />
-      <DepartmentFilter />
-      <DepartmentTable />
-    </div>
+    <ProtectedRoute requiredPermissions={["DEPARTMENT_READ"]}>
+      <div className="space-y-6">
+        <DepartmentHeader />
+        <DepartmentFilter />
+        <DepartmentTable />
+      </div>
+    </ProtectedRoute>
   );
 }

@@ -21,6 +21,7 @@ import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
 import Button from "@/components/ui/Button";
 import WeeklyEvaluationExportButton from "@/components/pdf/WeeklyEvaluationExportButton";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { useWeeklyEvaluationDetail } from "@/hooks/weekly-evaluation/useWeeklyEvaluationDetail";
 import { useWeeklyEvaluations } from "@/hooks/weekly-evaluation/useWeeklyEvaluations";
 import { useMarkReviewed } from "@/hooks/weekly-evaluation/useMarkReviewed";
@@ -303,7 +304,7 @@ function ProgressChart({
   );
 }
 
-export default function InternWeeklyEvaluationDetailPage() {
+function WeeklyEvaluationDetailContent() {
   const t = useTranslations("intern.weeklyEvaluation");
   const td = useTranslations("intern.weeklyEvaluation.detail");
   const params = useParams<{ id: string }>();
@@ -620,5 +621,13 @@ export default function InternWeeklyEvaluationDetailPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function InternWeeklyEvaluationDetailPage() {
+  return (
+    <ProtectedRoute requiredPermissions={["WEEKLY_EVALUATION_READ"]}>
+      <WeeklyEvaluationDetailContent />
+    </ProtectedRoute>
   );
 }

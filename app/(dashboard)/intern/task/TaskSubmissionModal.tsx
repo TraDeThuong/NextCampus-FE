@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X, Send, Link, Video, FileText, Loader2, Pencil, Paperclip, Download, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";

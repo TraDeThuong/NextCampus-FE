@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/auth/useAuth";
 import {
   getPortalName,
   getDashboardPath,
+  getFirstAuthorizedPath,
   hasAnyPermission,
   hasAllPermissions,
   type PortalName,
@@ -83,11 +84,11 @@ export default function ProtectedRoute({
     }
 
     if (!isAuthorized) {
-      const safeDashboard = getDashboardPath(userRole);
+      const safePath = getFirstAuthorizedPath(userRole, userPermissions);
       toast.error("Bạn không có quyền truy cập vào trang này");
-      router.replace(safeDashboard);
+      router.replace(safePath);
     }
-  }, [state.isLoading, state.isAuthenticated, isAuthorized, userRole, router]);
+  }, [state.isLoading, state.isAuthenticated, isAuthorized, userRole, userPermissions, router]);
 
   if (state.isLoading) {
     return (

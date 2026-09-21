@@ -25,6 +25,7 @@ import { useReviewAbsence } from "@/hooks/meeting/useReviewAbsence";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { useRsvpMeeting } from "@/hooks/meeting/useRsvpMeeting";
 import { useSubmitAbsence } from "@/hooks/meeting/useSubmitAbsence";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 interface Props {
   meetingId: string;
@@ -51,6 +52,11 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
   const isVi = locale === "vi";
   const { state } = useAuth();
   const currentUser = state.user;
+  const { can } = useRBAC();
+  const canAttend = can("MEETING_ATTEND");
+  const canSubmitAbsence = can("MEETING_ABSENCE_SUBMIT");
+  const canReviewAbsence = can("MEETING_ABSENCE_REVIEW");
+  const canUpdateMeeting = can("MEETING_UPDATE");
 
   const { data: meetingData, isPending, isError } = useMeeting(meetingId);
   const { data: absencesData } = useMeetingAbsences(meetingId);
@@ -245,29 +251,31 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
                   ? t("youDeclined")
                   : t("youInvited")}
               </p>
-              <div className="flex items-center gap-2">
-                {myStatus !== "ACCEPTED" && (
-                  <button
-                    type="button"
-                    onClick={handleAccept}
-                    disabled={rsvpMeeting.isPending}
-                    className="flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/15 px-3.5 py-1.5 text-xs font-semibold text-emerald-300 transition hover:bg-emerald-500/25 active:scale-95 disabled:opacity-50"
-                  >
-                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
-                    <span>{t("accept")}</span>
-                  </button>
-                )}
-                {myStatus !== "DECLINED" && (
-                  <button
-                    type="button"
-                    onClick={() => setShowLeaveForm(true)}
-                    className="flex items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/15 px-3.5 py-1.5 text-xs font-semibold text-rose-300 transition hover:bg-rose-500/25 active:scale-95"
-                  >
-                    <XCircle className="h-3.5 w-3.5 shrink-0" />
-                    <span>{myStatus === "ACCEPTED" ? t("leave") : t("decline")}</span>
-                  </button>
-                )}
-              </div>
+              {(canAttend || canSubmitAbsence) && (
+                <div className="flex items-center gap-2">
+                  {canAttend && myStatus !== "ACCEPTED" && (
+                    <button
+                      type="button"
+                      onClick={handleAccept}
+                      disabled={rsvpMeeting.isPending}
+                      className="flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/15 px-3.5 py-1.5 text-xs font-semibold text-emerald-300 transition hover:bg-emerald-500/25 active:scale-95 disabled:opacity-50"
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                      <span>{t("accept")}</span>
+                    </button>
+                  )}
+                  {canSubmitAbsence && myStatus !== "DECLINED" && (
+                    <button
+                      type="button"
+                      onClick={() => setShowLeaveForm(true)}
+                      className="flex items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/15 px-3.5 py-1.5 text-xs font-semibold text-rose-300 transition hover:bg-rose-500/25 active:scale-95"
+                    >
+                      <XCircle className="h-3.5 w-3.5 shrink-0" />
+                      <span>{myStatus === "ACCEPTED" ? t("leave") : t("decline")}</span>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -344,26 +352,32 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
                     )}
                   </div>
                   {a.status === "PENDING" ? (
-                    <div className="flex shrink-0 items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => handleReview(a.id, "APPROVED")}
-                        disabled={reviewAbsence.isPending}
-                        className="flex items-center gap-1 rounded-lg border border-emerald-500/30 bg-emerald-500/15 px-3 py-1 text-xs font-medium text-emerald-300 transition hover:bg-emerald-500/25 active:scale-95"
-                      >
-                        <Check className="h-3 w-3 shrink-0" />
-                        <span>{t("approve")}</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleReview(a.id, "REJECTED")}
-                        disabled={reviewAbsence.isPending}
-                        className="flex items-center gap-1 rounded-lg border border-rose-500/30 bg-rose-500/15 px-3 py-1 text-xs font-medium text-rose-300 transition hover:bg-rose-500/25 active:scale-95"
-                      >
-                        <X className="h-3 w-3 shrink-0" />
-                        <span>{t("reject")}</span>
-                      </button>
-                    </div>
+                    canReviewAbsence ? (
+                      <div className="flex shrink-0 items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => handleReview(a.id, "APPROVED")}
+                          disabled={reviewAbsence.isPending}
+                          className="flex items-center gap-1 rounded-lg border border-emerald-500/30 bg-emerald-500/15 px-3 py-1 text-xs font-medium text-emerald-300 transition hover:bg-emerald-500/25 active:scale-95"
+                        >
+                          <Check className="h-3 w-3 shrink-0" />
+                          <span>{t("approve")}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleReview(a.id, "REJECTED")}
+                          disabled={reviewAbsence.isPending}
+                          className="flex items-center gap-1 rounded-lg border border-rose-500/30 bg-rose-500/15 px-3 py-1 text-xs font-medium text-rose-300 transition hover:bg-rose-500/25 active:scale-95"
+                        >
+                          <X className="h-3 w-3 shrink-0" />
+                          <span>{t("reject")}</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                        {a.status}
+                      </span>
+                    )
                   ) : (
                     <span
                       className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
@@ -383,7 +397,7 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
       )}
 
       {/* Cancel Confirmation & Actions */}
-      {isHostOrOrganizer && meeting.status !== "COMPLETED" && meeting.status !== "CANCELLED" && (
+      {isHostOrOrganizer && canUpdateMeeting && meeting.status !== "COMPLETED" && meeting.status !== "CANCELLED" && (
         <div className="border-t border-border/60 dark:border-white/10 pt-4">
           {confirmAction === "cancel" ? (
             <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-4">

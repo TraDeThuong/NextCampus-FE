@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import WeeklyEvaluationList from "./WeeklyEvaluationList";
 import Spinner from "@/components/ui/Spinner";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations();
@@ -11,8 +12,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function page() {
   return (
-    <Suspense fallback={<Spinner />}>
-      <WeeklyEvaluationList />
-    </Suspense>
+    <ProtectedRoute requiredPermissions={["WEEKLY_EVALUATION_READ"]}>
+      <Suspense fallback={<Spinner />}>
+        <WeeklyEvaluationList />
+      </Suspense>
+    </ProtectedRoute>
   );
 }

@@ -29,6 +29,18 @@ type MenuItem = {
   permissions?: string[];
 };
 
+const baseClass =
+  "flex items-center justify-center w-14 h-14 rounded-2xl border transition-all duration-300 shadow-shadow-soft cursor-pointer";
+
+const activeClass =
+  "bg-primary-main/20 border-primary-light text-gray-300 scale-110 shadow-[0_0_24px_primary-white]";
+
+const inactiveClass =
+  "bg-card border-border text-muted hover:bg-card-hover hover:border-border-strong hover:text-foreground hover:scale-110";
+
+const tooltipClass =
+  "text-metal pointer-events-none absolute top-full mt-2 translate-y-1 whitespace-nowrap text-xs font-medium opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100 z-30";
+
 export default function AdminSidebar() {
   const pathname = usePathname();
   const t = useTranslations();
@@ -37,16 +49,16 @@ export default function AdminSidebar() {
 
   const menus = useMemo(() => {
     const items: MenuItem[] = [
-      { name: t("admin.nav.dashboard"),     href: "/admin/dashboard",     icon: LayoutDashboard },
-      { name: t("admin.nav.adminTeam"),     href: "/admin/admin-team",    icon: MdManageAccounts, permissions: ["USER_READ", "USER_ROLE_ASSIGN"] },
+      { name: t("admin.nav.dashboard"),     href: "/admin/dashboard",     icon: LayoutDashboard, permissions: ["STATS_ADMIN_READ"] },
+      { name: t("admin.nav.adminTeam"),     href: "/admin/admin-team",    icon: MdManageAccounts, permissions: ["USER_READ"] },
       { name: t("admin.nav.department"),    href: "/admin/department",    icon: PiBuildingOfficeLight, permissions: ["DEPARTMENT_READ"] },
       { name: t("admin.nav.leaders"),       href: "/admin/leaders",       icon: UserCheck,        permissions: ["LEADER_READ"] },
-      { name: t("admin.nav.onboarding"),    href: "/admin/onboarding",    icon: Rocket,           permissions: ["APPLICATION_READ", "APPLICATION_INVITE_READ"] },
+      { name: t("admin.nav.onboarding"),    href: "/admin/onboarding",    icon: Rocket,           permissions: ["APPLICATION_READ"] },
       { name: t("admin.nav.interns"),       href: "/admin/interns",       icon: Users,            permissions: ["INTERN_READ"] },
       { name: t("admin.nav.meetings"),      href: "/admin/meetings",      icon: LuAlarmClock,     permissions: ["MEETING_READ"] },
-      { name: t("admin.nav.roles"),         href: "/admin/roles",         icon: ShieldCheck,      permissions: ["ROLE_READ", "PERMISSION_READ"] },
-      { name: t("admin.nav.mails"),         href: "/admin/emails",        icon: MdOutlineMailOutline,  permissions: ["NOTIFICATION_TEMPLATE_READ", "NOTIFICATION_TEMPLATE_MANAGE", "NOTIFICATION_READ"] },
-      { name: t("admin.nav.settings"),      href: "/admin/settings",      icon: Settings,         permissions: ["SYSTEM_CONFIG_READ", "SYSTEM_CONFIG_MANAGE"] },
+      { name: t("admin.nav.roles"),         href: "/admin/roles",         icon: ShieldCheck,      permissions: ["ROLE_READ"] },
+      { name: t("admin.nav.mails"),         href: "/admin/emails",        icon: MdOutlineMailOutline,  permissions: ["NOTIFICATION_TEMPLATE_READ"] },
+      { name: t("admin.nav.settings"),      href: "/admin/settings",      icon: Settings,         permissions: ["SYSTEM_CONFIG_READ"] },
       { name: t("admin.nav.activityLogs"), href: "/admin/activity-logs", icon: History,          permissions: ["AUDIT_LOG_READ"] },
       { name: t("admin.nav.profile"),       href: "/admin/profile",       icon: UserRoundPen },
     ];
@@ -58,35 +70,33 @@ export default function AdminSidebar() {
   }, [t, canAny]);
 
   return (
-    <aside
-      className="flex flex-col items-center min-h-screen py-2 px-4 ">
-
-      <ul className="flex flex-col items-center gap-6">
+    <div className="flex flex-col items-center w-full py-2">
+      <ul className="flex flex-col items-center gap-6 w-full">
         {menus.map((item) => {
           const Icon = item.icon;
           const isActive =
             pathname === item.href ||
+            (item.href !== "/admin/dashboard" && pathname.startsWith(`${item.href}/`)) ||
             (item.href === "/admin/regulations" && pathname === "/admin/policies") ||
-            (item.href === "/admin/meetings" && pathname === "/admin/mettings");
+            (item.href === "/admin/meetings" && (pathname === "/admin/mettings" || pathname.startsWith("/admin/mettings")));
 
           return (
-            <li key={item.href} className="relative group">
-              <Link href={item.href} className="relative flex flex-col items-center" onMouseEnter={getPrefetchHandler(item.href)}>
-                <div className={`
-                    flex items-center justify-center
-                    w-14 h-14 rounded-2xl
-                    border transition-all duration-300
-                    shadow-shadow-soft cursor-pointer
-
-                    ${
-                      isActive
-                        ? `bg-primary-main/20 border-primary-light text-gray-300 scale-110 shadow-[0_0_24px_primary-white]`
-                        : `bg-card border-border text-muted hover:bg-card-hover hover:border-border-strong hover:text-foreground hover:scale-110 `}`} >         
+            <li key={item.href} className="group relative">
+              <Link
+                href={item.href}
+                aria-label={item.name}
+                className="relative flex flex-col items-center"
+                onMouseEnter={getPrefetchHandler(item.href)}
+              >
+                <div
+                  className={`${baseClass} ${
+                    isActive ? activeClass : inactiveClass
+                  }`}
+                >
                   <Icon size={22} />
                 </div>
 
-                <span
-                  className=" text-metal absolute top-full mt-2 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 text-xs font-medium whitespace-nowrap pointer-events-none">
+                <span className={tooltipClass}>
                   {item.name}
                 </span>
               </Link>
@@ -94,6 +104,6 @@ export default function AdminSidebar() {
           );
         })}
       </ul>
-    </aside>
+    </div>
   );
 }

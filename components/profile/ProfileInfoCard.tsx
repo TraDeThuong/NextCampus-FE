@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { User } from "lucide-react";
+import { User, AlertCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { useUpdateProfile } from "@/hooks/profile/useUpdateProfile";
@@ -19,7 +19,7 @@ type FormValues = {
 };
 
 export default function ProfileInfoCard({ profile }: ProfileInfoCardProps) {
-    const t = useTranslations("admin.profile");
+    const t = useTranslations("profile");
     const { updateProfileAsync, isPending } = useUpdateProfile();
 
     const {
@@ -41,20 +41,21 @@ export default function ProfileInfoCard({ profile }: ProfileInfoCardProps) {
 
     return (
         <MetalCard>
-            <section className="rounded-3xl border border-slate-200 p-6 shadow-sm">
+            <section className="rounded-3xl border border-border p-6 shadow-sm">
                 <div className="mb-6">
                     <h2 className="text-xl font-semibold metal-text">
                         {t("personalInfo")}
                     </h2>
-                    <p className="mt-1 text-sm text-slate-500">
+                    <p className="mt-1 text-sm text-muted-foreground">
                         {t("personalInfoDesc")}
                     </p>
                 </div>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                    <div>
-                        <label className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
-                            <User className="h-4 w-4" />
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                    {/* Full Name */}
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center gap-1">
+                            <User className="h-4 w-4 shrink-0" />
                             {t("fullName")}
                         </label>
                         <input
@@ -66,10 +67,20 @@ export default function ProfileInfoCard({ profile }: ProfileInfoCardProps) {
                                     message: t("fullNameMinLength"),
                                 },
                             })}
-                            className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-slate-400 text-white"
+                            className={`
+                                h-[42px] sm:h-[46px] w-full rounded-xl border
+                                bg-card text-foreground text-sm
+                                px-4 py-2.5 sm:py-3
+                                outline-none transition-all duration-200
+                                ${errors.fullName
+                                    ? "border-danger focus-visible:border-danger focus-visible:ring-2 focus-visible:ring-danger/40"
+                                    : "border-border hover:border-border-strong focus-visible:border-primary-light/50 focus-visible:ring-2 focus-visible:ring-primary-light"
+                                }
+                            `}
                         />
                         {errors.fullName && (
-                            <p className="mt-2 text-sm text-red-500">
+                            <p className="text-xs text-danger flex items-center gap-1.5 mt-0.5 animate-fadeIn">
+                                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                                 {errors.fullName.message}
                             </p>
                         )}
@@ -80,7 +91,7 @@ export default function ProfileInfoCard({ profile }: ProfileInfoCardProps) {
                             <button
                                 type="button"
                                 onClick={() => reset()}
-                                className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 transition hover:border-white/20 hover:text-white"
+                                className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 transition hover:border-white/20 hover:text-white active:scale-95"
                             >
                                 {t("cancel")}
                             </button>

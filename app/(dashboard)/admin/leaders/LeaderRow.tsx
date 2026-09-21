@@ -18,6 +18,7 @@ import Table from "@/components/ui/Table";
 import Modal from "@/components/ui/Modal";
 import InlineSelect from "@/components/ui/InlineSelect";
 import LeaderDepartmentSelect from "./LeaderDepartmentSelect";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 type LeaderRowProps = {
     leader: Leader;
@@ -26,11 +27,17 @@ type LeaderRowProps = {
 export default function LeaderRow({ leader }: LeaderRowProps) {
     const t = useTranslations();
     const router = useRouter();
+    const { can } = useRBAC();
+    const canUpdateLeader = can("LEADER_UPDATE");
+    const canUpdateUser = can("USER_UPDATE");
+    const canDeleteLeader = can("LEADER_DELETE");
+    const canViewLeader = can("LEADER_READ");
+    const hasAnyAction = canViewLeader || canDeleteLeader;
+
     const { mutate: deleteLeader, isPending: isDeleting } = useDeleteLeader();
     const { mutate: updateLeader } = useUpdateLeader();
     const { data: deptData } = useDepartments();
     const departments = deptData?.data ?? [];
-
     const managedDepartmentIds = new Set(
         leader.departments.map((department) => department.id),
     );
@@ -198,30 +205,42 @@ export default function LeaderRow({ leader }: LeaderRowProps) {
 
                 {/* Department */}
                 <div className="text-sm min-w-0 pr-2">
-                    <LeaderDepartmentSelect
-                        leader={leader}
-                        departments={departments}
-                    />
+                    {canUpdateLeader ? (
+                        <LeaderDepartmentSelect
+                            leader={leader}
+                            departments={departments}
+                        />
+                    ) : (
+                        <span className="truncate text-foreground font-medium" title={leader.departments.map((d) => d.name).join(", ") || "—"}>
+                            {leader.departments.map((d) => d.name).join(", ") || "—"}
+                        </span>
+                    )}
                 </div>
 
                 {/* Position */}
                 <div className="text-sm min-w-0 pr-2">
-                    <InlineSelect
-                        ariaLabel={t("admin.leaders.colPosition")}
-                        value={leader.position}
-                        placeholder={t("admin.leaders.notSet")}
-                        loading={updatingField === "position"}
-                        disabled={leader.departments.length === 0}
-                        onDisabledClick={() => toast.error(t("admin.leaders.selectDepartmentFirst"))}
-                        onChange={handlePositionChange}
-                        options={[
-                            { value: null, label: t("admin.leaders.notSet") },
-                            ...availablePositions.map((pos) => ({
-                                value: pos.name,
-                                label: pos.name,
-                            })),
-                        ]}
-                    />
+                    {canUpdateLeader ? (
+                        <InlineSelect
+                            ariaLabel={t("admin.leaders.colPosition")}
+                            value={leader.position}
+                            placeholder={t("admin.leaders.notSet")}
+                            loading={updatingField === "position"}
+                            disabled={leader.departments.length === 0}
+                            onDisabledClick={() => toast.error(t("admin.leaders.selectDepartmentFirst"))}
+                            onChange={handlePositionChange}
+                            options={[
+                                { value: null, label: t("admin.leaders.notSet") },
+                                ...availablePositions.map((pos) => ({
+                                    value: pos.name,
+                                    label: pos.name,
+                                })),
+                            ]}
+                        />
+                    ) : (
+                        <span className="truncate text-muted" title={leader.position ?? "—"}>
+                            {leader.position ?? "—"}
+                        </span>
+                    )}
                 </div>
 
                 {/* Intern Count */}
@@ -233,55 +252,76 @@ export default function LeaderRow({ leader }: LeaderRowProps) {
 
                 {/* Status */}
                 <div>
-                    <InlineSelect
-                        ariaLabel={t("admin.leaders.colStatus")}
-                        value={leader.user.isActive ? "true" : "false"}
-                        placeholder={t("admin.leaders.colStatus")}
-                        loading={togglingActive}
-                        disabled={togglingActive}
-                        onChange={(val) => {
-                            if (val !== null) toggleActive(val === "true");
-                        }}
-                        options={[
-                            { value: "true", label: t("admin.leaders.active") },
-                            { value: "false", label: t("admin.leaders.inactive") },
-                        ]}
-                        renderTrigger={(label) => (
-                            <span
-                                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
-                                    leader.user.isActive
-                                        ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-300 hover:border-emerald-400/50"
-                                        : "border-red-400/30 bg-red-500/10 text-red-300 hover:border-red-400/50"
-                                }`}
-                            >
+                    {canUpdateUser ? (
+                        <InlineSelect
+                            ariaLabel={t("admin.leaders.colStatus")}
+                            value={leader.user.isActive ? "true" : "false"}
+                            placeholder={t("admin.leaders.colStatus")}
+                            loading={togglingActive}
+                            disabled={togglingActive}
+                            onChange={(val) => {
+                                if (val !== null) toggleActive(val === "true");
+                            }}
+                            options={[
+                                { value: "true", label: t("admin.leaders.active") },
+                                { value: "false", label: t("admin.leaders.inactive") },
+                            ]}
+                            renderTrigger={(label) => (
                                 <span
-                                    className={`h-1.5 w-1.5 rounded-full ${
+                                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
                                         leader.user.isActive
-                                            ? "bg-emerald-400"
-                                            : "bg-red-400"
+                                            ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-300 hover:border-emerald-400/50"
+                                            : "border-red-400/30 bg-red-500/10 text-red-300 hover:border-red-400/50"
                                     }`}
-                                />
-                                {label}
-                            </span>
-                        )}
-                    />
+                                >
+                                    <span
+                                        className={`h-1.5 w-1.5 rounded-full ${
+                                            leader.user.isActive
+                                                ? "bg-emerald-400"
+                                                : "bg-red-400"
+                                        }`}
+                                    />
+                                    {label}
+                                </span>
+                            )}
+                        />
+                    ) : (
+                        <span
+                            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${
+                                leader.user.isActive
+                                    ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-300"
+                                    : "border-red-400/30 bg-red-500/10 text-red-300"
+                            }`}
+                        >
+                            <span
+                                className={`h-1.5 w-1.5 rounded-full ${
+                                    leader.user.isActive
+                                        ? "bg-emerald-400"
+                                        : "bg-red-400"
+                                }`}
+                            />
+                            {leader.user.isActive ? t("admin.leaders.active") : t("admin.leaders.inactive")}
+                        </span>
+                    )}
                 </div>
 
                 {/* Actions */}
                 <div className="relative flex items-center justify-end">
-                    <button
-                        ref={triggerRef}
-                        type="button"
-                        aria-label="Actions menu"
-                        aria-haspopup="menu"
-                        aria-expanded={menuOpen}
-                        onClick={toggleMenu}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-muted transition hover:border-border dark:hover:border-white/10 hover:bg-card hover:text-foreground active:scale-95"
-                    >
-                        <MoreVertical className="h-4 w-4" />
-                    </button>
+                    {hasAnyAction && (
+                        <button
+                            ref={triggerRef}
+                            type="button"
+                            aria-label="Actions menu"
+                            aria-haspopup="menu"
+                            aria-expanded={menuOpen}
+                            onClick={toggleMenu}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-muted transition hover:border-border dark:hover:border-white/10 hover:bg-card hover:text-foreground active:scale-95"
+                        >
+                            <MoreVertical className="h-4 w-4" />
+                        </button>
+                    )}
 
-                    {menuOpen &&
+                    {hasAnyAction && menuOpen &&
                         typeof document !== "undefined" &&
                         createPortal(
                             <div
@@ -292,30 +332,34 @@ export default function LeaderRow({ leader }: LeaderRowProps) {
                                 style={menuStyle}
                                 className="rounded-2xl border border-border dark:border-white/10 bg-card/95 p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl"
                             >
-                                <button
-                                    type="button"
-                                    role="menuitem"
-                                    onClick={() => {
-                                        setMenuOpen(false);
-                                        router.push(`/admin/leaders/${leader.id}`);
-                                    }}
-                                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-muted transition hover:bg-white/5 hover:text-foreground"
-                                >
-                                    <Eye className="h-4 w-4 shrink-0 text-cyan-400" />
-                                    {t("admin.leaders.view")}
-                                </button>
-
-                                <Modal.Open opens={`delete-leader-${leader.id}`}>
+                                {canViewLeader && (
                                     <button
                                         type="button"
                                         role="menuitem"
-                                        onClick={() => setMenuOpen(false)}
-                                        className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-rose-400 transition hover:bg-rose-500/10"
+                                        onClick={() => {
+                                            setMenuOpen(false);
+                                            router.push(`/admin/leaders/${leader.id}`);
+                                        }}
+                                        className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-muted transition hover:bg-white/5 hover:text-foreground"
                                     >
-                                        <Trash2 className="h-4 w-4 shrink-0" />
-                                        {t("admin.leaders.delete")}
+                                        <Eye className="h-4 w-4 shrink-0 text-cyan-400" />
+                                        {t("admin.leaders.view")}
                                     </button>
-                                </Modal.Open>
+                                )}
+
+                                {canDeleteLeader && (
+                                    <Modal.Open opens={`delete-leader-${leader.id}`}>
+                                        <button
+                                            type="button"
+                                            role="menuitem"
+                                            onClick={() => setMenuOpen(false)}
+                                            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-rose-400 transition hover:bg-rose-500/10"
+                                        >
+                                            <Trash2 className="h-4 w-4 shrink-0" />
+                                            {t("admin.leaders.delete")}
+                                        </button>
+                                    </Modal.Open>
+                                )}
                             </div>,
                             document.body,
                         )}

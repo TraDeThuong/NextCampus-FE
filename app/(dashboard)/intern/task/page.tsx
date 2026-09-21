@@ -6,6 +6,8 @@ import InternTaskFilters from "./InternTaskFilters";
 import InternTaskStats from "./InternTaskStats";
 import InternTaskTable from "./InternTaskTable";
 
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations();
   return { title: t("intern.tasks.metaTitle") };
@@ -13,17 +15,22 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function InternTaskPage() {
   return (
-    <div className="space-y-6">
-      <InternTaskHeader />
-      <Suspense fallback={null}>
-        <InternTaskFilters />
-      </Suspense>
-      <Suspense fallback={null}>
-        <InternTaskStats />
-      </Suspense>
-      <Suspense fallback={null}>
-        <InternTaskTable />
-      </Suspense>
-    </div>
+    <ProtectedRoute
+      requiredPermissions={["TASK_READ", "TASK_ASSIGNMENT_READ"]}
+      permissionMode="ANY"
+    >
+      <div className="space-y-6">
+        <InternTaskHeader />
+        <Suspense fallback={null}>
+          <InternTaskFilters />
+        </Suspense>
+        <Suspense fallback={null}>
+          <InternTaskStats />
+        </Suspense>
+        <Suspense fallback={null}>
+          <InternTaskTable />
+        </Suspense>
+      </div>
+    </ProtectedRoute>
   );
 }

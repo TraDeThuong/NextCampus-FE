@@ -32,6 +32,8 @@ import Spinner from "@/components/ui/Spinner";
 import Table from "@/components/ui/Table";
 import InlineSelect from "@/components/ui/InlineSelect";
 import LeaderDepartmentSelect from "../LeaderDepartmentSelect";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 function formatDate(dateStr: string, locale: string = "vi") {
     try {
@@ -46,9 +48,18 @@ function formatDate(dateStr: string, locale: string = "vi") {
 }
 
 export default function LeaderDetailPage() {
+    return (
+        <ProtectedRoute requiredPermissions={["LEADER_READ"]}>
+            <LeaderDetailContent />
+        </ProtectedRoute>
+    );
+}
+
+function LeaderDetailContent() {
     const t = useTranslations();
     const params = useParams<{ id: string }>();
     const router = useRouter();
+    const { can } = useRBAC();
     const { data, isLoading, isError } = useLeaderDetail(params.id);
     const leader = data?.data;
 
@@ -86,7 +97,7 @@ export default function LeaderDetailPage() {
             </div>
 
             {/* Managed Interns Table */}
-            <InternsCard leader={leader} />
+            {can("INTERN_READ") && <InternsCard leader={leader} />}
         </div>
     );
 }
@@ -94,6 +105,9 @@ export default function LeaderDetailPage() {
 function LeaderHeader({ leader }: { leader: Leader }) {
     const t = useTranslations();
     const queryClient = useQueryClient();
+    const { can } = useRBAC();
+    const canUpdateUser = can("USER_UPDATE");
+
     const { mutate: toggleActive, isPending: togglingActive } = useMutation({
         mutationFn: (isActive: boolean) =>
             updateUserService(leader.userId, { isActive }),
@@ -153,38 +167,57 @@ function LeaderHeader({ leader }: { leader: Leader }) {
                     </div>
 
                     <div className="shrink-0">
-                        <InlineSelect
-                            ariaLabel={t("admin.leaders.colStatus")}
-                            value={leader.user.isActive ? "true" : "false"}
-                            placeholder={t("admin.leaders.colStatus")}
-                            loading={togglingActive}
-                            disabled={togglingActive}
-                            onChange={(val) => {
-                                if (val !== null) toggleActive(val === "true");
-                            }}
-                            options={[
-                                { value: "true", label: t("admin.leaders.active") },
-                                { value: "false", label: t("admin.leaders.inactive") },
-                            ]}
-                            renderTrigger={(label) => (
-                                <span
-                                    className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-                                        leader.user.isActive
-                                            ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-300 hover:border-emerald-400/50"
-                                            : "border-red-400/30 bg-red-500/10 text-red-300 hover:border-red-400/50"
-                                    }`}
-                                >
+                        {canUpdateUser ? (
+                            <InlineSelect
+                                ariaLabel={t("admin.leaders.colStatus")}
+                                value={leader.user.isActive ? "true" : "false"}
+                                placeholder={t("admin.leaders.colStatus")}
+                                loading={togglingActive}
+                                disabled={togglingActive}
+                                onChange={(val) => {
+                                    if (val !== null) toggleActive(val === "true");
+                                }}
+                                options={[
+                                    { value: "true", label: t("admin.leaders.active") },
+                                    { value: "false", label: t("admin.leaders.inactive") },
+                                ]}
+                                renderTrigger={(label) => (
                                     <span
-                                        className={`h-1.5 w-1.5 rounded-full ${
+                                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
                                             leader.user.isActive
-                                                ? "bg-emerald-400"
-                                                : "bg-red-400"
+                                                ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-300 hover:border-emerald-400/50"
+                                                : "border-red-400/30 bg-red-500/10 text-red-300 hover:border-red-400/50"
                                         }`}
-                                    />
-                                    {label}
-                                </span>
-                            )}
-                        />
+                                    >
+                                        <span
+                                            className={`h-1.5 w-1.5 rounded-full ${
+                                                leader.user.isActive
+                                                    ? "bg-emerald-400"
+                                                    : "bg-red-400"
+                                            }`}
+                                        />
+                                        {label}
+                                    </span>
+                                )}
+                            />
+                        ) : (
+                            <span
+                                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium ${
+                                    leader.user.isActive
+                                        ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-300"
+                                        : "border-red-400/30 bg-red-500/10 text-red-300"
+                                }`}
+                            >
+                                <span
+                                    className={`h-1.5 w-1.5 rounded-full ${
+                                        leader.user.isActive
+                                            ? "bg-emerald-400"
+                                            : "bg-red-400"
+                                    }`}
+                                />
+                                {leader.user.isActive ? t("admin.leaders.active") : t("admin.leaders.inactive")}
+                            </span>
+                        )}
                     </div>
                 </div>
             </div>
@@ -194,6 +227,8 @@ function LeaderHeader({ leader }: { leader: Leader }) {
 
 function LeaderInfo({ leader }: { leader: Leader }) {
     const t = useTranslations();
+    const { can } = useRBAC();
+    const canUpdateLeader = can("LEADER_UPDATE");
     const { mutate: updateLeader } = useUpdateLeader();
     const { data: deptData } = useDepartments();
     const departments = deptData?.data ?? [];
@@ -261,22 +296,28 @@ function LeaderInfo({ leader }: { leader: Leader }) {
                             <span>{t("admin.leaders.details.position")}</span>
                         </div>
                         <div className="min-w-0 max-w-[220px] text-sm text-right">
-                            <InlineSelect
-                                ariaLabel={t("admin.leaders.details.position")}
-                                value={leader.position}
-                                placeholder={t("admin.leaders.notSet")}
-                                loading={updatingPosition}
-                                disabled={leader.departments.length === 0}
-                                onDisabledClick={() => toast.error(t("admin.leaders.selectDepartmentFirst"))}
-                                onChange={handlePositionChange}
-                                options={[
-                                    { value: null, label: t("admin.leaders.notSet") },
-                                    ...availablePositions.map((pos) => ({
-                                        value: pos.name,
-                                        label: pos.name,
-                                    })),
-                                ]}
-                            />
+                            {canUpdateLeader ? (
+                                <InlineSelect
+                                    ariaLabel={t("admin.leaders.details.position")}
+                                    value={leader.position}
+                                    placeholder={t("admin.leaders.notSet")}
+                                    loading={updatingPosition}
+                                    disabled={leader.departments.length === 0}
+                                    onDisabledClick={() => toast.error(t("admin.leaders.selectDepartmentFirst"))}
+                                    onChange={handlePositionChange}
+                                    options={[
+                                        { value: null, label: t("admin.leaders.notSet") },
+                                        ...availablePositions.map((pos) => ({
+                                            value: pos.name,
+                                            label: pos.name,
+                                        })),
+                                    ]}
+                                />
+                            ) : (
+                                <span className="text-sm font-medium text-foreground">
+                                    {leader.position ?? "—"}
+                                </span>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -288,6 +329,8 @@ function LeaderInfo({ leader }: { leader: Leader }) {
 function DepartmentCard({ leader }: { leader: Leader }) {
     const t = useTranslations();
     const locale = useLocale();
+    const { can } = useRBAC();
+    const canUpdateLeader = can("LEADER_UPDATE");
     const { data: deptData } = useDepartments();
     const departments = deptData?.data ?? [];
 
@@ -310,10 +353,16 @@ function DepartmentCard({ leader }: { leader: Leader }) {
                             <span>{t("admin.leaders.details.departments")}</span>
                         </div>
                         <div className="min-w-0 max-w-[260px] text-sm">
-                            <LeaderDepartmentSelect
-                                leader={leader}
-                                departments={departments}
-                            />
+                            {canUpdateLeader ? (
+                                <LeaderDepartmentSelect
+                                    leader={leader}
+                                    departments={departments}
+                                />
+                            ) : (
+                                <span className="text-sm font-medium text-foreground">
+                                    {leader.departments.map((d) => d.name).join(", ") || "—"}
+                                </span>
+                            )}
                         </div>
                     </div>
 

@@ -8,6 +8,7 @@ import api from "@/lib/axios";
 import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
 import { useReviewAbsence } from "@/hooks/meeting/useReviewAbsence";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 interface AbsenceRequestItem {
   id: string;
@@ -32,14 +33,20 @@ interface PendingAbsencesResponse {
 
 export default function LeaveRequestsCard() {
   const t = useTranslations();
+  const { can } = useRBAC();
+  const canReview = can("MEETING_ABSENCE_REVIEW");
+
   const { data, isPending, isError } = useQuery({
     queryKey: ["absences", "pending"],
     queryFn: async () => {
       const res = await api.get<PendingAbsencesResponse>("/meetings/absences/pending");
       return res.data;
     },
+    enabled: canReview,
     staleTime: 1000 * 60 * 2,
   });
+
+  if (!canReview) return null;
 
   const allAbsences = data?.data ?? [];
   const pendingAbsences = allAbsences.filter((a) => a.status === "PENDING");

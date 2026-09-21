@@ -27,8 +27,8 @@ export const authService = {
         return response.data;
     },
 
-    updateMe: async (payload: UpdateProfilePayload): Promise<MeSuccessResponse> => {
-        const response = await api.put<MeSuccessResponse>("/auth/me", payload);
+    updateMe: async (payload: UpdateProfilePayload): Promise<MessageSuccessResponse> => {
+        const response = await api.put<MessageSuccessResponse>("/auth/profile", payload);
         return response.data;
     },
 

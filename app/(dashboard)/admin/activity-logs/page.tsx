@@ -8,6 +8,8 @@ import ActivityLogTable from "./ActivityLogTable";
 import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
 
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations();
   return { title: t("admin.activityLogs.metaTitle") };
@@ -15,19 +17,21 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function ActivityLogsPage() {
   return (
-    <div className="space-y-6">
-      <ActivityLogHeader />
-      <ActivityLogStats />
-      <Suspense
-        fallback={
-          <MetalCard className="flex items-center justify-center py-20">
-            <Spinner size="lg" />
-          </MetalCard>
-        }
-      >
-        <ActivityLogFilter />
-        <ActivityLogTable />
-      </Suspense>
-    </div>
+    <ProtectedRoute requiredPermissions={["AUDIT_LOG_READ"]}>
+      <div className="space-y-6">
+        <ActivityLogHeader />
+        <ActivityLogStats />
+        <Suspense
+          fallback={
+            <MetalCard className="flex items-center justify-center py-20">
+              <Spinner size="lg" />
+            </MetalCard>
+          }
+        >
+          <ActivityLogFilter />
+          <ActivityLogTable />
+        </Suspense>
+      </div>
+    </ProtectedRoute>
   );
 }

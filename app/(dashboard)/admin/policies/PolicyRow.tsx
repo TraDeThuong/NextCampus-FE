@@ -14,6 +14,7 @@ import Table from "@/components/ui/Table";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import RichTextEditor from "@/components/ui/RichTextEditor";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 type PolicyRowProps = { policy: Regulation };
 
@@ -29,6 +30,11 @@ type FormValues = z.infer<typeof policySchema>;
 
 export default function PolicyRow({ policy }: PolicyRowProps) {
   const t = useTranslations();
+  const { can } = useRBAC();
+  const canUpdate = can("REGULATION_UPDATE");
+  const canDelete = can("REGULATION_DELETE");
+  const hasAnyAction = canUpdate || canDelete;
+
   const { mutate: updatePolicy, isPending: updating } = useUpdateRegulation();
   const { mutate: deletePolicy, isPending: deleting } = useDeleteRegulation();
   const { mutate: activatePolicy, isPending: activating } = useActivateRegulation();
@@ -58,52 +64,60 @@ export default function PolicyRow({ policy }: PolicyRowProps) {
         <div className="text-sm text-slate-400 flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5 text-slate-500" />{formattedCreatedDate}</div>
         <div className="text-sm text-slate-400 flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5 text-slate-500" />{formattedUpdatedDate}</div>
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            role="switch"
-            aria-checked={policy.isActive}
-            disabled={activating || policy.isActive}
-            onClick={() => !policy.isActive && activatePolicy(policy.id)}
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-light focus:ring-offset-2 focus:ring-offset-background disabled:cursor-not-allowed disabled:opacity-60 ${
-              policy.isActive ? "bg-emerald-500" : "bg-slate-700 hover:bg-slate-600"
-            }`}
-            title={policy.isActive ? t("admin.policies.active") : t("admin.policies.setActive")}
-          >
-            <span
-              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                policy.isActive ? "translate-x-4" : "translate-x-0"
+          {canUpdate && (
+            <button
+              type="button"
+              role="switch"
+              aria-checked={policy.isActive}
+              disabled={activating || policy.isActive}
+              onClick={() => !policy.isActive && activatePolicy(policy.id)}
+              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-light focus:ring-offset-2 focus:ring-offset-background disabled:cursor-not-allowed disabled:opacity-60 ${
+                policy.isActive ? "bg-emerald-500" : "bg-slate-700 hover:bg-slate-600"
               }`}
-            />
-          </button>
+              title={policy.isActive ? t("admin.policies.active") : t("admin.policies.setActive")}
+            >
+              <span
+                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  policy.isActive ? "translate-x-4" : "translate-x-0"
+                }`}
+              />
+            </button>
+          )}
           <span className={`inline-flex items-center rounded-lg border px-2 py-0.5 text-xs font-semibold ${policy.isActive ? "border-emerald-400/20 bg-emerald-500/10 text-emerald-300" : "border-slate-700 bg-slate-800/40 text-slate-400"}`}>
             {activating ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
             {policy.isActive ? t("admin.policies.active") : t("admin.policies.draftInactive")}
           </span>
         </div>
         <div className="relative flex justify-end" ref={menuRef}>
-          <button type="button" onClick={() => setMenuOpen((prev) => !prev)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-slate-400 transition hover:border-white/10 hover:bg-white/5 hover:text-white">
-            <MoreVertical className="h-4 w-4" />
-          </button>
-          {menuOpen && (
+          {hasAnyAction && (
+            <button type="button" onClick={() => setMenuOpen((prev) => !prev)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-slate-400 transition hover:border-white/10 hover:bg-white/5 hover:text-white">
+              <MoreVertical className="h-4 w-4" />
+            </button>
+          )}
+          {hasAnyAction && menuOpen && (
             <div className="absolute right-0 top-full z-50 mt-2 w-48 rounded-2xl border border-white/10 bg-[#0f172a] p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl">
-              <Modal.Open opens={`edit-policy-${policy.id}`}>
-                <button type="button" onClick={() => setMenuOpen(false)} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white">
-                  <Edit2 className="h-4 w-4" />
-                  {t("admin.policies.editContent")}
-                </button>
-              </Modal.Open>
-              {!policy.isActive && (
+              {canUpdate && (
+                <Modal.Open opens={`edit-policy-${policy.id}`}>
+                  <button type="button" onClick={() => setMenuOpen(false)} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white">
+                    <Edit2 className="h-4 w-4" />
+                    {t("admin.policies.editContent")}
+                  </button>
+                </Modal.Open>
+              )}
+              {canUpdate && !policy.isActive && (
                 <button type="button" onClick={() => { setMenuOpen(false); activatePolicy(policy.id); }} disabled={activating} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-emerald-400 transition hover:bg-emerald-500/10">
                   <Play className="h-4 w-4" />
                   {activating ? t("admin.policies.activating") : t("admin.policies.setActive")}
                 </button>
               )}
-              <Modal.Open opens={`delete-policy-${policy.id}`}>
-                <button type="button" onClick={() => setMenuOpen(false)} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-red-400 transition hover:bg-red-500/10">
-                  <Trash2 className="h-4 w-4" />
-                  {t("admin.policies.deletePolicy")}
-                </button>
-              </Modal.Open>
+              {canDelete && (
+                <Modal.Open opens={`delete-policy-${policy.id}`}>
+                  <button type="button" onClick={() => setMenuOpen(false)} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-red-400 transition hover:bg-red-500/10">
+                    <Trash2 className="h-4 w-4" />
+                    {t("admin.policies.deletePolicy")}
+                  </button>
+                </Modal.Open>
+              )}
             </div>
           )}
         </div>

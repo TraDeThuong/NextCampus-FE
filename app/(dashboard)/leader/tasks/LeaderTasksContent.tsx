@@ -6,6 +6,7 @@ import LeaderTaskStats from "./LeaderTaskStats";
 import LeaderTaskFilters from "./LeaderTaskFilters";
 import LeaderTableTasks from "./LeaderTableTasks";
 import TaskReviewModal from "./TaskReviewModal";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export default function LeaderTasksContent() {
   const searchParams = useSearchParams();
@@ -21,7 +22,8 @@ export default function LeaderTasksContent() {
   };
 
   return (
-    <div className="space-y-6">
+    <ProtectedRoute requiredPermissions={["TASK_READ"]}>
+      <div className="space-y-6">
       <LeaderTaskHeader />
       <LeaderTaskStats />
       <LeaderTaskFilters />
@@ -33,6 +35,7 @@ export default function LeaderTasksContent() {
           onClose={closeReview}
         />
       )}
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }

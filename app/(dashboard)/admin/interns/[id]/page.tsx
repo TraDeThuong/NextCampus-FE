@@ -46,6 +46,8 @@ import Spinner from "@/components/ui/Spinner";
 import InlineSelect from "@/components/ui/InlineSelect";
 import Table from "@/components/ui/Table";
 import InternshipSummaryExportButton from "@/components/pdf/InternshipSummaryExportButton";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 function formatDate(dateStr?: string | null, locale = "vi") {
     if (!dateStr) return "—";
@@ -69,6 +71,14 @@ function extractArray<T>(data: unknown): T[] {
 }
 
 export default function InternDetailPage() {
+    return (
+        <ProtectedRoute requiredPermissions={["INTERN_READ"]}>
+            <InternDetailContent />
+        </ProtectedRoute>
+    );
+}
+
+function InternDetailContent() {
     const t = useTranslations();
     const params = useParams<{ id: string }>();
     const router = useRouter();
@@ -147,40 +157,42 @@ export default function InternDetailPage() {
     }
 
     return (
-        <div className="mx-auto w-full space-y-6">
-            {/* Top Back Action */}
-            <div>
-                <button
-                    type="button"
-                    onClick={() => router.push("/admin/interns")}
-                    className="inline-flex items-center gap-2 text-sm font-medium text-muted hover:text-foreground transition-all py-2 px-3.5 rounded-xl border border-border/60 dark:border-white/10 bg-card/60 hover:bg-card active:scale-95 focus-visible:ring-2 focus-visible:ring-cyan-500/50 shadow-sm"
-                >
-                    <ArrowLeft className="h-4 w-4 shrink-0 transition-transform group-hover:-translate-x-1" />
-                    <span>{t("admin.interns.details.back")}</span>
-                </button>
+        <ProtectedRoute requiredPermissions={["INTERN_READ"]}>
+            <div className="mx-auto w-full space-y-6">
+                {/* Top Back Action */}
+                <div>
+                    <button
+                        type="button"
+                        onClick={() => router.push("/admin/interns")}
+                        className="inline-flex items-center gap-2 text-sm font-medium text-muted hover:text-foreground transition-all py-2 px-3.5 rounded-xl border border-border/60 dark:border-white/10 bg-card/60 hover:bg-card active:scale-95 focus-visible:ring-2 focus-visible:ring-cyan-500/50 shadow-sm"
+                    >
+                        <ArrowLeft className="h-4 w-4 shrink-0 transition-transform group-hover:-translate-x-1" />
+                        <span>{t("admin.interns.details.back")}</span>
+                    </button>
+                </div>
+
+                {/* Header Banner */}
+                <InternHeader intern={intern} />
+
+                {/* KPI Stat Cards (Adhering to Rule 49-51: mobile 2-col, rotate-6/scale-110 micro-interaction, odd count headline KPI) */}
+                <InternKpiCards
+                    totalTasks={assignments.length}
+                    completedTasks={assignments.filter((a) => a.status === "DONE").length}
+                    inProgressTasks={assignments.filter((a) => a.status === "IN_PROGRESS").length}
+                    dailyReportsCount={reportsCount}
+                    evaluationsCount={evaluationsCount}
+                />
+
+                {/* Main Content Grid: Personal Info & Program Placement */}
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                    <PersonalInfo intern={intern} />
+                    <InternshipInfo intern={intern} />
+                </div>
+
+                {/* Assigned Tasks Table */}
+                <TaskListCard assignments={assignments} />
             </div>
-
-            {/* Header Banner */}
-            <InternHeader intern={intern} />
-
-            {/* KPI Stat Cards (Adhering to Rule 49-51: mobile 2-col, rotate-6/scale-110 micro-interaction, odd count headline KPI) */}
-            <InternKpiCards
-                totalTasks={assignments.length}
-                completedTasks={assignments.filter((a) => a.status === "DONE").length}
-                inProgressTasks={assignments.filter((a) => a.status === "IN_PROGRESS").length}
-                dailyReportsCount={reportsCount}
-                evaluationsCount={evaluationsCount}
-            />
-
-            {/* Main Content Grid: Personal Info & Program Placement */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <PersonalInfo intern={intern} />
-                <InternshipInfo intern={intern} />
-            </div>
-
-            {/* Assigned Tasks Table */}
-            <TaskListCard assignments={assignments} />
-        </div>
+        </ProtectedRoute>
     );
 }
 
@@ -189,6 +201,8 @@ export default function InternDetailPage() {
 function InternHeader({ intern }: { intern: Intern }) {
     const t = useTranslations();
     const locale = useLocale();
+    const { can } = useRBAC();
+    const canUpdate = can("INTERN_UPDATE");
     const { mutate: updateIntern } = useUpdateIntern();
     const [status, setStatus] = useState(intern.status);
 
@@ -239,47 +253,62 @@ function InternHeader({ intern }: { intern: Intern }) {
                         <div className="flex flex-wrap items-center gap-3">
                             <InternshipSummaryExportButton internId={intern.id} />
 
-                            {/* Standardized InlineSelect for Status */}
-                            <InlineSelect
-                                ariaLabel={t("admin.interns.colStatus")}
-                                value={status}
-                                placeholder={t("admin.interns.colStatus")}
-                                onChange={(val) => {
-                                    if (!val) return;
-                                    const v = val as Intern["status"];
-                                    setStatus(v);
-                                    updateIntern(
-                                        {
-                                            id: intern.id,
-                                            payload: { status: v },
-                                        },
-                                        {
-                                            onError: () => setStatus(intern.status),
-                                        }
-                                    );
-                                }}
-                                options={[
-                                    { value: "ACTIVE", label: t("admin.interns.details.active") },
-                                    { value: "COMPLETED", label: t("admin.interns.details.completed") },
-                                    { value: "DROPPED", label: t("admin.interns.details.dropped") },
-                                ]}
-                                renderTrigger={(label) => (
-                                    <span
-                                        className={`inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-semibold tracking-wide uppercase transition shadow-sm ${statusBadge[status]}`}
-                                    >
-                                        <Circle className="h-2 w-2 fill-current" />
-                                        {label}
-                                    </span>
-                                )}
-                            />
+                            {canUpdate ? (
+                                <>
+                                    {/* Standardized InlineSelect for Status */}
+                                    <InlineSelect
+                                        ariaLabel={t("admin.interns.colStatus")}
+                                        value={status}
+                                        placeholder={t("admin.interns.colStatus")}
+                                        onChange={(val) => {
+                                            if (!val) return;
+                                            const v = val as Intern["status"];
+                                            setStatus(v);
+                                            updateIntern(
+                                                {
+                                                    id: intern.id,
+                                                    payload: { status: v },
+                                                },
+                                                {
+                                                    onError: () => setStatus(intern.status),
+                                                }
+                                            );
+                                        }}
+                                        options={[
+                                            { value: "ACTIVE", label: t("admin.interns.details.active") },
+                                            { value: "COMPLETED", label: t("admin.interns.details.completed") },
+                                            { value: "DROPPED", label: t("admin.interns.details.dropped") },
+                                        ]}
+                                        renderTrigger={(label) => (
+                                            <span
+                                                className={`inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-semibold tracking-wide uppercase transition shadow-sm ${statusBadge[status]}`}
+                                            >
+                                                <Circle className="h-2 w-2 fill-current" />
+                                                {label}
+                                            </span>
+                                        )}
+                                    />
 
-                            {status === "ACTIVE" && (
-                                <Modal.Open opens="drop-intern">
-                                    <button className="flex items-center gap-2 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-2 text-xs font-semibold tracking-wide uppercase text-rose-400 transition-all duration-300 hover:bg-rose-500/20 hover:border-rose-500/40 active:scale-95 shadow-sm">
-                                        <Trash2 className="h-3.5 w-3.5 shrink-0" />
-                                        <span>{t("admin.interns.details.dropIntern")}</span>
-                                    </button>
-                                </Modal.Open>
+                                    {status === "ACTIVE" && (
+                                        <Modal.Open opens="drop-intern">
+                                            <button className="flex items-center gap-2 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-2 text-xs font-semibold tracking-wide uppercase text-rose-400 transition-all duration-300 hover:bg-rose-500/20 hover:border-rose-500/40 active:scale-95 shadow-sm">
+                                                <Trash2 className="h-3.5 w-3.5 shrink-0" />
+                                                <span>{t("admin.interns.details.dropIntern")}</span>
+                                            </button>
+                                        </Modal.Open>
+                                    )}
+                                </>
+                            ) : (
+                                <span
+                                    className={`inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-semibold tracking-wide uppercase transition shadow-sm ${statusBadge[status]}`}
+                                >
+                                    <Circle className="h-2 w-2 fill-current" />
+                                    {status === "ACTIVE"
+                                        ? t("admin.interns.details.active")
+                                        : status === "COMPLETED"
+                                          ? t("admin.interns.details.completed")
+                                          : t("admin.interns.details.dropped")}
+                                </span>
                             )}
                         </div>
                     </div>
@@ -403,6 +432,9 @@ function PersonalInfo({ intern }: { intern: Intern }) {
     const t = useTranslations();
     const locale = useLocale();
     const queryClient = useQueryClient();
+    const { can } = useRBAC();
+    const canUpdateIntern = can("INTERN_UPDATE");
+    const canUpdateUser = can("USER_UPDATE");
     const { mutate: updateIntern } = useUpdateIntern();
 
     const [editingPhone, setEditingPhone] = useState(false);
@@ -453,37 +485,43 @@ function PersonalInfo({ intern }: { intern: Intern }) {
                                 <Phone className="h-4 w-4 shrink-0 text-muted-foreground" />
                                 <span>{t("admin.interns.details.phone")}</span>
                             </div>
-                            {editingPhone ? (
-                                <div className="flex items-center gap-1.5">
-                                    <input
-                                        type="text"
-                                        value={phone}
-                                        onChange={(e) => setPhone(e.target.value)}
-                                        onBlur={() => {
-                                            if (phone !== intern.phone) {
-                                                updateIntern({
-                                                    id: intern.id,
-                                                    payload: { phone },
-                                                });
-                                            }
-                                            setEditingPhone(false);
-                                        }}
-                                        onKeyDown={(e) => {
-                                            if (e.key === "Enter")
-                                                (e.target as HTMLInputElement).blur();
-                                        }}
-                                        autoFocus
-                                        className="rounded-lg border border-primary-light bg-card px-3 py-1 text-sm text-foreground outline-none ring-2 ring-primary-light/20 shadow-inner w-36 transition-all"
-                                    />
-                                </div>
+                            {canUpdateIntern ? (
+                                editingPhone ? (
+                                    <div className="flex items-center gap-1.5">
+                                        <input
+                                            type="text"
+                                            value={phone}
+                                            onChange={(e) => setPhone(e.target.value)}
+                                            onBlur={() => {
+                                                if (phone !== intern.phone) {
+                                                    updateIntern({
+                                                        id: intern.id,
+                                                        payload: { phone },
+                                                    });
+                                                }
+                                                setEditingPhone(false);
+                                            }}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Enter")
+                                                    (e.target as HTMLInputElement).blur();
+                                            }}
+                                            autoFocus
+                                            className="rounded-lg border border-primary-light bg-card px-3 py-1 text-sm text-foreground outline-none ring-2 ring-primary-light/20 shadow-inner w-36 transition-all"
+                                        />
+                                    </div>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => setEditingPhone(true)}
+                                        className="rounded-lg px-2.5 py-1 text-sm font-medium text-foreground transition-all duration-200 hover:bg-card hover:text-cyan-400 border border-transparent hover:border-border active:scale-95"
+                                    >
+                                        {phone || t("admin.interns.details.addPhone")}
+                                    </button>
+                                )
                             ) : (
-                                <button
-                                    type="button"
-                                    onClick={() => setEditingPhone(true)}
-                                    className="rounded-lg px-2.5 py-1 text-sm font-medium text-foreground transition-all duration-200 hover:bg-card hover:text-cyan-400 border border-transparent hover:border-border active:scale-95"
-                                >
-                                    {phone || t("admin.interns.details.addPhone")}
-                                </button>
+                                <span className="text-sm font-medium text-foreground">
+                                    {phone || "—"}
+                                </span>
                             )}
                         </div>
 
@@ -497,21 +535,36 @@ function PersonalInfo({ intern }: { intern: Intern }) {
                                 )}
                                 <span>{t("admin.interns.details.accountStatus")}</span>
                             </div>
-                            <button
-                                type="button"
-                                disabled={togglingActive}
-                                onClick={() => toggleUserActive(!intern.user.isActive)}
-                                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition active:scale-95 disabled:opacity-50 ${
-                                    intern.user.isActive
-                                        ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
-                                        : "border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20"
-                                }`}
-                            >
-                                <Circle className="h-2 w-2 fill-current" />
-                                {intern.user.isActive
-                                    ? t("admin.interns.details.authorized")
-                                    : t("admin.interns.details.deactivated")}
-                            </button>
+                            {canUpdateUser ? (
+                                <button
+                                    type="button"
+                                    disabled={togglingActive}
+                                    onClick={() => toggleUserActive(!intern.user.isActive)}
+                                    className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition active:scale-95 disabled:opacity-50 ${
+                                        intern.user.isActive
+                                            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
+                                            : "border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20"
+                                    }`}
+                                >
+                                    <Circle className="h-2 w-2 fill-current" />
+                                    {intern.user.isActive
+                                        ? t("admin.interns.details.authorized")
+                                        : t("admin.interns.details.deactivated")}
+                                </button>
+                            ) : (
+                                <span
+                                    className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${
+                                        intern.user.isActive
+                                            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                                            : "border-rose-500/30 bg-rose-500/10 text-rose-400"
+                                    }`}
+                                >
+                                    <Circle className="h-2 w-2 fill-current" />
+                                    {intern.user.isActive
+                                        ? t("admin.interns.details.authorized")
+                                        : t("admin.interns.details.deactivated")}
+                                </span>
+                            )}
                         </div>
 
                         <InfoRow
@@ -531,6 +584,9 @@ function PersonalInfo({ intern }: { intern: Intern }) {
 function InternshipInfo({ intern }: { intern: Intern }) {
     const t = useTranslations();
     const locale = useLocale();
+    const { can } = useRBAC();
+    const canAssignLeader = can("INTERN_LEADER_ASSIGN") || can("INTERN_UPDATE");
+    const canUpdateIntern = can("INTERN_UPDATE");
     const { mutate: updateIntern } = useUpdateIntern();
 
     const { data: leadersData } = useLeaders();
@@ -569,39 +625,45 @@ function InternshipInfo({ intern }: { intern: Intern }) {
                                 <User className="h-4 w-4 shrink-0 text-muted-foreground" />
                                 <span>{t("admin.interns.details.mentor")}</span>
                             </div>
-                            <InlineSelect
-                                ariaLabel={t("admin.interns.details.mentor")}
-                                value={intern.leaderId}
-                                placeholder={t("admin.interns.details.notAssigned")}
-                                onChange={(newId) => {
-                                    const selectedLdr = newId
-                                        ? leaders.find((l) => l.userId === newId)
-                                        : null;
-                                    const hasSingleDepartment = selectedLdr?.departments?.length === 1;
+                            {canAssignLeader ? (
+                                <InlineSelect
+                                    ariaLabel={t("admin.interns.details.mentor")}
+                                    value={intern.leaderId}
+                                    placeholder={t("admin.interns.details.notAssigned")}
+                                    onChange={(newId) => {
+                                        const selectedLdr = newId
+                                            ? leaders.find((l) => l.userId === newId)
+                                            : null;
+                                        const hasSingleDepartment = selectedLdr?.departments?.length === 1;
 
-                                    updateIntern({
-                                        id: intern.id,
-                                        payload: {
-                                            leaderId: newId || null,
-                                            ...(hasSingleDepartment ? {
-                                                departmentId: selectedLdr.departments[0].id,
-                                            } : {
-                                                departmentId: null,
-                                                positionId: null,
-                                            }),
-                                        },
-                                    });
-                                }}
-                                options={[
-                                    { value: null, label: t("admin.interns.details.notAssigned") },
-                                    ...leaders.map((l) => ({
-                                        value: l.userId,
-                                        label: l.user.fullName
-                                            ? `${l.user.fullName} (${l.user.email})`
-                                            : l.user.email,
-                                    })),
-                                ]}
-                            />
+                                        updateIntern({
+                                            id: intern.id,
+                                            payload: {
+                                                leaderId: newId || null,
+                                                ...(hasSingleDepartment ? {
+                                                    departmentId: selectedLdr.departments[0].id,
+                                                } : {
+                                                    departmentId: null,
+                                                    positionId: null,
+                                                }),
+                                            },
+                                        });
+                                    }}
+                                    options={[
+                                        { value: null, label: t("admin.interns.details.notAssigned") },
+                                        ...leaders.map((l) => ({
+                                            value: l.userId,
+                                            label: l.user.fullName
+                                                ? `${l.user.fullName} (${l.user.email})`
+                                                : l.user.email,
+                                        })),
+                                    ]}
+                                />
+                            ) : (
+                                <span className="text-sm font-medium text-foreground">
+                                    {selectedLeader?.user?.fullName ?? selectedLeader?.user?.email ?? t("admin.interns.details.notAssigned")}
+                                </span>
+                            )}
                         </div>
 
                         {/* Department Selector */}
@@ -610,29 +672,35 @@ function InternshipInfo({ intern }: { intern: Intern }) {
                                 <Building2 className="h-4 w-4 shrink-0 text-muted-foreground" />
                                 <span>{t("admin.interns.details.department")}</span>
                             </div>
-                            <InlineSelect
-                                ariaLabel={t("admin.interns.details.department")}
-                                value={intern.department?.id ?? null}
-                                placeholder={t("admin.interns.details.notAssigned")}
-                                disabled={!intern.leaderId}
-                                onDisabledClick={() => toast.error(t("admin.interns.selectLeaderFirst"))}
-                                onChange={(newId) => {
-                                    updateIntern({
-                                        id: intern.id,
-                                        payload: {
-                                            departmentId: newId,
-                                            positionId: null,
-                                        },
-                                    });
-                                }}
-                                options={[
-                                    { value: null, label: t("admin.interns.details.notAssigned") },
-                                    ...allowedDepartments.map((d) => ({
-                                        value: d.id,
-                                        label: d.name,
-                                    })),
-                                ]}
-                            />
+                            {canUpdateIntern ? (
+                                <InlineSelect
+                                    ariaLabel={t("admin.interns.details.department")}
+                                    value={intern.department?.id ?? null}
+                                    placeholder={t("admin.interns.details.notAssigned")}
+                                    disabled={!intern.leaderId}
+                                    onDisabledClick={() => toast.error(t("admin.interns.selectLeaderFirst"))}
+                                    onChange={(newId) => {
+                                        updateIntern({
+                                            id: intern.id,
+                                            payload: {
+                                                departmentId: newId,
+                                                positionId: null,
+                                            },
+                                        });
+                                    }}
+                                    options={[
+                                        { value: null, label: t("admin.interns.details.notAssigned") },
+                                        ...allowedDepartments.map((d) => ({
+                                            value: d.id,
+                                            label: d.name,
+                                        })),
+                                    ]}
+                                />
+                            ) : (
+                                <span className="text-sm font-medium text-foreground">
+                                    {intern.department?.name ?? t("admin.interns.details.notAssigned")}
+                                </span>
+                            )}
                         </div>
 
                         {/* Job Role Selector */}
@@ -641,28 +709,34 @@ function InternshipInfo({ intern }: { intern: Intern }) {
                                 <Briefcase className="h-4 w-4 shrink-0 text-muted-foreground" />
                                 <span>{t("admin.interns.details.jobRole")}</span>
                             </div>
-                            <InlineSelect
-                                ariaLabel={t("admin.interns.details.jobRole")}
-                                value={intern.position?.id ?? null}
-                                placeholder={t("admin.interns.details.notAssigned")}
-                                disabled={!intern.department?.id}
-                                onDisabledClick={() => toast.error(t("admin.interns.departmentRequired"))}
-                                onChange={(newId) => {
-                                    updateIntern({
-                                        id: intern.id,
-                                        payload: {
-                                            positionId: newId || undefined,
-                                        },
-                                    });
-                                }}
-                                options={[
-                                    { value: null, label: t("admin.interns.details.notAssigned") },
-                                    ...positions.map((p) => ({
-                                        value: p.id,
-                                        label: p.name,
-                                    })),
-                                ]}
-                            />
+                            {canUpdateIntern ? (
+                                <InlineSelect
+                                    ariaLabel={t("admin.interns.details.jobRole")}
+                                    value={intern.position?.id ?? null}
+                                    placeholder={t("admin.interns.details.notAssigned")}
+                                    disabled={!intern.department?.id}
+                                    onDisabledClick={() => toast.error(t("admin.interns.departmentRequired"))}
+                                    onChange={(newId) => {
+                                        updateIntern({
+                                            id: intern.id,
+                                            payload: {
+                                                positionId: newId || undefined,
+                                            },
+                                        });
+                                    }}
+                                    options={[
+                                        { value: null, label: t("admin.interns.details.notAssigned") },
+                                        ...positions.map((p) => ({
+                                            value: p.id,
+                                            label: p.name,
+                                        })),
+                                    ]}
+                                />
+                            ) : (
+                                <span className="text-sm font-medium text-foreground">
+                                    {intern.position?.name ?? t("admin.interns.details.notAssigned")}
+                                </span>
+                            )}
                         </div>
 
                         <InfoRow

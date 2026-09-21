@@ -5,10 +5,12 @@ import { Building2, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import MetalCard from "@/components/ui/MetalCard";
 import CreateDepartmentModal from "./CreateDepartmentModal";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 export default function DepartmentHeader() {
   const t = useTranslations();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const { can } = useRBAC();
 
   return (
     <>
@@ -29,10 +31,11 @@ export default function DepartmentHeader() {
               </p>
             </div>
 
-            <div className="flex items-center gap-3 shrink-0">
-              <button
-                type="button"
-                onClick={() => setIsCreateOpen(true)}
+            {can("DEPARTMENT_CREATE") && (
+              <div className="flex items-center gap-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsCreateOpen(true)}
                 className="
                   group relative inline-flex items-center justify-center gap-2 overflow-hidden
                   rounded-xl sm:rounded-2xl
@@ -62,6 +65,7 @@ export default function DepartmentHeader() {
                 </span>
               </button>
             </div>
+            )}
           </div>
         </div>
       </MetalCard>

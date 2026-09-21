@@ -17,6 +17,7 @@ import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
 import { useWeeklyEvaluationDetail } from "@/hooks/weekly-evaluation/useWeeklyEvaluationDetail";
 import WeeklyEvaluationExportButton from "../WeeklyEvaluationExportButton";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import {
   CRITERIA_SECTIONS,
   RATING_COLORS,
@@ -216,6 +217,14 @@ function LegacyScoreBars({
 }
 
 export default function WeeklyEvaluationDetailPage() {
+  return (
+    <ProtectedRoute requiredPermissions={["WEEKLY_EVALUATION_READ"]}>
+      <WeeklyEvaluationDetailContent />
+    </ProtectedRoute>
+  );
+}
+
+function WeeklyEvaluationDetailContent() {
   const t = useTranslations("leader.weeklyEvaluation");
   const td = useTranslations("leader.weeklyEvaluation.detail");
   const params = useParams<{ id: string }>();

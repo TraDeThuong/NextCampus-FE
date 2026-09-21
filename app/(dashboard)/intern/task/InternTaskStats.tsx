@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { CheckSquare, Clock, CheckCircle2, Percent, AlertTriangle, type LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useTaskAssignments } from "@/hooks/task-assignment/useTaskAssignments";
+import type { TaskAssignment } from "@/types/task-assignment";
 import MetalCard from "@/components/ui/MetalCard";
 
 interface StatCard { title: string; value: string | number; icon: LucideIcon; iconBg: string; }

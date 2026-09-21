@@ -5,6 +5,7 @@ import { Settings, RotateCcw, Save, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import MetalCard from "@/components/ui/MetalCard";
 import Button from "@/components/ui/Button";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 interface SettingsHeaderProps {
   onOpenResetModal: () => void;
@@ -22,6 +23,8 @@ export default function SettingsHeader({
   hasChanges,
 }: SettingsHeaderProps) {
   const t = useTranslations("admin.settings");
+  const { can } = useRBAC();
+  const canManage = can("SYSTEM_CONFIG_MANAGE");
 
   return (
     <MetalCard>
@@ -43,37 +46,39 @@ export default function SettingsHeader({
           </div>
 
           {/* Action Toolbar: Single location for Reset and Save */}
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-            {/* Reset to Defaults Button */}
-            <Button
-              type="button"
-              variant="glass"
-              size="md"
-              onClick={onOpenResetModal}
-              disabled={isPending}
-              className="h-[42px] sm:h-[46px] text-xs sm:text-sm px-4"
-            >
-              <RotateCcw className="h-4 w-4 shrink-0 text-muted" />
-              <span>{t("resetDefaults")}</span>
-            </Button>
+          {canManage && (
+            <div className="flex flex-wrap items-center gap-3 shrink-0">
+              {/* Reset to Defaults Button */}
+              <Button
+                type="button"
+                variant="glass"
+                size="md"
+                onClick={onOpenResetModal}
+                disabled={isPending}
+                className="h-[42px] sm:h-[46px] text-xs sm:text-sm px-4"
+              >
+                <RotateCcw className="h-4 w-4 shrink-0 text-muted" />
+                <span>{t("resetDefaults")}</span>
+              </Button>
 
-            {/* Save Settings Button */}
-            <Button
-              type="submit"
-              variant="primary"
-              size="md"
-              onClick={onSave}
-              disabled={isPending || hasErrors || !hasChanges}
-              className="h-[42px] sm:h-[46px] text-xs sm:text-sm px-6 shadow-[0_0_25px_rgba(21,174,245,0.25)]"
-            >
-              {isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin shrink-0" />
-              ) : (
-                <Save className="h-4 w-4 shrink-0" />
-              )}
-              <span>{isPending ? t("saving") : t("saveSettings")}</span>
-            </Button>
-          </div>
+              {/* Save Settings Button */}
+              <Button
+                type="submit"
+                variant="primary"
+                size="md"
+                onClick={onSave}
+                disabled={isPending || hasErrors || !hasChanges}
+                className="h-[42px] sm:h-[46px] text-xs sm:text-sm px-6 shadow-[0_0_25px_rgba(21,174,245,0.25)]"
+              >
+                {isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin shrink-0" />
+                ) : (
+                  <Save className="h-4 w-4 shrink-0" />
+                )}
+                <span>{isPending ? t("saving") : t("saveSettings")}</span>
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </MetalCard>

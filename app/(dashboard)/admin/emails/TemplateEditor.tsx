@@ -22,6 +22,7 @@ import DOMPurify from "isomorphic-dompurify";
 import { toast } from "react-hot-toast";
 import { useTranslations } from "next-intl";
 import Spinner from "@/components/ui/Spinner";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 // ─── Types ────────────────────────────────────────────────────────────────
 
@@ -165,6 +166,12 @@ function TemplateEditorInner({
   meta,
 }: Props & { meta: (typeof TEMPLATE_CATALOG)[number] }) {
   const t = useTranslations();
+  const { canAny } = useRBAC();
+  const canManage = canAny([
+    "NOTIFICATION_TEMPLATE_MANAGE",
+    "TEMPLATE_MANAGE",
+    "NOTIFICATION_UPDATE",
+  ]);
   const { mutate: upsert, isPending: saving } = useUpsertNotificationTemplate();
   const { mutate: reset, isPending: resetting } = useResetNotificationTemplate();
 
@@ -740,75 +747,77 @@ function TemplateEditorInner({
         </div>
 
         {/* Action Controls */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-t border-border pt-5">
-          {/* Restore Default */}
-          <div>
-            {template?.id ? (
-              <button
-                type="button"
-                onClick={onReset}
-                disabled={resetting}
+        {canManage && (
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-t border-border pt-5">
+            {/* Restore Default */}
+            <div>
+              {template?.id ? (
+                <button
+                  type="button"
+                  onClick={onReset}
+                  disabled={resetting}
+                  className="
+                    flex items-center gap-2 rounded-xl border border-rose-500/20
+                    bg-rose-500/5 px-4 py-2.5 text-xs sm:text-sm font-semibold text-rose-400
+                    transition-all duration-200 cursor-pointer
+                    hover:bg-rose-500/15 hover:border-rose-500/40 hover:text-rose-300
+                    active:scale-[0.98]
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                  "
+                >
+                  {resetting ? (
+                    <Spinner size="sm" />
+                  ) : (
+                    <RotateCcw className="h-4 w-4 shrink-0" />
+                  )}
+                  <span>{t("admin.emails.restoreDefault")}</span>
+                </button>
+              ) : (
+                <p className="text-xs text-muted flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.6)]" />
+                  <span>{t("admin.emails.usingFallback")}</span>
+                </p>
+              )}
+            </div>
+
+            {/* Save */}
+            <button
+              type="submit"
+              disabled={saving || (!isDirty && !!template)}
+              className="
+                group relative inline-flex items-center justify-center gap-2 overflow-hidden
+                rounded-xl sm:rounded-2xl
+                h-[42px] sm:h-[46px] px-6 sm:px-8
+                bg-gradient-to-r from-(--primary-main) to-(--primary-light)
+                text-sm font-semibold text-white
+                shadow-[0_0_25px_rgba(21,174,245,0.25)]
+                transition-all duration-300
+                hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-[0_0_35px_rgba(21,174,245,0.4)] hover:brightness-110
+                active:scale-[0.98]
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400
+                disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed
+                cursor-pointer select-none
+              "
+            >
+              <span
                 className="
-                  flex items-center gap-2 rounded-xl border border-rose-500/20
-                  bg-rose-500/5 px-4 py-2.5 text-xs sm:text-sm font-semibold text-rose-400
-                  transition-all duration-200 cursor-pointer
-                  hover:bg-rose-500/15 hover:border-rose-500/40 hover:text-rose-300
-                  active:scale-[0.98]
-                  disabled:opacity-50 disabled:cursor-not-allowed
+                  pointer-events-none absolute inset-y-0 -left-24 w-16 rotate-12
+                  bg-white/30 blur-lg
+                  transition-all duration-700
+                  group-hover:left-[130%]
                 "
-              >
-                {resetting ? (
+              />
+              <span className="relative flex items-center gap-2">
+                {saving ? (
                   <Spinner size="sm" />
                 ) : (
-                  <RotateCcw className="h-4 w-4 shrink-0" />
+                  <Save className="h-4 w-4 shrink-0" />
                 )}
-                <span>{t("admin.emails.restoreDefault")}</span>
-              </button>
-            ) : (
-              <p className="text-xs text-muted flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.6)]" />
-                <span>{t("admin.emails.usingFallback")}</span>
-              </p>
-            )}
+                <span>{t("admin.emails.saveChanges")}</span>
+              </span>
+            </button>
           </div>
-
-          {/* Save */}
-          <button
-            type="submit"
-            disabled={saving || (!isDirty && !!template)}
-            className="
-              group relative inline-flex items-center justify-center gap-2 overflow-hidden
-              rounded-xl sm:rounded-2xl
-              h-[42px] sm:h-[46px] px-6 sm:px-8
-              bg-gradient-to-r from-(--primary-main) to-(--primary-light)
-              text-sm font-semibold text-white
-              shadow-[0_0_25px_rgba(21,174,245,0.25)]
-              transition-all duration-300
-              hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-[0_0_35px_rgba(21,174,245,0.4)] hover:brightness-110
-              active:scale-[0.98]
-              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400
-              disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed
-              cursor-pointer select-none
-            "
-          >
-            <span
-              className="
-                pointer-events-none absolute inset-y-0 -left-24 w-16 rotate-12
-                bg-white/30 blur-lg
-                transition-all duration-700
-                group-hover:left-[130%]
-              "
-            />
-            <span className="relative flex items-center gap-2">
-              {saving ? (
-                <Spinner size="sm" />
-              ) : (
-                <Save className="h-4 w-4 shrink-0" />
-              )}
-              <span>{t("admin.emails.saveChanges")}</span>
-            </span>
-          </button>
-        </div>
+        )}
       </form>
     </div>
   );

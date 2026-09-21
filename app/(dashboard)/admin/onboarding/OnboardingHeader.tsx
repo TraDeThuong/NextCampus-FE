@@ -9,9 +9,12 @@ import DateRangeFilter from "./DateRangeFilter";
 import InviteInternForm from "./InviteInternForm";
 import Modal from "@/components/ui/Modal";
 import { useCreateInvite } from "@/hooks/application/useCreateInvite";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 export default function OnboardingHeader() {
     const t = useTranslations();
+    const { can } = useRBAC();
+    const canCreateInvite = can("APPLICATION_CREATE");
     const { mutate: createInvite, isPending } = useCreateInvite();
 
     return (
@@ -41,35 +44,37 @@ export default function OnboardingHeader() {
                     <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:self-end lg:self-auto">
                         <DateRangeFilter />
 
-                        <Modal.Open opens="invite-intern">
-                            <button
-                                type="button"
-                                className="
-                                    group relative shrink-0 overflow-hidden
-                                    rounded-2xl
-                                    bg-gradient-to-r from-(--primary-main) to-(--primary-light)
-                                    px-6 py-3
-                                    text-sm font-semibold text-white
-                                    shadow-[0_0_35px_rgba(21,174,245,0.25)]
-                                    transition-all duration-300
-                                    hover:-translate-y-0.5 hover:scale-[1.02]
-                                    active:scale-[0.98]
-                                "
-                            >
-                                <span
+                        {canCreateInvite && (
+                            <Modal.Open opens="invite-intern">
+                                <button
+                                    type="button"
                                     className="
-                                        absolute inset-y-0 -left-24 w-16 rotate-12
-                                        bg-white/30 blur-lg
-                                        transition-all duration-700
-                                        group-hover:left-[130%]
+                                        group relative shrink-0 overflow-hidden
+                                        rounded-2xl
+                                        bg-gradient-to-r from-(--primary-main) to-(--primary-light)
+                                        px-6 py-3
+                                        text-sm font-semibold text-white
+                                        shadow-[0_0_35px_rgba(21,174,245,0.25)]
+                                        transition-all duration-300
+                                        hover:-translate-y-0.5 hover:scale-[1.02]
+                                        active:scale-[0.98]
                                     "
-                                />
-                                <span className="relative flex items-center gap-2 hover:cursor-pointer">
-                                    <Plus className="h-4 w-4 shrink-0 transition-transform duration-300 group-hover:rotate-90" />
-                                    {t("admin.onboarding.inviteIntern")}
-                                </span>
-                            </button>
-                        </Modal.Open>
+                                >
+                                    <span
+                                        className="
+                                            absolute inset-y-0 -left-24 w-16 rotate-12
+                                            bg-white/30 blur-lg
+                                            transition-all duration-700
+                                            group-hover:left-[130%]
+                                        "
+                                    />
+                                    <span className="relative flex items-center gap-2 hover:cursor-pointer">
+                                        <Plus className="h-4 w-4 shrink-0 transition-transform duration-300 group-hover:rotate-90" />
+                                        {t("admin.onboarding.inviteIntern")}
+                                    </span>
+                                </button>
+                            </Modal.Open>
+                        )}
                     </div>
                 </div>
             </MetalCard>

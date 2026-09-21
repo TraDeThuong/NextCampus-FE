@@ -4,6 +4,8 @@ import { Suspense } from "react";
 import InternWeeklyEvaluationList from "./InternWeeklyEvaluationList";
 import Spinner from "@/components/ui/Spinner";
 
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations();
   return { title: t("intern.weeklyEvaluation.metaTitle") };
@@ -11,8 +13,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function page() {
   return (
-    <Suspense fallback={<Spinner />}>
-      <InternWeeklyEvaluationList />
-    </Suspense>
+    <ProtectedRoute requiredPermissions={["WEEKLY_EVALUATION_READ"]}>
+      <Suspense fallback={<Spinner />}>
+        <InternWeeklyEvaluationList />
+      </Suspense>
+    </ProtectedRoute>
   );
 }

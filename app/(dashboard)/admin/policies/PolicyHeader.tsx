@@ -10,6 +10,7 @@ import MetalCard from "@/components/ui/MetalCard";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import RichTextEditor from "@/components/ui/RichTextEditor";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 const policySchema = z.object({
   title: z.string().trim().min(1, "Title is required").max(100),
@@ -28,6 +29,7 @@ type FormValues = {
 
 export default function PolicyHeader() {
   const t = useTranslations();
+  const { can } = useRBAC();
   const { mutate: createPolicy, isPending } = useCreateRegulation();
 
   return (
@@ -44,14 +46,16 @@ export default function PolicyHeader() {
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
-              <Modal.Open opens="add-policy">
-                <button className="flex items-center gap-2 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2.5 text-sm font-medium text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20">
-                  <FilePlus className="h-4 w-4" />
-                  {t("admin.policies.addPolicy")}
-                </button>
-              </Modal.Open>
-            </div>
+            {can("REGULATION_CREATE") && (
+              <div className="flex items-center gap-3">
+                <Modal.Open opens="add-policy">
+                  <button className="flex items-center gap-2 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2.5 text-sm font-medium text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20">
+                    <FilePlus className="h-4 w-4" />
+                    {t("admin.policies.addPolicy")}
+                  </button>
+                </Modal.Open>
+              </div>
+            )}
           </div>
         </div>
       </MetalCard>

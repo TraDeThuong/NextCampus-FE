@@ -7,6 +7,7 @@ import LeaderFilter from "./LeaderFilter";
 import LeaderTable from "./LeaderTable";
 import Spinner from "@/components/ui/Spinner";
 import MetalCard from "@/components/ui/MetalCard";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations();
@@ -15,20 +16,22 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function ManageLeaders() {
     return (
-        <div className="space-y-6">
-            <LeaderHeader />
-            <LeaderStats />
-            <Suspense
-                fallback={
-                    <MetalCard className="flex items-center justify-center py-20">
-                        <Spinner size="lg" />
-                    </MetalCard>
-                }
-            >
-                <LeaderFilter />
-                <LeaderTable />
-            </Suspense>
-        </div>
+        <ProtectedRoute requiredPermissions={["LEADER_READ"]}>
+            <div className="space-y-6">
+                <LeaderHeader />
+                <LeaderStats />
+                <Suspense
+                    fallback={
+                        <MetalCard className="flex items-center justify-center py-20">
+                            <Spinner size="lg" />
+                        </MetalCard>
+                    }
+                >
+                    <LeaderFilter />
+                    <LeaderTable />
+                </Suspense>
+            </div>
+        </ProtectedRoute>
     );
 }
 

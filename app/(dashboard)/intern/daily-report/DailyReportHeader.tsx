@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import MetalCard from "@/components/ui/MetalCard";
 import Button from "@/components/ui/Button";
 import { useDailyReports } from "@/hooks/daily-report/useDailyReports";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 import type { DailyReport } from "@/types/daily-report";
 
 type Props = {
@@ -22,6 +23,9 @@ export default function DailyReportHeader({
   isReloading = false,
 }: Props) {
   const t = useTranslations("intern.dailyReport");
+  const { can } = useRBAC();
+  const canCreate = can("DAILY_REPORT_CREATE");
+  const canUpdate = can("DAILY_REPORT_UPDATE");
 
   // Format date and time in Asia/Ho_Chi_Minh
   const { todayStr, isPastCutoff } = useMemo(() => {
@@ -83,25 +87,29 @@ export default function DailyReportHeader({
               {isPending ? (
                 <Button variant="metal-silver" size="md" isLoading disabled />
               ) : hasReportedToday ? (
-                <Button
-                  variant="metal-blue"
-                  size="md"
-                  onClick={() => onOpenEdit(existingReport!)}
-                  className="active:scale-95 shadow-sm"
-                >
-                  <FileText className="h-4 w-4 shrink-0" />
-                  <span>{t("editReport")}</span>
-                </Button>
+                canUpdate && (
+                  <Button
+                    variant="metal-blue"
+                    size="md"
+                    onClick={() => onOpenEdit(existingReport!)}
+                    className="active:scale-95 shadow-sm"
+                  >
+                    <FileText className="h-4 w-4 shrink-0" />
+                    <span>{t("editReport")}</span>
+                  </Button>
+                )
               ) : (
-                <Button
-                  variant="metal-blue"
-                  size="md"
-                  onClick={onOpenCreate}
-                  className="active:scale-95 shadow-sm"
-                >
-                  <Plus className="h-4 w-4 shrink-0" />
-                  <span>{t("createReport")}</span>
-                </Button>
+                canCreate && (
+                  <Button
+                    variant="metal-blue"
+                    size="md"
+                    onClick={onOpenCreate}
+                    className="active:scale-95 shadow-sm"
+                  >
+                    <Plus className="h-4 w-4 shrink-0" />
+                    <span>{t("createReport")}</span>
+                  </Button>
+                )
               )}
             </div>
           </div>
@@ -122,13 +130,15 @@ export default function DailyReportHeader({
                   {t("reportedTodayDesc")}
                 </p>
               </div>
-              <Button
-                variant="glass"
-                size="sm"
-                onClick={() => onOpenEdit(existingReport!)}
-              >
-                {t("editReport")}
-              </Button>
+              {canUpdate && (
+                <Button
+                  variant="glass"
+                  size="sm"
+                  onClick={() => onOpenEdit(existingReport!)}
+                >
+                  {t("editReport")}
+                </Button>
+              )}
             </div>
           ) : isPastCutoff ? (
             <div className="flex items-center gap-3 rounded-2xl border border-rose-500/40 bg-rose-500/10 p-4 text-rose-300 animate-fadeIn">
@@ -141,9 +151,11 @@ export default function DailyReportHeader({
                   {t("pastCutoffDesc", { date: todayStr })}
                 </p>
               </div>
-              <Button variant="danger" size="sm" onClick={onOpenCreate}>
-                {t("submitLateNow")}
-              </Button>
+              {canCreate && (
+                <Button variant="danger" size="sm" onClick={onOpenCreate}>
+                  {t("submitLateNow")}
+                </Button>
+              )}
             </div>
           ) : (
             <div className="flex items-center gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-amber-300 animate-fadeIn">
@@ -156,9 +168,11 @@ export default function DailyReportHeader({
                   {t("beforeCutoffDesc")}
                 </p>
               </div>
-              <Button variant="metal-blue" size="sm" onClick={onOpenCreate}>
-                {t("createReport")}
-              </Button>
+              {canCreate && (
+                <Button variant="metal-blue" size="sm" onClick={onOpenCreate}>
+                  {t("createReport")}
+                </Button>
+              )}
             </div>
           )}
         </div>

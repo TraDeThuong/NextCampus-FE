@@ -26,6 +26,7 @@ import { useUnassignTask } from "@/hooks/task-assignment/useUnassignTask";
 import { useUnblockTaskAssignment } from "@/hooks/task-assignment/useUnblockTaskAssignment";
 import { useLookupAssignmentIntern } from "@/hooks/intern/useLookupAssignmentIntern";
 import { AuthContext } from "@/contexts/AuthContext";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 import TaskEditModal from "./TaskEditModal";
 import TaskGroupMemberSelector from "./TaskGroupMemberSelector";
 import { useForm } from "react-hook-form";
@@ -43,6 +44,7 @@ const checkIsOverdue = (deadline: string) => {
 
 export default function LeaderTableTasks() {
   const t = useTranslations("leader.tasks");
+  const { can } = useRBAC();
   const [action, setAction] = useState<GroupAction>(null);
   const [taskAction, setTaskAction] = useState<{ type: "edit" | "delete"; taskId: string; taskTitle: string } | null>(null);
   const [aiTask, setAiTask] = useState<{ taskId: string; taskTitle: string; isAssigned: boolean } | null>(null);
@@ -185,7 +187,7 @@ export default function LeaderTableTasks() {
                   )}
                 </h3>
               </div>
-              {taskGroupId && (
+              {taskGroupId && can("TASK_ASSIGNMENT_CREATE") && (
                 <Button
                   variant="glass"
                   size="sm"
@@ -367,6 +369,12 @@ function TaskGroupItem({
   onOpenAction: (a: GroupAction) => void;
 }) {
   const t = useTranslations("leader.tasks");
+  const { can } = useRBAC();
+  const canView = can("TASK_GROUP_READ");
+  const canEdit = can("TASK_GROUP_UPDATE");
+  const canDelete = can("TASK_GROUP_DELETE");
+  const hasAnyGroupAction = canView || canEdit || canDelete;
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -475,20 +483,23 @@ function TaskGroupItem({
         )}
       </button>
 
-      <button
-        ref={triggerRef}
-        type="button"
-        aria-label={`Actions for group ${group.name}`}
-        aria-haspopup="menu"
-        aria-expanded={menuOpen}
-        aria-controls={`group-actions-${menuId}`}
-        onClick={toggleMenu}
-        className="mr-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted opacity-0 transition hover:bg-white/10 hover:text-foreground group-hover:opacity-100 cursor-pointer"
-      >
-        <MoreVertical className="h-3.5 w-3.5" />
-      </button>
+      {hasAnyGroupAction && (
+        <button
+          ref={triggerRef}
+          type="button"
+          aria-label={`Actions for group ${group.name}`}
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
+          aria-controls={`group-actions-${menuId}`}
+          onClick={toggleMenu}
+          className="mr-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted opacity-0 transition hover:bg-white/10 hover:text-foreground group-hover:opacity-100 cursor-pointer"
+        >
+          <MoreVertical className="h-3.5 w-3.5" />
+        </button>
+      )}
 
-      {menuOpen &&
+      {hasAnyGroupAction &&
+        menuOpen &&
         typeof document !== "undefined" &&
         createPortal(
           <div
@@ -498,49 +509,54 @@ function TaskGroupItem({
             style={menuStyle}
             className="rounded-2xl border border-white/10 bg-[#0c1322]/95 p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn text-left scrollbar-dropdown"
           >
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => {
-                setMenuOpen(false);
-                onOpenAction({ type: "view", groupId: group.id, groupName: group.name });
-              }}
-              className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground active:scale-95 transition cursor-pointer"
-            >
-              <Eye className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
-              <span>{t("view")}</span>
-            </button>
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => {
-                setMenuOpen(false);
-                onOpenAction({ type: "edit", groupId: group.id, groupName: group.name });
-              }}
-              className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground active:scale-95 transition cursor-pointer"
-            >
-              <Pencil className="h-3.5 w-3.5 shrink-0 text-amber-400" />
-              <span>{t("edit")}</span>
-            </button>
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => {
-                setMenuOpen(false);
-                onOpenAction({ type: "delete", groupId: group.id, groupName: group.name });
-              }}
-              className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-xs text-rose-400 hover:bg-rose-500/10 active:scale-95 transition cursor-pointer"
-            >
-              <Trash2 className="h-3.5 w-3.5 shrink-0" />
-              <span>{t("delete")}</span>
-            </button>
+            {canView && (
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onOpenAction({ type: "view", groupId: group.id, groupName: group.name });
+                }}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground active:scale-95 transition cursor-pointer"
+              >
+                <Eye className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
+                <span>{t("view")}</span>
+              </button>
+            )}
+            {canEdit && (
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onOpenAction({ type: "edit", groupId: group.id, groupName: group.name });
+                }}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground active:scale-95 transition cursor-pointer"
+              >
+                <Pencil className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+                <span>{t("edit")}</span>
+              </button>
+            )}
+            {canDelete && (
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onOpenAction({ type: "delete", groupId: group.id, groupName: group.name });
+                }}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-xs text-rose-400 hover:bg-rose-500/10 active:scale-95 transition cursor-pointer"
+              >
+                <Trash2 className="h-3.5 w-3.5 shrink-0" />
+                <span>{t("delete")}</span>
+              </button>
+            )}
           </div>,
           document.body,
         )}
     </li>
   );
 }
-
 /* ─── Task Row Desktop with Portal 3-Dots Menu ──────────────── */
 
 function TaskTableRow({
@@ -561,6 +577,13 @@ function TaskTableRow({
   onOpenAiAssign: (a: { taskId: string; taskTitle: string; isAssigned: boolean }) => void;
 }) {
   const t = useTranslations("leader.tasks");
+  const { can } = useRBAC();
+  const canAiAssign = can("TASK_ASSIGNMENT_CREATE");
+  const canUnblock = can("TASK_ASSIGNMENT_UPDATE");
+  const canView = can("TASK_READ");
+  const canEdit = can("TASK_UPDATE");
+  const canDelete = can("TASK_DELETE");
+
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
@@ -570,6 +593,10 @@ function TaskTableRow({
 
   const isCompleted = task.assignment?.status === "DONE";
   const isBlocked = task.assignment?.status === "BLOCKED";
+
+  const showAiAssign = canAiAssign && (!task.assignment || !task.assignment.internId) && !checkIsOverdue(task.deadline);
+  const showUnblock = canUnblock && isBlocked && !!task.assignment?.id;
+  const hasAnyTaskAction = showAiAssign || showUnblock || canView || canEdit || canDelete;
 
   const updateMenuPosition = useCallback(() => {
     if (!triggerRef.current) return;
@@ -699,20 +726,23 @@ function TaskTableRow({
         {new Date(task.deadline).toLocaleDateString("vi-VN")}
       </div>
       <div className="relative text-right">
-        <button
-          ref={triggerRef}
-          type="button"
-          aria-label={`Actions for task ${task.title}`}
-          aria-haspopup="menu"
-          aria-expanded={menuOpen}
-          aria-controls={`task-actions-${menuId}`}
-          onClick={toggleMenu}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-card/40 text-muted transition hover:border-white/20 hover:bg-card hover:text-foreground active:scale-95 cursor-pointer"
-        >
-          <MoreVertical className="h-4 w-4 shrink-0" />
-        </button>
+        {hasAnyTaskAction && (
+          <button
+            ref={triggerRef}
+            type="button"
+            aria-label={`Actions for task ${task.title}`}
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            aria-controls={`task-actions-${menuId}`}
+            onClick={toggleMenu}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-card/40 text-muted transition hover:border-white/20 hover:bg-card hover:text-foreground active:scale-95 cursor-pointer"
+          >
+            <MoreVertical className="h-4 w-4 shrink-0" />
+          </button>
+        )}
 
-        {menuOpen &&
+        {hasAnyTaskAction &&
+          menuOpen &&
           typeof document !== "undefined" &&
           createPortal(
             <div
@@ -722,7 +752,7 @@ function TaskTableRow({
               style={menuStyle}
               className="rounded-2xl border border-white/10 bg-[#0c1322]/95 p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn text-left scrollbar-dropdown"
             >
-              {(!task.assignment || !task.assignment.internId) && !checkIsOverdue(task.deadline) && (
+              {showAiAssign && (
                 <button
                   type="button"
                   role="menuitem"
@@ -737,7 +767,7 @@ function TaskTableRow({
                 </button>
               )}
 
-              {isBlocked && task.assignment?.id && (
+              {showUnblock && (
                 <button
                   type="button"
                   role="menuitem"
@@ -753,48 +783,54 @@ function TaskTableRow({
                 </button>
               )}
 
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  setMenuOpen(false);
-                  router.push(`${pathname}/${task.id}`);
-                }}
-                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-muted hover:bg-white/5 hover:text-foreground active:scale-95 transition cursor-pointer"
-              >
-                <Eye className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
-                <span>{t("view")}</span>
-              </button>
+              {canView && (
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    router.push(`${pathname}/${task.id}`);
+                  }}
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-muted hover:bg-white/5 hover:text-foreground active:scale-95 transition cursor-pointer"
+                >
+                  <Eye className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
+                  <span>{t("view")}</span>
+                </button>
+              )}
 
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onOpenTaskAction({ type: "edit", taskId: task.id, taskTitle: task.title });
-                }}
-                disabled={isCompleted}
-                title={isCompleted ? t("completedTaskReadOnly") : undefined}
-                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-muted hover:bg-white/5 hover:text-foreground active:scale-95 transition disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted cursor-pointer"
-              >
-                <Pencil className="h-3.5 w-3.5 shrink-0 text-amber-400" />
-                <span>{t("edit")}</span>
-              </button>
+              {canEdit && (
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onOpenTaskAction({ type: "edit", taskId: task.id, taskTitle: task.title });
+                  }}
+                  disabled={isCompleted}
+                  title={isCompleted ? t("completedTaskReadOnly") : undefined}
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-muted hover:bg-white/5 hover:text-foreground active:scale-95 transition disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted cursor-pointer"
+                >
+                  <Pencil className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+                  <span>{t("edit")}</span>
+                </button>
+              )}
 
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onOpenTaskAction({ type: "delete", taskId: task.id, taskTitle: task.title });
-                }}
-                disabled={isCompleted}
-                title={isCompleted ? t("completedTaskReadOnly") : undefined}
-                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-rose-400 hover:bg-rose-500/10 active:scale-95 transition disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-rose-400 cursor-pointer"
-              >
-                <Trash2 className="h-3.5 w-3.5 shrink-0" />
-                <span>{t("delete")}</span>
-              </button>
+              {canDelete && (
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onOpenTaskAction({ type: "delete", taskId: task.id, taskTitle: task.title });
+                  }}
+                  disabled={isCompleted}
+                  title={isCompleted ? t("completedTaskReadOnly") : undefined}
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-rose-400 hover:bg-rose-500/10 active:scale-95 transition disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-rose-400 cursor-pointer"
+                >
+                  <Trash2 className="h-3.5 w-3.5 shrink-0" />
+                  <span>{t("delete")}</span>
+                </button>
+              )}
             </div>,
             document.body,
           )}
@@ -823,6 +859,13 @@ function TaskCardItem({
   onOpenAiAssign: (a: { taskId: string; taskTitle: string; isAssigned: boolean }) => void;
 }) {
   const t = useTranslations("leader.tasks");
+  const { can } = useRBAC();
+  const canAiAssign = can("TASK_ASSIGNMENT_CREATE");
+  const canUnblock = can("TASK_ASSIGNMENT_UPDATE");
+  const canView = can("TASK_READ");
+  const canEdit = can("TASK_UPDATE");
+  const canDelete = can("TASK_DELETE");
+
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
@@ -832,6 +875,10 @@ function TaskCardItem({
 
   const isCompleted = task.assignment?.status === "DONE";
   const isBlocked = task.assignment?.status === "BLOCKED";
+
+  const showAiAssign = canAiAssign && (!task.assignment || !task.assignment.internId) && !checkIsOverdue(task.deadline);
+  const showUnblock = canUnblock && isBlocked && !!task.assignment?.id;
+  const hasAnyTaskAction = showAiAssign || showUnblock || canView || canEdit || canDelete;
 
   const updateMenuPosition = useCallback(() => {
     if (!triggerRef.current) return;
@@ -943,20 +990,23 @@ function TaskCardItem({
         </div>
 
         <div className="relative">
-          <button
-            ref={triggerRef}
-            type="button"
-            aria-label={`Actions for task ${task.title}`}
-            aria-haspopup="menu"
-            aria-expanded={menuOpen}
-            aria-controls={`task-card-actions-${menuId}`}
-            onClick={toggleMenu}
-            className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-card/40 text-muted hover:bg-white/10 hover:text-foreground active:scale-95 transition cursor-pointer"
-          >
-            <MoreVertical className="h-4 w-4" />
-          </button>
+          {hasAnyTaskAction && (
+            <button
+              ref={triggerRef}
+              type="button"
+              aria-label={`Actions for task ${task.title}`}
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              aria-controls={`task-card-actions-${menuId}`}
+              onClick={toggleMenu}
+              className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-card/40 text-muted hover:bg-white/10 hover:text-foreground active:scale-95 transition cursor-pointer"
+            >
+              <MoreVertical className="h-4 w-4" />
+            </button>
+          )}
 
-          {menuOpen &&
+          {hasAnyTaskAction &&
+            menuOpen &&
             typeof document !== "undefined" &&
             createPortal(
               <div
@@ -966,7 +1016,7 @@ function TaskCardItem({
                 style={menuStyle}
                 className="rounded-2xl border border-white/10 bg-[#0c1322]/95 p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn text-left scrollbar-dropdown"
               >
-                {(!task.assignment || !task.assignment.internId) && !checkIsOverdue(task.deadline) && (
+                {showAiAssign && (
                   <button
                     type="button"
                     role="menuitem"
@@ -981,7 +1031,7 @@ function TaskCardItem({
                   </button>
                 )}
 
-                {isBlocked && task.assignment?.id && (
+                {showUnblock && (
                   <button
                     type="button"
                     role="menuitem"
@@ -997,48 +1047,54 @@ function TaskCardItem({
                   </button>
                 )}
 
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    router.push(`${pathname}/${task.id}`);
-                  }}
-                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-muted hover:bg-white/5 hover:text-foreground active:scale-95 transition cursor-pointer"
-                >
-                  <Eye className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
-                  <span>{t("view")}</span>
-                </button>
+                {canView && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      router.push(`${pathname}/${task.id}`);
+                    }}
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-muted hover:bg-white/5 hover:text-foreground active:scale-95 transition cursor-pointer"
+                  >
+                    <Eye className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
+                    <span>{t("view")}</span>
+                  </button>
+                )}
 
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    onOpenTaskAction({ type: "edit", taskId: task.id, taskTitle: task.title });
-                  }}
-                  disabled={isCompleted}
-                  title={isCompleted ? t("completedTaskReadOnly") : undefined}
-                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-muted hover:bg-white/5 hover:text-foreground active:scale-95 transition disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted cursor-pointer"
-                >
-                  <Pencil className="h-3.5 w-3.5 shrink-0 text-amber-400" />
-                  <span>{t("edit")}</span>
-                </button>
+                {canEdit && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onOpenTaskAction({ type: "edit", taskId: task.id, taskTitle: task.title });
+                    }}
+                    disabled={isCompleted}
+                    title={isCompleted ? t("completedTaskReadOnly") : undefined}
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-muted hover:bg-white/5 hover:text-foreground active:scale-95 transition disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted cursor-pointer"
+                  >
+                    <Pencil className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+                    <span>{t("edit")}</span>
+                  </button>
+                )}
 
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    onOpenTaskAction({ type: "delete", taskId: task.id, taskTitle: task.title });
-                  }}
-                  disabled={isCompleted}
-                  title={isCompleted ? t("completedTaskReadOnly") : undefined}
-                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-rose-400 hover:bg-rose-500/10 active:scale-95 transition disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-rose-400 cursor-pointer"
-                >
-                  <Trash2 className="h-3.5 w-3.5 shrink-0" />
-                  <span>{t("delete")}</span>
-                </button>
+                {canDelete && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onOpenTaskAction({ type: "delete", taskId: task.id, taskTitle: task.title });
+                    }}
+                    disabled={isCompleted}
+                    title={isCompleted ? t("completedTaskReadOnly") : undefined}
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-rose-400 hover:bg-rose-500/10 active:scale-95 transition disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-rose-400 cursor-pointer"
+                  >
+                    <Trash2 className="h-3.5 w-3.5 shrink-0" />
+                    <span>{t("delete")}</span>
+                  </button>
+                )}
               </div>,
               document.body,
             )}
@@ -1421,6 +1477,12 @@ function InlineAssignCell({
   taskGroupDepartmentId?: string | null;
 }) {
   const t = useTranslations("leader.tasks");
+  const { can } = useRBAC();
+  const canAssign = can("TASK_ASSIGNMENT_CREATE");
+  const canUnassign = can("TASK_ASSIGNMENT_DELETE");
+  const canInternRead = can("INTERN_READ");
+  const canModifyAssign = canAssign || canUnassign;
+
   const queryClient = useQueryClient();
   const auth = useContext(AuthContext);
   const currentUserId = auth?.state.user?.id;
@@ -1431,7 +1493,10 @@ function InlineAssignCell({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
 
-  const { data: myInternsData } = useInterns({ leaderId: currentUserId });
+  const { data: myInternsData } = useInterns(
+    { leaderId: currentUserId },
+    { enabled: canInternRead && open }
+  );
   const myInterns = myInternsData?.data ?? [];
 
   const assignTask = useAssignTask();
@@ -1584,6 +1649,18 @@ function InlineAssignCell({
   const assigneeName = assignment?.intern?.fullName;
   const assigneeEmail = myInterns.find((i) => i.id === assignment?.internId)?.user?.email;
 
+  if (!canModifyAssign) {
+    return (
+      <div className="truncate text-left px-2 py-1">
+        {assigneeName ? (
+          <span className="block truncate text-sm font-medium text-foreground">{assigneeName}</span>
+        ) : (
+          <span className="text-sm text-muted">—</span>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="relative">
       <button
@@ -1622,8 +1699,8 @@ function InlineAssignCell({
             style={popoverStyle}
             className="rounded-2xl border border-white/10 bg-[#0c1322]/95 p-2 shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn text-left scrollbar-dropdown"
           >
-            {/* My Team & Other Teams (Only show if not overdue) */}
-            {!isOverdue && (
+            {/* My Team & Other Teams (Only show if canAssign and not overdue) */}
+            {canAssign && !isOverdue && (
               <>
                 {filteredMyInterns.length > 0 && (
                   <>
@@ -1717,9 +1794,9 @@ function InlineAssignCell({
             )}
 
             {/* Unassign */}
-            {assignment && (
+            {canUnassign && assignment && (
               <>
-                {!isOverdue && <div className="my-0.5 border-t border-border" />}
+                {canAssign && !isOverdue && <div className="my-0.5 border-t border-border" />}
                 <button
                   type="button"
                   onClick={handleUnassign}
@@ -1761,6 +1838,10 @@ function StatusBadge({
   isUnblocking?: boolean;
 }) {
   const t = useTranslations("leader.tasks");
+  const { can } = useRBAC();
+  const canUnblock = can("TASK_ASSIGNMENT_UPDATE");
+  const canReview = can("TASK_ASSIGNMENT_APPROVE");
+
   const colors: Record<string, string> = {
     DONE: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
     IN_PROGRESS: "border-sky-500/30 bg-sky-500/10 text-sky-300",
@@ -1783,7 +1864,7 @@ function StatusBadge({
     );
   }
 
-  if (status === "BLOCKED" && assignmentId && onUnblockClick) {
+  if (status === "BLOCKED" && assignmentId && onUnblockClick && canUnblock) {
     return (
       <div className="flex flex-wrap items-center gap-1.5">
         <span
@@ -1812,7 +1893,7 @@ function StatusBadge({
     );
   }
 
-  if (status === "REVIEW" && assignmentId && taskId && onReviewClick) {
+  if (status === "REVIEW" && assignmentId && taskId && onReviewClick && canReview) {
     return (
       <button
         type="button"
