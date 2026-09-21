@@ -150,11 +150,23 @@
       "colScore": "Điểm & Xếp Loại",
       "colStatus": "Trạng thái",
       "colDetail": "Chi tiết",
+      "colActions": "Thao Tác",
       "reviewed": "Đã xem",
       "notReviewed": "Chưa xem",
       "view": "Xem",
-      "pagination": "Trang {page} / {totalPages}",
+      "pagination": "Trang {page} / {totalPages} (Tổng {total} tuần)",
+      "stats": {
+        "latestScore": "Điểm tuần gần nhất",
+        "latestScoreSub": "Tuần {week} (Thang điểm 10.0)",
+        "avgScore": "Điểm trung bình",
+        "avgScoreSub": "Điểm tích lũy các tuần",
+        "totalWeeks": "Số tuần đánh giá",
+        "totalWeeksSub": "Tiến độ kỳ thực tập",
+        "reviewedCount": "Đã xác nhận xem",
+        "reviewedCountSub": "{count} / {total} tuần đã xác nhận"
+      },
       "detail": {
+
         "yourEvaluation": "Đánh giá của bạn",
         "week": "Tuần {n}",
         "criteria12": "12 tiêu chí",

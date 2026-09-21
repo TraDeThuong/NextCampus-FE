@@ -290,7 +290,7 @@ export default function CreateDailyReportModal({ onClose }: Props) {
                   accept="video/mp4,video/webm,video/quicktime,video/x-matroska,video/x-msvideo,.mp4,.webm,.mov,.mkv,.avi"
                   disabled={isPending || !!videoLink.trim()}
                   onChange={(e) => handleVideoFileChange(e.target.files?.[0])}
-                  className="h-[42px] sm:h-[46px] w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-1.5 text-sm text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 file:cursor-pointer outline-none disabled:opacity-50"
+                  className="h-[42px] sm:h-[46px] w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-2 sm:py-2.5 text-sm text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 file:cursor-pointer cursor-pointer align-middle file:align-middle outline-none transition hover:border-white/20 focus:border-cyan-400/50 disabled:opacity-50"
                 />
               )}
               <p className="text-[11px] text-muted">{tm("videoFileHint", { limit: UPLOAD_LIMITS_MB.reportVideo })}</p>
@@ -337,7 +337,7 @@ export default function CreateDailyReportModal({ onClose }: Props) {
                   handleAttachmentFilesChange(files);
                   e.target.value = "";
                 }}
-                className="h-[42px] sm:h-[46px] w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-1.5 text-sm text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 file:cursor-pointer outline-none disabled:opacity-50"
+                className="h-[42px] sm:h-[46px] w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-2 sm:py-2.5 text-sm text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 file:cursor-pointer cursor-pointer align-middle file:align-middle outline-none transition hover:border-white/20 focus:border-cyan-400/50 disabled:opacity-50"
               />
               <p className="text-[11px] text-muted">
                 {tm("attachmentsHint", { max: MAX_REPORT_ATTACHMENTS, limit: UPLOAD_LIMITS_MB.reportAttachment })}

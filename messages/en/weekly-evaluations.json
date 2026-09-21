@@ -150,11 +150,23 @@
       "colScore": "Score & Rating",
       "colStatus": "Status",
       "colDetail": "Detail",
+      "colActions": "Actions",
       "reviewed": "Reviewed",
       "notReviewed": "Not Reviewed",
       "view": "View",
-      "pagination": "Page {page} / {totalPages}",
+      "pagination": "Page {page} / {totalPages} (Total {total} weeks)",
+      "stats": {
+        "latestScore": "Latest Week Score",
+        "latestScoreSub": "Week {week} (Scale 10.0)",
+        "avgScore": "Average Score",
+        "avgScoreSub": "Cumulative average score",
+        "totalWeeks": "Evaluated Weeks",
+        "totalWeeksSub": "Internship progress",
+        "reviewedCount": "Reviewed & Confirmed",
+        "reviewedCountSub": "{count} / {total} weeks confirmed"
+      },
       "detail": {
+
         "yourEvaluation": "Your Evaluation",
         "week": "Week {n}",
         "criteria12": "12 criteria",
