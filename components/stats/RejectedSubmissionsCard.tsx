@@ -81,7 +81,9 @@ export default function RejectedSubmissionsCard({ needsReworkItems }: Props) {
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
                 <p className="truncate text-foreground font-semibold">{item.title}</p>
-                <span className="text-[11px] text-muted">Lần nộp #{item.attempt}</span>
+                <span className="text-[11px] text-muted">
+                  {t("submissionAttempt", { attempt: item.attempt })}
+                </span>
               </div>
               <Link
                 href={item.link}

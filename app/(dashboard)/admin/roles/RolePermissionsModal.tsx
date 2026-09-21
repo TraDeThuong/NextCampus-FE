@@ -19,6 +19,9 @@ import {
   Bell,
   Clock,
   BookOpen,
+  FileDown,
+  BarChart3,
+  FileText,
 } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import { usePermissions } from "@/hooks/rbac/usePermissions";
@@ -41,9 +44,12 @@ const RESOURCE_ICONS: Record<string, React.ElementType> = {
   MEETING: Calendar,
   DAILY_REPORT: Clock,
   WEEKLY_EVALUATION: FileCheck,
+  PDF_EXPORT: FileDown,
   NOTIFICATION: Bell,
   NOTIFICATION_TEMPLATE: Mail,
   SETTINGS: Settings,
+  REGULATION: FileText,
+  STATS: BarChart3,
 };
 
 const RESOURCE_FALLBACKS: Record<string, string> = {
@@ -74,6 +80,9 @@ const RESOURCE_FALLBACKS: Record<string, string> = {
   ABSENCE: "Nghỉ phép",
   DAILY_REPORT: "Báo cáo Tiến độ Ngày",
   WEEKLY_EVALUATION: "Bảng Đánh giá Tuần",
+  PDF_EXPORT: "Xuất Báo Cáo & Chứng Nhận (PDF)",
+  REGULATION: "Nội quy & Quy định",
+  STATS: "Thống kê & Báo cáo",
 };
 
 interface RolePermissionsModalProps {
@@ -160,7 +169,10 @@ function RolePermissionsForm({
 
   const getResourceLabel = (res: string) => {
     try {
-      return t(`admin.roles.resources.${res}`) || RESOURCE_FALLBACKS[res] || res;
+      if (t.has(`admin.roles.resources.${res}`)) {
+        return t(`admin.roles.resources.${res}`);
+      }
+      return RESOURCE_FALLBACKS[res] || res;
     } catch {
       return RESOURCE_FALLBACKS[res] || res;
     }

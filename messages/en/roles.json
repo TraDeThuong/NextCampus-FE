@@ -123,7 +123,10 @@
         "MEETING": "Meetings & Attendance",
         "ABSENCE": "Absence Requests",
         "DAILY_REPORT": "Daily Progress Reports",
-        "WEEKLY_EVALUATION": "Weekly Evaluations"
+        "WEEKLY_EVALUATION": "Weekly Evaluations",
+        "PDF_EXPORT": "PDF Export (Reports & Certificates)",
+        "REGULATION": "Policies & Regulations",
+        "STATS": "Statistics & Reports"
       }
     }
   },
@@ -235,7 +238,10 @@
       "MEETING": "Meetings & Attendance",
       "ABSENCE": "Absence Requests",
       "DAILY_REPORT": "Daily Progress Reports",
-      "WEEKLY_EVALUATION": "Weekly Evaluations"
+      "WEEKLY_EVALUATION": "Weekly Evaluations",
+      "PDF_EXPORT": "PDF Export (Reports & Certificates)",
+      "REGULATION": "Policies & Regulations",
+      "STATS": "Statistics & Reports"
     }
   }
 }

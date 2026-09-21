@@ -1,15 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { useAuth } from "@/hooks/auth/useAuth";
 import { useInternStats } from "@/hooks/stats/useInternStats";
 import StatsCard from "./StatsCard";
+import InternActivityHeatmap from "./InternActivityHeatmap";
 import Spinner from "../ui/Spinner";
 import MetalCard from "../ui/MetalCard";
 import RejectedSubmissionsCard from "./RejectedSubmissionsCard";
-import InternRegulationModal from "../regulation/InternRegulationModal";
 import Table from "../ui/Table";
-import InternshipSummaryExportButton from "../pdf/InternshipSummaryExportButton";
 import {
   ClipboardList,
   CheckCircle2,
@@ -17,57 +17,179 @@ import {
   Award,
   ExternalLink,
   Clock,
-  FileCheck,
-  AlertTriangle,
-  Flame,
+  RotateCw,
   AlertCircle,
-  AlertOctagon,
+  AlertTriangle,
+  GraduationCap,
+  ShieldCheck,
+  Zap,
+  ListTodo,
 } from "lucide-react";
+import {
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+} from "recharts";
+import type { AssignmentDetail } from "@/types/stats";
 
 export default function InternStatsOverview() {
   const t = useTranslations("intern.dashboard");
-  const { data: response, isLoading, isError, refetch } = useInternStats();
+  const locale = useLocale();
+  const { state: authState } = useAuth();
+  const { data: response, isLoading, isError, isFetching, refetch } = useInternStats();
 
-  if (isLoading) return <div className="flex h-64 w-full items-center justify-center"><Spinner size="lg" /></div>;
+  if (isLoading) {
+    return (
+      <MetalCard className="p-12">
+        <div className="flex flex-col items-center justify-center space-y-4">
+          <Spinner size="lg" />
+          <p className="text-sm text-muted">
+            {locale === "vi" ? "Đang tải dữ liệu tổng quan..." : "Loading dashboard overview..."}
+          </p>
+        </div>
+      </MetalCard>
+    );
+  }
 
   if (isError || !response?.success) {
     return (
-      <div className="rounded-2xl border border-danger/30 bg-danger/10 p-6 text-center text-danger space-y-3">
-        <p className="font-semibold">{t("loadError")}</p>
-        <button onClick={() => refetch()} className="px-4 py-2 rounded-xl bg-danger text-white text-xs font-bold hover:opacity-90 transition-all cursor-pointer">{t("retry")}</button>
-      </div>
+      <MetalCard className="p-8 sm:p-10">
+        <div className="flex flex-col items-center justify-center text-center space-y-4 max-w-lg mx-auto">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 shadow-[0_0_25px_rgba(244,63,94,0.2)]">
+            <AlertTriangle className="h-7 w-7" />
+          </div>
+          <div className="space-y-1.5">
+            <h3 className="text-xl font-bold text-foreground">
+              {t("loadError")}
+            </h3>
+            <p className="text-xs text-muted leading-relaxed">
+              {response?.message ||
+                (locale === "vi"
+                  ? "Không thể lấy dữ liệu thống kê từ máy chủ. Vui lòng kiểm tra lại quyền hạn hoặc kết nối mạng và thử lại."
+                  : "Unable to retrieve statistics from the server. Please check your permissions or network connection and try again.")}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            disabled={isFetching}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-bold hover:opacity-90 transition-all cursor-pointer shadow-lg disabled:opacity-50 active:scale-95"
+          >
+            <RotateCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+            {t("retry")}
+          </button>
+        </div>
+      </MetalCard>
     );
   }
 
   const stats = response.data;
-  const todaysTasks = stats.todaysTasks ?? [];
+  const todaysTasks = Array.isArray(stats?.todaysTasks) ? stats.todaysTasks : [];
 
-  const tasksCompleted = stats.tasks?.completedTasks ?? stats.tasksCompleted ?? 0;
-  const tasksBlocked = stats.tasks?.blockedTasks ?? 0;
-  const tasksOverdue = stats.tasks?.overdueTasks ?? stats.tasksOverdue ?? 0;
-  const tasksInProgress = stats.tasks?.inProgressTasks ?? stats.tasksInProgress ?? 0;
+  const tasksCompleted = stats?.tasks?.completedTasks ?? stats?.tasksCompleted ?? 0;
+  const tasksBlocked = stats?.tasks?.blockedTasks ?? 0;
+  const tasksOverdue = stats?.tasks?.overdueTasks ?? stats?.tasksOverdue ?? 0;
+  const tasksInProgress = stats?.tasks?.inProgressTasks ?? stats?.tasksInProgress ?? 0;
   const totalTasks =
-    stats.tasks?.totalTasks ??
-    stats.totalTasks ??
+    stats?.tasks?.totalTasks ??
+    stats?.totalTasks ??
     (tasksCompleted + tasksInProgress + tasksBlocked + tasksOverdue);
   const completionRate =
-    stats.tasks?.completionRate ??
-    stats.completionRate ??
+    stats?.tasks?.completionRate ??
+    stats?.completionRate ??
     (totalTasks > 0 ? Math.round((tasksCompleted / totalTasks) * 100) : 0);
 
-  const streakCount = stats.reports?.reportStreak ?? stats.reportStreak ?? 0;
   const isTodayReportSubmitted =
-    stats.reports?.dailyReportTodaySubmitted ?? stats.dailyReportTodaySubmitted ?? false;
-  const avgScore = stats.evaluations?.avgScore ?? stats.avgScore ?? 0;
-  const lastWeekScore = stats.evaluations?.lastWeekScore ?? stats.lastWeekScore ?? null;
-  const needsReworkItems = stats.needsRework ?? [];
+    stats?.reports?.dailyReportTodaySubmitted ?? stats?.dailyReportTodaySubmitted ?? false;
+  const avgScore = stats?.evaluations?.avgScore ?? stats?.avgScore ?? 0;
+  const lastWeekScore = stats?.evaluations?.lastWeekScore ?? stats?.lastWeekScore ?? null;
+  const needsReworkItems = Array.isArray(stats?.needsRework) ? stats.needsRework : [];
+
+  const internDisplayName = stats?.internName || authState?.user?.fullName || "Thực tập sinh";
+
+  // Task status distribution for Donut Chart
+  const donutData = [
+    {
+      name: t("taskStatusDone"),
+      value: tasksCompleted,
+      color: "#10b981", // Emerald
+    },
+    {
+      name: t("taskStatusInProgress"),
+      value: tasksInProgress,
+      color: "#06b6d4", // Cyan
+    },
+    {
+      name: t("taskStatusBlocked"),
+      value: tasksBlocked,
+      color: "#f59e0b", // Amber
+    },
+    {
+      name: t("taskStatusOverdue"),
+      value: tasksOverdue,
+      color: "#f43f5e", // Rose
+    },
+  ];
+
+  const totalDonutValue = donutData.reduce((acc, curr) => acc + curr.value, 0);
+  const displayDonutData =
+    totalDonutValue > 0
+      ? donutData.filter((d) => d.value > 0)
+      : [{ name: t("totalTasksLabel"), value: 1, color: "#334155" }];
 
   return (
     <div className="space-y-6 animate-fadeIn">
-      {/* Regulation Acknowledgment Alert / Status */}
-      <InternRegulationModal />
+      {/* Tier 1: Executive Header Banner */}
+      <MetalCard>
+        <div className="p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-light/10 text-primary-light border border-primary-light/20 shrink-0 shadow-[0_0_15px_rgba(56,189,248,0.2)]">
+                  <GraduationCap className="h-5 w-5 shrink-0" />
+                </div>
+                <h1 className="text-2xl font-bold metal-text">
+                  {t("greeting", { name: internDisplayName })}
+                </h1>
+                <span className="hidden sm:inline-flex rounded-full border border-primary-light/30 bg-primary-light/10 px-3 py-0.5 text-xs font-semibold text-primary-light">
+                  {t("badge")}
+                </span>
+              </div>
+              <p className="mt-1 text-sm text-muted">
+                {t("welcome")}
+              </p>
+            </div>
 
-      {/* Daily Report Deadline Banner */}
+            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+              {/* Live Status Badge */}
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-emerald-400 text-xs font-medium">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                </span>
+                <ShieldCheck className="h-3.5 w-3.5" />
+                <span>{t("liveBadge")}</span>
+              </div>
+
+              {/* Fast Reload Button */}
+              <button
+                type="button"
+                onClick={() => refetch()}
+                disabled={isFetching}
+                title={t("reloadTooltip")}
+                aria-label={t("reloadTooltip")}
+                className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-muted hover:text-cyan-400 hover:bg-white/10 transition-all active:scale-90 disabled:opacity-50 cursor-pointer"
+              >
+                <RotateCw className={`h-4 w-4 ${isFetching ? "animate-spin text-cyan-400" : ""}`} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </MetalCard>
+
+      {/* Daily Report Deadline Notice Card */}
       <div
         className={`flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-2xl border p-4 transition-all duration-300 ${
           isTodayReportSubmitted
@@ -79,8 +201,8 @@ export default function InternStatsOverview() {
           <div
             className={`flex h-10 w-10 items-center justify-center rounded-xl shrink-0 ${
               isTodayReportSubmitted
-                ? "bg-emerald-500/20 text-emerald-400"
-                : "bg-amber-500/20 text-amber-400"
+                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
             }`}
           >
             {isTodayReportSubmitted ? (
@@ -122,29 +244,9 @@ export default function InternStatsOverview() {
         )}
       </div>
 
-      {/* Greeting Header */}
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-extrabold text-foreground metal-text">{t("greeting", { name: stats.internName })}</h1>
-          <p className="text-sm text-muted">{t("welcome")}</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          {stats.internId && (
-            <InternshipSummaryExportButton
-              internId={stats.internId}
-              label={t("exportSummaryPdf")}
-            />
-          )}
-          <Link href="/intern/daily-report" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-primary-main to-primary-light text-white font-semibold shadow-soft hover:opacity-90 transition-all text-sm">
-            <Calendar className="h-4 w-4" />{t("submitTodayReport")}
-          </Link>
-        </div>
-      </div>
-
-      {/* KPI Stats Grid - 7 Cards including Report Streak and Blocked Tasks */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
+      {/* Tier 2: 4 Core Headline KPI Cards (Aligned with Golden Ratio 4-Card Standard) */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 md:gap-5">
         <StatsCard
-          className="col-span-2 md:col-span-1"
           title={t("tasksInProgress")}
           value={tasksInProgress}
           subtitle={t("totalTasks", { n: totalTasks })}
@@ -152,46 +254,31 @@ export default function InternStatsOverview() {
           href="/intern/task"
           trend={{ text: t("completionRate", { n: completionRate }), positive: true }}
         />
+
         <StatsCard
           title={t("tasksCompleted")}
           value={tasksCompleted}
-          subtitle={t("completedOf", { done: tasksCompleted, total: totalTasks })}
+          subtitle={t("tasksCompletedSubtitle", { done: tasksCompleted, total: totalTasks })}
           icon={<CheckCircle2 className="h-6 w-6 text-emerald-400" />}
           href="/intern/task?status=DONE"
-          trend={{ text: t("updateProgress"), positive: true }}
+          trend={{
+            text: tasksBlocked > 0 ? `${tasksBlocked} ${t("needsUnblockSupport")}` : t("updateProgress"),
+            positive: tasksBlocked === 0,
+          }}
         />
-        <StatsCard
-          title={t("tasksBlocked")}
-          value={tasksBlocked}
-          subtitle={t("tasksBlockedHint")}
-          icon={<AlertOctagon className="h-6 w-6 text-amber-500" />}
-          href="/intern/task"
-          trend={{ text: tasksBlocked > 0 ? "Cần hỗ trợ gỡ" : "Thông suốt", positive: tasksBlocked === 0 }}
-        />
+
         <StatsCard
           title={t("tasksOverdue")}
           value={tasksOverdue}
-          subtitle={t("overdueHint")}
-          icon={<AlertTriangle className="h-6 w-6 text-rose-400" />}
-          href="/intern/task"
-          trend={{ text: tasksOverdue > 0 ? t("overdueNeedsAttention") : t("noOverdueTasks"), positive: tasksOverdue === 0 }}
+          subtitle={tasksOverdue > 0 ? t("tasksOverdueSubtitle", { n: tasksOverdue }) : t("noOverdueTasks")}
+          icon={<AlertTriangle className={`h-6 w-6 ${tasksOverdue > 0 ? "text-rose-400 animate-pulse" : "text-emerald-400"}`} />}
+          href="/intern/task?status=OVERDUE"
+          trend={{
+            text: tasksOverdue > 0 ? t("needsUrgentAction") : t("onTrack"),
+            positive: tasksOverdue === 0,
+          }}
         />
-        <StatsCard
-          title={t("todaysReport")}
-          value={isTodayReportSubmitted ? t("submitted") : t("notSubmitted")}
-          subtitle={isTodayReportSubmitted ? t("onTime") : t("submitByEvening")}
-          icon={<FileCheck className="h-6 w-6 text-indigo-400" />}
-          href="/intern/daily-report"
-          trend={{ text: isTodayReportSubmitted ? t("completeStatus") : t("submitNowStatus"), positive: isTodayReportSubmitted }}
-        />
-        <StatsCard
-          title={t("reportStreak")}
-          value={t("reportStreakCount", { n: streakCount })}
-          subtitle={t("reportStreakSubtitle")}
-          icon={<Flame className="h-6 w-6 text-orange-400 animate-pulse" />}
-          href="/intern/daily-report"
-          trend={{ text: streakCount > 0 ? "🔥 Streak active" : "Start today", positive: streakCount > 0 }}
-        />
+
         <StatsCard
           title={t("weeklyScore")}
           value={typeof lastWeekScore === "number" ? `${lastWeekScore.toFixed(1)}/10` : `${avgScore.toFixed(1)}/10`}
@@ -202,69 +289,291 @@ export default function InternStatsOverview() {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
-        <RejectedSubmissionsCard needsReworkItems={needsReworkItems} />
+      {/* Activity Heatmap: Contribution Calendar / Streak */}
+      <InternActivityHeatmap activity={stats?.activity} />
 
-        <MetalCard className="p-6 lg:col-span-3">
-          <div className="flex items-center justify-between border-b border-white/10 pb-4">
-            <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-amber-400 shrink-0" />
-              <h3 className="text-lg font-semibold text-foreground">{t("tasksToDos")}</h3>
+      {/* Tier 3: Analytics Row (Golden Ratio 65% / 35%) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        {/* Left Column (65% -> col-span-8): Operations & Detail */}
+        <div className="lg:col-span-8 flex flex-col space-y-6">
+          {/* Action Alert: Rejected Submissions Needing Rework */}
+          {needsReworkItems.length > 0 && (
+            <RejectedSubmissionsCard needsReworkItems={needsReworkItems} />
+          )}
+
+          {/* Today's Tasks & Assignments Table */}
+          <MetalCard className="p-6 flex-1 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.15)]">
+                      <Clock className="h-5 w-5 shrink-0" />
+                    </div>
+                    <h3 className="text-xl font-bold text-foreground">
+                      <span className="metal-text">{t("tasksToDos")}</span>
+                    </h3>
+                  </div>
+                  <p className="text-xs text-muted mt-1.5">{t("recentlyAssigned")}</p>
+                </div>
+                <Link
+                  href="/intern/task"
+                  className="text-xs text-primary-light hover:text-cyan-300 font-semibold flex items-center gap-1 px-3 py-1.5 rounded-xl border border-primary-light/20 bg-primary-light/5 hover:bg-primary-light/10 transition-all"
+                >
+                  {t("viewAllTasks")}
+                  <ExternalLink className="h-3 w-3" />
+                </Link>
+              </div>
+
+              <div className="mt-6">
+                <Table columns="2.2fr 1fr 1.6fr 1fr">
+                  <Table.Header>
+                    <span>{t("colTaskName")}</span>
+                    <span>{t("colPriority")}</span>
+                    <span>{t("colStatusDeadline")}</span>
+                    <div className="flex items-center justify-end">
+                      <Table.ReloadButton onReload={refetch} isReloading={isFetching} />
+                    </div>
+                  </Table.Header>
+
+                  <Table.Body
+                    data={todaysTasks.slice(0, 5)}
+                    emptyMessage={t("noTasksToday")}
+                    render={(task: AssignmentDetail) => {
+                      const deadlineText = task.taskDeadline
+                        ? new Date(task.taskDeadline).toLocaleDateString(
+                            locale === "vi" ? "vi-VN" : "en-US",
+                            { day: "2-digit", month: "2-digit", year: "numeric" },
+                          )
+                        : "—";
+
+                      return (
+                        <Table.Row key={task.id}>
+                          <div className="min-w-0 pr-2">
+                            <p className="font-semibold text-foreground text-sm truncate">
+                              {task.taskTitle}
+                            </p>
+                            <p className="text-xs text-muted truncate">
+                              {t("leader")} {task.leaderName || "Leader"}
+                            </p>
+                          </div>
+
+                          <div>
+                            <span
+                              className={`inline-block text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full border ${
+                                task.taskPriority === "HIGH"
+                                  ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                                  : task.taskPriority === "MEDIUM"
+                                    ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                                    : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                              }`}
+                            >
+                              {task.taskPriority || "NORMAL"}
+                            </span>
+                          </div>
+
+                          <div>
+                            <div className="flex flex-col gap-0.5">
+                              <span
+                                className={`inline-flex w-fit items-center text-[11px] font-semibold px-2 py-0.5 rounded-lg border ${
+                                  task.status === "DONE"
+                                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                    : task.status === "IN_PROGRESS"
+                                      ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"
+                                      : task.status === "REVIEW"
+                                        ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                                        : "bg-slate-500/10 text-slate-300 border-slate-500/20"
+                                }`}
+                              >
+                                {task.status}
+                              </span>
+                              <span className="text-[11px] text-muted">{deadlineText}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-end">
+                            <Link
+                              href={`/intern/task`}
+                              className="text-xs text-primary-light hover:underline font-medium inline-flex items-center gap-1"
+                            >
+                              {t("viewTaskDetails")}
+                              <ExternalLink className="h-3 w-3" />
+                            </Link>
+                          </div>
+                        </Table.Row>
+                      );
+                    }}
+                  />
+                </Table>
+              </div>
             </div>
-            <Link href="/intern/task" className="text-xs font-medium text-primary-light hover:underline flex items-center gap-1">{t("viewAllTasks")} <ExternalLink className="h-3.5 w-3.5" /></Link>
-          </div>
+          </MetalCard>
+        </div>
 
-          <div className="mt-5 space-y-4">
-            <div className={`p-4 rounded-2xl border transition-all flex items-center justify-between ${stats.dailyReportTodaySubmitted ? "border-emerald-500/30 bg-emerald-500/10" : "border-amber-500/30 bg-amber-500/10"}`}>
-              <div className="flex items-center gap-3">
-                <div className={`p-2.5 rounded-xl ${stats.dailyReportTodaySubmitted ? "bg-emerald-500/20 text-emerald-300" : "bg-amber-500/20 text-amber-300"}`}><Calendar className="h-5 w-5" /></div>
-                <div>
-                  <p className="text-sm font-bold text-foreground">{t("dailyReport")}</p>
-                  <p className="text-xs text-muted">{stats.dailyReportTodaySubmitted ? t("reportSubmittedMsg") : t("reportNotSubmittedMsg")}</p>
+        {/* Right Column (35% -> col-span-4): Donut Chart & Quick Actions */}
+        <div className="lg:col-span-4 flex flex-col">
+          <MetalCard className="p-6 flex-1 flex flex-col justify-between space-y-6">
+            <div>
+              {/* Task Status Heading */}
+              <div className="border-b border-white/10 pb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+                    <CheckCircle2 className="h-5 w-5 shrink-0" />
+                  </div>
+                  <h3 className="text-xl font-bold text-foreground">
+                    <span className="metal-text">{t("taskStatusBreakdown")}</span>
+                  </h3>
+                </div>
+                <p className="text-xs text-muted mt-1.5">{t("taskStatusSubtitle")}</p>
+              </div>
+
+              {/* Recharts Donut Chart */}
+              <div className="relative mt-4 h-48 w-full flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={displayDonutData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={55}
+                      outerRadius={78}
+                      paddingAngle={totalDonutValue > 0 ? 4 : 0}
+                      dataKey="value"
+                      stroke="none"
+                    >
+                      {displayDonutData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "rgba(15, 23, 42, 0.95)",
+                        borderColor: "rgba(255, 255, 255, 0.12)",
+                        borderRadius: "0.75rem",
+                        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.6)",
+                        color: "#f8fafc",
+                        backdropFilter: "blur(8px)",
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+
+                {/* Center Completion Rate Counter */}
+                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+                  <span className="text-3xl font-extrabold chrome-text leading-none tracking-tight">
+                    {completionRate}%
+                  </span>
+                  <span className="text-[11px] font-semibold text-muted mt-1 uppercase tracking-wider">
+                    {t("completed")}
+                  </span>
                 </div>
               </div>
-              {!stats.dailyReportTodaySubmitted && <Link href="/intern/daily-report" className="px-4 py-2 rounded-xl bg-amber-500 text-black font-bold text-xs hover:bg-amber-400 transition-all shrink-0">{t("submitNow")}</Link>}
-            </div>
 
-            <div className="pt-2">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted mb-3">{t("recentlyAssigned")}</p>
-              <Table columns="2.5fr 1fr 1.5fr">
-                <Table.Header><span>{t("colTaskName")}</span><span>{t("colPriority")}</span><span>{t("colStatusDeadline")}</span></Table.Header>
-                <Table.Body data={todaysTasks.slice(0, 5)} render={(task) => (
-                  <Table.Row key={task.id}>
-                    <div><p className="font-semibold text-foreground text-sm">{task.taskTitle}</p><p className="text-xs text-muted">{t("leader")} {task.leaderName}</p></div>
-                    <div><span className={`inline-block text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${task.taskPriority === "HIGH" ? "bg-rose-500/10 text-rose-400 border border-rose-500/20" : task.taskPriority === "MEDIUM" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"}`}>{task.taskPriority}</span></div>
-                    <div><span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-lg ${task.status === "DONE" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : task.status === "IN_PROGRESS" ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20" : "bg-slate-500/10 text-slate-300 border border-slate-500/20"}`}>{task.status}</span></div>
-                  </Table.Row>
-                )} />
-              </Table>
-            </div>
-          </div>
-        </MetalCard>
-
-        <MetalCard className="p-6 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
-                <h3 className="text-lg font-semibold text-foreground">{t("internshipProgress")}</h3>
+              {/* Status Chips Grid */}
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <div className="p-2.5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-center">
+                  <p className="text-[10px] text-emerald-400 font-medium truncate">{t("taskStatusDone")}</p>
+                  <p className="text-sm font-bold text-emerald-300 mt-0.5">{tasksCompleted}</p>
+                </div>
+                <div className="p-2.5 rounded-xl border border-cyan-500/20 bg-cyan-500/5 text-center">
+                  <p className="text-[10px] text-cyan-400 font-medium truncate">{t("taskStatusInProgress")}</p>
+                  <p className="text-sm font-bold text-cyan-300 mt-0.5">{tasksInProgress}</p>
+                </div>
+                <div className="p-2.5 rounded-xl border border-amber-500/20 bg-amber-500/5 text-center">
+                  <p className="text-[10px] text-amber-400 font-medium truncate">{t("taskStatusBlocked")}</p>
+                  <p className="text-sm font-bold text-amber-300 mt-0.5">{tasksBlocked}</p>
+                </div>
+                <div className="p-2.5 rounded-xl border border-rose-500/20 bg-rose-500/5 text-center">
+                  <p className="text-[10px] text-rose-400 font-medium truncate">{t("taskStatusOverdue")}</p>
+                  <p className="text-sm font-bold text-rose-300 mt-0.5">{tasksOverdue}</p>
+                </div>
               </div>
             </div>
-            <div className="mt-6 text-center space-y-4">
-              <div className="inline-flex h-32 w-32 items-center justify-center rounded-full border-4 border-primary-light/30 bg-primary-light/5 p-4 shadow-glass"><div><span className="text-3xl font-extrabold text-foreground metal-text">{stats.completionRate}%</span><span className="block text-[10px] text-muted uppercase font-semibold">{t("completed")}</span></div></div>
-              <p className="text-xs text-muted">
-                {t.rich("completedTasksMsg", {
-                  done: tasksCompleted,
-                  total: totalTasks,
-                  strong: (chunks) => <strong>{chunks}</strong>,
-                })}
-              </p>
+
+            {/* Quick Actions Grid */}
+            <div className="pt-4 border-t border-white/10">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-1 rounded-lg bg-amber-500/10 text-amber-400 shrink-0">
+                  <Zap className="h-3.5 w-3.5" />
+                </div>
+                <span className="text-xs font-bold text-foreground">{t("quickActions")}</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                {/* Action 1: Submit Daily Report */}
+                <Link
+                  href="/intern/daily-report"
+                  className="flex items-center justify-between p-2.5 rounded-xl border border-indigo-500/25 bg-indigo-500/5 hover:bg-indigo-500/15 hover:border-indigo-500/40 transition-all group"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Calendar className="h-4 w-4 text-indigo-400 shrink-0" />
+                    <span className="text-xs font-medium text-foreground group-hover:text-indigo-300 transition-colors truncate">
+                      {t("actionSubmitReport")}
+                    </span>
+                  </div>
+                  <span
+                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${
+                      isTodayReportSubmitted
+                        ? "text-emerald-400 bg-emerald-500/20"
+                        : "text-amber-400 bg-amber-500/20"
+                    }`}
+                  >
+                    {isTodayReportSubmitted ? "✓" : "!"}
+                  </span>
+                </Link>
+
+                {/* Action 2: Task Board */}
+                <Link
+                  href="/intern/task"
+                  className="flex items-center justify-between p-2.5 rounded-xl border border-cyan-500/25 bg-cyan-500/5 hover:bg-cyan-500/15 hover:border-cyan-500/40 transition-all group"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <ListTodo className="h-4 w-4 text-cyan-400 shrink-0" />
+                    <span className="text-xs font-medium text-foreground group-hover:text-cyan-300 transition-colors truncate">
+                      {t("actionManageTasks")}
+                    </span>
+                  </div>
+                  {tasksInProgress > 0 && (
+                    <span className="text-[10px] font-bold text-cyan-400 bg-cyan-500/20 px-1.5 py-0.5 rounded-md shrink-0">
+                      {tasksInProgress}
+                    </span>
+                  )}
+                </Link>
+
+                {/* Action 3: Weekly Evaluation */}
+                <Link
+                  href="/intern/weekly-evaluation"
+                  className="flex items-center justify-between p-2.5 rounded-xl border border-emerald-500/25 bg-emerald-500/5 hover:bg-emerald-500/15 hover:border-emerald-500/40 transition-all group"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Award className="h-4 w-4 text-emerald-400 shrink-0" />
+                    <span className="text-xs font-medium text-foreground group-hover:text-emerald-300 transition-colors truncate">
+                      {t("actionWeeklyEvaluation")}
+                    </span>
+                  </div>
+                  {avgScore > 0 && (
+                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/20 px-1.5 py-0.5 rounded-md shrink-0">
+                      {avgScore.toFixed(1)}
+                    </span>
+                  )}
+                </Link>
+
+                {/* Action 4: Meetings & Mentoring */}
+                <Link
+                  href="/intern/meetings"
+                  className="flex items-center justify-between p-2.5 rounded-xl border border-purple-500/25 bg-purple-500/5 hover:bg-purple-500/15 hover:border-purple-500/40 transition-all group"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Clock className="h-4 w-4 text-purple-400 shrink-0" />
+                    <span className="text-xs font-medium text-foreground group-hover:text-purple-300 transition-colors truncate">
+                      {t("actionMeetings")}
+                    </span>
+                  </div>
+                </Link>
+              </div>
             </div>
-          </div>
-          <div className="pt-6 border-t border-white/10 mt-6">
-            <Link href="/intern/task" className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-white/10 bg-white/5 text-foreground font-semibold text-sm hover:bg-white/10 transition-all">{t("viewTaskDetails")} <ExternalLink className="h-4 w-4" /></Link>
-          </div>
-        </MetalCard>
+          </MetalCard>
+        </div>
       </div>
     </div>
   );

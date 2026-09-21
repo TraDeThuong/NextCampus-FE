@@ -1,290 +1,736 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-import { FileText, Calendar, User, Layers, Link, ChevronRight, Clock, Send, Pencil, Video, Play, Loader2, AlertTriangle, Paperclip, CheckCircle2 } from "lucide-react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  MoreVertical,
+  Eye,
+  Send,
+  Play,
+  AlertTriangle,
+  FileText,
+  Clock,
+} from "lucide-react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
+import Table from "@/components/ui/Table";
 import { useTaskAssignments } from "@/hooks/task-assignment/useTaskAssignments";
 import { useStartTaskAssignment } from "@/hooks/task-assignment/useStartTaskAssignment";
-import { useBlockTaskAssignment } from "@/hooks/task-assignment/useBlockTaskAssignment";
-import { useTask } from "@/hooks/task/useTask";
-import { useTaskSubmissions } from "@/hooks/task-submission/useTaskSubmissions";
-import type { TaskAssignment } from "@/types/task-assignment";
+import type { TaskAssignment, AssignmentStatus } from "@/types/task-assignment";
 import type { TaskSubmission } from "@/types/task-submission";
-import Spinner from "@/components/ui/Spinner";
+import TaskDetailModal from "./TaskDetailModal";
 import TaskSubmissionModal from "./TaskSubmissionModal";
 
-const priorityBadge: Record<string, string> = { HIGH: "bg-red-500/10 text-red-400 border-red-500/30", MEDIUM: "bg-amber-500/10 text-amber-400 border-amber-500/30", LOW: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" };
-const statusBadge: Record<string, string> = { DONE: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300", IN_PROGRESS: "border-blue-500/30 bg-blue-500/10 text-blue-300", REVIEW: "border-purple-500/30 bg-purple-500/10 text-purple-300", TODO: "border-slate-700 bg-slate-800/50 text-slate-400", BLOCKED: "border-red-500/30 bg-red-500/10 text-red-300", PENDING_APPROVAL: "border-amber-500/30 bg-amber-500/10 text-amber-300" };
+const priorityBadge: Record<string, string> = {
+  HIGH: "bg-red-500/10 text-red-400 border-red-500/30",
+  MEDIUM: "bg-amber-500/10 text-amber-400 border-amber-500/30",
+  LOW: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
+};
+
+const statusBadge: Record<string, string> = {
+  DONE: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+  IN_PROGRESS: "border-blue-500/30 bg-blue-500/10 text-blue-400",
+  REVIEW: "border-purple-500/30 bg-purple-500/10 text-purple-400",
+  TODO: "border-slate-500/30 bg-slate-500/10 text-muted-foreground",
+  BLOCKED: "border-red-500/30 bg-red-500/10 text-red-400",
+  PENDING_APPROVAL: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+};
+
+function extractArray<T>(data: unknown): T[] {
+  if (Array.isArray(data)) return data as T[];
+  if (!data || typeof data !== "object") return [];
+  if ("data" in data) {
+    const inner = (data as { data: unknown }).data;
+    if (Array.isArray(inner)) return inner as T[];
+    if (
+      inner &&
+      typeof inner === "object" &&
+      "data" in inner &&
+      Array.isArray((inner as { data: unknown }).data)
+    ) {
+      return (inner as { data: T[] }).data;
+    }
+    if (
+      inner &&
+      typeof inner === "object" &&
+      "items" in inner &&
+      Array.isArray((inner as { items: unknown }).items)
+    ) {
+      return (inner as { items: T[] }).items;
+    }
+  }
+  if ("items" in data && Array.isArray((data as { items: unknown }).items)) {
+    return (data as { items: T[] }).items;
+  }
+  return [];
+}
+
+const TABLE_COLUMNS =
+  "minmax(90px, 110px) minmax(220px, 2.6fr) minmax(130px, 1.2fr) minmax(90px, 0.9fr) minmax(120px, 1fr) 60px";
+
+const PAGE_SIZE = 10;
+
+function checkIsOverdue(deadline: string | undefined, status: string): boolean {
+  if (!deadline || status === "DONE") return false;
+  const d = new Date(deadline);
+  d.setHours(23, 59, 59, 999);
+  return d < new Date();
+}
 
 export default function InternTaskTable() {
   const t = useTranslations("intern.tasks");
-  const searchParams = useSearchParams(); const router = useRouter();
-  const deadlineFrom = searchParams.get("deadlineFrom"); const deadlineTo = searchParams.get("deadlineTo");
-  const assignmentId = searchParams.get("assignmentId");
-  const [showSubmissionModal, setShowSubmissionModal] = useState(false);
-  const [editingSubmission, setEditingSubmission] = useState<TaskSubmission | undefined>(undefined);
-  const [isSubmissionReadOnly, setIsSubmissionReadOnly] = useState(false);
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
 
-  const updateParams = useCallback((key: string, value: string | null) => {
-    const p = new URLSearchParams(searchParams.toString()); if (value) p.set(key, value); else p.delete(key); return p.toString();
-  }, [searchParams]);
+  const search = searchParams.get("search")?.toLowerCase().trim() ?? "";
+  const paramStatus = searchParams.get("status") as AssignmentStatus | null;
+  const paramPriority = searchParams.get("priority");
+  const deadlineFrom = searchParams.get("deadlineFrom");
+  const deadlineTo = searchParams.get("deadlineTo");
+  const urlPage = Number(searchParams.get("page")) || 1;
+  const assignmentIdParam = searchParams.get("assignmentId");
 
-  const { data: assignmentsData, isLoading: listLoading } = useTaskAssignments({ limit: 100 });
-  const assignments = useMemo(() => assignmentsData?.data ?? [], [assignmentsData?.data]);
-  const sortedAssignments = useMemo(() => {
-    let filtered = [...assignments];
-    if (deadlineFrom || deadlineTo) {
-      filtered = filtered.filter((a) => { const d = new Date(a.task.deadline); if (deadlineFrom && d < new Date(deadlineFrom)) return false; if (deadlineTo) { const to = new Date(deadlineTo); to.setHours(23, 59, 59, 999); if (d > to) return false; } return true; });
+  const [selectedAssignment, setSelectedAssignment] = useState<TaskAssignment | null>(null);
+  const [submissionModalState, setSubmissionModalState] = useState<{
+    isOpen: boolean;
+    assignment: TaskAssignment | null;
+    submission?: TaskSubmission;
+    readOnly?: boolean;
+  }>({
+    isOpen: false,
+    assignment: null,
+  });
+
+  const {
+    data: assignmentsData,
+    isLoading,
+    refetch,
+    isFetching,
+  } = useTaskAssignments({
+    limit: 300,
+    status: paramStatus || undefined,
+  });
+
+  const rawAssignments = useMemo(
+    () => extractArray<TaskAssignment>(assignmentsData),
+    [assignmentsData],
+  );
+
+  // Client-side filtering
+  const filteredAssignments = useMemo(() => {
+    let list = [...rawAssignments];
+
+    if (search) {
+      list = list.filter((a) => {
+        const code = a.task?.code?.toLowerCase() ?? "";
+        const title = a.task?.title?.toLowerCase() ?? "";
+        return code.includes(search) || title.includes(search);
+      });
     }
-    return filtered.sort((a, b) => {
-      const timeA = new Date(a.assignedAt).getTime();
-      const timeB = new Date(b.assignedAt).getTime();
+
+    if (paramPriority) {
+      list = list.filter((a) => a.task?.priority === paramPriority);
+    }
+
+    if (deadlineFrom || deadlineTo) {
+      list = list.filter((a) => {
+        if (!a.task?.deadline) return false;
+        const d = new Date(a.task.deadline);
+        if (deadlineFrom && d < new Date(deadlineFrom)) return false;
+        if (deadlineTo) {
+          const to = new Date(deadlineTo);
+          to.setHours(23, 59, 59, 999);
+          if (d > to) return false;
+        }
+        return true;
+      });
+    }
+
+    return list.sort((a, b) => {
+      const timeA = a.assignedAt ? new Date(a.assignedAt).getTime() : 0;
+      const timeB = b.assignedAt ? new Date(b.assignedAt).getTime() : 0;
       if (timeA !== timeB) return timeB - timeA;
-
-      const taskTimeA = new Date(a.task.createdAt).getTime();
-      const taskTimeB = new Date(b.task.createdAt).getTime();
-      if (taskTimeA !== taskTimeB) return taskTimeB - taskTimeA;
-
-      return (b.task.code || "").localeCompare(a.task.code || "");
+      const deadA = a.task?.deadline ? new Date(a.task.deadline).getTime() : 0;
+      const deadB = b.task?.deadline ? new Date(b.task.deadline).getTime() : 0;
+      return deadB - deadA;
     });
-  }, [assignments, deadlineFrom, deadlineTo]);
+  }, [rawAssignments, search, paramPriority, deadlineFrom, deadlineTo]);
 
-  const selectedAssignment = assignmentId ? sortedAssignments.find((a) => a.id === assignmentId) : undefined;
-  const { data: taskData, isLoading: taskLoading } = useTask(selectedAssignment?.taskId);
-  const task = taskData?.data ?? null;
+  const total = filteredAssignments.length;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const currentPage = Math.min(Math.max(1, urlPage), totalPages);
 
-  const handleSelectAssignment = (aId: string) => { const query = updateParams("assignmentId", aId === assignmentId ? null : aId); router.replace(`?${query}`, { scroll: false }); };
+  const paginatedAssignments = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredAssignments.slice(start, start + PAGE_SIZE);
+  }, [filteredAssignments, currentPage]);
+
+  const goToPage = useCallback(
+    (page: number) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("page", String(page));
+      router.push(`${pathname}?${params.toString()}`);
+    },
+    [searchParams, pathname, router],
+  );
+
+  // Derive assignment from URL param or state without setState in effect
+  const selectedAssignmentFromUrl = useMemo(() => {
+    if (!assignmentIdParam || rawAssignments.length === 0) return null;
+    return (
+      rawAssignments.find(
+        (a) => a.id === assignmentIdParam || a.taskId === assignmentIdParam,
+      ) ?? null
+    );
+  }, [assignmentIdParam, rawAssignments]);
+
+  const activeAssignment = selectedAssignment ?? selectedAssignmentFromUrl;
+
+  const handleOpenDetail = (assignment: TaskAssignment) => {
+    setSelectedAssignment(assignment);
+  };
+
+  const handleCloseDetail = () => {
+    setSelectedAssignment(null);
+    if (assignmentIdParam) {
+      const p = new URLSearchParams(searchParams.toString());
+      p.delete("assignmentId");
+      router.replace(`${pathname}?${p.toString()}`, { scroll: false });
+    }
+  };
+
+  const handleOpenSubmission = (assignment: TaskAssignment) => {
+    setSubmissionModalState({
+      isOpen: true,
+      assignment,
+      submission: undefined,
+      readOnly: false,
+    });
+  };
+
+  const handleViewSubmission = (assignment: TaskAssignment, sub: TaskSubmission) => {
+    setSubmissionModalState({
+      isOpen: true,
+      assignment,
+      submission: sub,
+      readOnly: true,
+    });
+  };
+
+  const handleEditSubmission = (assignment: TaskAssignment, sub: TaskSubmission) => {
+    setSubmissionModalState({
+      isOpen: true,
+      assignment,
+      submission: sub,
+      readOnly: false,
+    });
+  };
 
   return (
     <>
-    <div className="relative flex w-full h-[75vh] flex-col overflow-hidden rounded-2xl border border-slate-700/60 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 shadow-[0_0_50px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.05)] text-slate-100">
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.03),_transparent)]" />
-      <div className="absolute -top-40 left-1/2 -translate-x-1/2 h-80 w-[600px] rounded-full bg-cyan-500/5 blur-[120px]" />
-
-      <div className="relative flex items-center justify-between border-b border-slate-800/80 px-6 py-4 bg-slate-900/40 backdrop-blur-sm">
-        <div>
-          <div className="flex items-center gap-2"><div className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse" /><h2 className="text-lg font-bold tracking-wide uppercase bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">{t("taskRegistry")}</h2></div>
-          <p className="mt-0.5 text-xs font-mono text-slate-500">[ {t("totalUnits", { n: sortedAssignments.length })} ]</p>
-        </div>
-      </div>
-
-      <div className="flex flex-1 overflow-hidden relative">
-        {listLoading ? <div className="flex w-full items-center justify-center"><Spinner size="lg" /></div> :
-         sortedAssignments.length === 0 ? <div className="flex w-full flex-col items-center justify-center py-12 text-slate-500"><FileText className="h-10 w-10 stroke-[1.2] mb-2 opacity-40" /><p className="text-sm font-mono tracking-wide">{t("noTasksAllocated")}</p></div> :
-         <>
-           <div className="w-1/4 border-r border-slate-800/80 overflow-y-auto p-4 space-y-2 bg-slate-950/40 custom-scrollbar">
-             <div className="px-2 pb-2 text-[10px] font-bold tracking-widest text-slate-500 uppercase font-mono">{t("taskRegistry")}</div>
-             {sortedAssignments.map((a) => <TaskRowButton key={a.id} assignment={a} isSelected={assignmentId === a.id} onClick={() => handleSelectAssignment(a.id)} />)}
-           </div>
-           <div className="w-3/4 overflow-y-auto p-6 bg-slate-900/20 relative custom-scrollbar">
-             {assignmentId ? (
-               taskLoading ? <div className="flex h-full items-center justify-center"><Spinner size="md" /></div> :
-               task ? <TaskDetailPanel task={task} assignment={selectedAssignment} onOpenSubmission={() => { setEditingSubmission(undefined); setIsSubmissionReadOnly(false); setShowSubmissionModal(true); }} onViewSubmission={(sub) => { setEditingSubmission(sub); setIsSubmissionReadOnly(true); setShowSubmissionModal(true); }} onEditSubmission={(sub) => { setEditingSubmission(sub); setIsSubmissionReadOnly(false); setShowSubmissionModal(true); }} /> :
-               selectedAssignment ? <TaskDetailPanel task={null} assignment={selectedAssignment} onOpenSubmission={() => { setEditingSubmission(undefined); setIsSubmissionReadOnly(false); setShowSubmissionModal(true); }} onViewSubmission={(sub) => { setEditingSubmission(sub); setIsSubmissionReadOnly(true); setShowSubmissionModal(true); }} onEditSubmission={(sub) => { setEditingSubmission(sub); setIsSubmissionReadOnly(false); setShowSubmissionModal(true); }} /> :
-               <p className="text-center text-sm font-mono text-red-400/80 py-12">{t("failedToLoad")}</p>
-             ) : (
-               <div className="flex h-full flex-col items-center justify-center text-slate-600"><Layers className="h-12 w-12 stroke-[1] mb-2 opacity-20" /><p className="text-xs font-mono tracking-wider uppercase">{t("selectTask")}</p></div>
-             )}
-           </div>
-         </>}
-      </div>
-    </div>
-
-    {showSubmissionModal && selectedAssignment && <TaskSubmissionModal assignmentId={selectedAssignment.id} assignment={selectedAssignment} submission={editingSubmission} readOnly={isSubmissionReadOnly} onClose={() => { setShowSubmissionModal(false); setEditingSubmission(undefined); setIsSubmissionReadOnly(false); }} />}
-    </>);
-}
-
-function TaskRowButton({ assignment, isSelected, onClick }: { assignment: TaskAssignment; isSelected: boolean; onClick: () => void }) {
-  const statusColors: Record<string, string> = { DONE: "bg-emerald-400/20", IN_PROGRESS: "bg-blue-400/20", REVIEW: "bg-purple-400/20", TODO: "bg-slate-700/40", BLOCKED: "bg-red-400/20", PENDING_APPROVAL: "bg-amber-400/20" };
-  return (
-    <button onClick={onClick} className={`group relative flex w-full items-center justify-between rounded-xl border p-3.5 text-left transition-all duration-200 ${isSelected ? "border-cyan-500/50 bg-gradient-to-r from-slate-900 to-slate-800/80 shadow-[0_4px_20px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.05)] text-white" : "border-slate-850 bg-slate-900/40 text-slate-400 hover:border-slate-700 hover:bg-slate-900/80"}`}>
-      <div className={`absolute left-0 top-1/4 h-1/2 w-[3px] rounded-r-full transition-all ${isSelected ? "bg-cyan-400" : statusColors[assignment.status] || "bg-slate-700"}`} />
-      <div className="pl-2 space-y-1 overflow-hidden pr-2">
-        <div className="font-mono text-xs font-bold tracking-wider text-slate-300 group-hover:text-cyan-400 transition-colors">{assignment.task.code || "UNTITLED"}</div>
-        <div className="truncate text-xs text-slate-500 group-hover:text-slate-400 transition-colors">{assignment.task.title}</div>
-        <div className="flex items-center gap-1 text-[10px] text-slate-600"><Clock className="h-3 w-3" />{new Date(assignment.task.deadline).toLocaleDateString("en-GB")}</div>
-      </div>
-      <ChevronRight className={`h-4 w-4 shrink-0 text-slate-600 transition-transform ${isSelected ? "translate-x-0.5 text-cyan-400" : "group-hover:translate-x-0.5"}`} />
-    </button>
-  );
-}
-
-function TaskDetailPanel({ task, assignment, onOpenSubmission, onViewSubmission, onEditSubmission }: { task: NonNullable<ReturnType<typeof useTask>["data"]>["data"] | null; assignment: TaskAssignment | undefined; onOpenSubmission: () => void; onViewSubmission: (sub: TaskSubmission) => void; onEditSubmission: (sub: TaskSubmission) => void }) {
-  const t = useTranslations("intern.tasks");
-  const basicTask = task ?? assignment?.task;
-  const startTaskMutation = useStartTaskAssignment();
-  const blockTaskMutation = useBlockTaskAssignment();
-  const [showBlockForm, setShowBlockForm] = useState(false);
-  const [blockedReason, setBlockedReason] = useState("");
-  const { data: submissionsData } = useTaskSubmissions(assignment ? { assignmentId: assignment.id, limit: 20, sortBy: "attempt", order: "desc" } : undefined);
-  const submissions = submissionsData?.data ?? []; const latestSubmission = submissions[0] ?? null;
-  if (!basicTask) return null;
-
-  return (
-    <div className="space-y-6">
-      <div className="space-y-2 border-b border-slate-800/60 pb-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-xs bg-slate-800 border border-slate-700 text-slate-300 px-2 py-0.5 rounded-md">{basicTask.code ?? "N/A"}</span>
-            {assignment && <span className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-mono uppercase font-bold tracking-wider ${statusBadge[assignment.status] ?? ""}`}><span className="h-1.5 w-1.5 rounded-full bg-current animate-pulse" />{assignment.status.replace("_", " ")}</span>}
-            <span className={`inline-flex rounded-md border px-2 py-0.5 text-xs font-mono uppercase font-bold tracking-wider ${priorityBadge[basicTask.priority] ?? ""}`}>{basicTask.priority}</span>
-          </div>
-          {assignment?.status === "IN_PROGRESS" && latestSubmission?.reviewStatus !== "PENDING" && (
-            <button onClick={onOpenSubmission} className="flex shrink-0 items-center gap-1.5 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-3 py-1.5 text-xs font-medium text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20"><Send className="h-3.5 w-3.5" />{t("submitWork")}</button>
-          )}
-        </div>
-        <h3 className="text-xl font-bold tracking-tight text-white">{basicTask.title}</h3>
-      </div>
-
-      {assignment?.status === "DONE" && (
-        <div className="flex items-center gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-emerald-300">
-          <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
-          <span className="text-xs font-semibold">Công việc đã hoàn thành, không thể sửa đổi hoặc nộp bài thêm.</span>
-        </div>
-      )}
-
-      {assignment?.status === "TODO" && (
-        <div className="flex items-center gap-3 rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-3">
-          <Play className="h-4 w-4 text-cyan-400" />
-          <span className="text-xs text-cyan-300 flex-1">{t("readyToStart")}</span>
-          <button onClick={() => startTaskMutation.mutate(assignment.id)} disabled={startTaskMutation.isPending} className="flex items-center gap-1.5 rounded-lg bg-cyan-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-cyan-500 disabled:opacity-50">
-            {startTaskMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}{t("startWorking")}
-          </button>
-        </div>
-      )}
-
-      {assignment?.status === "BLOCKED" && (
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/5 px-4 py-3">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-400" />
-            <div className="min-w-0">
-              <p className="text-xs font-semibold text-rose-300">{t("blockedMsg")}</p>
-              <p className="mt-1 whitespace-pre-wrap text-sm text-slate-300">
-                {assignment.blockedReason || t("blockedReasonMissing")}
-              </p>
+      {/* Mobile Card List View (< md) */}
+      <div className="block md:hidden space-y-3">
+        {isLoading ? (
+          Array.from({ length: 4 }).map((_, idx) => (
+            <div
+              key={`task-skel-${idx}`}
+              className="rounded-2xl border border-border bg-card p-4 shadow-glass animate-pulse space-y-3"
+            >
+              <div className="flex justify-between items-center">
+                <div className="h-4 w-16 bg-white/10 rounded" />
+                <div className="h-4 w-20 bg-white/10 rounded" />
+              </div>
+              <div className="h-5 w-3/4 bg-white/10 rounded" />
+              <div className="h-4 w-1/2 bg-white/10 rounded" />
             </div>
+          ))
+        ) : paginatedAssignments.length === 0 ? (
+          <div className="rounded-2xl border border-border bg-card p-8 text-center flex flex-col items-center justify-center shadow-glass">
+            <FileText className="h-10 w-10 stroke-[1.2] mb-2 text-muted opacity-40" />
+            <p className="text-sm font-semibold text-foreground">
+              {t("noTasksFound")}
+            </p>
+            <p className="mt-1 text-xs text-muted max-w-xs">
+              {search || paramStatus || paramPriority || deadlineFrom || deadlineTo
+                ? t("noTasksFoundDesc")
+                : t("noTasksAllocatedDesc")}
+            </p>
           </div>
-        </div>
-      )}
-
-      {assignment?.status === "IN_PROGRESS" && (
-        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
-          {!showBlockForm ? (
-            <div className="flex items-center gap-3">
-              <AlertTriangle className="h-4 w-4 text-amber-400" />
-              <span className="flex-1 text-xs text-amber-200">{t("blockTaskHint")}</span>
-              <button
-                type="button"
-                onClick={() => setShowBlockForm(true)}
-                className="rounded-lg border border-amber-400/30 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-200 transition hover:bg-amber-500/20"
+        ) : (
+          paginatedAssignments.map((assignment) => {
+            const isOverdue = checkIsOverdue(assignment.task.deadline, assignment.status);
+            return (
+              <div
+                key={assignment.id}
+                onClick={() => handleOpenDetail(assignment)}
+                className="rounded-2xl border border-border bg-card p-4 shadow-glass transition hover:border-border-strong cursor-pointer space-y-3"
               >
-                {t("blockTask")}
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <div>
-                <label htmlFor={`blocked-reason-${assignment.id}`} className="text-xs font-semibold text-amber-200">
-                  {t("blockReason")}
-                </label>
-                <textarea
-                  id={`blocked-reason-${assignment.id}`}
-                  value={blockedReason}
-                  onChange={(event) => setBlockedReason(event.target.value)}
-                  maxLength={2000}
-                  rows={3}
-                  autoFocus
-                  placeholder={t("blockReasonPlaceholder")}
-                  className="mt-2 w-full resize-y rounded-lg border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm text-slate-200 outline-none transition placeholder:text-slate-600 focus:border-amber-400/50"
-                />
-                <p className="mt-1 text-right text-[10px] text-slate-500">{blockedReason.length}/2000</p>
-              </div>
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => { setShowBlockForm(false); setBlockedReason(""); }}
-                  disabled={blockTaskMutation.isPending}
-                  className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-slate-800 disabled:opacity-50"
-                >
-                  {t("cancelBlock")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => blockTaskMutation.mutate(
-                    { id: assignment.id, blockedReason: blockedReason.trim() },
-                    { onSuccess: () => { setShowBlockForm(false); setBlockedReason(""); } },
-                  )}
-                  disabled={blockTaskMutation.isPending || blockedReason.trim().length === 0}
-                  className="flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {blockTaskMutation.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                  {t("confirmBlock")}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      <div className="grid grid-cols-2 gap-3 bg-slate-950/40 border border-slate-850 p-4 rounded-xl">
-        <DetailRow icon={Calendar} label={t("targetDeadline")} value={new Date(basicTask.deadline).toLocaleDateString("en-GB")} />
-        <DetailRow icon={Calendar} label={t("assignedAt")} value={assignment ? new Date(assignment.assignedAt).toLocaleDateString("en-GB") : "—"} />
-        <DetailRow icon={User} label={t("assignedBy")} value={assignment?.assigner?.fullName ?? "—"} />
-        <DetailRow icon={User} label={t("support")} value={assignment?.support?.fullName ?? "—"} />
-        {task && <DetailRow icon={Layers} label={t("group")} value={task.taskGroup?.name ?? "—"} />}
-        {task?.startDate && <DetailRow icon={Calendar} label={t("startDate")} value={new Date(task.startDate).toLocaleDateString("en-GB")} />}
-        {task?.estDays && <div className="col-span-2 mt-1 pt-2 border-t border-slate-850"><DetailRow label={t("estDuration")} value={t("days", { n: task.estDays })} /></div>}
-      </div>
-
-      {basicTask.description && <div className="space-y-1.5"><h4 className="text-[10px] font-bold uppercase font-mono tracking-widest text-slate-500">{t("description")}</h4><div className="rounded-xl border border-slate-850 bg-slate-900/30 p-3.5 text-sm text-slate-400 leading-relaxed">{basicTask.description}</div></div>}
-      {task?.acceptanceCriteria && <div className="space-y-1.5"><h4 className="text-[10px] font-bold uppercase font-mono tracking-widest text-slate-500">{t("acceptanceCriteria")}</h4><div className="rounded-xl border border-slate-850 bg-slate-900/30 p-3.5 text-sm text-slate-400 leading-relaxed font-mono whitespace-pre-line">{task.acceptanceCriteria}</div></div>}
-      {task?.taskNotes && <div className="space-y-1.5"><h4 className="text-[10px] font-bold uppercase font-mono tracking-widest text-slate-500">{t("notes")}</h4><div className="rounded-xl border border-slate-850 bg-slate-950/40 p-3.5 text-sm text-amber-400/80 leading-relaxed italic">{task.taskNotes}</div></div>}
-
-      {task && task.attachments.length > 0 && (
-        <div className="space-y-2 pt-2">
-          <h4 className="text-[10px] font-bold uppercase font-mono tracking-widest text-slate-500">{t("attachments", { n: task.attachments.length })}</h4>
-          <div className="grid grid-cols-1 gap-2">{task.attachments.map((att) => <a key={att.id} href={att.fileUrl} target="_blank" rel="noopener noreferrer" className="group flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/50 px-4 py-2.5 text-xs text-slate-300 transition-all hover:border-cyan-500/40 hover:bg-slate-900 hover:text-cyan-400"><div className="flex items-center gap-2.5 overflow-hidden"><Link className="h-3.5 w-3.5 shrink-0 text-slate-500 group-hover:text-cyan-400" /><span className="truncate font-mono">{att.fileName}</span></div><span className="text-[10px] font-mono text-slate-600 group-hover:text-cyan-500 uppercase border border-slate-800 px-1.5 py-0.5 rounded bg-slate-950/60 transition-colors ml-2 shrink-0">{t("open")}</span></a>)}</div>
-        </div>
-      )}
-
-      {submissions.length > 0 && (
-        <div className="space-y-3 pt-4 border-t-2 border-slate-700/50">
-          <div className="flex items-center gap-2"><div className="h-1.5 w-1.5 rounded-full bg-cyan-400" /><h4 className="text-xs font-bold uppercase tracking-widest text-slate-400">{t("submissionHistory", { n: submissions.length })}</h4></div>
-          <div className="space-y-3">
-            {submissions.map((sub) => {
-              const isLatest = sub.id === latestSubmission?.id;
-              return (
-                <div key={sub.id} className={`rounded-xl border p-4 ${isLatest ? "border-cyan-500/40 bg-gradient-to-r from-cyan-500/5 to-transparent" : "border-slate-800 bg-slate-900/40"}`}>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono font-bold text-slate-300">#{sub.attempt}</span>
-                      <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-bold uppercase ${sub.reviewStatus === "APPROVED" ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : sub.reviewStatus === "REJECTED" ? "border-red-500/40 bg-red-500/10 text-red-300" : "border-amber-500/40 bg-amber-500/10 text-amber-300"}`}>{sub.reviewStatus}</span>
-                      {isLatest && <span className="text-[10px] text-cyan-400 font-mono bg-cyan-500/10 border border-cyan-500/30 px-1.5 py-0.5 rounded">{t("latest")}</span>}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] text-slate-500">{new Date(sub.submittedAt).toLocaleString("en-GB")}</span>
-                      <button onClick={() => onViewSubmission(sub)} className="text-[11px] text-cyan-400 hover:text-cyan-300 transition">{t("view")}</button>
-                      {sub.reviewStatus === "PENDING" && isLatest && <button onClick={() => onEditSubmission(sub)} className="flex items-center gap-1 rounded-lg border border-amber-400/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-300 transition hover:border-amber-400/50 hover:bg-amber-500/20"><Pencil className="h-3 w-3" />{t("edit")}</button>}
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    {sub.prLink && <a href={sub.prLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 transition"><Link className="h-3 w-3 shrink-0" /><span className="truncate">{sub.prLink}</span></a>}
-                    {sub.videoDemo && <a href={sub.videoDemo} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 transition"><Video className="h-3 w-3 shrink-0" /><span className="truncate">Video Demo</span></a>}
-                    {sub.attachments.length > 0 && <div className="space-y-1.5"><div className="flex items-center gap-1.5 text-xs text-slate-400"><Paperclip className="h-3 w-3 shrink-0" /><span>{t("attachments", { n: sub.attachments.length })}</span></div><div className="flex flex-wrap gap-1.5 pl-4.5">{sub.attachments.map((attachment) => <a key={attachment.id} href={attachment.fileUrl} target="_blank" rel="noopener noreferrer" title={attachment.fileName} className="max-w-full truncate rounded-md border border-slate-700 bg-slate-950/60 px-2 py-1 text-[11px] text-slate-300 transition hover:border-cyan-500/40 hover:text-cyan-300">{attachment.fileName}</a>)}</div></div>}
-                    {sub.note && <p className="text-xs text-slate-400 leading-relaxed">{sub.note}</p>}
-                    {sub.reviewComment && <div className="mt-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2"><p className="text-[10px] text-amber-400/70 uppercase tracking-wider mb-0.5">{t("reviewComment")}</p><p className="text-xs text-amber-300 italic">{sub.reviewComment}</p></div>}
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded-md border border-border bg-card/80 text-primary-light">
+                    {assignment.task.code || "UNTITLED"}
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className={`inline-flex rounded-md border px-2 py-0.5 text-[10px] font-mono uppercase font-bold tracking-wider ${
+                        priorityBadge[assignment.task.priority] ?? ""
+                      }`}
+                    >
+                      {t.has(`priority${assignment.task.priority}`)
+                        ? t(`priority${assignment.task.priority}`)
+                        : assignment.task.priority}
+                    </span>
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-mono uppercase font-bold tracking-wider ${
+                        statusBadge[assignment.status] ?? ""
+                      }`}
+                    >
+                      {t.has(`status${assignment.status}`)
+                        ? t(`status${assignment.status}`)
+                        : assignment.status.replace("_", " ")}
+                    </span>
                   </div>
                 </div>
-              );
-            })}
+
+                <div>
+                  <h3 className="text-sm font-bold text-foreground line-clamp-2">
+                    {assignment.task.title}
+                  </h3>
+                </div>
+
+                <div className="flex items-center justify-between text-xs pt-1 border-t border-border/40">
+                  <div className="flex items-center gap-1 text-muted">
+                    <Calendar className="h-3.5 w-3.5" />
+                    <span className={isOverdue ? "text-rose-400 font-medium" : ""}>
+                      {new Date(assignment.task.deadline).toLocaleDateString("vi-VN")}
+                    </span>
+                    {isOverdue && (
+                      <span className="text-[10px] text-rose-400 bg-rose-500/10 border border-rose-500/20 px-1 rounded ml-1 font-semibold">
+                        {t("overdueBadge")}
+                      </span>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenDetail(assignment);
+                    }}
+                    className="text-xs text-cyan-400 hover:text-cyan-300 font-medium cursor-pointer"
+                  >
+                    {t("viewDetails")} →
+                  </button>
+                </div>
+              </div>
+            );
+          })
+        )}
+
+        {/* Mobile Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between gap-4 border-t border-border/40 pt-4 text-xs text-muted">
+            <p className="text-muted">
+              {t("pagination", {
+                page: currentPage,
+                totalPages,
+                total,
+              })}
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={currentPage <= 1}
+                onClick={() => goToPage(currentPage - 1)}
+                className="rounded-xl border border-border bg-card px-3 py-1.5 text-muted transition hover:bg-card-hover hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                disabled={currentPage >= totalPages}
+                onClick={() => goToPage(currentPage + 1)}
+                className="rounded-xl border border-border bg-card px-3 py-1.5 text-muted transition hover:bg-card-hover hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
           </div>
-        </div>
+        )}
+      </div>
+
+      {/* Desktop Table View (hidden md:block) */}
+      <div className="hidden md:block">
+        <Table columns={TABLE_COLUMNS}>
+          <Table.Header>
+            <div>{t("colCode")}</div>
+            <div>{t("colTitle")}</div>
+            <div>{t("colDeadline")}</div>
+            <div>{t("colPriority")}</div>
+            <div>{t("colStatus")}</div>
+            <div className="flex items-center justify-end">
+              <Table.ReloadButton onReload={refetch} isReloading={isFetching} />
+            </div>
+          </Table.Header>
+
+          <Table.Body
+            data={paginatedAssignments}
+            isLoading={isLoading}
+            emptyMessage={t("noTasksFound")}
+            emptyDescription={
+              search || paramStatus || paramPriority || deadlineFrom || deadlineTo
+                ? t("noTasksFoundDesc")
+                : t("noTasksAllocatedDesc")
+            }
+            render={(assignment) => {
+              const isOverdue = checkIsOverdue(
+                assignment.task.deadline,
+                assignment.status,
+              );
+              return (
+                <Table.Row
+                  key={assignment.id}
+                  onClick={() => handleOpenDetail(assignment)}
+                >
+                  {/* 1. Code */}
+                  <div>
+                    <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded-md border border-border bg-card/80 text-primary-light">
+                      {assignment.task.code || "UNTITLED"}
+                    </span>
+                  </div>
+
+                  {/* 2. Title */}
+                  <div className="min-w-0 pr-4 space-y-0.5">
+                    <p className="text-sm font-semibold text-foreground truncate hover:text-cyan-400 transition-colors">
+                      {assignment.task.title}
+                    </p>
+                    {assignment.task.recreatedTaskId && (
+                      <span className="inline-flex items-center text-[10px] text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.2 rounded font-mono">
+                        Recreated
+                      </span>
+                    )}
+                  </div>
+
+                  {/* 3. Deadline */}
+                  <div className="flex items-center gap-1.5 text-xs text-muted">
+                    <Clock className="h-3.5 w-3.5 shrink-0" />
+                    <span className={isOverdue ? "text-rose-400 font-semibold" : "text-foreground/90 font-medium"}>
+                      {new Date(assignment.task.deadline).toLocaleDateString("vi-VN")}
+                    </span>
+                    {isOverdue && (
+                      <span className="text-[10px] text-rose-400 bg-rose-500/10 border border-rose-500/20 px-1.5 py-0.5 rounded font-bold">
+                        {t("overdueBadge")}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* 4. Priority */}
+                  <div>
+                    <span
+                      className={`inline-flex rounded-md border px-2 py-0.5 text-xs font-mono uppercase font-bold tracking-wider ${
+                        priorityBadge[assignment.task.priority] ?? ""
+                      }`}
+                    >
+                      {t.has(`priority${assignment.task.priority}`)
+                        ? t(`priority${assignment.task.priority}`)
+                        : assignment.task.priority}
+                    </span>
+                  </div>
+
+                  {/* 5. Status */}
+                  <div>
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-mono uppercase font-bold tracking-wider ${
+                        statusBadge[assignment.status] ?? ""
+                      }`}
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full bg-current animate-pulse" />
+                      {t.has(`status${assignment.status}`)
+                        ? t(`status${assignment.status}`)
+                        : assignment.status.replace("_", " ")}
+                    </span>
+                  </div>
+
+                  {/* 6. Actions Menu */}
+                  <div
+                    className="flex items-center justify-end"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <TaskTableRowActions
+                      assignment={assignment}
+                      onOpenDetail={() => handleOpenDetail(assignment)}
+                      onOpenSubmission={() => handleOpenSubmission(assignment)}
+                    />
+                  </div>
+                </Table.Row>
+              );
+            }}
+          />
+
+          {totalPages > 1 && (
+            <Table.Footer>
+              <div className="flex w-full items-center justify-between gap-4 text-sm">
+                <p className="text-muted text-xs sm:text-sm">
+                  {t("pagination", {
+                    page: currentPage,
+                    totalPages,
+                    total,
+                  })}
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={currentPage <= 1}
+                    onClick={() => goToPage(currentPage - 1)}
+                    className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer"
+                    aria-label="Previous page"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    disabled={currentPage >= totalPages}
+                    onClick={() => goToPage(currentPage + 1)}
+                    className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer"
+                    aria-label="Next page"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </Table.Footer>
+          )}
+        </Table>
+      </div>
+
+      {/* Task Detail Modal */}
+      {activeAssignment && (
+        <TaskDetailModal
+          assignment={activeAssignment}
+          onClose={handleCloseDetail}
+          onOpenSubmission={() => handleOpenSubmission(activeAssignment)}
+          onViewSubmission={(sub) => handleViewSubmission(activeAssignment, sub)}
+          onEditSubmission={(sub) => handleEditSubmission(activeAssignment, sub)}
+        />
       )}
-    </div>
+
+      {/* Task Submission Modal */}
+      {submissionModalState.isOpen && submissionModalState.assignment && (
+        <TaskSubmissionModal
+          assignmentId={submissionModalState.assignment.id}
+          assignment={submissionModalState.assignment}
+          submission={submissionModalState.submission}
+          readOnly={submissionModalState.readOnly}
+          onClose={() =>
+            setSubmissionModalState({
+              isOpen: false,
+              assignment: null,
+              submission: undefined,
+              readOnly: false,
+            })
+          }
+        />
+      )}
+    </>
   );
 }
 
-function DetailRow({ icon: Icon, label, value }: { icon?: React.ComponentType<{ className?: string }>; label: string; value: React.ReactNode }) {
-  return <div className="flex flex-col gap-0.5 p-1"><div className="flex items-center gap-1.5 text-[10px] font-bold font-mono tracking-wider uppercase text-slate-500">{Icon && <Icon className="h-3 w-3 shrink-0 text-slate-500" />}<span>{label}</span></div><div className="text-sm font-medium text-slate-200 mt-0.5">{value}</div></div>;
+const MENU_WIDTH = 190;
+const ESTIMATED_HEIGHT = 160;
+
+function TaskTableRowActions({
+  assignment,
+  onOpenDetail,
+  onOpenSubmission,
+}: {
+  assignment: TaskAssignment;
+  onOpenDetail: () => void;
+  onOpenSubmission: () => void;
+}) {
+  const t = useTranslations("intern.tasks");
+  const startTaskMutation = useStartTaskAssignment();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [coords, setCoords] = useState<{ top: number; left: number }>({
+    top: 0,
+    left: 0,
+  });
+  const [openUpward, setOpenUpward] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const updateMenuPosition = useCallback(() => {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    const spaceBelow = vh - rect.bottom;
+    const spaceAbove = rect.top;
+    const shouldFlip =
+      spaceBelow < ESTIMATED_HEIGHT && spaceAbove > spaceBelow;
+
+    setOpenUpward(shouldFlip);
+    const left = Math.max(
+      8,
+      Math.min(rect.right - MENU_WIDTH, vw - MENU_WIDTH - 8),
+    );
+    const top = shouldFlip ? rect.top - 6 : rect.bottom + 6;
+    setCoords({ top, left });
+  }, []);
+
+  const toggleMenu = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (!menuOpen) {
+        updateMenuPosition();
+        setMenuOpen(true);
+      } else {
+        setMenuOpen(false);
+      }
+    },
+    [menuOpen, updateMenuPosition],
+  );
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const handlePointerDown = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node;
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(target) &&
+        triggerRef.current &&
+        !triggerRef.current.contains(target)
+      ) {
+        setMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setMenuOpen(false);
+        triggerRef.current?.focus();
+      }
+    };
+
+    const handleScrollOrResize = () => {
+      setMenuOpen(false);
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown, {
+      passive: true,
+    });
+    document.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("scroll", handleScrollOrResize, true);
+    window.addEventListener("resize", handleScrollOrResize);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("scroll", handleScrollOrResize, true);
+      window.removeEventListener("resize", handleScrollOrResize);
+    };
+  }, [menuOpen]);
+
+  return (
+    <>
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={toggleMenu}
+        aria-haspopup="true"
+        aria-expanded={menuOpen}
+        aria-label="Task actions"
+        className="flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-muted transition hover:border-border hover:bg-card-hover hover:text-foreground active:scale-90 cursor-pointer"
+      >
+        <MoreVertical className="h-4 w-4" />
+      </button>
+
+      {menuOpen &&
+        createPortal(
+          <div
+            ref={menuRef}
+            style={{
+              position: "fixed",
+              top: openUpward ? undefined : `${coords.top}px`,
+              bottom: openUpward
+                ? `${window.innerHeight - coords.top}px`
+                : undefined,
+              left: `${coords.left}px`,
+              width: `${MENU_WIDTH}px`,
+              zIndex: 9999,
+              maxHeight: "calc(100vh - 24px)",
+              overflowY: "auto",
+            }}
+            className="rounded-2xl border border-border bg-card/95 p-1.5 shadow-glass backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-100"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* View Details */}
+            <button
+              type="button"
+              onClick={() => {
+                setMenuOpen(false);
+                onOpenDetail();
+              }}
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:bg-white/5 hover:text-cyan-400 transition cursor-pointer"
+            >
+              <Eye className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
+              <span>{t("viewDetails")}</span>
+            </button>
+
+            {/* Start Task (TODO) */}
+            {assignment.status === "TODO" && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  startTaskMutation.mutate(assignment.id);
+                }}
+                disabled={startTaskMutation.isPending}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-emerald-400 hover:bg-emerald-500/10 transition cursor-pointer disabled:opacity-50"
+              >
+                <Play className="h-3.5 w-3.5 shrink-0" />
+                <span>{t("startWorking")}</span>
+              </button>
+            )}
+
+            {/* Submit Work (IN_PROGRESS) */}
+            {assignment.status === "IN_PROGRESS" && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onOpenSubmission();
+                }}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-cyan-400 hover:bg-cyan-500/10 transition cursor-pointer"
+              >
+                <Send className="h-3.5 w-3.5 shrink-0" />
+                <span>{t("submitWork")}</span>
+              </button>
+            )}
+
+            {/* Report Blocker (IN_PROGRESS) */}
+            {assignment.status === "IN_PROGRESS" && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onOpenDetail();
+                }}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-amber-400 hover:bg-amber-500/10 transition cursor-pointer"
+              >
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                <span>{t("blockTask")}</span>
+              </button>
+            )}
+          </div>,
+          document.body,
+        )}
+    </>
+  );
 }

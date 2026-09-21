@@ -41,6 +41,9 @@ const RESOURCE_FALLBACKS: Record<string, string> = {
   ABSENCE: "Nghỉ phép",
   DAILY_REPORT: "Báo cáo Tiến độ Ngày",
   WEEKLY_EVALUATION: "Bảng Đánh giá Tuần",
+  PDF_EXPORT: "Xuất Báo Cáo & Chứng Nhận (PDF)",
+  REGULATION: "Nội quy & Quy định",
+  STATS: "Thống kê & Báo cáo",
 };
 
 export default function CreateRoleModal({ isOpen, onClose }: CreateRoleModalProps) {
@@ -113,7 +116,10 @@ export default function CreateRoleModal({ isOpen, onClose }: CreateRoleModalProp
 
   const getResourceLabel = (res: string) => {
     try {
-      return t(`admin.roles.resources.${res}`) || RESOURCE_FALLBACKS[res] || res;
+      if (t.has(`admin.roles.resources.${res}`)) {
+        return t(`admin.roles.resources.${res}`);
+      }
+      return RESOURCE_FALLBACKS[res] || res;
     } catch {
       return RESOURCE_FALLBACKS[res] || res;
     }

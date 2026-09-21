@@ -180,6 +180,20 @@ export interface NeedsReworkItem {
   submittedAt: string;
 }
 
+export interface InternActivityDayDetail {
+  count: number;
+  reports: number;
+  submissions: number;
+}
+
+export interface InternActivityStatsData {
+  currentStreak: number;
+  longestStreak: number;
+  totalActiveDays: number;
+  totalActivities: number;
+  history: Record<string, InternActivityDayDetail>;
+}
+
 export interface InternPersonalStatsData {
   internId?: string;
   internName: string;
@@ -202,6 +216,7 @@ export interface InternPersonalStatsData {
   reports?: InternReportStats;
   evaluations?: InternEvaluationStats;
   recentTasks?: unknown[];
+  activity?: InternActivityStatsData;
 }
 
 export interface ActivityLog {

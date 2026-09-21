@@ -121,10 +121,17 @@ export default function TaskSubmissionModal({ assignmentId, assignment, submissi
 
   const isPending = isSubmitting || createSubmission.isPending || updateSubmission.isPending || uploadVideo.isPending || uploadAttachment.isPending || deleteAttachment.isPending;
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
   return createPortal(
-    <div onClick={onClose} className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0a0e1a] p-4">
-      <div onClick={(e) => e.stopPropagation()} className="relative max-h-[calc(100vh-2rem)] w-full max-w-lg overflow-y-auto rounded-[32px] border border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] shadow-[0_25px_80px_rgba(0,0,0,0.55)]">
-        <div className="absolute -left-24 -top-24 h-64 w-64 rounded-full bg-cyan-400/10 blur-3xl" /><div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent" />
+    <div onClick={onClose} className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 backdrop-blur-md">
+      <div onClick={(e) => e.stopPropagation()} className="relative max-h-[calc(100vh-2rem)] w-full max-w-lg overflow-y-auto rounded-[28px] border border-border bg-card shadow-glass">
         <div className="relative p-6">
           <div className="mb-6 flex items-start justify-between">
             <div>
@@ -134,56 +141,56 @@ export default function TaskSubmissionModal({ assignmentId, assignment, submissi
               </div>
               <p className="mt-1 text-sm text-muted">{isView ? tm("viewDesc") : isEdit ? tm("editDesc") : tm("submitDesc")}</p>
             </div>
-            <button onClick={onClose} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 transition-all hover:rotate-90 hover:border-white/20 hover:bg-white/10"><X className="h-5 w-5 text-white" /></button>
+            <button onClick={onClose} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border bg-card/60 text-muted transition-all hover:rotate-90 hover:text-foreground hover:bg-card active:scale-95 cursor-pointer"><X className="h-4 w-4" /></button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {readOnly && submission ? (
-              <div className="space-y-4">
-                <div><p className="text-xs text-slate-500 mb-1">{tm("status")}</p><span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-mono uppercase font-bold ${submission.reviewStatus === "APPROVED" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" : submission.reviewStatus === "REJECTED" ? "border-red-500/30 bg-red-500/10 text-red-300" : "border-amber-500/30 bg-amber-500/10 text-amber-300"}`}>{submission.reviewStatus}</span></div>
-                {submission.prLink && <div><p className="text-xs text-slate-500 mb-1">{tm("prLink")}</p><a href={submission.prLink} target="_blank" rel="noopener noreferrer" className="text-sm text-cyan-400 hover:text-cyan-300 break-all">{submission.prLink}</a></div>}
-                {submission.videoDemo && <div><p className="text-xs text-slate-500 mb-1">{tm("videoDemo")}</p><a href={submission.videoDemo} target="_blank" rel="noopener noreferrer" className="text-sm text-cyan-400 hover:text-cyan-300 break-all">{submission.videoDemo}</a></div>}
-                {existingAttachments.length > 0 && <div><p className="text-xs text-slate-500 mb-1.5">{tm("attachments")}</p><div className="space-y-1.5">{existingAttachments.map((attachment) => <a key={attachment.id} href={attachment.fileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 transition hover:border-cyan-400/20 hover:text-cyan-300"><Download className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{attachment.fileName}</span></a>)}</div></div>}
-                {submission.note && <div><p className="text-xs text-slate-500 mb-1">{tm("note")}</p><p className="text-sm text-slate-300">{submission.note}</p></div>}
-                <div><p className="text-xs text-slate-500 mb-1">{tm("submitted")}</p><p className="text-sm text-slate-400">{new Date(submission.submittedAt).toLocaleString("en-GB")}</p></div>
-                {submission.reviewComment && <div><p className="text-xs text-slate-500 mb-1">{tm("reviewComment")}</p><p className="text-sm text-amber-300 italic">{submission.reviewComment}</p></div>}
+              <div className="space-y-3.5">
+                <div><p className="text-xs text-muted mb-1 font-medium">{tm("status")}</p><span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-mono uppercase font-bold ${submission.reviewStatus === "APPROVED" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : submission.reviewStatus === "REJECTED" ? "border-red-500/30 bg-red-500/10 text-red-400" : "border-amber-500/30 bg-amber-500/10 text-amber-400"}`}>{submission.reviewStatus}</span></div>
+                {submission.prLink && <div><p className="text-xs text-muted mb-1 font-medium">{tm("prLink")}</p><a href={submission.prLink} target="_blank" rel="noopener noreferrer" className="text-sm text-cyan-400 hover:text-cyan-300 break-all">{submission.prLink}</a></div>}
+                {submission.videoDemo && <div><p className="text-xs text-muted mb-1 font-medium">{tm("videoDemo")}</p><a href={submission.videoDemo} target="_blank" rel="noopener noreferrer" className="text-sm text-cyan-400 hover:text-cyan-300 break-all">{submission.videoDemo}</a></div>}
+                {existingAttachments.length > 0 && <div><p className="text-xs text-muted mb-1.5 font-medium">{tm("attachments")}</p><div className="space-y-1.5">{existingAttachments.map((attachment) => <a key={attachment.id} href={attachment.fileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-xl border border-border bg-card/60 px-4 py-2 text-sm text-foreground/85 transition hover:border-cyan-400/30 hover:text-cyan-400"><Download className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{attachment.fileName}</span></a>)}</div></div>}
+                {submission.note && <div><p className="text-xs text-muted mb-1 font-medium">{tm("note")}</p><p className="text-sm text-foreground/90 whitespace-pre-wrap">{submission.note}</p></div>}
+                <div><p className="text-xs text-muted mb-1 font-medium">{tm("submitted")}</p><p className="text-sm text-foreground/80">{new Date(submission.submittedAt).toLocaleString("vi-VN")}</p></div>
+                {submission.reviewComment && <div><p className="text-xs text-muted mb-1 font-medium">{tm("reviewComment")}</p><p className="text-sm text-amber-300 italic">{submission.reviewComment}</p></div>}
               </div>
             ) : (
             <>
-            <div><label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-200"><Link className="h-4 w-4 text-cyan-400" />{tm("prLink")}</label><input type="url" value={prLink} onChange={(e) => setPrLink(e.target.value)} placeholder={tm("prPlaceholder")} disabled={isPending} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-cyan-400/50 disabled:opacity-50" /></div>
+            <div><label className="mb-1.5 flex items-center gap-1.5 text-xs sm:text-sm font-medium text-foreground/90 select-none"><Link className="h-4 w-4 text-cyan-400" />{tm("prLink")}</label><input type="url" value={prLink} onChange={(e) => setPrLink(e.target.value)} placeholder={tm("prPlaceholder")} disabled={isPending} className="w-full h-[46px] rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted outline-none transition focus:border-primary-light disabled:opacity-50" /></div>
             <div>
-              <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-200"><Video className="h-4 w-4 text-cyan-400" />{tm("videoDemo")}</label>
+              <label className="mb-1.5 flex items-center gap-1.5 text-xs sm:text-sm font-medium text-foreground/90 select-none"><Video className="h-4 w-4 text-cyan-400" />{tm("videoDemo")}</label>
               <div className="space-y-2">
-                <input type="url" value={videoLink} onChange={(e) => setVideoLink(e.target.value)} placeholder={tm("videoPlaceholder")} disabled={isPending || !!videoFile} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-cyan-400/50 disabled:opacity-50" />
+                <input type="url" value={videoLink} onChange={(e) => setVideoLink(e.target.value)} placeholder={tm("videoPlaceholder")} disabled={isPending || !!videoFile} className="w-full h-[46px] rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted outline-none transition focus:border-primary-light disabled:opacity-50" />
                 {canUploadAttachments ? (
                   <>
-                    <div className="flex items-center gap-2 text-xs text-slate-500"><span className="h-px flex-1 bg-white/5" /><span>{tm("or")}</span><span className="h-px flex-1 bg-white/5" /></div>
-                    {videoFile ? <div className="flex items-center justify-between rounded-xl border border-emerald-400/20 bg-emerald-500/5 px-4 py-2.5"><span className="text-sm text-emerald-300 truncate">{videoFile.name}</span><button type="button" onClick={() => setVideoFile(null)} disabled={isPending} className="text-xs text-slate-400 hover:text-red-400">{tm("remove")}</button></div> :
-                     <input type="file" accept="video/mp4,video/webm,video/quicktime,video/x-matroska,video/x-msvideo,.mp4,.webm,.mov,.mkv,.avi" disabled={isPending || !!videoLink.trim()} onChange={(e) => handleVideoFileChange(e.target.files?.[0])} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-400 file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 file:cursor-pointer outline-none disabled:opacity-50" />}
-                    <p className="text-xs text-slate-500">{tm("videoFileHint", { limit: submissionVideoLimitMb })}</p>
+                    <div className="flex items-center gap-2 text-xs text-muted"><span className="h-px flex-1 bg-border/40" /><span>{tm("or")}</span><span className="h-px flex-1 bg-border/40" /></div>
+                    {videoFile ? <div className="flex items-center justify-between rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-2.5"><span className="text-sm text-emerald-400 truncate">{videoFile.name}</span><button type="button" onClick={() => setVideoFile(null)} disabled={isPending} className="text-xs text-muted hover:text-rose-400 cursor-pointer">{tm("remove")}</button></div> :
+                     <input type="file" accept="video/mp4,video/webm,video/quicktime,video/x-matroska,video/x-msvideo,.mp4,.webm,.mov,.mkv,.avi" disabled={isPending || !!videoLink.trim()} onChange={(e) => handleVideoFileChange(e.target.files?.[0])} className="w-full rounded-xl border border-border bg-card px-4 py-2 text-sm text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 file:cursor-pointer outline-none disabled:opacity-50" />}
+                    <p className="text-xs text-muted">{tm("videoFileHint", { limit: submissionVideoLimitMb })}</p>
                   </>
                 ) : null}
               </div>
             </div>
             <div>
-              <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-200"><Paperclip className="h-4 w-4 text-cyan-400" />{tm("attachments")}</label>
+              <label className="mb-1.5 flex items-center gap-1.5 text-xs sm:text-sm font-medium text-foreground/90 select-none"><Paperclip className="h-4 w-4 text-cyan-400" />{tm("attachments")}</label>
               <div className="space-y-2">
-                {existingAttachments.map((attachment) => <div key={attachment.id} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-2"><a href={attachment.fileUrl} target="_blank" rel="noopener noreferrer" className="flex min-w-0 items-center gap-2 text-sm text-slate-300 transition hover:text-cyan-300"><Download className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{attachment.fileName}</span></a>{canUploadAttachments && <button type="button" onClick={() => activeSubmissionId && deleteAttachment.mutate({ submissionId: activeSubmissionId, attachmentId: attachment.id })} disabled={isPending || !activeSubmissionId} className="ml-2 shrink-0 text-slate-400 transition hover:text-red-400 disabled:opacity-50" aria-label={tm("deleteAttachment", { name: attachment.fileName })}><Trash2 className="h-3.5 w-3.5" /></button>}</div>)}
-                {attachmentFiles.map((file, index) => <div key={`${file.name}-${file.lastModified}-${index}`} className="flex items-center justify-between rounded-xl border border-emerald-400/20 bg-emerald-500/5 px-4 py-2"><span className="truncate text-sm text-emerald-300">{file.name}</span><button type="button" onClick={() => setAttachmentFiles((current) => current.filter((_, itemIndex) => itemIndex !== index))} disabled={isPending} className="ml-2 shrink-0 text-xs text-slate-400 transition hover:text-red-400 disabled:opacity-50">{tm("remove")}</button></div>)}
+                {existingAttachments.map((attachment) => <div key={attachment.id} className="flex items-center justify-between rounded-xl border border-border bg-card/60 px-4 py-2"><a href={attachment.fileUrl} target="_blank" rel="noopener noreferrer" className="flex min-w-0 items-center gap-2 text-sm text-foreground/80 transition hover:text-cyan-400"><Download className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{attachment.fileName}</span></a>{canUploadAttachments && <button type="button" onClick={() => activeSubmissionId && deleteAttachment.mutate({ submissionId: activeSubmissionId, attachmentId: attachment.id })} disabled={isPending || !activeSubmissionId} className="ml-2 shrink-0 text-muted transition hover:text-rose-400 disabled:opacity-50 cursor-pointer" aria-label={tm("deleteAttachment", { name: attachment.fileName })}><Trash2 className="h-3.5 w-3.5" /></button>}</div>)}
+                {attachmentFiles.map((file, index) => <div key={`${file.name}-${file.lastModified}-${index}`} className="flex items-center justify-between rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-2"><span className="truncate text-sm text-emerald-400">{file.name}</span><button type="button" onClick={() => setAttachmentFiles((current) => current.filter((_, itemIndex) => itemIndex !== index))} disabled={isPending} className="ml-2 shrink-0 text-xs text-muted transition hover:text-rose-400 disabled:opacity-50 cursor-pointer">{tm("remove")}</button></div>)}
                 {canUploadAttachments ? (
                   <>
-                    {existingAttachments.length + attachmentFiles.length < MAX_SUBMISSION_ATTACHMENTS ? <input type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,.pdf,.doc,.docx,.zip,.rar,.7z" disabled={isPending} onChange={(e) => { handleAttachmentFilesChange(Array.from(e.target.files ?? [])); e.target.value = ""; }} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-400 file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 outline-none disabled:opacity-50" /> : <p className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-2.5 text-xs text-amber-300">{tm("attachmentLimitReached", { max: MAX_SUBMISSION_ATTACHMENTS })}</p>}
-                    <p className="text-xs text-slate-500">{tm("attachmentsHint", { max: MAX_SUBMISSION_ATTACHMENTS, limit: submissionAttachmentLimitMb })}</p>
+                    {existingAttachments.length + attachmentFiles.length < MAX_SUBMISSION_ATTACHMENTS ? <input type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,.pdf,.doc,.docx,.zip,.rar,.7z" disabled={isPending} onChange={(e) => { handleAttachmentFilesChange(Array.from(e.target.files ?? [])); e.target.value = ""; }} className="w-full rounded-xl border border-border bg-card px-4 py-2 text-sm text-muted file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-cyan-500/10 file:px-3 file:py-1 file:text-xs file:text-cyan-300 outline-none disabled:opacity-50" /> : <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-xs text-amber-300">{tm("attachmentLimitReached", { max: MAX_SUBMISSION_ATTACHMENTS })}</p>}
+                    <p className="text-xs text-muted">{tm("attachmentsHint", { max: MAX_SUBMISSION_ATTACHMENTS, limit: submissionAttachmentLimitMb })}</p>
                   </>
                 ) : (
-                  <p className="rounded-xl border border-white/5 bg-white/5 px-4 py-2.5 text-xs text-slate-400 italic">{tm("uploadNotAllowed")}</p>
+                  <p className="rounded-xl border border-border bg-card px-4 py-2.5 text-xs text-muted italic">{tm("uploadNotAllowed")}</p>
                 )}
               </div>
             </div>
-            <div><label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-slate-200"><FileText className="h-4 w-4 text-cyan-400" />{tm("note")}</label><textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder={tm("notePlaceholder")} rows={3} disabled={isPending} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-cyan-400/50 disabled:opacity-50 resize-none" /></div>
+            <div><label className="mb-1.5 flex items-center gap-1.5 text-xs sm:text-sm font-medium text-foreground/90 select-none"><FileText className="h-4 w-4 text-cyan-400" />{tm("note")}</label><textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder={tm("notePlaceholder")} rows={3} disabled={isPending} className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted outline-none transition focus:border-primary-light disabled:opacity-50 resize-none" /></div>
             <div className="flex justify-end gap-3 pt-2">
-              <button type="button" onClick={onClose} disabled={isPending} className="rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm text-slate-300 transition hover:text-white disabled:opacity-50">{tm("cancel")}</button>
-              {!readOnly && <button type="submit" disabled={isPending} className="flex items-center gap-2 rounded-xl bg-cyan-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-cyan-500 disabled:opacity-50">{isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : isEdit ? <Pencil className="h-4 w-4" /> : <Send className="h-4 w-4" />}{isEdit ? tm("update") : tm("submit")}</button>}
+              <button type="button" onClick={onClose} disabled={isPending} className="h-[42px] sm:h-[46px] rounded-xl border border-border bg-card px-5 text-sm font-medium text-muted transition hover:text-foreground hover:bg-card-hover active:scale-95 disabled:opacity-50 cursor-pointer">{tm("cancel")}</button>
+              {!readOnly && <button type="submit" disabled={isPending} className="h-[42px] sm:h-[46px] flex items-center gap-2 rounded-xl bg-cyan-600 px-5 text-sm font-medium text-white transition hover:bg-cyan-500 active:scale-95 disabled:opacity-50 cursor-pointer">{isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : isEdit ? <Pencil className="h-4 w-4" /> : <Send className="h-4 w-4" />}{isEdit ? tm("update") : tm("submit")}</button>}
             </div>
             </>
             )}
