@@ -7,14 +7,21 @@ import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
 import { useMeetings } from "@/hooks/meeting/useMeetings";
 import { useMyApprovedAbsences } from "@/hooks/meeting/useMyApprovedAbsences";
+import { useAuth } from "@/hooks/auth/useAuth";
+import { isUserParticipating } from "@/lib/meeting";
 
 export default function MeetingStats() {
   const t = useTranslations("intern.meetings");
+  const { state } = useAuth();
   const { data, isPending, isError } = useMeetings({ limit: 100, sortBy: "startTime", order: "asc" });
   const { data: excusedIds } = useMyApprovedAbsences();
 
   const counts = useMemo(() => {
-    const meetings = data?.data ?? [];
+    const rawMeetings = data?.data ?? [];
+    const userId = state.user?.id;
+    const meetings = userId
+      ? rawMeetings.filter((m) => isUserParticipating(m, userId))
+      : rawMeetings;
     const excused = excusedIds ?? new Set<string>();
     const active = meetings.filter((m) => !excused.has(m.id));
     return {
@@ -23,7 +30,7 @@ export default function MeetingStats() {
       completed: active.filter((m) => m.status === "COMPLETED").length,
       cancelled: active.filter((m) => m.status === "CANCELLED").length,
     };
-  }, [data, excusedIds]);
+  }, [data, excusedIds, state.user?.id]);
 
   const cards = [
     {

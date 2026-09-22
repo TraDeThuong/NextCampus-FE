@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/auth/useAuth";
 import { useMeetings } from "@/hooks/meeting/useMeetings";
 import { internService } from "@/services/intern.service";
 import type { Meeting } from "@/types/meeting";
+import { isUserParticipating } from "@/lib/meeting";
 
 const STATUS: Record<string, { dot: string; badge: string }> = {
   SCHEDULED: { dot: "bg-sky-400", badge: "bg-sky-500/15 text-sky-300 border border-sky-500/30" },
@@ -70,7 +71,11 @@ export default function WeekMeetingsCard({
     staleTime: 1000 * 60 * 5,
   });
 
-  const meetings = useMemo(() => meetingsData?.data ?? [], [meetingsData?.data]);
+  const meetings = useMemo(() => {
+    const list = meetingsData?.data ?? [];
+    if (!currentUser?.id) return list;
+    return list.filter((m) => isUserParticipating(m, currentUser.id));
+  }, [meetingsData?.data, currentUser?.id]);
   const internUserIds = useMemo(
     () => new Set((internsData?.data ?? []).map((i) => i.userId)),
     [internsData],
@@ -93,6 +98,14 @@ export default function WeekMeetingsCard({
       minute: "2-digit",
     });
   }
+
+  const STATUS_LABEL: Record<string, string> = {
+    SCHEDULED: t("scheduled"),
+    ONGOING: t("ongoing"),
+    COMPLETED: t("completed"),
+    CANCELLED: t("cancelled"),
+    DRAFT: t("draft"),
+  };
 
   function getParticipantLabel(m: Meeting) {
     let interns = 0;
@@ -123,7 +136,7 @@ export default function WeekMeetingsCard({
     if (accepted > 0) parts.push(t("accepted", { n: accepted }));
     if (pending > 0) parts.push(t("pending", { n: pending }));
     if (declined > 0) parts.push(t("declined", { n: declined }));
-    return parts.join(" · ");
+    return parts.length > 0 ? parts.join(" • ") : null;
   }
 
   return (
@@ -150,7 +163,7 @@ export default function WeekMeetingsCard({
         ) : meetings.length === 0 ? (
           <div className="flex flex-col items-center py-10 text-center">
             <Calendar className="mb-2 h-7 w-7 text-muted/40" />
-            <p className="text-sm text-muted">{t("noMeetingsThisWeek")}</p>
+            <p className="text-sm text-muted">{t("noMeetingsWeek")}</p>
           </div>
         ) : (
           <div className="space-y-4 max-h-[380px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
@@ -204,7 +217,7 @@ export default function WeekMeetingsCard({
                                     <span
                                       className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${st.badge}`}
                                     >
-                                      {m.status}
+                                      {STATUS_LABEL[m.status] || m.status}
                                     </span>
                                   </div>
                                 </div>

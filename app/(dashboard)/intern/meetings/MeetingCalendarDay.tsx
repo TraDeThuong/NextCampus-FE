@@ -41,6 +41,14 @@ export default function MeetingCalendarDay({
 }: Props) {
   const t = useTranslations("intern.meetings");
 
+  const STATUS_LABEL: Record<string, string> = {
+    SCHEDULED: t("scheduled"),
+    ONGOING: t("ongoing"),
+    COMPLETED: t("completed"),
+    CANCELLED: t("cancelled"),
+    DRAFT: t("draft"),
+  };
+
   if (!date) {
     return <div className="min-h-[85px] sm:min-h-[105px] rounded-xl bg-black/[0.02] dark:bg-white/[0.01]" />;
   }
@@ -90,7 +98,7 @@ export default function MeetingCalendarDay({
                   ${!isHosted ? "border-dashed opacity-90" : ""}
                   ${isExcused ? "opacity-40 line-through" : ""}
                 `}
-                title={`${meeting.title} (${meeting.status})`}
+                title={`${meeting.title} (${STATUS_LABEL[meeting.status] || meeting.status})`}
               >
                 {meeting.title}
               </button>

@@ -10,6 +10,7 @@ import { useMeetings } from "@/hooks/meeting/useMeetings";
 import MeetingCalendarDay from "./MeetingCalendarDay";
 import CreateMeetingModal from "./CreateMeetingModal";
 import type { Meeting } from "@/types/meeting";
+import { isUserParticipating } from "@/lib/meeting";
 
 function getDaysInMonth(year: number, month: number): number {
   return new Date(year, month + 1, 0).getDate();
@@ -31,9 +32,11 @@ function isSameDay(d1: Date, d2: Date): boolean {
 export default function MeetingCalendar({
   onMeetingClick,
   currentUserId,
+  scope = "my",
 }: {
   onMeetingClick: (id: string) => void;
   currentUserId?: string;
+  scope?: "my" | "all";
 }) {
   const t = useTranslations();
   const locale = useLocale();
@@ -63,7 +66,12 @@ export default function MeetingCalendar({
     order: "asc",
   });
 
-  const meetings = useMemo(() => data?.data ?? [], [data?.data]);
+  const meetings = useMemo(() => {
+    const list = data?.data ?? [];
+    if (scope === "all") return list;
+    if (!currentUserId) return list;
+    return list.filter((m) => isUserParticipating(m, currentUserId));
+  }, [data?.data, scope, currentUserId]);
 
   const meetingsByDay = useMemo(() => {
     const map = new Map<string, Meeting[]>();

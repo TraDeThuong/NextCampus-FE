@@ -1,13 +1,21 @@
 "use client";
 
-import { Calendar, Plus } from "lucide-react";
+import { Calendar, Plus, User, Layers } from "lucide-react";
 import { useTranslations } from "next-intl";
 import MetalCard from "@/components/ui/MetalCard";
 import Modal from "@/components/ui/Modal";
 import CreateMeetingModal from "./CreateMeetingModal";
 import { useRBAC } from "@/hooks/rbac/useRBAC";
 
-export default function MeetingHeader() {
+interface MeetingHeaderProps {
+  scope?: "my" | "all";
+  onScopeChange?: (scope: "my" | "all") => void;
+}
+
+export default function MeetingHeader({
+  scope = "my",
+  onScopeChange,
+}: MeetingHeaderProps) {
   const t = useTranslations();
   const { can } = useRBAC();
   const canCreate = can("MEETING_CREATE");
@@ -29,8 +37,37 @@ export default function MeetingHeader() {
               </p>
             </div>
 
-            {canCreate && (
-              <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              {onScopeChange && (
+                <div className="flex items-center rounded-xl border border-border/70 dark:border-white/10 bg-card/60 dark:bg-white/[0.03] p-1 shadow-sm">
+                  <button
+                    type="button"
+                    onClick={() => onScopeChange("my")}
+                    className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                      scope === "my"
+                        ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shadow-sm"
+                        : "text-muted hover:text-foreground"
+                    }`}
+                  >
+                    <User className="h-3.5 w-3.5 shrink-0" />
+                    <span>{t("admin.meetings.myMeetings")}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onScopeChange("all")}
+                    className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                      scope === "all"
+                        ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shadow-sm"
+                        : "text-muted hover:text-foreground"
+                    }`}
+                  >
+                    <Layers className="h-3.5 w-3.5 shrink-0" />
+                    <span>{t("admin.meetings.allMeetings")}</span>
+                  </button>
+                </div>
+              )}
+
+              {canCreate && (
                 <Modal.Open opens="create-meeting">
                   <button
                     type="button"
@@ -40,8 +77,8 @@ export default function MeetingHeader() {
                     <span>{t("admin.meetings.scheduleMeeting")}</span>
                   </button>
                 </Modal.Open>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </MetalCard>

@@ -139,6 +139,26 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
     setLeaveReason("");
   }
 
+  const STATUS_LABEL: Record<string, string> = {
+    SCHEDULED: t("scheduled"),
+    ONGOING: t("ongoing"),
+    COMPLETED: t("completed"),
+    CANCELLED: t("cancelled"),
+    DRAFT: t("draft"),
+  };
+
+  const ROLE_LABELS: Record<string, string> = {
+    HOST: t("roleHost"),
+    ORGANIZER: t("roleOrganizer"),
+    PARTICIPANT: t("roleParticipant"),
+  };
+
+  const ABSENCE_STATUS_LABEL: Record<string, string> = {
+    PENDING: t("statusPending"),
+    APPROVED: t("statusApproved"),
+    REJECTED: t("statusRejected"),
+  };
+
   return (
     <div className="space-y-6 px-0.5 sm:px-1 py-1">
       {/* Header */}
@@ -158,7 +178,7 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
             STATUS_BADGE[meeting.status] || STATUS_BADGE.DRAFT
           }`}
         >
-          {meeting.status}
+          {STATUS_LABEL[meeting.status] || meeting.status}
         </span>
       </div>
 
@@ -318,7 +338,7 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
                     </span>
                   </div>
                   <span className="shrink-0 text-[10px] uppercase font-semibold text-muted bg-border/40 dark:bg-white/5 px-2 py-0.5 rounded-full">
-                    {p.participantRole}
+                    {ROLE_LABELS[p.participantRole] || p.participantRole}
                   </span>
                 </div>
               );
@@ -375,7 +395,7 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
                       </div>
                     ) : (
                       <span className="shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                        {a.status}
+                        {ABSENCE_STATUS_LABEL[a.status] || a.status}
                       </span>
                     )
                   ) : (
@@ -386,7 +406,7 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
                           : "bg-rose-500/15 text-rose-300 border border-rose-500/30"
                       }`}
                     >
-                      {a.status}
+                      {ABSENCE_STATUS_LABEL[a.status] || a.status}
                     </span>
                   )}
                 </div>

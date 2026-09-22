@@ -142,7 +142,11 @@ export default function LeaveRequestsCard() {
                           : "bg-rose-500/15 text-rose-300 border border-rose-500/30"
                       }`}
                     >
-                      {a.status}
+                      {a.status === "APPROVED"
+                        ? t("admin.meetings.statusApproved")
+                        : a.status === "REJECTED"
+                        ? t("admin.meetings.statusRejected")
+                        : t("admin.meetings.statusPending")}
                     </span>
                   </div>
                 ))}

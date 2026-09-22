@@ -148,6 +148,26 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
     setLeaveReason("");
   }
 
+  const STATUS_LABEL: Record<string, string> = {
+    SCHEDULED: t("admin.meetings.scheduled"),
+    ONGOING: t("admin.meetings.ongoing"),
+    COMPLETED: t("admin.meetings.completed"),
+    CANCELLED: t("admin.meetings.cancelled"),
+    DRAFT: t("admin.meetings.draft"),
+  };
+
+  const ROLE_LABELS: Record<string, string> = {
+    HOST: t("admin.meetings.roleHost"),
+    ORGANIZER: t("admin.meetings.roleOrganizer"),
+    PARTICIPANT: t("admin.meetings.roleParticipant"),
+  };
+
+  const ABSENCE_STATUS_LABEL: Record<string, string> = {
+    PENDING: t("admin.meetings.statusPending"),
+    APPROVED: t("admin.meetings.statusApproved"),
+    REJECTED: t("admin.meetings.statusRejected"),
+  };
+
   return (
     <div className="space-y-6 px-0.5 sm:px-1 py-1">
       {/* Title + Status */}
@@ -159,7 +179,7 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
               STATUS_BADGE[meeting.status] || STATUS_BADGE.DRAFT
             }`}
           >
-            {meeting.status}
+            {STATUS_LABEL[meeting.status] || meeting.status}
           </span>
         </div>
         {meeting.description && (
@@ -203,7 +223,7 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
           <span>
             {meeting.visibility === "TEAM"
               ? t("admin.meetings.allMembers")
-              : `${leaderCount} leader${leaderCount !== 1 ? "s" : ""}`}
+              : t("admin.meetings.leaders", { n: leaderCount, plural: leaderCount !== 1 ? "s" : "" })}
           </span>
         </div>
       </div>
@@ -335,7 +355,7 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
                     {p.user.fullName || p.user.email}
                   </span>
                   <span className="shrink-0 text-xs text-muted">
-                    {p.participantRole}
+                    {ROLE_LABELS[p.participantRole] || p.participantRole}
                   </span>
                 </div>
               );
@@ -392,7 +412,7 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
                       </div>
                     ) : (
                       <span className="shrink-0 rounded-full px-2 py-0.5 text-xs font-medium bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                        {a.status}
+                        {ABSENCE_STATUS_LABEL[a.status] || a.status}
                       </span>
                     )
                   ) : (
@@ -403,7 +423,7 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
                           : "bg-rose-500/15 text-rose-300 border border-rose-500/30"
                       }`}
                     >
-                      {a.status}
+                      {ABSENCE_STATUS_LABEL[a.status] || a.status}
                     </span>
                   )}
                 </div>

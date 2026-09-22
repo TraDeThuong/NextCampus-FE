@@ -345,7 +345,7 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
               {currentUser?.fullName || currentUser?.email}
             </span>
             <span className="rounded bg-cyan-500/15 text-cyan-300 px-1.5 py-0.5 text-[10px] font-semibold border border-cyan-500/20">
-              Host
+              {t("admin.meetings.roleHost")}
             </span>
           </div>
         </div>

@@ -6,6 +6,7 @@ import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
 import { useMeetings } from "@/hooks/meeting/useMeetings";
 import { useAuth } from "@/hooks/auth/useAuth";
+import { isUserParticipating } from "@/lib/meeting";
 
 const STATUS: Record<string, { dot: string; badge: string }> = {
   SCHEDULED: { dot: "bg-sky-400", badge: "bg-sky-500/15 text-sky-300 border border-sky-500/30" },
@@ -14,8 +15,10 @@ const STATUS: Record<string, { dot: string; badge: string }> = {
 
 export default function UpcomingMeetingsCard({
   onMeetingClick,
+  scope = "my",
 }: {
   onMeetingClick?: (id: string) => void;
+  scope?: "my" | "all";
 }) {
   const t = useTranslations();
   const locale = useLocale();
@@ -38,9 +41,11 @@ export default function UpcomingMeetingsCard({
     order: "asc",
     limit: 10,
   });
-  const meetings = (data?.data ?? []).filter(
-    (m) => m.status === "SCHEDULED" || m.status === "ONGOING",
-  );
+  const meetings = (data?.data ?? []).filter((m) => {
+    if (m.status !== "SCHEDULED" && m.status !== "ONGOING") return false;
+    if (scope === "all") return true;
+    return isUserParticipating(m, state.user?.id);
+  });
 
   function formatTime(iso: string) {
     return new Date(iso).toLocaleTimeString(locale === "vi" ? "vi-VN" : "en-US", {
@@ -56,6 +61,14 @@ export default function UpcomingMeetingsCard({
       day: "numeric",
     });
   }
+
+  const STATUS_LABEL: Record<string, string> = {
+    SCHEDULED: t("admin.meetings.scheduled"),
+    ONGOING: t("admin.meetings.ongoing"),
+    COMPLETED: t("admin.meetings.completed"),
+    CANCELLED: t("admin.meetings.cancelled"),
+    DRAFT: t("admin.meetings.draft"),
+  };
 
   return (
     <MetalCard>
@@ -133,7 +146,7 @@ export default function UpcomingMeetingsCard({
                           <span
                             className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${status.badge}`}
                           >
-                            {m.status}
+                            {STATUS_LABEL[m.status] || m.status}
                           </span>
                         </div>
                       </div>

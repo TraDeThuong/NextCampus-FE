@@ -14,6 +14,7 @@ import { useAuth } from "@/hooks/auth/useAuth";
 
 export default function MeetingsClient() {
   const { state } = useAuth();
+  const [scope, setScope] = useState<"my" | "all">("my");
   const [selectedMeetingId, setSelectedMeetingId] = useState<string | null>(null);
   const openRef = useRef<HTMLButtonElement>(null);
 
@@ -27,10 +28,10 @@ export default function MeetingsClient() {
     <Modal>
       <div className="space-y-6">
         {/* Header */}
-        <MeetingHeader />
+        <MeetingHeader scope={scope} onScopeChange={setScope} />
 
         {/* Full-width Stat Cards (2 cols mobile, 4 cols desktop) */}
-        <MeetingStats />
+        <MeetingStats scope={scope} currentUserId={state.user?.id} />
 
         {/* Main Dashboard: Calendar (2 cols) + Borderless Right Sidebar (1 col) */}
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
@@ -39,13 +40,20 @@ export default function MeetingsClient() {
             <MeetingCalendar
               onMeetingClick={handleMeetingClick}
               currentUserId={state.user?.id}
+              scope={scope}
             />
           </div>
 
           {/* Borderless Right Panel (Rule 46) */}
           <div className="space-y-6 xl:col-span-1">
-            <UpcomingMeetingsCard onMeetingClick={handleMeetingClick} />
-            <WeekMeetingsCard onMeetingClick={handleMeetingClick} />
+            <UpcomingMeetingsCard
+              onMeetingClick={handleMeetingClick}
+              scope={scope}
+            />
+            <WeekMeetingsCard
+              onMeetingClick={handleMeetingClick}
+              scope={scope}
+            />
             <LeaveRequestsCard />
             <RecentNotifications />
           </div>

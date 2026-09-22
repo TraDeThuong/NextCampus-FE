@@ -120,6 +120,20 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
     );
   }
 
+  const STATUS_LABEL: Record<string, string> = {
+    SCHEDULED: t("scheduled"),
+    ONGOING: t("ongoing"),
+    COMPLETED: t("completed"),
+    CANCELLED: t("cancelled"),
+    DRAFT: t("draft"),
+  };
+
+  const ROLE_LABELS: Record<string, string> = {
+    HOST: t("roleHost"),
+    ORGANIZER: t("roleOrganizer"),
+    PARTICIPANT: t("roleParticipant"),
+  };
+
   return (
     <div className="flex flex-col">
       {/* Sticky Header (Rule 44 Compliant, clears modal close button with pr-9 sm:pr-12) */}
@@ -144,7 +158,7 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
               STATUS_BADGE[meeting.status] || STATUS_BADGE.DRAFT
             }`}
           >
-            {meeting.status}
+            {STATUS_LABEL[meeting.status] || meeting.status}
           </span>
         </div>
       </div>
@@ -358,7 +372,7 @@ export default function MeetingDetailModal({ meetingId, onCloseModal }: Props) {
                       </span>
                     </div>
                     <span className="shrink-0 text-[10px] uppercase font-semibold text-muted bg-border/40 dark:bg-white/5 px-2 py-0.5 rounded-full">
-                      {p.participantRole}
+                      {ROLE_LABELS[p.participantRole] || p.participantRole}
                     </span>
                   </div>
                 );

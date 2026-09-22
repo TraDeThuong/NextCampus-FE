@@ -11,6 +11,7 @@ import { useMyApprovedAbsences } from "@/hooks/meeting/useMyApprovedAbsences";
 import MeetingCalendarDay from "./MeetingCalendarDay";
 import CreateMeetingModal from "./CreateMeetingModal";
 import type { Meeting } from "@/types/meeting";
+import { isUserParticipating } from "@/lib/meeting";
 
 function getDaysInMonth(year: number, month: number): number {
   return new Date(year, month + 1, 0).getDate();
@@ -65,7 +66,11 @@ export default function MeetingCalendar({
     order: "asc",
   });
 
-  const meetings = useMemo(() => data?.data ?? [], [data?.data]);
+  const meetings = useMemo(() => {
+    const list = data?.data ?? [];
+    if (!currentUserId) return list;
+    return list.filter((m) => isUserParticipating(m, currentUserId));
+  }, [data?.data, currentUserId]);
 
   const meetingsByDay = useMemo(() => {
     const map = new Map<string, Meeting[]>();

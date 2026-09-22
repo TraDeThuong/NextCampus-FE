@@ -5,8 +5,10 @@ import { useTranslations, useLocale } from "next-intl";
 import { Calendar, MapPin } from "lucide-react";
 import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
+import { useAuth } from "@/hooks/auth/useAuth";
 import { useMeetings } from "@/hooks/meeting/useMeetings";
 import type { Meeting } from "@/types/meeting";
+import { isUserParticipating } from "@/lib/meeting";
 
 const STATUS: Record<string, { dot: string; badge: string }> = {
   SCHEDULED: { dot: "bg-sky-400", badge: "bg-sky-500/15 text-sky-300 border border-sky-500/30" },
@@ -31,12 +33,15 @@ function getWeekRange() {
 
 export default function WeekMeetingsCard({
   onMeetingClick,
+  scope = "my",
 }: {
   onMeetingClick?: (id: string) => void;
+  scope?: "my" | "all";
 }) {
   const t = useTranslations();
   const locale = useLocale();
   const isVi = locale === "vi";
+  const { state } = useAuth();
 
   const DAY_NAMES = [
     isVi ? "Thứ 2" : "Mon",
@@ -58,7 +63,13 @@ export default function WeekMeetingsCard({
     limit: 50,
   });
 
-  const meetings = useMemo(() => data?.data ?? [], [data?.data]);
+  const meetings = useMemo(() => {
+    const list = data?.data ?? [];
+    if (scope === "all") return list;
+    const userId = state.user?.id;
+    if (!userId) return list;
+    return list.filter((m) => isUserParticipating(m, userId));
+  }, [data?.data, scope, state.user?.id]);
 
   const grouped = useMemo(() => {
     const map = new Map<number, Meeting[]>();
@@ -78,13 +89,21 @@ export default function WeekMeetingsCard({
     });
   }
 
+  const STATUS_LABEL: Record<string, string> = {
+    SCHEDULED: t("admin.meetings.scheduled"),
+    ONGOING: t("admin.meetings.ongoing"),
+    COMPLETED: t("admin.meetings.completed"),
+    CANCELLED: t("admin.meetings.cancelled"),
+    DRAFT: t("admin.meetings.draft"),
+  };
+
   function getParticipantLabel(m: Meeting) {
     if (m.visibility === "TEAM") return t("admin.meetings.allMembers");
     const count =
       m.participants?.filter((p) => p.participantRole === "PARTICIPANT").length ||
       m._count?.participants ||
       0;
-    return `${count} leader${count > 1 ? "s" : ""}`;
+    return t("admin.meetings.leaders", { n: count, plural: count > 1 ? "s" : "" });
   }
 
   return (
@@ -152,7 +171,7 @@ export default function WeekMeetingsCard({
                                   <span
                                     className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${st.badge}`}
                                   >
-                                    {m.status}
+                                    {STATUS_LABEL[m.status] || m.status}
                                   </span>
                                 </div>
                                 <div className="mt-0.5 flex items-center gap-2 text-[11px] text-muted">

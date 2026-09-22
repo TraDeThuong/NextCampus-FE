@@ -8,6 +8,7 @@ import Spinner from "@/components/ui/Spinner";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { useMeetings } from "@/hooks/meeting/useMeetings";
 import type { Meeting } from "@/types/meeting";
+import { isUserParticipating } from "@/lib/meeting";
 
 const STATUS: Record<string, { dot: string; badge: string }> = {
   SCHEDULED: { dot: "bg-sky-400", badge: "bg-sky-500/15 text-sky-300 border border-sky-500/30" },
@@ -61,7 +62,11 @@ export default function WeekMeetingsCard({
     limit: 50,
   });
 
-  const meetings = useMemo(() => meetingsData?.data ?? [], [meetingsData?.data]);
+  const meetings = useMemo(() => {
+    const list = meetingsData?.data ?? [];
+    if (!currentUser?.id) return list;
+    return list.filter((m) => isUserParticipating(m, currentUser.id));
+  }, [meetingsData?.data, currentUser?.id]);
 
   const grouped = useMemo(() => {
     const map = new Map<number, Meeting[]>();
@@ -80,6 +85,14 @@ export default function WeekMeetingsCard({
       minute: "2-digit",
     });
   }
+
+  const STATUS_LABEL: Record<string, string> = {
+    SCHEDULED: t("scheduled"),
+    ONGOING: t("ongoing"),
+    COMPLETED: t("completed"),
+    CANCELLED: t("cancelled"),
+    DRAFT: t("draft"),
+  };
 
   return (
     <MetalCard>
@@ -118,19 +131,18 @@ export default function WeekMeetingsCard({
                       {DAY_NAMES[dayIndex]}
                     </span>
                     <span className="text-xs text-muted">
-                      {date.getDate()}/{date.getMonth() + 1}
+                      {date.getDate()} {locale === "vi" ? `Tháng ${date.getMonth() + 1}` : date.toLocaleString("en-US", { month: "short" })}
                     </span>
-                    <div className="h-px flex-1 bg-white/5" />
                   </div>
 
                   {dayMeetings.length === 0 ? (
-                    <p className="pl-3 text-xs text-muted/60 italic">{t("noMeetings")}</p>
+                    <p className="pl-2 text-xs text-muted/60">{t("noMeetings")}</p>
                   ) : (
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                       {dayMeetings.map((m) => {
                         const status = STATUS[m.status] || STATUS.DRAFT;
                         const myParticipant = m.participants?.find(
-                          (p) => p.userId === currentUser?.id,
+                          (p) => p.userId === state.user?.id,
                         );
                         const rsvpBadge = myParticipant
                           ? myParticipant.invitationStatus === "ACCEPTED"
@@ -154,13 +166,13 @@ export default function WeekMeetingsCard({
                             key={m.id}
                             type="button"
                             onClick={() => onMeetingClick?.(m.id)}
-                            className="group w-full rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] p-3 text-left transition-all hover:border-cyan-500/30 shadow-sm cursor-pointer"
+                            className="group w-full rounded-xl border border-border/60 dark:border-white/5 bg-card/40 dark:bg-white/[0.03] px-3.5 py-2.5 text-left transition-all hover:border-cyan-400/40 hover:bg-card/70 active:scale-[0.99] shadow-sm"
                           >
-                            <div className="flex items-center gap-2.5">
+                            <div className="flex items-center gap-3">
                               <span className={`h-2 w-2 rounded-full shrink-0 ${status.dot}`} />
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-center justify-between gap-2">
-                                  <p className="truncate text-xs sm:text-sm font-semibold text-foreground group-hover:text-cyan-300 transition-colors">
+                                  <p className="truncate text-sm font-medium text-foreground group-hover:text-cyan-300 transition-colors">
                                     {m.title}
                                   </p>
                                   <div className="flex items-center gap-1.5 shrink-0">
@@ -174,7 +186,7 @@ export default function WeekMeetingsCard({
                                     <span
                                       className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${status.badge}`}
                                     >
-                                      {m.status === "SCHEDULED" ? t("scheduled") : t("completed")}
+                                      {STATUS_LABEL[m.status] || m.status}
                                     </span>
                                   </div>
                                 </div>
