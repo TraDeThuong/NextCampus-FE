@@ -52,8 +52,9 @@ export function useNotificationSSE() {
     };
 
     const handleNotificationData = (eventType: string, payload: unknown) => {
-      // Luôn làm mới cache React Query cho danh sách và unread-count
+      // Luôn làm mới cache React Query cho danh sách, unread-count và action-counts
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["action-counts"] });
 
       if (!payload || typeof payload !== "object") return;
       const notif = payload as NotificationPayload;

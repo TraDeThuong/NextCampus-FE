@@ -69,6 +69,8 @@
         "weekRange": "Tuần đánh giá phải nằm trong khoảng từ 1 đến {max}.",
         "weekendOnly": "Chỉ có thể đánh giá tuần hiện tại từ Thứ Bảy (sau 11:00 sáng) đến hết Chủ Nhật.",
         "weekAlreadyExists": "Tuần {week} đã được đánh giá cho thực tập sinh này.",
+        "assignedMidWeek": "Mới được giao giữa tuần (chưa tính đánh giá tuần này)",
+        "assignedMidWeekNotice": "Thực tập sinh mới được giao giữa tuần, không áp dụng đánh giá cho tuần này.",
         "aiSuggestionReceived": "Đã nhận gợi ý từ AI!",
         "criteriaCount": "({count} tiêu chí)",
         "draftPreviewNotice": "Điểm 12 tiêu chí và nhận xét từ AI đang ở dạng Xem trước (Draft). Bạn có thể tự do điều chỉnh trước khi lưu chính thức.",

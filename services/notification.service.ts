@@ -4,6 +4,7 @@ import type {
   NotificationSuccessResponse,
   NotificationQueryParams,
   CreateNotificationPayload,
+  ActionCountsResponse,
 } from "@/types/notification";
 import type { MessageSuccessResponse } from "@/types/auth";
 
@@ -48,6 +49,14 @@ export const notificationService = {
       "/notifications/unread-count",
     );
     return response.data;
+  },
+
+  getActionCounts: async (): Promise<ActionCountsResponse> => {
+    const response = await api.get<{
+      success: boolean;
+      data: ActionCountsResponse;
+    }>("/notifications/action-counts");
+    return response.data.data;
   },
 
   markAsRead: async (id: string): Promise<NotificationSuccessResponse> => {

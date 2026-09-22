@@ -69,6 +69,8 @@
         "weekRange": "Week must be between 1 and {max}.",
         "weekendOnly": "Current week evaluation is only available from Saturday (after 11:00 AM) to Sunday.",
         "weekAlreadyExists": "Week {week} has already been evaluated for this intern.",
+        "assignedMidWeek": "Assigned mid-week (excluded from this week's evaluation)",
+        "assignedMidWeekNotice": "Intern was assigned mid-week, not applicable for this week's evaluation.",
         "aiSuggestionReceived": "AI suggestion received!",
         "criteriaCount": "({count} criteria)",
         "draftPreviewNotice": "12-criteria ratings and feedback from AI are in Draft Preview. You can freely adjust them before saving.",

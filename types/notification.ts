@@ -58,3 +58,19 @@ export interface CreateNotificationPayload {
   content: string;
   type: string;
 }
+
+// ─── Action-Required Badge Counts ─────────────────────────────────────────
+
+export interface ActionCountsResponse {
+  // Intern
+  pendingTasks?: number;
+  missedReports?: number;
+  unviewedEvaluations?: number;
+  pendingMeetingRsvp?: number;
+  // Leader
+  pendingSubmissions?: number;
+  unreviewedReports?: number;
+  pendingEvaluations?: number;
+  // Admin
+  pendingApplications?: number;
+}

@@ -14,6 +14,8 @@ import { LuAlarmClock } from "react-icons/lu";
 import { useTranslations } from "next-intl";
 import { useInternSidebarPrefetch } from "@/hooks/useInternSidebarPrefetch";
 import { useRBAC } from "@/hooks/rbac/useRBAC";
+import { useActionCounts } from "@/hooks/notification/useActionCounts";
+import { SidebarBadge } from "@/components/ui/SidebarBadge";
 
 const baseClass =
   "flex items-center justify-center w-14 h-14 rounded-2xl border transition-all duration-300 shadow-shadow-soft cursor-pointer";
@@ -32,16 +34,17 @@ export default function InternSidebar() {
   const t = useTranslations();
   const { getPrefetchHandler } = useInternSidebarPrefetch();
   const { canAny } = useRBAC();
+  const counts = useActionCounts();
 
   const menus = useMemo(
     () => {
       const items = [
-        { name: t("intern.nav.dashboard"),        href: "/intern/dashboard",         icon: LayoutDashboard, permissions: ["STATS_INTERN_READ", "STATS_LEADER_READ", "STATS_ADMIN_READ"] },
-        { name: t("intern.nav.task"),             href: "/intern/task",              icon: CheckSquare,    permissions: ["TASK_READ", "TASK_ASSIGNMENT_READ"] },
-        { name: t("intern.nav.meetings"),         href: "/intern/meetings",          icon: LuAlarmClock,   permissions: ["MEETING_READ"] },
-        { name: t("intern.nav.dailyReport"),      href: "/intern/daily-report",      icon: FileClock,      permissions: ["DAILY_REPORT_READ"] },
-        { name: t("intern.nav.weeklyEvaluation"), href: "/intern/weekly-evaluation", icon: ClipboardCheck,  permissions: ["WEEKLY_EVALUATION_READ"] },
-        { name: t("intern.nav.profile"),          href: "/intern/profile",           icon: UserRoundPen },
+        { name: t("intern.nav.dashboard"),        href: "/intern/dashboard",         icon: LayoutDashboard, permissions: ["STATS_INTERN_READ", "STATS_LEADER_READ", "STATS_ADMIN_READ"], badge: undefined },
+        { name: t("intern.nav.task"),             href: "/intern/task",              icon: CheckSquare,    permissions: ["TASK_READ", "TASK_ASSIGNMENT_READ"],                            badge: counts.pendingTasks },
+        { name: t("intern.nav.meetings"),         href: "/intern/meetings",          icon: LuAlarmClock,   permissions: ["MEETING_READ"],                                                 badge: counts.pendingMeetingRsvp },
+        { name: t("intern.nav.dailyReport"),      href: "/intern/daily-report",      icon: FileClock,      permissions: ["DAILY_REPORT_READ"],                                            badge: counts.missedReports },
+        { name: t("intern.nav.weeklyEvaluation"), href: "/intern/weekly-evaluation", icon: ClipboardCheck,  permissions: ["WEEKLY_EVALUATION_READ"],                                      badge: counts.unviewedEvaluations },
+        { name: t("intern.nav.profile"),          href: "/intern/profile",           icon: UserRoundPen,   permissions: undefined,                                                        badge: undefined },
       ];
 
       return items.filter((item) => {
@@ -49,13 +52,13 @@ export default function InternSidebar() {
         return canAny(item.permissions);
       });
     },
-    [t, canAny],
+    [t, canAny, counts],
   );
 
   return (
     <div className="flex flex-col items-center w-full py-2">
       <ul className="flex flex-col items-center gap-6 w-full">
-        {menus.map(({ name, href, icon: Icon }) => {
+        {menus.map(({ name, href, icon: Icon, badge }) => {
           const isActive =
             pathname === href ||
             (href !== "/intern/dashboard" && pathname.startsWith(`${href}/`));
@@ -68,12 +71,15 @@ export default function InternSidebar() {
                 className="relative flex flex-col items-center"
                 onMouseEnter={getPrefetchHandler(href)}
               >
-                <div
-                  className={`${baseClass} ${
-                    isActive ? activeClass : inactiveClass
-                  }`}
-                >
-                  <Icon size={22} />
+                <div className="relative">
+                  <div
+                    className={`${baseClass} ${
+                      isActive ? activeClass : inactiveClass
+                    }`}
+                  >
+                    <Icon size={22} />
+                  </div>
+                  <SidebarBadge count={badge} />
                 </div>
 
                 <span className={tooltipClass}>

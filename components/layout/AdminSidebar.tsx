@@ -21,12 +21,15 @@ import { MdOutlineMailOutline } from "react-icons/md";
 import { useTranslations } from "next-intl";
 import { useSidebarPrefetch } from "@/hooks/useSidebarPrefetch";
 import { useRBAC } from "@/hooks/rbac/useRBAC";
+import { useActionCounts } from "@/hooks/notification/useActionCounts";
+import { SidebarBadge } from "@/components/ui/SidebarBadge";
 
 type MenuItem = {
   name: string;
   href: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
   permissions?: string[];
+  badge?: number;
 };
 
 const baseClass =
@@ -46,19 +49,20 @@ export default function AdminSidebar() {
   const t = useTranslations();
   const { getPrefetchHandler } = useSidebarPrefetch();
   const { canAny } = useRBAC();
+  const counts = useActionCounts();
 
   const menus = useMemo(() => {
     const items: MenuItem[] = [
-      { name: t("admin.nav.dashboard"),     href: "/admin/dashboard",     icon: LayoutDashboard, permissions: ["STATS_ADMIN_READ"] },
-      { name: t("admin.nav.adminTeam"),     href: "/admin/admin-team",    icon: MdManageAccounts, permissions: ["USER_READ"] },
-      { name: t("admin.nav.department"),    href: "/admin/department",    icon: PiBuildingOfficeLight, permissions: ["DEPARTMENT_READ"] },
-      { name: t("admin.nav.leaders"),       href: "/admin/leaders",       icon: UserCheck,        permissions: ["LEADER_READ"] },
-      { name: t("admin.nav.onboarding"),    href: "/admin/onboarding",    icon: Rocket,           permissions: ["APPLICATION_READ"] },
-      { name: t("admin.nav.interns"),       href: "/admin/interns",       icon: Users,            permissions: ["INTERN_READ"] },
-      { name: t("admin.nav.meetings"),      href: "/admin/meetings",      icon: LuAlarmClock,     permissions: ["MEETING_READ"] },
-      { name: t("admin.nav.roles"),         href: "/admin/roles",         icon: ShieldCheck,      permissions: ["ROLE_READ"] },
-      { name: t("admin.nav.mails"),         href: "/admin/emails",        icon: MdOutlineMailOutline,  permissions: ["NOTIFICATION_TEMPLATE_READ"] },
-      { name: t("admin.nav.settings"),      href: "/admin/settings",      icon: Settings,         permissions: [
+      { name: t("admin.nav.dashboard"),     href: "/admin/dashboard",     icon: LayoutDashboard,      permissions: ["STATS_ADMIN_READ"],              badge: undefined },
+      { name: t("admin.nav.adminTeam"),     href: "/admin/admin-team",    icon: MdManageAccounts,     permissions: ["USER_READ"],                     badge: undefined },
+      { name: t("admin.nav.department"),    href: "/admin/department",    icon: PiBuildingOfficeLight, permissions: ["DEPARTMENT_READ"],               badge: undefined },
+      { name: t("admin.nav.leaders"),       href: "/admin/leaders",       icon: UserCheck,            permissions: ["LEADER_READ"],                   badge: undefined },
+      { name: t("admin.nav.onboarding"),    href: "/admin/onboarding",    icon: Rocket,               permissions: ["APPLICATION_READ"],              badge: counts.pendingApplications },
+      { name: t("admin.nav.interns"),       href: "/admin/interns",       icon: Users,                permissions: ["INTERN_READ"],                   badge: undefined },
+      { name: t("admin.nav.meetings"),      href: "/admin/meetings",      icon: LuAlarmClock,         permissions: ["MEETING_READ"],                  badge: counts.pendingMeetingRsvp },
+      { name: t("admin.nav.roles"),         href: "/admin/roles",         icon: ShieldCheck,          permissions: ["ROLE_READ"],                     badge: undefined },
+      { name: t("admin.nav.mails"),         href: "/admin/emails",        icon: MdOutlineMailOutline, permissions: ["NOTIFICATION_TEMPLATE_READ"],    badge: undefined },
+      { name: t("admin.nav.settings"),      href: "/admin/settings",      icon: Settings,             permissions: [
         "SYSTEM_CONFIG_READ",
         "MAINTENANCE_READ",
         "MAINTENANCE_MANAGE",
@@ -68,16 +72,16 @@ export default function AdminSidebar() {
         "WEBHOOK_MANAGE",
         "CRON_JOB_READ",
         "CRON_JOB_MANAGE",
-      ] },
-      { name: t("admin.nav.activityLogs"), href: "/admin/activity-logs", icon: History,          permissions: ["AUDIT_LOG_READ"] },
-      { name: t("admin.nav.profile"),       href: "/admin/profile",       icon: UserRoundPen },
+      ],                                                                                                                                                badge: undefined },
+      { name: t("admin.nav.activityLogs"), href: "/admin/activity-logs", icon: History,              permissions: ["AUDIT_LOG_READ"],                badge: undefined },
+      { name: t("admin.nav.profile"),       href: "/admin/profile",       icon: UserRoundPen,         permissions: undefined,                         badge: undefined },
     ];
 
     return items.filter((item) => {
       if (!item.permissions || item.permissions.length === 0) return true;
       return canAny(item.permissions);
     });
-  }, [t, canAny]);
+  }, [t, canAny, counts]);
 
   return (
     <div className="flex flex-col items-center w-full py-2">
@@ -98,12 +102,15 @@ export default function AdminSidebar() {
                 className="relative flex flex-col items-center"
                 onMouseEnter={getPrefetchHandler(item.href)}
               >
-                <div
-                  className={`${baseClass} ${
-                    isActive ? activeClass : inactiveClass
-                  }`}
-                >
-                  <Icon size={22} />
+                <div className="relative">
+                  <div
+                    className={`${baseClass} ${
+                      isActive ? activeClass : inactiveClass
+                    }`}
+                  >
+                    <Icon size={22} />
+                  </div>
+                  <SidebarBadge count={item.badge} />
                 </div>
 
                 <span className={tooltipClass}>

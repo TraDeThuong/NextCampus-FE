@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useContext } from "react";
+import { useState, useMemo, useContext, useCallback } from "react";
 import { Sparkles, ChevronDown, ChevronUp, Info, Bot } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useTranslations } from "next-intl";
@@ -12,6 +12,7 @@ import { useInterns } from "@/hooks/intern/useInterns";
 import { useWeeklyEvaluations } from "@/hooks/weekly-evaluation/useWeeklyEvaluations";
 import { AuthContext } from "@/contexts/AuthContext";
 import type { CreateWeeklyEvaluationPayload, EvaluationRatings, RatingLevel } from "@/types/weekly-evaluation";
+import type { Intern } from "@/types/intern";
 import { CRITERIA_SECTIONS, DEFAULT_RATINGS, RATING_SCORES, RATING_COLORS } from "@/types/weekly-evaluation";
 
 interface Props {
@@ -136,6 +137,36 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal, onSuccess }:
     [interns, internId],
   );
 
+  const isInternMidWeekThisWeek = useCallback((internItem: Intern) => {
+    const tzOffset = 7 * 60 * 60 * 1000;
+    const now = new Date();
+    const nowVn = new Date(now.getTime() + tzOffset);
+    const vnDay = nowVn.getUTCDay();
+    const diffToMonday = vnDay === 0 ? -6 : 1 - vnDay;
+    const startOfWeekVn = new Date(
+      Date.UTC(
+        nowVn.getUTCFullYear(),
+        nowVn.getUTCMonth(),
+        nowVn.getUTCDate() + diffToMonday,
+        0,
+        0,
+        0,
+        0,
+      ),
+    );
+    const endOfMondayVn = new Date(startOfWeekVn.getTime() + 24 * 3600 * 1000 - 1);
+    const startDate = new Date(internItem.startDate);
+    const createdAt = new Date(internItem.createdAt);
+
+    const isStartedMidWeek =
+      startDate.getTime() + tzOffset > endOfMondayVn.getTime() &&
+      startDate.getTime() + tzOffset <= nowVn.getTime() + 7 * 24 * 3600 * 1000;
+    const isCreatedMidWeek =
+      createdAt.getTime() + tzOffset > endOfMondayVn.getTime();
+
+    return isStartedMidWeek || isCreatedMidWeek;
+  }, []);
+
   const maxWeek = useMemo(() => {
     if (!selectedIntern) return 99;
     const tzOffset = 7 * 60 * 60 * 1000; // Asia/Ho_Chi_Minh is UTC+7
@@ -257,6 +288,14 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal, onSuccess }:
     }
     if (
       selectedIntern &&
+      isInternMidWeekThisWeek(selectedIntern) &&
+      Number(week) === maxWeek
+    ) {
+      toast.error(t("assignedMidWeekNotice"));
+      return;
+    }
+    if (
+      selectedIntern &&
       Number(week) === maxWeek &&
       !isWeekendAllowedForCurrentWeek
     ) {
@@ -297,6 +336,14 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal, onSuccess }:
     }
     if (selectedIntern && (Number(week) < 1 || Number(week) > maxWeek)) {
       toast.error(t("weekRange", { max: maxWeek }));
+      return;
+    }
+    if (
+      selectedIntern &&
+      isInternMidWeekThisWeek(selectedIntern) &&
+      Number(week) === maxWeek
+    ) {
+      toast.error(t("assignedMidWeekNotice"));
       return;
     }
     if (
@@ -347,11 +394,15 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal, onSuccess }:
 
   const internOptions = useMemo(
     () =>
-      interns.map((i) => ({
-        value: i.id,
-        label: `${i.fullName || i.user?.fullName || "Intern"} (${i.user?.email || ""})`,
-      })),
-    [interns],
+      interns.map((i) => {
+        const isMidWeek = isInternMidWeekThisWeek(i);
+        return {
+          value: i.id,
+          label: `${i.fullName || i.user?.fullName || "Intern"} (${i.user?.email || ""})${isMidWeek ? ` — [${t("assignedMidWeek")}]` : ""}`,
+          disabled: isMidWeek,
+        };
+      }),
+    [interns, isInternMidWeekThisWeek, t],
   );
 
   return (
@@ -402,11 +453,18 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal, onSuccess }:
                 <p className="text-[11px] text-muted">
                   {t("currentWeek", { week: maxWeek, max: maxWeek })}
                 </p>
-                {Number(week) === maxWeek && !isWeekendAllowedForCurrentWeek && (
+                {Number(week) === maxWeek && isInternMidWeekThisWeek(selectedIntern) && (
                   <p className="text-[11px] text-amber-400 font-semibold">
-                    {t("weekendNotice")}
+                    {t("assignedMidWeekNotice")}
                   </p>
                 )}
+                {Number(week) === maxWeek &&
+                  !isInternMidWeekThisWeek(selectedIntern) &&
+                  !isWeekendAllowedForCurrentWeek && (
+                    <p className="text-[11px] text-amber-400 font-semibold">
+                      {t("weekendNotice")}
+                    </p>
+                  )}
                 {evaluatedWeeks.includes(Number(week)) && (
                   <p className="text-[11px] text-destructive font-semibold">
                     {t("weekAlreadyEvaluated")}
