@@ -38,7 +38,6 @@ const RESOURCE_FALLBACKS: Record<string, string> = {
   TASK_ASSIGNMENT: "Phân công Nhiệm vụ",
   TASK_SUBMISSION: "Bài nộp Nhiệm vụ",
   MEETING: "Cuộc họp & Điểm danh",
-  ABSENCE: "Nghỉ phép",
   DAILY_REPORT: "Báo cáo Tiến độ Ngày",
   WEEKLY_EVALUATION: "Bảng Đánh giá Tuần",
   PDF_EXPORT: "Xuất Báo Cáo & Chứng Nhận (PDF)",
