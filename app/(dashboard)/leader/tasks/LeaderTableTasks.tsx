@@ -32,7 +32,7 @@ import TaskGroupMemberSelector from "./TaskGroupMemberSelector";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { extractTaskGroups, type TaskGroup, type UpdateTaskGroupPayload } from "@/types/task-group";
-import type { Task, TaskQueryParams } from "@/types/task";
+import { extractTasks, type Task, type TaskQueryParams } from "@/types/task";
 
 type GroupAction = { type: "view" | "edit" | "delete"; groupId: string; groupName: string } | null;
 
@@ -113,8 +113,8 @@ export default function LeaderTableTasks() {
   }, [searchParams, taskGroupId]);
 
   const { data: tasksData, isLoading: tasksLoading, refetch: tasksRefetch, isFetching: tasksFetching } = useTasks(params);
-  const tasks = tasksData?.data ?? [];
-  const meta = tasksData?.meta;
+  const tasks = useMemo(() => extractTasks(tasksData?.data), [tasksData]);
+  const meta = tasksData?.meta ?? (tasksData?.data as any)?.meta;
   const openAction = (a: GroupAction) => { setAction(a); triggerRef.current?.click(); };
 
   function goToPage(page: number) {
@@ -250,7 +250,7 @@ export default function LeaderTableTasks() {
 
                 {/* Desktop Table View (hidden md:block) */}
                 <div className="hidden md:block">
-                  <Table columns="60px minmax(180px,260px) minmax(145px,1fr) minmax(125px,0.8fr) minmax(75px,0.25fr) minmax(110px,0.4fr) minmax(85px,0.3fr) 40px">
+                  <Table columns="65px minmax(200px,1.8fr) minmax(140px,1fr) minmax(120px,0.8fr) minmax(80px,0.35fr) minmax(115px,0.5fr) minmax(90px,0.4fr) 40px">
                     <Table.Header>
                       <div>{t("colCode")}</div>
                       <div>{t("colTitle")}</div>
@@ -684,19 +684,19 @@ function TaskTableRow({
   return (
     <Table.Row key={task.id}>
       <div className="font-mono text-xs text-muted">{task.code ?? "—"}</div>
-      <div className="min-w-0 pr-2">
+      <div className="min-w-0 w-full overflow-hidden pr-2">
         <button
           type="button"
           onClick={() => router.push(`${pathname}/${task.id}`)}
           title={task.title}
-          className="truncate block text-sm text-left hover:text-primary-light transition cursor-pointer max-w-[240px] font-medium"
+          className="truncate block w-full max-w-full text-sm text-left hover:text-primary-light transition cursor-pointer font-medium"
         >
           {task.title}
         </button>
         {isCompleted && (
-          <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-medium mt-0.5" title={t("completedTaskReadOnly")}>
-            <Check className="h-2.5 w-2.5" />
-            <span>{t("completedTaskReadOnly")}</span>
+          <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-medium mt-0.5 truncate max-w-full" title={t("completedTaskReadOnly")}>
+            <Check className="h-2.5 w-2.5 shrink-0" />
+            <span className="truncate">{t("completedTaskReadOnly")}</span>
           </span>
         )}
       </div>
@@ -722,7 +722,7 @@ function TaskTableRow({
           isUnblocking={isUnblocking}
         />
       </div>
-      <div className="text-sm text-muted">
+      <div className="text-sm text-muted whitespace-nowrap">
         {new Date(task.deadline).toLocaleDateString("vi-VN")}
       </div>
       <div className="relative text-right">
@@ -1154,7 +1154,7 @@ function ViewGroup({
   const { data, isLoading } = useTaskGroup(groupId);
   const { data: tasksData } = useTasks({ taskGroupId: groupId, limit: 5, sortBy: "createdAt", order: "desc" });
   const group = data?.data;
-  const tasks = tasksData?.data ?? [];
+  const tasks = useMemo(() => extractTasks(tasksData?.data), [tasksData]);
 
   if (isLoading) return <div className="flex justify-center py-8"><Spinner size="sm" /></div>;
   if (!group) return <p className="py-4 text-center text-sm text-muted">{t("groupNotFound")}</p>;
@@ -1662,21 +1662,21 @@ function InlineAssignCell({
   }
 
   return (
-    <div className="relative">
+    <div className="relative min-w-0 w-full">
       <button
         ref={triggerRef}
         type="button"
         onClick={toggleOpen}
         disabled={isPending || !canClick}
         title={isCompleted ? t("completedTaskReadOnly") : undefined}
-        className={`flex w-full items-center gap-1 rounded-lg px-2 py-1 text-sm transition hover:bg-white/5 disabled:opacity-50 ${
+        className={`flex w-full items-center gap-1 rounded-lg px-2 py-1 text-sm transition hover:bg-white/5 disabled:opacity-50 min-w-0 ${
           assigneeName ? "text-foreground" : "text-muted"
         } ${!canClick ? "cursor-not-allowed" : ""}`}
       >
         {isPending ? (
           <Loader2 className="h-3 w-3 animate-spin shrink-0" />
         ) : assigneeName ? (
-          <div className="truncate text-left">
+          <div className="truncate text-left min-w-0 flex-1">
             <span className="block truncate text-sm font-medium">{assigneeName}</span>
             {assigneeEmail && (
               <span className="block truncate text-[11px] text-muted">{assigneeEmail}</span>

@@ -145,14 +145,18 @@ export default function TaskViewModal({ task, onClose }: Props) {
           </Card>
 
           {/* Card 4: Dependencies */}
-          {(task.dependsOn.length > 0 || task.dependencies.length > 0 || task.recreatedTask) && (
+          {Boolean(
+            (task.dependsOn && task.dependsOn.length > 0) ||
+            (task.dependencies && task.dependencies.length > 0) ||
+            task.recreatedTask
+          ) && (
             <Card icon={<GitBranch className="h-4 w-4 text-purple-400" />} title="Dependencies">
               <div className="space-y-3">
-                {task.dependsOn.length > 0 && (
+                {Boolean(task.dependsOn && task.dependsOn.length > 0) && (
                   <div>
                     <Label>Depends On</Label>
                     <div className="flex flex-wrap gap-1.5">
-                      {task.dependsOn.map((d) => (
+                      {task.dependsOn?.map((d) => (
                         <span key={d.id} className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-foreground">
                           <span className="font-mono text-muted">{d.code}</span>
                           <span>{d.title}</span>
@@ -161,11 +165,11 @@ export default function TaskViewModal({ task, onClose }: Props) {
                     </div>
                   </div>
                 )}
-                {task.dependencies.length > 0 && (
+                {Boolean(task.dependencies && task.dependencies.length > 0) && (
                   <div>
                     <Label>Depended By</Label>
                     <div className="flex flex-wrap gap-1.5">
-                      {task.dependencies.map((d) => (
+                      {task.dependencies?.map((d) => (
                         <span key={d.id} className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-foreground">
                           <span className="font-mono text-muted">{d.code}</span>
                           <span>{d.title}</span>
@@ -191,10 +195,10 @@ export default function TaskViewModal({ task, onClose }: Props) {
           )}
 
           {/* Card 5: Attachments */}
-          {task.attachments.length > 0 && (
-            <Card icon={<Paperclip className="h-4 w-4 text-cyan-400" />} title={`Attachments (${task.attachments.length})`}>
+          {Boolean(task.attachments && task.attachments.length > 0) && (
+            <Card icon={<Paperclip className="h-4 w-4 text-cyan-400" />} title={`Attachments (${task.attachments?.length ?? 0})`}>
               <div className="space-y-1.5">
-                {task.attachments.map((a) => (
+                {task.attachments?.map((a) => (
                   <a
                     key={a.id}
                     href={a.fileUrl}

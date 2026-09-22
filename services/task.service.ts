@@ -17,8 +17,24 @@ export const taskService = {
 
   // GET /tasks
   getTasks: async (params?: TaskQueryParams): Promise<TaskListResponse> => {
-    const response = await api.get<TaskListResponse>("/tasks", { params });
-    return response.data;
+    const response = await api.get<any>("/tasks", { params });
+    const raw = response.data;
+    const taskList = Array.isArray(raw?.data)
+      ? raw.data
+      : Array.isArray(raw?.data?.data)
+        ? raw.data.data
+        : [];
+    const meta = raw?.meta ?? raw?.data?.meta ?? {
+      total: taskList.length,
+      page: 1,
+      limit: taskList.length,
+      totalPages: 1,
+    };
+    return {
+      success: raw?.success ?? true,
+      data: taskList,
+      meta,
+    };
   },
 
   // GET /tasks/:id

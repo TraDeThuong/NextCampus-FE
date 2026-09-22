@@ -95,6 +95,14 @@ export interface TaskListResponse {
   };
 }
 
+export function extractTasks(data?: any): Task[] {
+  if (!data) return [];
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data.data)) return data.data;
+  if (data.data && Array.isArray(data.data.data)) return data.data.data;
+  return [];
+}
+
 export interface TaskDeleteResponse {
   success: boolean;
   message: string;

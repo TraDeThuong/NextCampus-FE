@@ -140,14 +140,18 @@ function TaskDetailContent() {
             </div>
           </Card>
 
-          {(task.dependsOn.length > 0 || task.dependencies.length > 0 || task.recreatedTask) && (
+          {Boolean(
+            (task.dependsOn && task.dependsOn.length > 0) ||
+            (task.dependencies && task.dependencies.length > 0) ||
+            task.recreatedTask
+          ) && (
             <Card icon={<GitBranch className="h-4 w-4 text-purple-400" />} title={td("taskRelations")}>
               <div className="space-y-4">
-                {task.dependsOn.length > 0 && (
+                {Boolean(task.dependsOn && task.dependsOn.length > 0) && (
                   <div className="space-y-2">
                     <Label>{td("dependsOn")}</Label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {task.dependsOn.map((d) => (
+                      {task.dependsOn?.map((d) => (
                         <div key={d.id} className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/40 p-2.5 text-xs text-slate-300">
                           <span className="font-mono font-bold text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded">{d.code}</span>
                           <span className="truncate font-medium">{d.title}</span>
@@ -156,11 +160,11 @@ function TaskDetailContent() {
                     </div>
                   </div>
                 )}
-                {task.dependencies.length > 0 && (
+                {Boolean(task.dependencies && task.dependencies.length > 0) && (
                   <div className="space-y-2">
                     <Label>{td("dependedBy")}</Label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {task.dependencies.map((d) => (
+                      {task.dependencies?.map((d) => (
                         <div key={d.id} className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/40 p-2.5 text-xs text-slate-300">
                           <span className="font-mono font-bold text-sky-400 bg-sky-500/10 px-1.5 py-0.5 rounded">{d.code}</span>
                           <span className="truncate font-medium">{d.title}</span>
@@ -185,10 +189,10 @@ function TaskDetailContent() {
             </Card>
           )}
 
-          {task.attachments.length > 0 && (
-            <Card icon={<Paperclip className="h-4 w-4 text-cyan-400" />} title={td("attachments", { count: task.attachments.length })}>
+          {Boolean(task.attachments && task.attachments.length > 0) && (
+            <Card icon={<Paperclip className="h-4 w-4 text-cyan-400" />} title={td("attachments", { count: task.attachments?.length ?? 0 })}>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {task.attachments.map((a) => (
+                {task.attachments?.map((a) => (
                   <a key={a.id} href={a.fileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-xl border border-slate-800/60 bg-slate-900/30 p-3 hover:bg-slate-800/50 hover:border-slate-700 transition group">
                     <div className="p-2 rounded-lg bg-slate-950 shadow-inner">{getFileIcon(a.mimeType)}</div>
                     <div className="min-w-0 flex-1">

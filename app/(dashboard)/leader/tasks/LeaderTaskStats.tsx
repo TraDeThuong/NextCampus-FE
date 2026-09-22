@@ -13,7 +13,7 @@ import { useTaskAnalytics } from "@/hooks/task/useTaskAnalytics";
 import { useTaskGroups } from "@/hooks/task-group/useTaskGroups";
 import { useTasks } from "@/hooks/task/useTasks";
 import { extractTaskGroups } from "@/types/task-group";
-import type { TaskStatusDistribution, TaskQueryParams } from "@/types/task";
+import { extractTasks, type TaskStatusDistribution, type TaskQueryParams } from "@/types/task";
 import { DateRangePicker } from "@/components/ui/DatePicker";
 
 type TimePreset = "week" | "month" | "custom";
@@ -112,8 +112,8 @@ export default function LeaderTaskStats() {
   const totalGroups = taskGroupsData?.meta?.total ?? groupsList.length;
 
   const { data: reviewTasksData, isLoading: reviewLoading } = useTasks({ status: "REVIEW", limit: 10 });
-  const reviewTasks = reviewTasksData?.data ?? [];
-  const reviewTaskCount = reviewTasksData?.meta?.total ?? reviewTasks.length;
+  const reviewTasks = useMemo(() => extractTasks(reviewTasksData?.data), [reviewTasksData]);
+  const reviewTaskCount = reviewTasksData?.meta?.total ?? (reviewTasksData?.data as any)?.meta?.total ?? reviewTasks.length;
 
   const overview = analytics?.overview;
   const doneCount = overview?.byStatus ? getStatusCount(overview.byStatus, "DONE") : 0;
@@ -290,8 +290,8 @@ function TaskTable({ filters }: { filters: TaskQueryParams }) {
   const t = useTranslations("leader.tasks");
   const [page, setPage] = useState(1);
   const { data, isLoading, refetch, isFetching } = useTasks({ ...filters, page, limit: 20 });
-  const tasks = data?.data ?? [];
-  const meta = data?.meta;
+  const tasks = useMemo(() => extractTasks(data?.data), [data]);
+  const meta = data?.meta ?? (data?.data as any)?.meta;
   const router = useRouter();
 
   if (isLoading) return <div className="flex justify-center py-8"><Spinner size="sm" /></div>;
@@ -334,8 +334,8 @@ function DoneTaskTable({ filters }: { filters: TaskQueryParams }) {
   const t = useTranslations("leader.tasks");
   const [page, setPage] = useState(1);
   const { data, isLoading, refetch, isFetching } = useTasks({ ...filters, page, limit: 20 });
-  const tasks = data?.data ?? [];
-  const meta = data?.meta;
+  const tasks = useMemo(() => extractTasks(data?.data), [data]);
+  const meta = data?.meta ?? (data?.data as any)?.meta;
   const router = useRouter();
 
   if (isLoading) return <div className="flex justify-center py-8"><Spinner size="sm" /></div>;
