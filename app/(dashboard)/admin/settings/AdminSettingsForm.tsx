@@ -32,6 +32,7 @@ import ResetDefaultsModal from "./ResetDefaultsModal";
 
 const FACTORY_DEFAULTS = {
   DAILY_REPORT_DEADLINE_TIME: "17:30",
+  WORKING_DAYS_PER_WEEK: "6",
   MAX_ACTIVE_TASKS: "5",
   MAX_WORKLOAD_DAYS: "14",
   MAX_LEADER_DEPARTMENTS: "3",
@@ -100,12 +101,24 @@ function AdminSettingsFields({
 
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
+  // Check if today is Sunday in Vietnam timezone (Asia/Ho_Chi_Minh)
+  const isSunday = useMemo(() => {
+    const vnDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" }));
+    return vnDate.getDay() === 0;
+  }, []);
+
   // Parse initial state safely from backend data
   const initialValues = useMemo(() => ({
     DAILY_REPORT_DEADLINE_TIME:
-      typeof initialData.DAILY_REPORT_DEADLINE_TIME === "string"
-        ? initialData.DAILY_REPORT_DEADLINE_TIME
-        : FACTORY_DEFAULTS.DAILY_REPORT_DEADLINE_TIME,
+      typeof initialData.NEXT_DAILY_REPORT_DEADLINE_TIME === "string"
+        ? initialData.NEXT_DAILY_REPORT_DEADLINE_TIME
+        : typeof initialData.DAILY_REPORT_DEADLINE_TIME === "string"
+          ? initialData.DAILY_REPORT_DEADLINE_TIME
+          : FACTORY_DEFAULTS.DAILY_REPORT_DEADLINE_TIME,
+    WORKING_DAYS_PER_WEEK:
+      initialData.WORKING_DAYS_PER_WEEK != null
+        ? String(initialData.WORKING_DAYS_PER_WEEK)
+        : FACTORY_DEFAULTS.WORKING_DAYS_PER_WEEK,
     MAX_ACTIVE_TASKS:
       initialData.MAX_ACTIVE_TASKS != null
         ? String(initialData.MAX_ACTIVE_TASKS)
@@ -166,7 +179,15 @@ function AdminSettingsFields({
   };
 
   const handleConfirmResetDefaults = () => {
-    setFormValues({ ...FACTORY_DEFAULTS });
+    setFormValues({
+      ...FACTORY_DEFAULTS,
+      ...(!isSunday && {
+        WORKING_DAYS_PER_WEEK:
+          initialData.WORKING_DAYS_PER_WEEK != null
+            ? String(initialData.WORKING_DAYS_PER_WEEK)
+            : FACTORY_DEFAULTS.WORKING_DAYS_PER_WEEK,
+      }),
+    });
     setIsResetModalOpen(false);
   };
 
@@ -178,6 +199,16 @@ function AdminSettingsFields({
       errs.DAILY_REPORT_DEADLINE_TIME = t("errors.deadlineRequired");
     } else if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(formValues.DAILY_REPORT_DEADLINE_TIME)) {
       errs.DAILY_REPORT_DEADLINE_TIME = t("errors.deadlineFormat");
+    }
+
+    const workingDaysNum = Number(formValues.WORKING_DAYS_PER_WEEK);
+    if (
+      isNaN(workingDaysNum) ||
+      workingDaysNum < 1 ||
+      workingDaysNum > 7 ||
+      !Number.isInteger(workingDaysNum)
+    ) {
+      errs.WORKING_DAYS_PER_WEEK = t("errors.workingDaysRange");
     }
 
     const tasksNum = Number(formValues.MAX_ACTIVE_TASKS);
@@ -240,6 +271,7 @@ function AdminSettingsFields({
     // Convert string values to appropriate backend payload
     const payload: Record<string, string | number | boolean> = {
       DAILY_REPORT_DEADLINE_TIME: formValues.DAILY_REPORT_DEADLINE_TIME,
+      WORKING_DAYS_PER_WEEK: Number(formValues.WORKING_DAYS_PER_WEEK),
       MAX_ACTIVE_TASKS: Number(formValues.MAX_ACTIVE_TASKS),
       MAX_WORKLOAD_DAYS: Number(formValues.MAX_WORKLOAD_DAYS),
       MAX_LEADER_DEPARTMENTS: Number(formValues.MAX_LEADER_DEPARTMENTS),
@@ -383,6 +415,90 @@ function AdminSettingsFields({
               <p className="text-xs text-muted mt-0.5">
                 Bấm vào mốc giờ để áp dụng nhanh hạn chốt nộp báo cáo.
               </p>
+            </div>
+
+            {/* Next Day Effective Notice if current time passed cutoff */}
+            {initialData.NEXT_DAILY_REPORT_DEADLINE_TIME && initialData.DAILY_REPORT_DEADLINE_EFFECTIVE_DATE && (
+              <div className="col-span-1 md:col-span-2 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5 sm:p-4 text-amber-300 flex items-start gap-3 animate-fadeIn">
+                <Clock className="h-5 w-5 shrink-0 text-amber-400 mt-0.5" />
+                <div className="text-xs sm:text-sm space-y-1">
+                  <p className="font-semibold text-foreground">
+                    {t("deadlineNextDayNotice", {
+                      currentDeadline: initialData.DAILY_REPORT_DEADLINE_TIME ?? "17:30",
+                      newDeadline: initialData.NEXT_DAILY_REPORT_DEADLINE_TIME,
+                      effectiveDate: initialData.DAILY_REPORT_DEADLINE_EFFECTIVE_DATE,
+                    })}
+                  </p>
+                  <p className="text-muted text-xs">
+                    {t("deadlineActiveTodayNotice", {
+                      deadline: initialData.DAILY_REPORT_DEADLINE_TIME ?? "17:30",
+                    })}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Divider and Working Days Per Week (Sunday-only change rule) */}
+            <div className="col-span-1 md:col-span-2 pt-5 border-t border-border/60 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+              <div>
+                <Input
+                  label={t("workingDaysTitle")}
+                  type="number"
+                  min={1}
+                  max={7}
+                  value={formValues.WORKING_DAYS_PER_WEEK}
+                  onChange={(e) => handleChange("WORKING_DAYS_PER_WEEK", e.target.value)}
+                  disabled={!isSunday || batchUpdate.isPending}
+                  required
+                  error={errors.WORKING_DAYS_PER_WEEK}
+                  helperText={t("workingDaysDesc")}
+                  leftIcon={<Calendar className="h-4 w-4" />}
+                  rightIcon={
+                    <span className="text-xs font-mono font-bold uppercase text-muted select-none">
+                      {t("daysPerWeekUnit")}
+                    </span>
+                  }
+                  className="font-mono font-bold"
+                />
+              </div>
+
+              {/* Presets and Sunday restriction badge */}
+              <div className="flex flex-col gap-1.5">
+                <span className="text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center gap-1">
+                  {t("quickPresets")}
+                </span>
+                <div className="flex flex-wrap items-center gap-2 h-[42px] sm:h-[46px]">
+                  {[
+                    { value: "5", label: t("presets5Days") },
+                    { value: "6", label: t("presets6Days") },
+                  ].map((preset) => {
+                    const isSelected = formValues.WORKING_DAYS_PER_WEEK === preset.value;
+                    return (
+                      <button
+                        key={preset.value}
+                        type="button"
+                        onClick={() => handleChange("WORKING_DAYS_PER_WEEK", preset.value)}
+                        disabled={!isSunday || batchUpdate.isPending}
+                        className={`
+                          flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold
+                          transition-all duration-200 select-none
+                          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400
+                          ${
+                            !isSunday
+                              ? "opacity-50 cursor-not-allowed border border-border bg-card text-muted"
+                              : isSelected
+                                ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm cursor-pointer"
+                                : "border border-border bg-card text-muted hover:border-border-strong hover:text-foreground hover:bg-card-hover cursor-pointer"
+                          }
+                        `}
+                      >
+                        <Calendar className="h-3 w-3 shrink-0" />
+                        <span>{preset.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
         </MetalCard>

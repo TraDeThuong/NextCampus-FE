@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { useInternStats } from "@/hooks/stats/useInternStats";
+import { useSystemSettings } from "@/hooks/system-setting/useSystemSettings";
 import StatsCard from "./StatsCard";
 import InternActivityHeatmap from "./InternActivityHeatmap";
 import Spinner from "../ui/Spinner";
@@ -39,6 +40,8 @@ export default function InternStatsOverview() {
   const locale = useLocale();
   const { state: authState } = useAuth();
   const { data: response, isLoading, isError, isFetching, refetch } = useInternStats();
+  const { data: settingsData } = useSystemSettings();
+  const activeDeadline = settingsData?.data?.DAILY_REPORT_DEADLINE_TIME ?? "17:30";
 
   if (isLoading) {
     return (
@@ -228,7 +231,7 @@ export default function InternStatsOverview() {
             <p className="text-xs sm:text-sm font-medium mt-0.5 text-foreground">
               {isTodayReportSubmitted
                 ? t("reportSubmittedMsg")
-                : t("deadlineNotice")}
+                : t("deadlineNotice", { time: activeDeadline })}
             </p>
           </div>
         </div>

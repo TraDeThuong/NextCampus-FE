@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import type { DailyReport } from "@/types/daily-report";
+import { useSystemSettings } from "@/hooks/system-setting/useSystemSettings";
 
 const VI_WEEKDAYS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 const EN_WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
@@ -73,6 +74,8 @@ export default function InternCalendar({
   const isVi = locale === "vi";
   const t = useTranslations("leader.dailyReports");
   const today = useMemo(() => new Date(), []);
+  const { data: settingsResponse } = useSystemSettings();
+  const workingDaysPerWeek = settingsResponse?.data?.WORKING_DAYS_PER_WEEK ?? 6;
 
   const totalMonths = useMemo(() => {
     return (
@@ -129,7 +132,9 @@ export default function InternCalendar({
   function isMissingReport(d: Date): boolean {
     if (d > today) return false; // future date
     if (d < startDate) return false;
-    if (d.getDay() === 0) return false; // Sunday
+    const dow = d.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
+    const isoDow = dow === 0 ? 7 : dow; // 1 = Mon ... 7 = Sun
+    if (isoDow > workingDaysPerWeek) return false; // weekend based on system setting
     return !reportsMap.has(isoDate(d));
   }
 

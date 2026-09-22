@@ -5,6 +5,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { useTranslations } from "next-intl";
 import MetalCard from "@/components/ui/MetalCard";
 import { useInternStats } from "@/hooks/stats/useInternStats";
+import { useSystemSettings } from "@/hooks/system-setting/useSystemSettings";
 
 type Props = {
   totalWorkingDays: number;
@@ -29,6 +30,8 @@ export default function DailyReportStats({
 }: Props) {
   const t = useTranslations("intern.dailyReport");
   const { data: internStatsData } = useInternStats();
+  const { data: settingsData } = useSystemSettings();
+  const activeDeadline = settingsData?.data?.DAILY_REPORT_DEADLINE_TIME ?? "17:30";
   const currentStreak = streak ?? internStatsData?.data?.reportStreak ?? 0;
 
   const chartData = [
@@ -231,7 +234,7 @@ export default function DailyReportStats({
 
             <div className="mt-4 rounded-xl border border-white/5 bg-white/[0.02] p-3 text-xs text-muted">
               <p className="font-semibold text-foreground mb-1">{t("policyTitle")}</p>
-              <p>{t("policyDesc")}</p>
+              <p>{t("policyDesc", { time: activeDeadline })}</p>
             </div>
           </MetalCard>
         </div>

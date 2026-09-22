@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { CalendarDays, FileText } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useQueryClient } from "@tanstack/react-query";
 import Spinner from "@/components/ui/Spinner";
 import MetalCard from "@/components/ui/MetalCard";
 import DailyReportHeader from "./DailyReportHeader";
@@ -15,6 +16,7 @@ import DailyReportStats from "./DailyReportStats";
 import { useIntern } from "@/hooks/profile/useIntern";
 import { useDailyReports } from "@/hooks/daily-report/useDailyReports";
 import { useDailyReport } from "@/hooks/daily-report/useDailyReport";
+import { useSystemSettings } from "@/hooks/system-setting/useSystemSettings";
 import type { DailyReport } from "@/types/daily-report";
 
 function isoDate(d: Date): string {
@@ -42,8 +44,9 @@ export default function DailyReportContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const selectedId = searchParams.get("id");
+  const queryClient = useQueryClient();
 
-  const { intern, isLoading: internLoading } = useIntern();
+  const { intern, isLoading: internLoading, refetch: refetchIntern } = useIntern();
 
   const dateRange = useMemo(() => {
     if (!intern) return null;
@@ -78,6 +81,13 @@ export default function DailyReportContent() {
     refetch: refetchSingleReport,
   } = useDailyReport(selectedId ?? undefined);
 
+  const {
+    data: settingsResponse,
+    refetch: refetchSettings,
+    isFetching: settingsFetching,
+  } = useSystemSettings();
+  const workingDaysPerWeek = settingsResponse?.data?.WORKING_DAYS_PER_WEEK ?? 6;
+
   const reportsMap = useMemo(() => {
     const map = new Map<string, DailyReport>();
     if (reportsData?.data) {
@@ -98,7 +108,9 @@ export default function DailyReportContent() {
     let workingDays = 0;
     const cursor = new Date(dateRange.start);
     while (cursor <= today) {
-      if (cursor.getDay() !== 0) workingDays++;
+      const dow = cursor.getDay();
+      const isoDow = dow === 0 ? 7 : dow;
+      if (isoDow <= workingDaysPerWeek) workingDays++;
       cursor.setDate(cursor.getDate() + 1);
     }
     const reportedDays = reportsMap.size;
@@ -106,14 +118,16 @@ export default function DailyReportContent() {
     const submissionRate =
       workingDays > 0 ? Math.round((reportedDays / workingDays) * 100) : 0;
 
-    // Week stats (Mon-Sat, from monday to today)
+    // Week stats (Mon-Sat or configured working days, from monday to today)
     const monday = new Date(today);
     monday.setDate(today.getDate() - ((today.getDay() + 6) % 7)); // Monday
     let weekWorkingDays = 0;
     let weekReportedDays = 0;
     const w = new Date(monday);
     while (w <= today) {
-      if (w.getDay() !== 0) {
+      const dow = w.getDay();
+      const isoDow = dow === 0 ? 7 : dow;
+      if (isoDow <= workingDaysPerWeek) {
         weekWorkingDays++;
         if (reportsMap.has(isoDate(w))) weekReportedDays++;
       }
@@ -128,7 +142,7 @@ export default function DailyReportContent() {
       weekWorkingDays,
       weekReportedDays,
     };
-  }, [dateRange, reportsMap]);
+  }, [dateRange, reportsMap, workingDaysPerWeek]);
 
   const selectedReport = useMemo(() => {
     if (!selectedId) return null;
@@ -163,12 +177,16 @@ export default function DailyReportContent() {
     [router, pathname],
   );
 
-  const isReloading = reportsFetching || singleReportFetching;
+  const isReloading =
+    reportsFetching || singleReportFetching || settingsFetching;
 
   const handleReload = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ["system-settings"] });
+    refetchSettings();
     refetchReports();
+    refetchIntern();
     if (selectedId) refetchSingleReport();
-  }, [refetchReports, selectedId, refetchSingleReport]);
+  }, [queryClient, refetchSettings, refetchReports, refetchIntern, selectedId, refetchSingleReport]);
 
   if (internLoading) {
     return (

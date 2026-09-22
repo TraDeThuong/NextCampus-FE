@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Users, CalendarDays, FileText } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useQueryClient } from "@tanstack/react-query";
 import Spinner from "@/components/ui/Spinner";
 import MetalCard from "@/components/ui/MetalCard";
 import LeaderDailyReportsHeader from "./LeaderDailyReportsHeader";
@@ -17,6 +18,7 @@ import { useInterns } from "@/hooks/intern/useInterns";
 import { useInternDetail } from "@/hooks/intern/useInternDetail";
 import { useDailyReports } from "@/hooks/daily-report/useDailyReports";
 import { useDailyReport } from "@/hooks/daily-report/useDailyReport";
+import { useSystemSettings } from "@/hooks/system-setting/useSystemSettings";
 import { useRBAC } from "@/hooks/rbac/useRBAC";
 import type { DailyReport } from "@/types/daily-report";
 
@@ -100,6 +102,14 @@ export default function LeaderDailyReportContent() {
     limit: 100,
   });
 
+  const queryClient = useQueryClient();
+  const {
+    data: settingsResponse,
+    refetch: refetchSettings,
+    isFetching: settingsFetching,
+  } = useSystemSettings();
+  const workingDaysPerWeek = settingsResponse?.data?.WORKING_DAYS_PER_WEEK ?? 6;
+
   // Calculate stats & today submitted set
   const { overviewStats, todaySubmittedSet } = useMemo(() => {
     const totalInterns = interns.length;
@@ -113,7 +123,7 @@ export default function LeaderDailyReportContent() {
     ).length;
     const missingToday = Math.max(0, totalInterns - submittedToday);
 
-    // This week (Mon–today, excl Sundays)
+    // This week (Mon–today, based on configured working days per week)
     const weekReports = weekReportsData?.data ?? [];
     const now = new Date();
     const monday = new Date(now);
@@ -121,7 +131,9 @@ export default function LeaderDailyReportContent() {
     let weekWorkingDays = 0;
     const w = new Date(monday);
     while (w <= now) {
-      if (w.getDay() !== 0) weekWorkingDays++;
+      const dow = w.getDay();
+      const isoDow = dow === 0 ? 7 : dow;
+      if (isoDow <= workingDaysPerWeek) weekWorkingDays++;
       w.setDate(w.getDate() + 1);
     }
     const expectedWeek = totalInterns * weekWorkingDays;
@@ -141,7 +153,7 @@ export default function LeaderDailyReportContent() {
       },
       todaySubmittedSet: todayUniqueInterns,
     };
-  }, [interns, todayReportsData, weekReportsData]);
+  }, [interns, todayReportsData, weekReportsData, workingDaysPerWeek]);
 
   // 3. Selection & Filtering State
   const [selectedInternId, setSelectedInternId] = useState<string | null>(
@@ -293,15 +305,17 @@ export default function LeaderDailyReportContent() {
   }, [filterMode, singleDate, fromDate, toDate, searchQuery]);
 
   const isReloading =
-    internsFetching || todayFetching || weekFetching || reportsFetching || singleReportFetching;
+    internsFetching || todayFetching || weekFetching || reportsFetching || singleReportFetching || settingsFetching;
 
   const handleReload = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ["system-settings"] });
+    refetchSettings();
     refetchInterns();
     refetchToday();
     refetchWeek();
     refetchReports();
     if (selectedReportId) refetchSingleReport();
-  }, [refetchInterns, refetchToday, refetchWeek, refetchReports, selectedReportId, refetchSingleReport]);
+  }, [queryClient, refetchSettings, refetchInterns, refetchToday, refetchWeek, refetchReports, selectedReportId, refetchSingleReport]);
 
   if (internsLoading) {
     return (

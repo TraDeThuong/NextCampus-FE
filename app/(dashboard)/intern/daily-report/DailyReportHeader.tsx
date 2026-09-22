@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import MetalCard from "@/components/ui/MetalCard";
 import Button from "@/components/ui/Button";
 import { useDailyReports } from "@/hooks/daily-report/useDailyReports";
+import { useSystemSettings } from "@/hooks/system-setting/useSystemSettings";
 import { useRBAC } from "@/hooks/rbac/useRBAC";
 import type { DailyReport } from "@/types/daily-report";
 
@@ -27,6 +28,17 @@ export default function DailyReportHeader({
   const canCreate = can("DAILY_REPORT_CREATE");
   const canUpdate = can("DAILY_REPORT_UPDATE");
 
+  // Fetch operational system settings (dynamic daily report cutoff deadline)
+  const { data: settingsData } = useSystemSettings();
+  const activeDeadline = settingsData?.data?.DAILY_REPORT_DEADLINE_TIME ?? "17:30";
+  const nextDeadline = settingsData?.data?.NEXT_DAILY_REPORT_DEADLINE_TIME;
+  const nextEffectiveDate = settingsData?.data?.DAILY_REPORT_DEADLINE_EFFECTIVE_DATE;
+
+  const [deadlineHour, deadlineMinute] = useMemo(() => {
+    const parts = (activeDeadline || "17:30").split(":").map(Number);
+    return [parts[0] ?? 17, parts[1] ?? 30];
+  }, [activeDeadline]);
+
   // Format date and time in Asia/Ho_Chi_Minh
   const { todayStr, isPastCutoff } = useMemo(() => {
     const now = new Date();
@@ -40,9 +52,9 @@ export default function DailyReportHeader({
       hour12: false,
     }).format(now);
     const [vnHour, vnMinute] = vnTimeStr.split(":").map(Number);
-    const past = vnHour > 17 || (vnHour === 17 && vnMinute >= 30);
+    const past = vnHour > deadlineHour || (vnHour === deadlineHour && vnMinute >= deadlineMinute);
     return { todayStr: vnDateStr, isPastCutoff: past };
-  }, []);
+  }, [deadlineHour, deadlineMinute]);
 
   const { data, isPending } = useDailyReports({
     from: todayStr,
@@ -145,11 +157,19 @@ export default function DailyReportHeader({
               <AlertTriangle className="h-5 w-5 shrink-0 text-rose-400 animate-bounce" />
               <div className="flex-1">
                 <p className="text-sm font-bold text-rose-200">
-                  {t("pastCutoffTitle")}
+                  {t("pastCutoffTitle", { time: activeDeadline })}
                 </p>
                 <p className="text-xs text-rose-300/80 mt-0.5">
                   {t("pastCutoffDesc", { date: todayStr })}
                 </p>
+                {nextDeadline && nextEffectiveDate && (
+                  <p className="text-[11px] text-rose-300/70 mt-1 italic">
+                    {t("nextDayEffectiveNotice", {
+                      nextTime: nextDeadline,
+                      date: nextEffectiveDate,
+                    })}
+                  </p>
+                )}
               </div>
               {canCreate && (
                 <Button variant="danger" size="sm" onClick={onOpenCreate}>
@@ -162,11 +182,19 @@ export default function DailyReportHeader({
               <Clock className="h-5 w-5 shrink-0 text-amber-400 animate-pulse" />
               <div className="flex-1">
                 <p className="text-sm font-semibold">
-                  {t("beforeCutoffTitle", { date: todayStr })}
+                  {t("beforeCutoffTitle", { time: activeDeadline, date: todayStr })}
                 </p>
                 <p className="text-xs text-amber-300/80 mt-0.5">
-                  {t("beforeCutoffDesc")}
+                  {t("beforeCutoffDesc", { time: activeDeadline })}
                 </p>
+                {nextDeadline && nextEffectiveDate && (
+                  <p className="text-[11px] text-amber-300/70 mt-1 italic">
+                    {t("nextDayEffectiveNotice", {
+                      nextTime: nextDeadline,
+                      date: nextEffectiveDate,
+                    })}
+                  </p>
+                )}
               </div>
               {canCreate && (
                 <Button variant="metal-blue" size="sm" onClick={onOpenCreate}>
