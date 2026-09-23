@@ -16,6 +16,7 @@ import {
 import MetalCard from "@/components/ui/MetalCard";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import DateTimePicker from "@/components/ui/DateTimePicker";
 import Spinner from "@/components/ui/Spinner";
 import { useRBAC } from "@/hooks/rbac/useRBAC";
 import { useMaintenanceConfig } from "@/hooks/maintenance/useMaintenanceConfig";
@@ -308,29 +309,25 @@ function MaintenanceFormView({ config }: MaintenanceFormViewProps) {
 
           {/* Schedule Range */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-muted flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5" />
-                {t("startAt")}
-              </label>
-              <Input
-                type="datetime-local"
+            <div>
+              <DateTimePicker
+                label={t("startAt")}
                 value={startAt}
-                onChange={(e) => setStartAt(e.target.value)}
+                onChange={(val) => setStartAt(val)}
+                onClear={() => setStartAt("")}
                 disabled={!canManage}
+                placeholder={t("startAt")}
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-muted flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5" />
-                {t("estimatedEndAt")}
-              </label>
-              <Input
-                type="datetime-local"
+            <div>
+              <DateTimePicker
+                label={t("estimatedEndAt")}
                 value={estimatedEndAt}
-                onChange={(e) => setEstimatedEndAt(e.target.value)}
+                onChange={(val) => setEstimatedEndAt(val)}
+                onClear={() => setEstimatedEndAt("")}
                 disabled={!canManage}
+                placeholder={t("estimatedEndAt")}
               />
             </div>
           </div>

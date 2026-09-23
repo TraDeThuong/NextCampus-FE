@@ -24,6 +24,7 @@ import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import TimePicker from "@/components/ui/TimePicker";
 import { useSystemSettings } from "@/hooks/system-setting/useSystemSettings";
 import { useBatchUpdateSettings } from "@/hooks/system-setting/useBatchUpdateSettings";
 import type { SystemSettings } from "@/types/system-setting";
@@ -368,16 +369,14 @@ function AdminSettingsFields({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
             <div>
-              <Input
+              <TimePicker
                 label={t("dailyReportDeadlineTitle")}
-                type="time"
                 value={formValues.DAILY_REPORT_DEADLINE_TIME}
-                onChange={(e) => handleChange("DAILY_REPORT_DEADLINE_TIME", e.target.value)}
+                onChange={(val) => handleChange("DAILY_REPORT_DEADLINE_TIME", val)}
                 disabled={batchUpdate.isPending}
                 required
                 error={errors.DAILY_REPORT_DEADLINE_TIME}
                 helperText={t("dailyReportDeadlineDesc")}
-                className="font-mono text-base font-semibold"
               />
             </div>
 

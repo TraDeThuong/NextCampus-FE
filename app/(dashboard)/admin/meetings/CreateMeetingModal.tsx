@@ -25,6 +25,7 @@ import Input from "@/components/ui/Input";
 import Textarea from "@/components/ui/Textarea";
 import Select from "@/components/ui/Select";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { TimePicker } from "@/components/ui/TimePicker";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { useCreateMeeting } from "@/hooks/meeting/useCreateMeeting";
 import { getUsersService } from "@/services/user.service";
@@ -486,12 +487,12 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
                 name="startTimeStr"
                 control={control}
                 render={({ field }) => (
-                  <Select
+                  <TimePicker
                     label={t("admin.meetings.startTime")}
                     required
-                    options={TIME_OPTIONS}
                     value={field.value}
                     onChange={(val) => field.onChange(val)}
+                    onClear={() => field.onChange("")}
                     error={errors.startTimeStr?.message}
                   />
                 )}
@@ -503,12 +504,12 @@ export default function CreateMeetingModal({ onCloseModal, defaultDate }: Props)
                 name="endTimeStr"
                 control={control}
                 render={({ field }) => (
-                  <Select
+                  <TimePicker
                     label={t("admin.meetings.endTime")}
                     required
-                    options={TIME_OPTIONS}
                     value={field.value}
                     onChange={(val) => field.onChange(val)}
+                    onClear={() => field.onChange("")}
                     error={errors.endTimeStr?.message}
                   />
                 )}

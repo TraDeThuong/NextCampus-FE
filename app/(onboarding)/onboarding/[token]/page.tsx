@@ -16,7 +16,6 @@ import {
   BookOpen,
   Building2,
   Briefcase,
-  Calendar,
   Clock,
   FileUp,
   FileText,
@@ -42,6 +41,7 @@ import {
 import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
 import Button from "@/components/ui/Button";
+import { DatePicker } from "@/components/ui/DatePicker";
 
 const BUSINESS_TIME_ZONE = "Asia/Ho_Chi_Minh";
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
@@ -677,29 +677,20 @@ export default function OnboardingPage() {
 
             {/* Start Date (Weekend + Past Date blocked) */}
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-slate-300">
-                Ngày bắt đầu dự kiến <span className="text-rose-400">*</span>
-              </label>
-              <div className="relative">
-                <Calendar className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-500 shrink-0" />
-                <input
-                  type="date"
-                  min={getBusinessToday()}
-                  {...register("startDate")}
-                  className={`w-full rounded-xl border bg-white/5 py-2.5 pl-10 pr-4 text-sm text-white outline-none transition focus:border-cyan-400/50 ${
-                    errors.startDate ? "border-rose-500/50" : "border-white/10"
-                  }`}
-                />
-              </div>
-              {errors.startDate ? (
-                <p className="mt-1 text-xs text-rose-400 flex items-center gap-1">
-                  <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.startDate.message}
-                </p>
-              ) : (
-                <p className="mt-1 text-[11px] text-slate-500">
-                  Lưu ý: Không được chọn ngày trong quá khứ và không chọn Thứ Bảy / Chủ Nhật.
-                </p>
-              )}
+              <DatePicker
+                label="Ngày bắt đầu dự kiến"
+                required
+                value={watch("startDate")}
+                minDate={getBusinessToday()}
+                onChange={(d) => {
+                  setValue("startDate", d, { shouldValidate: true });
+                }}
+                onClear={() => {
+                  setValue("startDate", "", { shouldValidate: true });
+                }}
+                error={errors.startDate?.message}
+                helperText="Lưu ý: Không được chọn ngày trong quá khứ và không chọn Thứ Bảy / Chủ Nhật."
+              />
             </div>
 
             {/* Duration */}

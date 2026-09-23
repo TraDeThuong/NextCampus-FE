@@ -1086,3 +1086,9 @@ export function DatePicker({
 }
 
 export default DatePicker;
+
+// Re-export TimePicker and DateTimePicker for unified access
+export { TimePicker } from "./TimePicker";
+export type { TimePickerProps, TimePreset } from "./TimePicker";
+export { DateTimePicker } from "./DateTimePicker";
+export type { DateTimePickerProps, DateTimePreset } from "./DateTimePicker";

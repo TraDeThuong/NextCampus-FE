@@ -118,8 +118,27 @@ Table là thành phần dễ bị "vỡ" giao diện nhất khi lên code. Phả
         - Hiệu ứng **Hover Range Preview** xem trước dải ngày trước khi click chốt.
         - Tích hợp thanh phím tắt chọn nhanh (Presets: Hôm nay, 7 ngày, 30 ngày, Tuần này, Tháng này).
         - Hiển thị ngày tháng người dùng theo định dạng chuẩn `DD/MM/YYYY`, lưu trữ và gửi API chuẩn ISO `YYYY-MM-DD`.
+   - **Thời gian & Giờ giấc (TimePicker)**:
+      * **Tuyệt đối CẤM `<input type="time">` native** trên toàn bộ hệ thống.
+      * **Bắt buộc sử dụng `TimePicker`** từ `@/components/ui/TimePicker` hoặc `@/components/ui/DatePicker`.
+      * **Quy cách UI/UX**:
+        - Chiều cao trigger chuẩn `h-[42px] sm:h-[46px]`, bo góc `rounded-xl`, icon `Clock`.
+        - Popover portal `zIndex: 9999`, tự động lật `flip`, kẹp viewport trên mobile.
+        - 2 cột Giờ (`00`-`23`) và Phút (`00`-`59` theo `step`), tự động cuộn đến giờ/phút đang chọn.
+        - Thanh cuộn chuẩn `.scrollbar-dropdown` (5px, cyan glow).
+        - Thanh phím tắt chọn nhanh (Presets: 08:00, 09:00, 12:00, 13:30, 17:30, 21:00...) và nút "Bây giờ".
+        - Lưu trữ và gửi API chuẩn 24h `HH:mm`.
+   - **Ngày & Giờ tích hợp (DateTimePicker)**:
+      * **Tuyệt đối CẤM `<input type="datetime-local">` native** trên toàn bộ hệ thống.
+      * **Bắt buộc sử dụng `DateTimePicker`** từ `@/components/ui/DateTimePicker` hoặc `@/components/ui/DatePicker`.
+      * **Quy cách UI/UX**:
+        - Chiều cao trigger chuẩn `h-[42px] sm:h-[46px]`, bo góc `rounded-xl`, icon `Calendar` + `Clock`.
+        - Popover portal `zIndex: 9999`, tự động lật `flip`.
+        - Giao diện đáp ứng: Desktop (`≥ 640px`) hiển thị song song (Side-by-side) lịch và cột giờ/phút; Mobile (`< 640px`) tabbed switcher `[ 📅 Ngày ]` và `[ ⏰ Giờ ]` chống tràn viền.
+        - Presets nhanh: "Bây giờ", "+1 Giờ", "Hôm nay 18:00", "Hôm nay 23:59", "Ngày mai 09:00"...
+        - Lưu trữ và gửi API chuẩn ISO / `YYYY-MM-DDTHH:mm`. Hiển thị người dùng `DD/MM/YYYY HH:mm` (vi) hoặc `MM/DD/YYYY HH:mm` (en).
 5. **Đồng Bộ Chiều Cao Các Ô Cùng Hàng (Uniform Field Height Across Rows - BẮT BUỘC)**:
-   - **Quy tắc bất biến**: Mọi ô nhập liệu (`Input`, `Select`, `DatePicker`, các nút radio chọn dạng card button...) khi đặt trên **cùng một hàng** (`grid-cols-2`, `grid-cols-3`...) **BẮT BUỘC PHẢI CÓ CHIỀU CAO BẰNG NHAU TUYỆT ĐỐI**. Tuyệt đối không để xảy ra tình trạng ô cao ô thấp làm lệch lạc hàng lối.
+   - **Quy tắc bất biến**: Mọi ô nhập liệu (`Input`, `Select`, `DatePicker`, `TimePicker`, `DateTimePicker`, các nút radio chọn dạng card button...) khi đặt trên **cùng một hàng** (`grid-cols-2`, `grid-cols-3`...) **BẮT BUỘC PHẢI CÓ CHIỀU CAO BẰNG NHAU TUYỆT ĐỐI**. Tuyệt đối không để xảy ra tình trạng ô cao ô thấp làm lệch lạc hàng lối.
    - **Kích thước chuẩn hóa**:
      * Chiều cao ô nhập / nút chọn: `h-[42px] sm:h-[46px]` (padding `px-4 py-2.5 sm:py-3 text-sm rounded-xl`).
      * Nhãn label: Đồng bộ dùng class `text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center gap-1` kèm dấu sao đỏ `*` nếu required. Tuyệt đối không nhét thêm icon tự chế vào nhãn làm lệch dòng nhãn.

@@ -13,7 +13,6 @@ import {
   Phone,
   Building2,
   Briefcase,
-  Calendar,
   Clock,
   Loader2,
   AlertTriangle,
@@ -26,6 +25,7 @@ import { useVerifyInvite } from "@/hooks/application/useVerifyInvite";
 import { useCreateApplication } from "@/hooks/application/useCreateApplication";
 import { getActiveRegulationService } from "@/services/regulation.service";
 import Spinner from "@/components/ui/Spinner";
+import { DatePicker } from "@/components/ui/DatePicker";
 import {
   APPLICATION_PREFERRED_DEPARTMENTS,
   getApplicationPreferredPositions,
@@ -145,6 +145,10 @@ export default function FormPage() {
   const preferredPositions = getApplicationPreferredPositions(
     selectedPreferredDepartment,
   );
+  const startDateVal = useWatch({
+    control,
+    name: "startDate",
+  });
 
   // ─── File upload state ────────────────────────────────────────────────────
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -355,23 +359,17 @@ export default function FormPage() {
           </div>
         </Field>
 
-        <Field
-          label="Start Date"
-          icon={Calendar}
-          error={errors.startDate?.message}
-        >
-          <input
-            type="date"
-            {...register("startDate")}
-            min={getBusinessToday()}
-            className={`${inputClass} cursor-pointer`}
-            onClick={(e) => {
-              try {
-                e.currentTarget.showPicker();
-              } catch {}
-            }}
+        <div>
+          <DatePicker
+            label="Start Date"
+            required
+            value={startDateVal}
+            minDate={getBusinessToday()}
+            onChange={(d) => setValue("startDate", d, { shouldValidate: true })}
+            onClear={() => setValue("startDate", "", { shouldValidate: true })}
+            error={errors.startDate?.message}
           />
-        </Field>
+        </div>
 
         <Field
           label="Duration (months)"

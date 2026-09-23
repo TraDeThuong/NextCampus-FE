@@ -6,6 +6,7 @@ import { KeyRound, Loader2, Calendar, ShieldCheck } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import DateTimePicker from "@/components/ui/DateTimePicker";
 import { usePermissions } from "@/hooks/rbac/usePermissions";
 import { useCreateApiKey } from "@/hooks/integration/useCreateApiKey";
 import type { CreateApiKeyResult } from "@/types/integration";
@@ -82,15 +83,13 @@ export default function CreateApiKeyModal({
           />
         </div>
 
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-muted flex items-center gap-1.5">
-            <Calendar className="h-3.5 w-3.5" />
-            {t("expiresLabel")}
-          </label>
-          <Input
-            type="datetime-local"
+        <div>
+          <DateTimePicker
+            label={t("expiresLabel")}
             value={expiresAt}
-            onChange={(e) => setExpiresAt(e.target.value)}
+            onChange={(val) => setExpiresAt(val)}
+            onClear={() => setExpiresAt("")}
+            placeholder={t("expiresLabel")}
           />
         </div>
 
