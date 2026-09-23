@@ -182,51 +182,51 @@ export default function LeaderStatsOverview() {
     { border: string; bg: string; hoverBg: string; text: string; textBold: string; hex: string }
   > = {
     DONE: {
-      border: "border-emerald-500/20",
-      bg: "bg-emerald-500/10",
-      hoverBg: "hover:bg-emerald-500/20",
-      text: "text-emerald-400",
-      textBold: "text-emerald-300",
+      border: "border-emerald-200 dark:border-emerald-500/20",
+      bg: "bg-emerald-50 dark:bg-emerald-500/10",
+      hoverBg: "hover:bg-emerald-100/70 dark:hover:bg-emerald-500/20",
+      text: "text-emerald-700 dark:text-emerald-400",
+      textBold: "text-emerald-800 dark:text-emerald-300",
       hex: "#10b981",
     },
     IN_PROGRESS: {
-      border: "border-cyan-500/20",
-      bg: "bg-cyan-500/10",
-      hoverBg: "hover:bg-cyan-500/20",
-      text: "text-cyan-400",
-      textBold: "text-cyan-300",
+      border: "border-cyan-200 dark:border-cyan-500/20",
+      bg: "bg-cyan-50 dark:bg-cyan-500/10",
+      hoverBg: "hover:bg-cyan-100/70 dark:hover:bg-cyan-500/20",
+      text: "text-cyan-700 dark:text-cyan-400",
+      textBold: "text-cyan-800 dark:text-cyan-300",
       hex: "#06b6d4",
     },
     REVIEW: {
-      border: "border-amber-500/20",
-      bg: "bg-amber-500/10",
-      hoverBg: "hover:bg-amber-500/20",
-      text: "text-amber-400",
-      textBold: "text-amber-300",
+      border: "border-amber-200 dark:border-amber-500/20",
+      bg: "bg-amber-50 dark:bg-amber-500/10",
+      hoverBg: "hover:bg-amber-100/70 dark:hover:bg-amber-500/20",
+      text: "text-amber-800 dark:text-amber-400",
+      textBold: "text-amber-900 dark:text-amber-300",
       hex: "#f59e0b",
     },
     BLOCKED: {
-      border: "border-rose-500/20",
-      bg: "bg-rose-500/10",
-      hoverBg: "hover:bg-rose-500/20",
-      text: "text-rose-400",
-      textBold: "text-rose-300",
+      border: "border-rose-200 dark:border-rose-500/20",
+      bg: "bg-rose-50 dark:bg-rose-500/10",
+      hoverBg: "hover:bg-rose-100/70 dark:hover:bg-rose-500/20",
+      text: "text-rose-700 dark:text-rose-400",
+      textBold: "text-rose-800 dark:text-rose-300",
       hex: "#f43f5e",
     },
     TODO: {
-      border: "border-white/10",
-      bg: "bg-white/5",
-      hoverBg: "hover:bg-white/10",
-      text: "text-muted",
-      textBold: "text-foreground",
+      border: "border-slate-200 dark:border-white/10",
+      bg: "bg-slate-50 dark:bg-white/5",
+      hoverBg: "hover:bg-slate-100 dark:hover:bg-white/10",
+      text: "text-slate-600 dark:text-muted",
+      textBold: "text-slate-900 dark:text-foreground",
       hex: "#64748b",
     },
     PENDING_APPROVAL: {
-      border: "border-purple-500/20",
-      bg: "bg-purple-500/10",
-      hoverBg: "hover:bg-purple-500/20",
-      text: "text-purple-400",
-      textBold: "text-purple-300",
+      border: "border-purple-200 dark:border-purple-500/20",
+      bg: "bg-purple-50 dark:bg-purple-500/10",
+      hoverBg: "hover:bg-purple-100/70 dark:hover:bg-purple-500/20",
+      text: "text-purple-700 dark:text-purple-400",
+      textBold: "text-purple-800 dark:text-purple-300",
       hex: "#a855f7",
     },
   };
@@ -338,22 +338,22 @@ export default function LeaderStatsOverview() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20 shrink-0 shadow-xs dark:shadow-[0_0_15px_rgba(99,102,241,0.2)]">
                   <LayoutDashboard className="h-5 w-5 shrink-0" />
                 </div>
                 <h1 className="text-2xl font-bold metal-text">
                   {t("welcomeBack", { name: leaderDisplayName })}
                 </h1>
-                <span className="hidden sm:inline-flex rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-0.5 text-xs font-semibold text-indigo-300">
+                <span className="hidden sm:inline-flex rounded-full border border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-500/30 dark:bg-indigo-500/10 dark:text-indigo-300 px-3 py-0.5 text-xs font-semibold">
                   {t("badge")}
                 </span>
               </div>
-              <p className="mt-1 text-sm text-muted">{t("description")}</p>
+              <p className="mt-1 text-sm text-slate-500 dark:text-muted">{t("description")}</p>
             </div>
 
             <div className="flex items-center gap-3">
               {/* Live Status Badge */}
-              <div className="flex items-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-3.5 py-2 text-xs font-semibold text-emerald-300 backdrop-blur-xl shadow-sm">
+              <div className="flex items-center gap-2 rounded-xl border border-emerald-300/80 bg-emerald-50 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-300 px-3.5 py-2 text-xs font-semibold backdrop-blur-xl shadow-xs">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
@@ -369,10 +369,10 @@ export default function LeaderStatsOverview() {
                 disabled={isFetching}
                 title={t("reloadTooltip")}
                 aria-label={t("reloadTooltip")}
-                className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-muted hover:text-indigo-400 hover:bg-white/10 transition-all active:scale-90 disabled:opacity-50 cursor-pointer"
+                className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100/80 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 dark:border-white/10 dark:bg-white/5 dark:text-muted dark:hover:text-indigo-400 dark:hover:bg-white/10 transition-all active:scale-90 disabled:opacity-50 cursor-pointer"
               >
                 <RotateCw
-                  className={`h-4 w-4 ${isFetching ? "animate-spin text-indigo-400" : ""}`}
+                  className={`h-4 w-4 ${isFetching ? "animate-spin text-indigo-500 dark:text-indigo-400" : ""}`}
                 />
               </button>
             </div>
@@ -386,7 +386,7 @@ export default function LeaderStatsOverview() {
           title={t("activeInterns")}
           value={activeInternsCount}
           subtitle={t("activeInternsSubtitle", { total: totalInternsCount })}
-          icon={<Users className="h-6 w-6 text-primary-light" />}
+          icon={<Users className="h-6 w-6 text-primary-main dark:text-primary-light" />}
           href="/leader/interns?status=ACTIVE"
           trend={{
             text: t("completedCount", { count: completedInternsCount }),
@@ -398,7 +398,7 @@ export default function LeaderStatsOverview() {
           title={t("activeWorkloadDays")}
           value={t("workloadDaysCount", { n: activeWorkloadDays })}
           subtitle={t("workloadDaysSubtitle")}
-          icon={<Clock className="h-6 w-6 text-cyan-400" />}
+          icon={<Clock className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />}
           href="/leader/tasks"
           trend={{
             text:
@@ -415,7 +415,7 @@ export default function LeaderStatsOverview() {
           title={t("overdueTasks")}
           value={overdueAssignments.length}
           subtitle={t("overdueTasksSubtitle")}
-          icon={<ShieldAlert className="h-6 w-6 text-rose-400" />}
+          icon={<ShieldAlert className="h-6 w-6 text-rose-600 dark:text-rose-400" />}
           onCardClick={handleOpenOverdueModal}
           trend={{
             text: overdueAssignments.length > 0 ? t("remindInterns") : t("onTrack"),
@@ -427,7 +427,7 @@ export default function LeaderStatsOverview() {
           title={t("avgScore")}
           value={`${avgEvalScore}/10`}
           subtitle={t("avgScoreSubtitle", { count: totalEvals })}
-          icon={<Award className="h-6 w-6 text-emerald-400" />}
+          icon={<Award className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />}
           href="/leader/weekly-evaluation"
           trend={{
             text: t("avgScoreLabel"),
@@ -442,21 +442,21 @@ export default function LeaderStatsOverview() {
         <div className="lg:col-span-8 flex flex-col">
           <MetalCard className="p-6 flex-1 flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-4">
                 <div>
                   <div className="flex items-center gap-2.5">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-light/10 text-primary-light border border-primary-light/20 shrink-0 shadow-[0_0_15px_rgba(56,189,248,0.15)]">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-main/10 text-primary-main border border-primary-main/20 dark:bg-primary-light/10 dark:text-primary-light dark:border-primary-light/20 shrink-0 shadow-xs dark:shadow-[0_0_15px_rgba(56,189,248,0.15)]">
                       <Users className="h-5 w-5 shrink-0" />
                     </div>
                     <h3 className="text-xl font-bold text-foreground">
                       <span className="metal-text">{t("internProgressTitle")}</span>
                     </h3>
                   </div>
-                  <p className="text-xs text-muted mt-1.5">{t("internProgressDesc")}</p>
+                  <p className="text-xs text-slate-500 dark:text-muted mt-1.5">{t("internProgressDesc")}</p>
                 </div>
                 <Link
                   href="/leader/interns"
-                  className="text-xs text-primary-light hover:text-cyan-300 font-semibold flex items-center gap-1 px-3 py-1.5 rounded-xl border border-primary-light/20 bg-primary-light/5 hover:bg-primary-light/10 transition-all"
+                  className="text-xs text-primary-main hover:text-primary-main/80 dark:text-primary-light dark:hover:text-cyan-300 font-semibold flex items-center gap-1 px-3 py-1.5 rounded-xl border border-primary-main/20 bg-primary-main/5 hover:bg-primary-main/10 dark:border-primary-light/20 dark:bg-primary-light/5 dark:hover:bg-primary-light/10 transition-all"
                 >
                   {locale === "vi" ? "Xem tất cả" : "View all"}
                   <ExternalLink className="h-3 w-3" />
@@ -527,9 +527,9 @@ export default function LeaderStatsOverview() {
                               </span>
                               <span className="text-muted">{percent}%</span>
                             </div>
-                            <div className="h-1.5 w-full rounded-full bg-white/5 overflow-hidden">
+                            <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-white/10 overflow-hidden">
                               <div
-                                className="h-full bg-primary-light rounded-full"
+                                className="h-full bg-primary-main dark:bg-primary-light rounded-full"
                                 style={{ width: `${percent}%` }}
                               />
                             </div>
@@ -543,12 +543,12 @@ export default function LeaderStatsOverview() {
 
                           <div>
                             {isTodayReport ? (
-                              <span className="inline-flex items-center gap-1 text-xs font-semibold leading-none text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1.5 rounded-lg">
+                              <span className="inline-flex items-center gap-1 text-xs font-semibold leading-none text-emerald-700 bg-emerald-50 border border-emerald-200 dark:text-emerald-400 dark:bg-emerald-500/10 dark:border-emerald-500/20 px-2.5 py-1.5 rounded-lg">
                                 <CheckCircle2 className="h-3 w-3 shrink-0" />
                                 {t("reportSubmittedToday")}
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 text-xs font-semibold leading-none text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1.5 rounded-lg">
+                              <span className="inline-flex items-center gap-1 text-xs font-semibold leading-none text-amber-800 bg-amber-50 border border-amber-200 dark:text-amber-400 dark:bg-amber-500/10 dark:border-amber-500/20 px-2.5 py-1.5 rounded-lg">
                                 <Clock className="h-3 w-3 shrink-0" />
                                 {t("reportNotSubmittedToday")}
                               </span>
@@ -557,17 +557,17 @@ export default function LeaderStatsOverview() {
 
                           <div>
                             {intern.healthStatus === "HEALTHY" && (
-                              <span className="inline-flex items-center justify-center text-xs font-semibold leading-none text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1.5 rounded-lg">
+                              <span className="inline-flex items-center justify-center text-xs font-semibold leading-none text-emerald-700 bg-emerald-50 border border-emerald-200 dark:text-emerald-400 dark:bg-emerald-500/10 dark:border-emerald-500/20 px-2.5 py-1.5 rounded-lg">
                                 {t("healthy")}
                               </span>
                             )}
                             {intern.healthStatus === "WARNING" && (
-                              <span className="inline-flex items-center justify-center text-xs font-semibold leading-none text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1.5 rounded-lg">
+                              <span className="inline-flex items-center justify-center text-xs font-semibold leading-none text-amber-800 bg-amber-50 border border-amber-200 dark:text-amber-400 dark:bg-amber-500/10 dark:border-amber-500/20 px-2.5 py-1.5 rounded-lg">
                                 {t("warning", { count: overdueCount })}
                               </span>
                             )}
                             {intern.healthStatus === "DANGER" && (
-                              <span className="inline-flex items-center justify-center text-xs font-semibold leading-none text-rose-400 bg-rose-500/10 border border-rose-500/30 px-2.5 py-1.5 rounded-lg">
+                              <span className="inline-flex items-center justify-center text-xs font-semibold leading-none text-rose-700 bg-rose-50 border border-rose-200 dark:text-rose-400 dark:bg-rose-500/10 dark:border-rose-500/30 px-2.5 py-1.5 rounded-lg">
                                 {t("danger", { count: overdueCount })}
                               </span>
                             )}
@@ -587,16 +587,16 @@ export default function LeaderStatsOverview() {
           <MetalCard className="p-6 flex-1 flex flex-col justify-between space-y-6">
             <div>
               {/* Task Status Heading */}
-              <div className="border-b border-white/10 pb-4">
+              <div className="border-b border-slate-100 dark:border-white/10 pb-4">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400 shrink-0 shadow-xs dark:shadow-[0_0_15px_rgba(16,185,129,0.15)]">
                     <CheckCircle2 className="h-5 w-5 shrink-0" />
                   </div>
                   <h3 className="text-xl font-bold text-foreground">
                     <span className="metal-text">{t("taskStatusTitle")}</span>
                   </h3>
                 </div>
-                <p className="text-xs text-muted mt-1.5">{t("taskStatusSubtitle")}</p>
+                <p className="text-xs text-slate-500 dark:text-muted mt-1.5">{t("taskStatusSubtitle")}</p>
               </div>
 
               {/* Donut Chart */}
@@ -663,7 +663,7 @@ export default function LeaderStatsOverview() {
             </div>
 
             {/* Quick Actions Shortcuts Grid */}
-            <div className="pt-4 border-t border-white/10">
+            <div className="pt-4 border-t border-slate-100 dark:border-white/10">
               <div className="flex items-center gap-2 mb-3">
                 <div className="p-1 rounded-lg bg-amber-500/10 text-amber-400 shrink-0">
                   <Zap className="h-3.5 w-3.5" />

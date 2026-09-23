@@ -137,9 +137,9 @@ export default function InternWeeklyEvaluationList() {
 
       {/* ─── EVALUATION TABLE: BORDERLESS LAYOUT (Rule 47 Compliant) ─────── */}
       {evaluations.length === 0 ? (
-        <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-12 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-muted mb-4">
-            <Sparkles className="h-8 w-8 text-cyan-400/60" />
+        <div className="rounded-3xl border border-border bg-card dark:border-white/10 dark:bg-white/[0.02] p-12 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/20 border border-border dark:bg-white/5 dark:border-white/10 text-muted mb-4">
+            <Sparkles className="h-8 w-8 text-cyan-500/60 dark:text-cyan-400/60" />
           </div>
           <h3 className="text-base font-semibold text-foreground">
             {t("noEvaluations")}
@@ -151,7 +151,7 @@ export default function InternWeeklyEvaluationList() {
       ) : (
         <Table
           columns="minmax(140px, 1.2fr) minmax(160px, 1.5fr) minmax(140px, 1.2fr) minmax(180px, 1.5fr)"
-          className="bg-[linear-gradient(145deg,#101827_0%,#1a2235_20%,#0f172a_55%,#050816_100%)] shadow-[0_12px_40px_rgba(0,0,0,.45)] hover:shadow-[0_20px_50px_rgba(21,174,245,.15)] transition-shadow duration-500"
+          className="bg-card dark:bg-[linear-gradient(145deg,#101827_0%,#1a2235_20%,#0f172a_55%,#050816_100%)] shadow-sm dark:shadow-[0_12px_40px_rgba(0,0,0,.45)] hover:shadow-md dark:hover:shadow-[0_20px_50px_rgba(21,174,245,.15)] transition-shadow duration-500"
         >
           <Table.Header>
             <span>{t("colWeek")}</span>
@@ -197,12 +197,12 @@ export default function InternWeeklyEvaluationList() {
                   {/* Cột 3: Trạng thái xác nhận */}
                   <div className="flex justify-center">
                     {isReviewed ? (
-                      <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-lg border text-emerald-400 border-emerald-500/30 bg-emerald-500/10">
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-lg border text-emerald-700 bg-emerald-100/80 border-emerald-300 dark:text-emerald-400 dark:border-emerald-500/30 dark:bg-emerald-500/10">
                         <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
                         {t("reviewed")}
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-lg border text-amber-400 border-amber-500/30 bg-amber-500/10">
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-lg border text-amber-700 bg-amber-100/80 border-amber-300 dark:text-amber-400 dark:border-amber-500/30 dark:bg-amber-500/10">
                         <Clock className="h-3.5 w-3.5 shrink-0" />
                         {t("notReviewed")}
                       </span>
@@ -250,7 +250,7 @@ export default function InternWeeklyEvaluationList() {
                     onClick={() => handlePageChange(meta.page - 1)}
                     disabled={meta.page <= 1}
                     aria-label="Previous page"
-                    className="h-8 w-8 !p-0 flex items-center justify-center rounded-lg border border-white/10"
+                    className="h-8 w-8 !p-0 flex items-center justify-center rounded-lg border border-border dark:border-white/10"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
@@ -260,7 +260,7 @@ export default function InternWeeklyEvaluationList() {
                     onClick={() => handlePageChange(meta.page + 1)}
                     disabled={meta.page >= meta.totalPages}
                     aria-label="Next page"
-                    className="h-8 w-8 !p-0 flex items-center justify-center rounded-lg border border-white/10"
+                    className="h-8 w-8 !p-0 flex items-center justify-center rounded-lg border border-border dark:border-white/10"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </Button>

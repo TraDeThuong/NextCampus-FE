@@ -31,17 +31,17 @@ import InlineSelect from "@/components/ui/InlineSelect";
 import { toast } from "react-hot-toast";
 
 const INVITE_COLORS: Record<string, string> = {
-    UNUSED: "border-sky-500/30 text-sky-400 bg-sky-500/10",
-    ACTIVE: "border-sky-500/30 text-sky-400 bg-sky-500/10",
-    USED: "border-emerald-500/30 text-emerald-400 bg-emerald-500/10",
-    EXPIRED: "border-amber-500/30 text-amber-400 bg-amber-500/10",
-    REVOKED: "border-red-500/30 text-red-400 bg-red-500/10",
+    UNUSED: "border-sky-300 text-sky-700 bg-sky-100/80 dark:border-sky-500/30 dark:text-sky-400 dark:bg-sky-500/10",
+    ACTIVE: "border-sky-300 text-sky-700 bg-sky-100/80 dark:border-sky-500/30 dark:text-sky-400 dark:bg-sky-500/10",
+    USED: "border-emerald-300 text-emerald-700 bg-emerald-100/80 dark:border-emerald-500/30 dark:text-emerald-400 dark:bg-emerald-500/10",
+    EXPIRED: "border-amber-300 text-amber-800 bg-amber-100/80 dark:border-amber-500/30 dark:text-amber-400 dark:bg-amber-500/10",
+    REVOKED: "border-rose-300 text-rose-700 bg-rose-100/80 dark:border-red-500/30 dark:text-red-400 dark:bg-red-500/10",
 };
 
 const APP_COLORS: Record<string, string> = {
-    PENDING: "border-amber-500/30 text-amber-400 bg-amber-500/10",
-    APPROVED: "border-emerald-500/30 text-emerald-400 bg-emerald-500/10",
-    REJECTED: "border-red-500/30 text-red-400 bg-red-500/10",
+    PENDING: "border-amber-300 text-amber-800 bg-amber-100/80 dark:border-amber-500/30 dark:text-amber-400 dark:bg-amber-500/10",
+    APPROVED: "border-emerald-300 text-emerald-700 bg-emerald-100/80 dark:border-emerald-500/30 dark:text-emerald-400 dark:bg-emerald-500/10",
+    REJECTED: "border-rose-300 text-rose-700 bg-rose-100/80 dark:border-red-500/30 dark:text-red-400 dark:bg-red-500/10",
 };
 
 function formatDate(dateStr: string, locale: string) {

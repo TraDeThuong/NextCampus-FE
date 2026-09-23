@@ -48,19 +48,19 @@ export default function LeaderDailyReportsFilter({
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder={t("searchIntern")}
-              className="h-[42px] sm:h-[46px] w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-xs sm:text-sm text-foreground placeholder:text-muted transition focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+              className="h-[42px] sm:h-[46px] w-full rounded-xl border border-border bg-card dark:border-white/10 dark:bg-white/5 px-5 py-3 text-xs sm:text-sm text-foreground placeholder:text-muted transition focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
             />
           </div>
 
           {/* Mode Selector */}
           <div className="md:col-span-4">
-            <div className="flex h-[42px] sm:h-[46px] items-center rounded-xl border border-white/10 bg-white/5 p-1 text-xs sm:text-sm">
+            <div className="flex h-[42px] sm:h-[46px] items-center rounded-xl border border-border bg-slate-100/80 dark:border-white/10 dark:bg-white/5 p-1 text-xs sm:text-sm">
               <button
                 type="button"
                 onClick={() => onModeChange("all")}
                 className={`flex-1 h-full rounded-lg px-2 sm:px-3 font-medium transition cursor-pointer select-none text-center truncate ${
                   filterMode === "all"
-                    ? "bg-cyan-500/20 text-cyan-300 shadow-sm"
+                    ? "bg-white text-cyan-700 shadow-sm dark:bg-cyan-500/20 dark:text-cyan-300"
                     : "text-muted hover:text-foreground"
                 }`}
               >
@@ -71,7 +71,7 @@ export default function LeaderDailyReportsFilter({
                 onClick={() => onModeChange("single")}
                 className={`flex-1 h-full rounded-lg px-2 sm:px-3 font-medium transition cursor-pointer select-none text-center truncate ${
                   filterMode === "single"
-                    ? "bg-cyan-500/20 text-cyan-300 shadow-sm"
+                    ? "bg-white text-cyan-700 shadow-sm dark:bg-cyan-500/20 dark:text-cyan-300"
                     : "text-muted hover:text-foreground"
                 }`}
               >
@@ -82,7 +82,7 @@ export default function LeaderDailyReportsFilter({
                 onClick={() => onModeChange("range")}
                 className={`flex-1 h-full rounded-lg px-2 sm:px-3 font-medium transition cursor-pointer select-none text-center truncate ${
                   filterMode === "range"
-                    ? "bg-cyan-500/20 text-cyan-300 shadow-sm"
+                    ? "bg-white text-cyan-700 shadow-sm dark:bg-cyan-500/20 dark:text-cyan-300"
                     : "text-muted hover:text-foreground"
                 }`}
               >
@@ -111,7 +111,7 @@ export default function LeaderDailyReportsFilter({
                 className="w-full [&>button]:h-[42px] sm:[&>button]:h-[46px] [&>button]:rounded-xl [&>button]:px-4 [&>button]:text-xs sm:[&>button]:text-sm [&>button]:w-full"
               />
             ) : (
-              <div className="flex h-[42px] sm:h-[46px] items-center rounded-xl border border-white/5 bg-white/[0.02] px-4 text-xs text-muted italic">
+              <div className="flex h-[42px] sm:h-[46px] items-center rounded-xl border border-border bg-muted/20 dark:border-white/5 dark:bg-white/[0.02] px-4 text-xs text-muted italic">
                 {t("selectCalendar")}
               </div>
             )}
@@ -121,14 +121,14 @@ export default function LeaderDailyReportsFilter({
         {/* Reset Row (Rule 63: only when hasFilters is active) */}
         {hasFilters && (
           <div className="flex items-center justify-between border-t border-border/40 pt-3">
-            <span className="text-xs text-cyan-400 font-medium flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
+            <span className="text-xs text-cyan-600 dark:text-cyan-400 font-medium flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400 animate-pulse" />
               {t("legendSelected")}
             </span>
             <button
               type="button"
               onClick={onReset}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-muted hover:border-cyan-400/30 hover:bg-cyan-500/10 hover:text-cyan-300 transition cursor-pointer active:scale-95"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card dark:border-white/10 dark:bg-white/5 px-3 py-1.5 text-xs text-muted hover:border-cyan-400/30 hover:bg-cyan-500/10 hover:text-cyan-600 dark:hover:text-cyan-300 transition cursor-pointer active:scale-95"
             >
               <RotateCcw className="h-3 w-3 shrink-0" />
               <span>{t("resetFilters")}</span>

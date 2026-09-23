@@ -289,14 +289,14 @@ export default function AdminStatsOverview() {
                   {t("admin.dashboard.badge")}
                 </span>
               </div>
-              <p className="mt-1 text-sm text-muted">
+              <p className="mt-1 text-sm text-slate-500 dark:text-muted">
                 {t("admin.dashboard.subtitle")}
               </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
               {/* Time Scope Filter Pills */}
-              <div className="flex items-center rounded-xl border border-white/10 bg-white/[0.03] p-1">
+              <div className="flex items-center rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100/70 dark:bg-white/[0.03] p-1">
                 {timeScopes.map((scope) => (
                   <button
                     key={scope.id}
@@ -304,8 +304,8 @@ export default function AdminStatsOverview() {
                     onClick={() => setTimeScope(scope.id)}
                     className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
                       timeScope === scope.id
-                        ? "bg-primary text-white shadow-sm"
-                        : "text-muted hover:text-foreground hover:bg-white/5"
+                        ? "bg-primary-main text-white shadow-sm"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-muted dark:hover:text-foreground dark:hover:bg-white/5"
                     }`}
                   >
                     {scope.label}
@@ -314,7 +314,7 @@ export default function AdminStatsOverview() {
               </div>
 
               {/* Live Status Badge */}
-              <div className="flex items-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-3 py-2 text-xs font-semibold text-emerald-300 backdrop-blur-xl shadow-sm">
+              <div className="flex items-center gap-2 rounded-xl border border-emerald-300/80 bg-emerald-50 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-300 px-3 py-2 text-xs font-semibold backdrop-blur-xl shadow-xs">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
@@ -330,9 +330,9 @@ export default function AdminStatsOverview() {
                 disabled={isFetching}
                 title={t("admin.dashboard.reloadTooltip")}
                 aria-label={t("admin.dashboard.reloadTooltip")}
-                className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-muted hover:text-cyan-400 hover:bg-white/10 transition-all active:scale-90 disabled:opacity-50 cursor-pointer"
+                className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100/80 text-slate-600 hover:text-cyan-600 hover:bg-cyan-50 dark:border-white/10 dark:bg-white/5 dark:text-muted dark:hover:text-cyan-400 dark:hover:bg-white/10 transition-all active:scale-90 disabled:opacity-50 cursor-pointer"
               >
-                <RotateCw className={`h-4 w-4 ${isFetching ? "animate-spin text-cyan-400" : ""}`} />
+                <RotateCw className={`h-4 w-4 ${isFetching ? "animate-spin text-cyan-600 dark:text-cyan-400" : ""}`} />
               </button>
             </div>
           </div>
@@ -345,7 +345,7 @@ export default function AdminStatsOverview() {
           title={t("admin.dashboard.totalInterns")}
           value={totalInterns}
           subtitle={t("admin.dashboard.activeInternsSubtitle", { active: activeInterns })}
-          icon={<Users className="h-6 w-6 text-primary-light" />}
+          icon={<Users className="h-6 w-6 text-primary-main dark:text-primary-light" />}
           href="/admin/interns"
           trend={{
             text: t("admin.dashboard.completed", {
@@ -361,7 +361,7 @@ export default function AdminStatsOverview() {
           subtitle={t("admin.dashboard.managingDepts", {
             n: stats?.system?.activeDepartments ?? departmentDistribution.length,
           })}
-          icon={<UserCheck className="h-6 w-6 text-indigo-400" />}
+          icon={<UserCheck className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />}
           href="/admin/leaders"
           trend={{
             text: t("admin.dashboard.adminLevel"),
@@ -373,7 +373,7 @@ export default function AdminStatsOverview() {
           title={t("admin.dashboard.pendingApps")}
           value={pendingAppsCount}
           subtitle={t("admin.dashboard.totalApps", { n: totalAppsCount })}
-          icon={<FileText className="h-6 w-6 text-amber-400" />}
+          icon={<FileText className="h-6 w-6 text-amber-600 dark:text-amber-400" />}
           href="/admin/onboarding?inviteStatus=USED&applicationStatus=PENDING"
           trend={{
             text:
@@ -388,7 +388,7 @@ export default function AdminStatsOverview() {
           title={t("admin.dashboard.retentionRateCardTitle")}
           value={retentionDisplay.value}
           subtitle={retentionDisplay.subtitle}
-          icon={<Award className="h-6 w-6 text-emerald-400" />}
+          icon={<Award className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />}
           href="/admin/interns"
           trend={retentionDisplay.trend}
         />
@@ -400,23 +400,23 @@ export default function AdminStatsOverview() {
         <div className="lg:col-span-8 flex flex-col">
           <MetalCard className="p-6 flex-1 flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-4">
                 <div>
                   <div className="flex items-center gap-2.5">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shrink-0 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-600 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-500/20 shrink-0 shadow-xs dark:shadow-[0_0_15px_rgba(6,182,212,0.15)]">
                       <Building2 className="h-5 w-5 shrink-0" />
                     </div>
                     <h3 className="text-xl font-bold text-foreground">
                       <span className="metal-text">{t("admin.dashboard.departmentDistribution")}</span>
                     </h3>
                   </div>
-                  <p className="text-xs text-muted mt-1.5">
+                  <p className="text-xs text-slate-500 dark:text-muted mt-1.5">
                     {t("admin.dashboard.departmentDistributionSubtitle")}
                   </p>
                 </div>
                 <Link
                   href="/admin/department"
-                  className="text-xs text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1 px-3 py-1.5 rounded-xl border border-cyan-500/20 bg-cyan-500/5 hover:bg-cyan-500/10 transition-all"
+                  className="text-xs text-primary-main hover:text-primary-main/80 dark:text-cyan-400 dark:hover:text-cyan-300 font-semibold flex items-center gap-1 px-3 py-1.5 rounded-xl border border-primary-main/20 bg-primary-main/5 hover:bg-primary-main/10 dark:border-cyan-500/20 dark:bg-cyan-500/5 dark:hover:bg-cyan-500/10 transition-all"
                 >
                   {t("common.viewAll")}
                   <ExternalLink className="h-3 w-3" />

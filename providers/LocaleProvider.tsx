@@ -8,6 +8,7 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
+import { useRouter } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import type { AbstractIntlMessages } from "next-intl";
 
@@ -38,6 +39,7 @@ export default function LocaleProvider({
   allMessages: AllMessages;
 }) {
   const [locale, setLocaleState] = useState(initialLocale);
+  const router = useRouter();
 
   useEffect(() => {
     document.documentElement.lang = locale;
@@ -53,8 +55,10 @@ export default function LocaleProvider({
       // Save to cookies for SSR / server components persistence
       document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
       document.cookie = `locale=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
+
+      router.refresh();
     },
-    [locale],
+    [locale, router],
   );
 
   const messages = allMessages[locale] ?? {};

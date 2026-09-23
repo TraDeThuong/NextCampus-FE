@@ -39,12 +39,12 @@ export default function Header({ role, onMenuClick }: HeaderProps) {
         document.body
       )}
 
-      <header className="sticky top-0 z-20 h-20 border-b border-white/10 bg-white/5 backdrop-blur-xl px-4 md:px-8 flex items-center justify-between">
+      <header className="sticky top-0 z-20 h-20 border-b border-slate-200/80 dark:border-white/10 bg-white/80 dark:bg-white/5 backdrop-blur-xl px-4 md:px-8 flex items-center justify-between">
         {/* Title */}
         <div className="flex items-center gap-3">
           <button
             onClick={onMenuClick}
-            className="md:hidden flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white cursor-pointer transition-colors"
+            className="md:hidden flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100/80 text-slate-700 hover:bg-slate-200 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10 dark:text-white cursor-pointer transition-colors"
             aria-label="Menu"
           >
             <Menu size={20} />
@@ -69,7 +69,7 @@ export default function Header({ role, onMenuClick }: HeaderProps) {
           <Link
             href={`/${role.toLowerCase()}/profile`}
             title={state.user?.fullName ?? "User"}
-            className="flex items-center gap-2 md:gap-3 rounded-full border border-white/10 bg-white/5 p-1 md:px-3 md:py-2 backdrop-blur-lg transition hover:bg-white/10 cursor-pointer max-w-fit md:max-w-[260px] min-w-0"
+            className="flex items-center gap-2 md:gap-3 rounded-full border border-slate-200 bg-slate-100/80 hover:bg-slate-200/80 text-foreground dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10 p-1 md:px-3 md:py-2 backdrop-blur-lg transition cursor-pointer max-w-fit md:max-w-[260px] min-w-0"
           >
             {state.user?.avatarUrl ? (
               <Image
@@ -98,16 +98,24 @@ export default function Header({ role, onMenuClick }: HeaderProps) {
           <button
             onClick={handleLogout}
             disabled={isLoading}
+            aria-label={t("header.logout") || "Đăng xuất"}
+            title={t("header.logout") || "Đăng xuất"}
             className="
                 flex items-center justify-center
                 w-11 h-11 rounded-xl
-                border border-white/10
-                bg-white/10
+                border border-slate-200
+                bg-slate-100/80
+                text-slate-600
                 backdrop-blur-lg
-                text-white/70
                 transition-all duration-300
-                hover:bg-red-500/20
-                hover:text-red-400
+                hover:bg-rose-50
+                hover:text-rose-600
+                hover:border-rose-200
+                dark:border-white/10
+                dark:bg-white/10
+                dark:text-white/70
+                dark:hover:bg-red-500/20
+                dark:hover:text-red-400
                 cursor-pointer
             "
           >

@@ -154,9 +154,9 @@ export default function InternRow({ intern }: InternRowProps) {
         });
 
     const statusBadge: Record<string, string> = {
-        ACTIVE: "border-emerald-400/20 bg-emerald-500/10 text-emerald-300",
-        COMPLETED: "border-blue-400/20 bg-blue-500/10 text-blue-300",
-        DROPPED: "border-rose-400/20 bg-rose-500/10 text-rose-300",
+        ACTIVE: "border-emerald-300 bg-emerald-100/80 text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-500/10 dark:text-emerald-300",
+        COMPLETED: "border-blue-300 bg-blue-100/80 text-blue-700 dark:border-blue-400/20 dark:bg-blue-500/10 dark:text-blue-300",
+        DROPPED: "border-rose-300 bg-rose-100/80 text-rose-700 dark:border-rose-400/20 dark:bg-rose-500/10 dark:text-rose-300",
     };
 
     const handleLeaderChange = useCallback(
@@ -236,7 +236,7 @@ export default function InternRow({ intern }: InternRowProps) {
             <Table.Row>
                 {/* Intern info */}
                 <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-slate-600 to-slate-800 text-sm font-bold text-white shadow-sm ring-1 ring-white/10">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-main to-primary-light text-sm font-bold text-white shadow-sm dark:from-slate-700 dark:to-slate-800 dark:ring-1 dark:ring-white/10">
                         {intern.fullName.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0">
@@ -388,7 +388,7 @@ export default function InternRow({ intern }: InternRowProps) {
                             aria-expanded={menuOpen}
                             aria-haspopup="true"
                             onClick={toggleMenu}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-muted transition hover:border-white/10 hover:bg-white/5 hover:text-foreground active:scale-95"
+                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-muted transition hover:border-border hover:bg-slate-100 hover:text-foreground dark:hover:border-white/10 dark:hover:bg-white/5 active:scale-95 cursor-pointer"
                         >
                             <MoreVertical className="h-4 w-4" />
                         </button>
@@ -401,7 +401,7 @@ export default function InternRow({ intern }: InternRowProps) {
                                 id={`intern-action-menu-${menuId}`}
                                 role="menu"
                                 style={menuStyle}
-                                className="rounded-2xl border border-white/10 bg-[#0c1322]/95 p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn"
+                                className="rounded-2xl border border-border bg-card/95 dark:border-white/10 dark:bg-[#0c1322]/95 p-1.5 shadow-xl dark:shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn"
                             >
                                 {canViewIntern && (
                                     <button
@@ -411,9 +411,9 @@ export default function InternRow({ intern }: InternRowProps) {
                                             setMenuOpen(false);
                                             router.push(`/admin/interns/${intern.id}`);
                                         }}
-                                        className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground/90 transition hover:bg-white/10 hover:text-cyan-400 active:scale-98"
+                                        className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground transition hover:bg-slate-100 dark:hover:bg-white/10 hover:text-cyan-600 dark:hover:text-cyan-400 active:scale-98 cursor-pointer"
                                     >
-                                        <Eye className="h-4 w-4 shrink-0 text-cyan-400" />
+                                        <Eye className="h-4 w-4 shrink-0 text-cyan-600 dark:text-cyan-400" />
                                         {t("admin.interns.view")}
                                     </button>
                                 )}
@@ -424,7 +424,7 @@ export default function InternRow({ intern }: InternRowProps) {
                                             type="button"
                                             role="menuitem"
                                             onClick={() => setMenuOpen(false)}
-                                            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-rose-400 transition hover:bg-rose-500/10 hover:text-rose-300 active:scale-98"
+                                            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-rose-600 dark:text-rose-400 transition hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-700 dark:hover:text-rose-300 active:scale-98 cursor-pointer"
                                         >
                                             <Trash2 className="h-4 w-4 shrink-0" />
                                             {t("admin.interns.delete")}

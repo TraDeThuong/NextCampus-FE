@@ -117,3 +117,29 @@
 - **Tương thích hiệu ứng Metal / Glassmorphism**:
   - Ở Light mode: Giảm độ bóng gương, tăng độ tương phản của chữ.
   - Ở Dark mode: Tận dụng lớp nền `backdrop-blur-md` kết hợp dải màu bạc `metal-text` tạo cảm giác sang trọng, cao cấp.
+
+### 2.4. Quy Chuẩn Thứ Tự Nút Điều Khiển (Theme & Language Toggle Order)
+- **QUY TẮC BẮT BUỘC ĐỒNG BỘ 100%**:
+  Trên mọi thanh điều hướng Header, thanh Action Bar, Auth layout, Onboarding layout, trang 404 (`not-found.tsx`), trang báo lỗi (`error.tsx`):
+  * **Nút chỉnh Sáng/Tối (`<ThemeToggle />`) BẮT BUỘC ĐỨNG TRƯỚC (bên trái)**.
+  * **Nút chuyển đổi Ngôn ngữ (`<LanguageToggle />`) BẮT BUỘC ĐỨNG SAU (bên phải)**.
+  * Cấu trúc chuẩn:
+    ```tsx
+    {/* Theme Switcher trước, Language Switcher sau */}
+    <ThemeToggle />
+    <LanguageToggle />
+    ```
+
+---
+
+## 🎯 3. Quy Chuẩn Đa Ngôn Ngữ (i18n) Cho Các Trang Độc Lập & Xác Thực
+1. **Tuyệt đối KHÔNG hardcode văn bản**:
+   - Các trang xác thực (`/login`, `/forgot-password`, `/reset-password`), trang 404 (`app/not-found.tsx`), trang báo lỗi hệ thống (`app/error.tsx`) phải sử dụng 100% qua `useTranslations(...)`.
+2. **Tính toàn vẹn song ngữ giữa 2 bộ từ điển**:
+   - Mọi key mới được định nghĩa trong `messages/vi/*.json` bắt buộc phải có key tương ứng trong `messages/en/*.json` (các namespace `auth`, `notFound`, `error` nằm trong `common.json`).
+3. **Cơ chế Client Component cho Trang 404**:
+   - `app/not-found.tsx` đóng vai trò bọc Server Component, bên trong render Client Component `components/common/NotFoundContent.tsx`.
+   - `NotFoundContent` gọi `useTranslations("notFound")` để khi người dùng nhấn nút cờ đổi ngôn ngữ, tiêu đề, mô tả và nút bấm sẽ chuyển đổi tức thì trong 0ms mà không cần tải lại trang.
+4. **Đồng bộ Server Components qua `router.refresh()`**:
+   - Trong `LocaleProvider.tsx`, khi `setLocale` được kích hoạt, ngoài việc cập nhật state React và lưu cookie `NEXT_LOCALE` / `locale`, phải gọi `router.refresh()` để thông báo Next.js cập nhật các Server Components đang đọc locale từ cookie.
+

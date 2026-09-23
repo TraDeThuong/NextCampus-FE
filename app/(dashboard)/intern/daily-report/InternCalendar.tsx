@@ -147,7 +147,7 @@ export default function InternCalendar({
           onClick={goPrev}
           disabled={currentOffset === 0}
           aria-label="Previous month"
-          className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition active:scale-95"
+          className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-slate-100 hover:bg-slate-200 text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/10 dark:hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition active:scale-95 cursor-pointer"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
@@ -159,7 +159,7 @@ export default function InternCalendar({
           onClick={goNext}
           disabled={currentOffset >= totalMonths - 1}
           aria-label="Next month"
-          className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition active:scale-95"
+          className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-slate-100 hover:bg-slate-200 text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/10 dark:hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition active:scale-95 cursor-pointer"
         >
           <ChevronRight className="h-4 w-4" />
         </button>
@@ -170,7 +170,7 @@ export default function InternCalendar({
         {weekdays.map((name) => (
           <div
             key={name}
-            className="text-center text-[10px] font-bold text-muted uppercase tracking-wider py-1 select-none"
+            className="text-center text-[10px] font-bold text-slate-700 dark:text-muted uppercase tracking-wider py-1 select-none"
           >
             {name}
           </div>
@@ -203,27 +203,27 @@ export default function InternCalendar({
               "aspect-square rounded-xl flex flex-col items-center justify-center text-xs transition-all duration-150 cursor-pointer select-none active:scale-95 ";
 
             if (!inRange) {
-              cellClass += "text-slate-700 opacity-30 cursor-not-allowed ";
+              cellClass += "text-slate-400 dark:text-slate-700 opacity-40 cursor-not-allowed ";
             } else if (report) {
               cellClass +=
-                "text-cyan-100 bg-cyan-500/25 font-bold shadow-[0_0_8px_rgba(6,182,212,0.15)] hover:bg-cyan-500/35 border border-cyan-400/30 ";
+                "text-cyan-800 dark:text-cyan-100 bg-cyan-100/90 dark:bg-cyan-500/25 font-bold shadow-xs hover:bg-cyan-200/80 dark:hover:bg-cyan-500/35 border border-cyan-300 dark:border-cyan-400/30 ";
             } else if (missing) {
               cellClass +=
-                "text-rose-200 bg-rose-500/15 font-medium hover:bg-rose-500/25 border border-rose-500/20 ";
+                "text-rose-800 dark:text-rose-200 bg-rose-100/90 dark:bg-rose-500/15 font-semibold hover:bg-rose-200/80 dark:hover:bg-rose-500/25 border border-rose-300 dark:border-rose-500/20 ";
             } else {
-              cellClass += "text-slate-300 hover:bg-white/5 border border-transparent ";
+              cellClass += "text-slate-800 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 border border-slate-200/40 dark:border-transparent ";
             }
 
             if (isToday && !report) {
-              cellClass += "ring-1 ring-white/40 ";
+              cellClass += "ring-1 ring-slate-400 dark:ring-white/40 ";
             }
 
             if (isToday && report) {
-              cellClass += "ring-1 ring-cyan-400 ";
+              cellClass += "ring-1 ring-primary-main dark:ring-cyan-400 ";
             }
 
             if (isSelected) {
-              cellClass += "ring-2 ring-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.4)] ";
+              cellClass += "ring-2 ring-primary-main dark:ring-cyan-400 shadow-md dark:shadow-[0_0_12px_rgba(6,182,212,0.4)] ";
             }
 
             return (
@@ -236,7 +236,7 @@ export default function InternCalendar({
               >
                 <span>{day.getDate()}</span>
                 {report && (
-                  <span className="block w-1.5 h-1.5 rounded-full bg-cyan-300 mt-0.5 shadow-[0_0_4px_rgba(6,182,212,0.8)]" />
+                  <span className="block w-1.5 h-1.5 rounded-full bg-cyan-600 dark:bg-cyan-300 mt-0.5 shadow-xs" />
                 )}
               </button>
             );
@@ -245,17 +245,17 @@ export default function InternCalendar({
       </div>
 
       {/* Calendar Legend */}
-      <div className="mt-4 pt-3 border-t border-white/5 flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted select-none">
+      <div className="mt-4 pt-3 border-t border-border dark:border-white/5 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-600 dark:text-muted select-none">
         <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_4px_rgba(6,182,212,0.6)]" />
+          <span className="w-2 h-2 rounded-full bg-cyan-500 dark:bg-cyan-400 shadow-[0_0_4px_rgba(6,182,212,0.6)]" />
           <span>{t("legendSubmitted")}</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-rose-400/80" />
+          <span className="w-2 h-2 rounded-full bg-rose-500 dark:bg-rose-400/80" />
           <span>{t("legendMissing")}</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-md border border-white/60" />
+          <span className="w-2.5 h-2.5 rounded-md border border-slate-400 dark:border-white/60" />
           <span>{t("legendToday")}</span>
         </div>
       </div>

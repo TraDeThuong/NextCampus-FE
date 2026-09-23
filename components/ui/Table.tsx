@@ -124,11 +124,11 @@ function Header({ children, className = "", isSticky = true }: HeaderProps) {
       style={{ gridTemplateColumns: columns }}
       className={`
         grid items-center gap-x-4 md:gap-x-6
-        border-b border-white/10
-        bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.02)_100%)]
+        border-b border-slate-200 dark:border-white/10
+        bg-slate-50/80 dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.02)_100%)]
         px-4 md:px-6 py-4
-        text-xs font-semibold uppercase tracking-[0.15em]
-        text-primary-light
+        text-xs font-bold uppercase tracking-[0.12em]
+        text-primary-main dark:text-primary-light
         backdrop-blur-xl
         rounded-t-[23px]
         [&>*]:min-w-0
@@ -151,14 +151,14 @@ function Row({ children, className = "", onClick }: RowProps) {
       onClick={onClick}
       className={`
         grid items-center gap-x-4 md:gap-x-6
-        border-b border-white/5
+        border-b border-slate-100 dark:border-white/5
         px-4 md:px-6 py-4
         text-foreground
         transition-all duration-200
-        hover:bg-white/[0.04]
+        hover:bg-slate-50/80 dark:hover:bg-white/[0.04]
         last:border-b-0
         [&>*]:min-w-0
-        ${onClick ? "cursor-pointer active:bg-white/[0.06]" : ""}
+        ${onClick ? "cursor-pointer active:bg-slate-100/80 dark:active:bg-white/[0.06]" : ""}
         ${className}
       `}
     >
@@ -242,8 +242,8 @@ function Footer({
     <footer
       className={`
         flex items-center justify-between
-        border-t border-white/5
-        bg-[linear-gradient(180deg,rgba(255,255,255,0.02)_0%,transparent_100%)]
+        border-t border-slate-100 dark:border-white/5
+        bg-slate-50/50 dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.02)_0%,transparent_100%)]
         px-6 py-4
         backdrop-blur-xl
         ${className}
@@ -280,14 +280,15 @@ export function TableReloadButton({
           rounded-lg border border-transparent
           text-muted transition-all duration-200
           hover:border-border dark:hover:border-white/10
-          hover:bg-white/5 hover:text-cyan-400
+          hover:bg-slate-100 dark:hover:bg-white/5
+          hover:text-primary-main dark:hover:text-cyan-400
           active:scale-90
           disabled:opacity-50 disabled:cursor-not-allowed
         "
       >
         <RotateCw
           className={`h-3.5 w-3.5 transition-transform ${
-            isReloading ? "animate-spin text-cyan-400" : ""
+            isReloading ? "animate-spin text-primary-main dark:text-cyan-400" : ""
           }`}
         />
       </button>

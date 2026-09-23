@@ -455,7 +455,7 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal, onSuccess }:
               max={maxWeek}
               value={week}
               onChange={(e) => setWeek(Number(e.target.value))}
-              className="h-[42px] sm:h-[46px] w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-foreground placeholder:text-muted transition focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+              className="h-[42px] sm:h-[46px] w-full rounded-xl border border-border bg-card dark:border-white/10 dark:bg-white/5 px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-foreground placeholder:text-muted transition focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
               required
             />
             {selectedIntern && (
@@ -637,7 +637,7 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal, onSuccess }:
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             maxLength={2000}
-            className="w-full rounded-xl border border-white/10 bg-white/5 p-4 text-xs sm:text-sm text-foreground placeholder:text-muted transition focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 resize-none scrollbar-dropdown"
+            className="w-full rounded-xl border border-border bg-card dark:border-white/10 dark:bg-white/5 p-4 text-xs sm:text-sm text-foreground placeholder:text-muted transition focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 resize-none scrollbar-dropdown"
           />
           {aiComment && aiComment !== comment && (
             <button

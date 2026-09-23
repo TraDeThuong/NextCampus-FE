@@ -89,5 +89,56 @@
       "vi": "Tiếng Việt",
       "en": "English"
     }
+  },
+  "notFound": {
+    "title": "404 - Không tìm thấy trang",
+    "heading": "Không tìm thấy trang",
+    "desc": "Trang bạn đang tìm kiếm không tồn tại hoặc đã được di chuyển sang địa chỉ khác.",
+    "backHome": "Quay lại trang chủ"
+  },
+  "auth": {
+    "welcomeBack": "Chào mừng trở lại",
+    "welcomeSub": "Đăng nhập để truy cập Hệ thống Quản lý Thực tập sinh.",
+    "emailLabel": "Địa chỉ Email",
+    "emailPlaceholder": "name@company.com",
+    "passwordLabel": "Mật khẩu",
+    "passwordPlaceholder": "Nhập mật khẩu của bạn",
+    "rememberMe": "Ghi nhớ đăng nhập",
+    "forgotPassword": "Quên mật khẩu?",
+    "signIn": "Đăng nhập",
+    "signingIn": "Đang đăng nhập...",
+    "emailRequired": "Vui lòng nhập email",
+    "invalidEmail": "Địa chỉ email không hợp lệ",
+    "passwordRequired": "Vui lòng nhập mật khẩu",
+    "accountInactive": "Tài khoản của bạn đã bị khóa hoặc ngừng hoạt động.",
+    "invalidCredentials": "Tên đăng nhập hoặc mật khẩu không chính xác.",
+    "loginFailed": "Đăng nhập thất bại. Vui lòng thử lại.",
+    "loginSuccess": "Chào mừng trở lại, {name}!",
+    "forgotTitle": "Quên mật khẩu",
+    "forgotDesc": "Nhập địa chỉ email của bạn và chúng tôi sẽ gửi liên kết để đặt lại mật khẩu.",
+    "sendResetLink": "Gửi liên kết đặt lại",
+    "sending": "Đang gửi...",
+    "resetLinkSent": "Nếu email tồn tại trong hệ thống, liên kết đặt lại đã được gửi.",
+    "backToSignIn": "Quay lại Đăng nhập",
+    "resetTitle": "Đặt lại mật khẩu",
+    "resetDesc": "Nhập mật khẩu mới của bạn bên dưới.",
+    "newPassword": "Mật khẩu mới",
+    "confirmPassword": "Xác nhận mật khẩu",
+    "resetting": "Đang đặt lại...",
+    "invalidLink": "Liên kết không hợp lệ",
+    "invalidLinkDesc": "Liên kết đặt lại mật khẩu bị thiếu hoặc không hợp lệ. Vui lòng yêu cầu lại.",
+    "requestNewLink": "Yêu cầu liên kết mới",
+    "passwordMinLength": "Mật khẩu phải có ít nhất 8 ký tự",
+    "passwordComplexity": "Mật khẩu phải chứa chữ hoa, chữ thường, số và ký tự đặc biệt",
+    "confirmPasswordRequired": "Vui lòng xác nhận mật khẩu",
+    "passwordsDoNotMatch": "Mật khẩu xác nhận không khớp",
+    "resetSuccess": "Đặt lại mật khẩu thành công. Bây giờ bạn có thể đăng nhập.",
+    "resetFailed": "Không thể đặt lại mật khẩu. Liên kết có thể đã hết hạn."
+  },
+  "error": {
+    "title": "500 - Lỗi hệ thống",
+    "desc": "Đã xảy ra lỗi không mong muốn trên hệ thống. Đội ngũ kỹ thuật đã được ghi nhận sự cố này.",
+    "retry": "Thử lại",
+    "backHome": "Quay lại trang chủ"
   }
 }

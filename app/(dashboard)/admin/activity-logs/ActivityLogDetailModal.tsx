@@ -73,11 +73,11 @@ export default function ActivityLogDetailModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl border border-white/10 bg-[#0c1322]/95 shadow-[0_24px_60px_rgba(0,0,0,0.85)] backdrop-blur-2xl text-slate-200 overflow-hidden animate-scaleUp">
+      <div className="relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl border border-border dark:border-white/10 bg-card text-foreground dark:bg-[#0c1322]/95 dark:text-slate-200 shadow-2xl backdrop-blur-2xl overflow-hidden animate-scaleUp">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 sm:p-6 border-b border-white/10 bg-white/[0.02]">
+        <div className="flex items-center justify-between p-5 sm:p-6 border-b border-border dark:border-white/10 bg-slate-50/80 dark:bg-white/[0.02]">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-cyan-400/30 bg-cyan-500/10 text-cyan-400 shadow-[0_0_16px_rgba(6,182,212,0.25)]">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-cyan-400/30 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 shadow-[0_0_16px_rgba(6,182,212,0.25)]">
               <Terminal className="h-5 w-5 shrink-0" />
             </div>
             <div className="min-w-0">
@@ -94,7 +94,7 @@ export default function ActivityLogDetailModal({
             type="button"
             onClick={onClose}
             aria-label={t("admin.activityLogs.close")}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-muted transition hover:border-white/20 hover:bg-white/[0.08] hover:text-foreground active:scale-90 cursor-pointer"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border dark:border-white/10 bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.03] dark:hover:bg-white/[0.08] text-muted hover:text-foreground transition active:scale-90 cursor-pointer"
           >
             <X className="h-4 w-4" />
           </button>
@@ -103,27 +103,27 @@ export default function ActivityLogDetailModal({
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 scrollbar-dropdown">
           {/* Action & ID Banner */}
-          <div className="flex flex-wrap items-center justify-between gap-2 p-3.5 rounded-2xl border border-white/5 bg-white/[0.02]">
+          <div className="flex flex-wrap items-center justify-between gap-2 p-3.5 rounded-2xl border border-border dark:border-white/5 bg-slate-50 dark:bg-white/[0.02]">
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold text-muted">
                 {t("admin.activityLogs.action")}:
               </span>
-              <span className="text-xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wider bg-cyan-500/15 text-cyan-300 border border-cyan-400/30 shadow-sm">
+              <span className="text-xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wider bg-cyan-100 dark:bg-cyan-500/15 text-cyan-800 dark:text-cyan-300 border border-cyan-300 dark:border-cyan-400/30 shadow-xs">
                 {log.action}
               </span>
             </div>
 
-            <div className="text-[11px] font-mono text-slate-400 truncate">
+            <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400 truncate">
               <span className="text-muted mr-1.5">{t("admin.activityLogs.logId")}:</span>
-              <span className="select-all text-slate-300">{log.id}</span>
+              <span className="select-all text-slate-700 dark:text-slate-300">{log.id}</span>
             </div>
           </div>
 
           {/* Grid Information */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Actor Card */}
-            <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 space-y-2">
-              <div className="flex items-center gap-2 text-xs font-semibold text-cyan-400">
+            <div className="rounded-2xl border border-border dark:border-white/5 bg-slate-50/70 dark:bg-white/[0.02] p-4 space-y-2">
+              <div className="flex items-center gap-2 text-xs font-semibold text-cyan-600 dark:text-cyan-400">
                 <User className="h-4 w-4 shrink-0" />
                 <span>{t("admin.activityLogs.actorInfo")}</span>
               </div>
@@ -131,7 +131,7 @@ export default function ActivityLogDetailModal({
                 <p className="font-bold text-foreground truncate">{actorName}</p>
                 <p className="text-muted truncate">{actorEmail}</p>
                 {actorRole && (
-                  <span className="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-md font-medium border border-indigo-500/30 bg-indigo-500/10 text-indigo-300">
+                  <span className="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-md font-medium border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300">
                     {actorRole}
                   </span>
                 )}
@@ -139,8 +139,8 @@ export default function ActivityLogDetailModal({
             </div>
 
             {/* Target Card */}
-            <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 space-y-2">
-              <div className="flex items-center gap-2 text-xs font-semibold text-cyan-400">
+            <div className="rounded-2xl border border-border dark:border-white/5 bg-slate-50/70 dark:bg-white/[0.02] p-4 space-y-2">
+              <div className="flex items-center gap-2 text-xs font-semibold text-cyan-600 dark:text-cyan-400">
                 <Shield className="h-4 w-4 shrink-0" />
                 <span>{t("admin.activityLogs.targetInfo")}</span>
               </div>
@@ -152,21 +152,21 @@ export default function ActivityLogDetailModal({
                   </span>
                 </div>
                 {log.targetId && (
-                  <div className="text-[11px] font-mono text-slate-400 truncate">
+                  <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400 truncate">
                     <span className="text-muted">{t("admin.activityLogs.targetId")}:</span>{" "}
-                    <span className="select-all">{log.targetId}</span>
+                    <span className="select-all text-slate-700 dark:text-slate-300">{log.targetId}</span>
                   </div>
                 )}
               </div>
             </div>
 
             {/* Timestamp */}
-            <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 space-y-2">
-              <div className="flex items-center gap-2 text-xs font-semibold text-cyan-400">
+            <div className="rounded-2xl border border-border dark:border-white/5 bg-slate-50/70 dark:bg-white/[0.02] p-4 space-y-2">
+              <div className="flex items-center gap-2 text-xs font-semibold text-cyan-600 dark:text-cyan-400">
                 <Clock className="h-4 w-4 shrink-0" />
                 <span>{t("admin.activityLogs.timestamp")}</span>
               </div>
-              <p className="text-xs font-medium text-slate-300">
+              <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
                 {new Date(log.createdAt).toLocaleString("vi-VN", {
                   year: "numeric",
                   month: "2-digit",
@@ -179,13 +179,13 @@ export default function ActivityLogDetailModal({
             </div>
 
             {/* Network / Client */}
-            <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 space-y-2">
-              <div className="flex items-center gap-2 text-xs font-semibold text-cyan-400">
+            <div className="rounded-2xl border border-border dark:border-white/5 bg-slate-50/70 dark:bg-white/[0.02] p-4 space-y-2">
+              <div className="flex items-center gap-2 text-xs font-semibold text-cyan-600 dark:text-cyan-400">
                 <Monitor className="h-4 w-4 shrink-0" />
                 <span>{t("admin.activityLogs.ipAddress")} & Client</span>
               </div>
               <div className="space-y-1 text-xs">
-                <p className="font-mono text-slate-300">
+                <p className="font-mono text-slate-700 dark:text-slate-300">
                   IP: {log.ipAddress || "—"}
                 </p>
                 <p className="text-[11px] text-muted truncate" title={log.userAgent || ""}>

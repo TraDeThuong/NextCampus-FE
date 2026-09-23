@@ -36,7 +36,7 @@ export default function PendingApprovalCard({ onOpenModal, className }: Props) {
       title={t("pendingApproval")}
       value={crossTeam.length}
       subtitle={t("pendingApprovalSubtitle")}
-      icon={<Clock className="h-6 w-6 text-amber-400" />}
+      icon={<Clock className="h-6 w-6 text-amber-600 dark:text-amber-400" />}
       onCardClick={onOpenModal}
       trend={{
         text: crossTeam.length > 0 ? t("needsYourApproval") : t("allApproved"),

@@ -33,13 +33,13 @@ export default function NotificationBell() {
     <div ref={containerRef} className="relative">
       <button
         onClick={() => setIsOpen((prev) => !prev)}
-        className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/10 backdrop-blur-lg text-white/70 transition-all duration-300 hover:bg-white/20 hover:text-white cursor-pointer"
+        className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-slate-100/80 text-slate-700 hover:bg-slate-200 hover:text-slate-900 dark:border-white/10 dark:bg-white/10 dark:text-white/70 dark:hover:bg-white/20 dark:hover:text-white backdrop-blur-lg transition-all duration-300 cursor-pointer"
         aria-label={t("label")}
         title={t("label")}
       >
         <Bell size={18} />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-cyan-400 px-1 text-[11px] font-bold text-slate-950 shadow-[0_0_10px_rgba(21,174,245,0.8)] animate-pulse">
+          <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-cyan-500 text-white dark:bg-cyan-400 dark:text-slate-950 px-1 text-[11px] font-bold shadow-sm dark:shadow-[0_0_10px_rgba(21,174,245,0.8)] animate-pulse">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}

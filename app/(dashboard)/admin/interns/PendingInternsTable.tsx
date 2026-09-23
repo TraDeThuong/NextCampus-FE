@@ -72,9 +72,9 @@ export default function PendingInternsTable() {
             <Table
                 columns={COLUMNS}
                 className="
-                    bg-[linear-gradient(145deg,#101827_0%,#1a2235_20%,#0f172a_55%,#050816_100%)]
-                    shadow-[0_12px_40px_rgba(0,0,0,.45)]
-                    hover:shadow-[0_20px_50px_rgba(21,174,245,.15)]
+                    bg-card dark:bg-[linear-gradient(145deg,#101827_0%,#1a2235_20%,#0f172a_55%,#050816_100%)]
+                    shadow-sm dark:shadow-[0_12px_40px_rgba(0,0,0,.45)]
+                    hover:shadow-md dark:hover:shadow-[0_20px_50px_rgba(21,174,245,.15)]
                     transition-shadow duration-500
                 "
             >

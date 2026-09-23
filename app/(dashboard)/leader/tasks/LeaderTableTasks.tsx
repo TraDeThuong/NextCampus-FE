@@ -232,14 +232,14 @@ export default function LeaderTableTasks() {
                         <button
                           disabled={meta.page <= 1}
                           onClick={() => goToPage(meta.page - 1)}
-                          className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-1.5 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer"
+                          className="rounded-xl border border-border bg-card px-3 py-1.5 text-muted transition-all hover:border-primary-light/40 hover:bg-slate-100 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-white/20 dark:hover:bg-white/[0.06]"
                         >
                           <ChevronLeft className="h-4 w-4" />
                         </button>
                         <button
                           disabled={meta.page >= meta.totalPages}
                           onClick={() => goToPage(meta.page + 1)}
-                          className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-1.5 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer"
+                          className="rounded-xl border border-border bg-card px-3 py-1.5 text-muted transition-all hover:border-primary-light/40 hover:bg-slate-100 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-white/20 dark:hover:bg-white/[0.06]"
                         >
                           <ChevronRight className="h-4 w-4" />
                         </button>
@@ -289,7 +289,7 @@ export default function LeaderTableTasks() {
                               type="button"
                               disabled={meta.page <= 1}
                               onClick={() => goToPage(meta.page - 1)}
-                              className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer"
+                              className="rounded-xl border border-border bg-card px-3 py-2 text-muted transition-all hover:border-primary-light/40 hover:bg-slate-100 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-white/20 dark:hover:bg-white/[0.06]"
                             >
                               <ChevronLeft className="h-4 w-4" />
                             </button>
@@ -297,7 +297,7 @@ export default function LeaderTableTasks() {
                               type="button"
                               disabled={meta.page >= meta.totalPages}
                               onClick={() => goToPage(meta.page + 1)}
-                              className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer"
+                              className="rounded-xl border border-border bg-card px-3 py-2 text-muted transition-all hover:border-primary-light/40 hover:bg-slate-100 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-white/20 dark:hover:bg-white/[0.06]"
                             >
                               <ChevronRight className="h-4 w-4" />
                             </button>
@@ -507,7 +507,7 @@ function TaskGroupItem({
             ref={menuRef}
             role="menu"
             style={menuStyle}
-            className="rounded-2xl border border-white/10 bg-[#0c1322]/95 p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn text-left scrollbar-dropdown"
+            className="rounded-2xl border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur-2xl animate-fadeIn text-left scrollbar-dropdown dark:border-white/10 dark:bg-[#0c1322]/95 dark:shadow-[0_16px_48px_rgba(0,0,0,.6)]"
           >
             {canView && (
               <button
@@ -517,7 +517,7 @@ function TaskGroupItem({
                   setMenuOpen(false);
                   onOpenAction({ type: "view", groupId: group.id, groupName: group.name });
                 }}
-                className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground active:scale-95 transition cursor-pointer"
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-xs text-muted hover:bg-slate-100 hover:text-foreground active:scale-95 transition cursor-pointer dark:hover:bg-white/5"
               >
                 <Eye className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
                 <span>{t("view")}</span>
@@ -531,7 +531,7 @@ function TaskGroupItem({
                   setMenuOpen(false);
                   onOpenAction({ type: "edit", groupId: group.id, groupName: group.name });
                 }}
-                className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-foreground active:scale-95 transition cursor-pointer"
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-xs text-muted hover:bg-slate-100 hover:text-foreground active:scale-95 transition cursor-pointer dark:hover:bg-white/5"
               >
                 <Pencil className="h-3.5 w-3.5 shrink-0 text-amber-400" />
                 <span>{t("edit")}</span>
@@ -735,7 +735,7 @@ function TaskTableRow({
             aria-expanded={menuOpen}
             aria-controls={`task-actions-${menuId}`}
             onClick={toggleMenu}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-card/40 text-muted transition hover:border-white/20 hover:bg-card hover:text-foreground active:scale-95 cursor-pointer"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-card text-muted transition hover:border-primary-light/40 hover:bg-slate-100 hover:text-foreground active:scale-95 cursor-pointer dark:border-white/10 dark:bg-card/40 dark:hover:border-white/20 dark:hover:bg-card"
           >
             <MoreVertical className="h-4 w-4 shrink-0" />
           </button>
@@ -750,7 +750,7 @@ function TaskTableRow({
               ref={menuRef}
               role="menu"
               style={menuStyle}
-              className="rounded-2xl border border-white/10 bg-[#0c1322]/95 p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn text-left scrollbar-dropdown"
+              className="rounded-2xl border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur-2xl animate-fadeIn text-left scrollbar-dropdown dark:border-white/10 dark:bg-[#0c1322]/95 dark:shadow-[0_16px_48px_rgba(0,0,0,.6)]"
             >
               {showAiAssign && (
                 <button
@@ -791,7 +791,7 @@ function TaskTableRow({
                     setMenuOpen(false);
                     router.push(`${pathname}/${task.id}`);
                   }}
-                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-muted hover:bg-white/5 hover:text-foreground active:scale-95 transition cursor-pointer"
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-muted hover:bg-slate-100 hover:text-foreground active:scale-95 transition cursor-pointer dark:hover:bg-white/5"
                 >
                   <Eye className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
                   <span>{t("view")}</span>
@@ -808,7 +808,7 @@ function TaskTableRow({
                   }}
                   disabled={isCompleted}
                   title={isCompleted ? t("completedTaskReadOnly") : undefined}
-                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-muted hover:bg-white/5 hover:text-foreground active:scale-95 transition disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted cursor-pointer"
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-muted hover:bg-slate-100 hover:text-foreground active:scale-95 transition disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted cursor-pointer dark:hover:bg-white/5"
                 >
                   <Pencil className="h-3.5 w-3.5 shrink-0 text-amber-400" />
                   <span>{t("edit")}</span>
@@ -999,7 +999,7 @@ function TaskCardItem({
               aria-expanded={menuOpen}
               aria-controls={`task-card-actions-${menuId}`}
               onClick={toggleMenu}
-              className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-card/40 text-muted hover:bg-white/10 hover:text-foreground active:scale-95 transition cursor-pointer"
+              className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-card text-muted hover:bg-slate-100 hover:text-foreground active:scale-95 transition cursor-pointer dark:border-white/10 dark:bg-card/40 dark:hover:bg-white/10"
             >
               <MoreVertical className="h-4 w-4" />
             </button>
@@ -1014,7 +1014,7 @@ function TaskCardItem({
                 ref={menuRef}
                 role="menu"
                 style={menuStyle}
-                className="rounded-2xl border border-white/10 bg-[#0c1322]/95 p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn text-left scrollbar-dropdown"
+                className="rounded-2xl border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur-2xl animate-fadeIn text-left scrollbar-dropdown dark:border-white/10 dark:bg-[#0c1322]/95 dark:shadow-[0_16px_48px_rgba(0,0,0,.6)]"
               >
                 {showAiAssign && (
                   <button
@@ -1455,7 +1455,7 @@ function DeleteTaskConfirm({
           </div>
         </div>
       </div>
-      <div className="flex justify-end gap-3 border-t border-white/10 pt-4">
+      <div className="flex justify-end gap-3 border-t border-border dark:border-white/10 pt-4">
         <Button variant="glass" onClick={onClose} disabled={deleteTask.isPending}>{td("cancel")}</Button>
         <Button variant="danger" isLoading={deleteTask.isPending} onClick={handleDelete}>{td("delete")}</Button>
       </div>
@@ -1697,7 +1697,7 @@ function InlineAssignCell({
           <div
             ref={popoverRef}
             style={popoverStyle}
-            className="rounded-2xl border border-white/10 bg-[#0c1322]/95 p-2 shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn text-left scrollbar-dropdown"
+            className="rounded-2xl border border-border bg-card/95 p-2 shadow-xl backdrop-blur-2xl animate-fadeIn text-left scrollbar-dropdown dark:border-white/10 dark:bg-[#0c1322]/95 dark:shadow-[0_16px_48px_rgba(0,0,0,.6)]"
           >
             {/* My Team & Other Teams (Only show if canAssign and not overdue) */}
             {canAssign && !isOverdue && (
@@ -1713,7 +1713,7 @@ function InlineAssignCell({
                         type="button"
                         onClick={() => handleAssign(intern.id)}
                         disabled={isPending}
-                        className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-foreground hover:bg-white/5 transition disabled:opacity-50 cursor-pointer"
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-foreground hover:bg-slate-100 transition disabled:opacity-50 cursor-pointer dark:hover:bg-white/5"
                       >
                         <span className="truncate flex-1 text-left">{intern.fullName}</span>
                         {currentInternId === intern.id && (

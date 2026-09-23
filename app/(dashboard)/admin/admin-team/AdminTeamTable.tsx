@@ -85,9 +85,9 @@ export default function AdminTeamTable() {
             <Table
                 columns={COLUMNS}
                 className="
-                    bg-[linear-gradient(145deg,#101827_0%,#1a2235_20%,#0f172a_55%,#050816_100%)]
-                    shadow-[0_12px_40px_rgba(0,0,0,.45)]
-                    hover:shadow-[0_20px_50px_rgba(21,174,245,.15)]
+                    bg-card dark:bg-[linear-gradient(145deg,#101827_0%,#1a2235_20%,#0f172a_55%,#050816_100%)]
+                    shadow-sm dark:shadow-[0_12px_40px_rgba(0,0,0,.45)]
+                    hover:shadow-md dark:hover:shadow-[0_20px_50px_rgba(21,174,245,.15)]
                     transition-shadow duration-500
                 "
             >
@@ -114,17 +114,21 @@ export default function AdminTeamTable() {
 
                             <div className="flex items-center gap-2">
                                 <button
+                                    type="button"
+                                    aria-label="Previous page"
                                     disabled={meta.page <= 1}
                                     onClick={() => goToPage(meta.page - 1)}
-                                    className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:opacity-30"
+                                    className="rounded-xl border border-border bg-slate-100 hover:bg-slate-200 text-slate-700 dark:border-white/10 dark:bg-white/[0.03] dark:text-muted dark:hover:border-white/20 dark:hover:bg-white/[0.06] dark:hover:text-foreground px-3 py-2 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                                 >
                                     <ChevronLeft className="h-4 w-4" />
                                 </button>
 
                                 <button
+                                    type="button"
+                                    aria-label="Next page"
                                     disabled={meta.page >= meta.totalPages}
                                     onClick={() => goToPage(meta.page + 1)}
-                                    className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:opacity-30"
+                                    className="rounded-xl border border-border bg-slate-100 hover:bg-slate-200 text-slate-700 dark:border-white/10 dark:bg-white/[0.03] dark:text-muted dark:hover:border-white/20 dark:hover:bg-white/[0.06] dark:hover:text-foreground px-3 py-2 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                                 >
                                     <ChevronRight className="h-4 w-4" />
                                 </button>

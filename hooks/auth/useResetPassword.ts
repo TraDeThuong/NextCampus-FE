@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
+import { useTranslations } from "next-intl";
 import axios from "axios";
 import { authService } from "@/services/auth.service";
 
@@ -13,6 +14,7 @@ type ResetPasswordFormValues = {
 };
 
 export function useResetPassword() {
+    const t = useTranslations("auth");
     const router = useRouter();
     const searchParams = useSearchParams();
     const token = searchParams.get("token");
@@ -30,7 +32,7 @@ export function useResetPassword() {
         mutationFn: (password: string) =>
             authService.resetPassword({ token: token!, password }),
         onSuccess: () => {
-            toast.success("Password reset successfully. You can now sign in.");
+            toast.success(t("resetSuccess"));
             router.push("/login");
         },
         onError: (error: unknown) => {
@@ -38,7 +40,7 @@ export function useResetPassword() {
                 ? error.response?.data?.message
                 : undefined;
             toast.error(
-                msg ?? "Failed to reset password. The link may have expired."
+                msg ?? t("resetFailed")
             );
         },
     });

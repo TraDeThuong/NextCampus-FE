@@ -33,48 +33,48 @@ const COLUMNS = "145px minmax(150px, 1fr) 245px 185px minmax(180px, 1.4fr) 120px
 
 function getActionBadgeStyle(action: string) {
   if (action.startsWith("CREATE")) {
-    return "bg-cyan-500/15 text-cyan-300 border border-cyan-400/30";
+    return "bg-cyan-100 text-cyan-800 border-cyan-300 dark:bg-cyan-500/15 dark:text-cyan-300 dark:border-cyan-400/30 border";
   }
   if (action.startsWith("UPDATE")) {
-    return "bg-amber-500/15 text-amber-300 border border-amber-400/30";
+    return "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-400/30 border";
   }
   if (action.startsWith("DELETE")) {
-    return "bg-rose-500/15 text-rose-300 border border-rose-400/30";
+    return "bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-500/15 dark:text-rose-300 dark:border-rose-400/30 border";
   }
   if (action === "LOGIN") {
-    return "bg-emerald-500/15 text-emerald-300 border border-emerald-400/30";
+    return "bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-400/30 border";
   }
   if (action === "LOGOUT") {
-    return "bg-slate-500/15 text-slate-300 border border-slate-400/30";
+    return "bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-500/15 dark:text-slate-300 dark:border-slate-400/30 border";
   }
-  return "bg-indigo-500/15 text-indigo-300 border border-indigo-400/30";
+  return "bg-indigo-100 text-indigo-800 border-indigo-300 dark:bg-indigo-500/15 dark:text-indigo-300 dark:border-indigo-400/30 border";
 }
 
 function getTargetTypeIcon(type: string | null) {
   const iconClass = "h-4 w-4 shrink-0";
   switch (type) {
     case "SUBMISSION":
-      return <CheckCircle2 className={`${iconClass} text-emerald-400`} />;
+      return <CheckCircle2 className={`${iconClass} text-emerald-600 dark:text-emerald-400`} />;
     case "DAILY_REPORT":
-      return <Calendar className={`${iconClass} text-cyan-400`} />;
+      return <Calendar className={`${iconClass} text-cyan-600 dark:text-cyan-400`} />;
     case "USER":
-      return <User className={`${iconClass} text-indigo-400`} />;
+      return <User className={`${iconClass} text-indigo-600 dark:text-indigo-400`} />;
     case "INTERN":
-      return <User className={`${iconClass} text-sky-400`} />;
+      return <User className={`${iconClass} text-sky-600 dark:text-sky-400`} />;
     case "TASK":
-      return <FileText className={`${iconClass} text-amber-400`} />;
+      return <FileText className={`${iconClass} text-amber-600 dark:text-amber-400`} />;
     case "MEETING":
-      return <Calendar className={`${iconClass} text-purple-400`} />;
+      return <Calendar className={`${iconClass} text-purple-600 dark:text-purple-400`} />;
     case "APPLICATION":
-      return <PlusCircle className={`${iconClass} text-blue-400`} />;
+      return <PlusCircle className={`${iconClass} text-blue-600 dark:text-blue-400`} />;
     case "REGULATION":
-      return <Shield className={`${iconClass} text-rose-400`} />;
+      return <Shield className={`${iconClass} text-rose-600 dark:text-rose-400`} />;
     case "NOTIFICATION_SETTING":
-      return <Bell className={`${iconClass} text-pink-400`} />;
+      return <Bell className={`${iconClass} text-pink-600 dark:text-pink-400`} />;
     case "SYSTEM_SETTING":
-      return <Settings className={`${iconClass} text-emerald-400`} />;
+      return <Settings className={`${iconClass} text-emerald-600 dark:text-emerald-400`} />;
     default:
-      return <FileText className={`${iconClass} text-slate-400`} />;
+      return <FileText className={`${iconClass} text-muted dark:text-slate-400`} />;
   }
 }
 
@@ -243,9 +243,9 @@ export default function ActivityLogTable() {
       <Table
         columns={COLUMNS}
         className="
-          bg-[linear-gradient(145deg,#101827_0%,#1a2235_20%,#0f172a_55%,#050816_100%)]
-          shadow-[0_12px_40px_rgba(0,0,0,.45)]
-          hover:shadow-[0_20px_50px_rgba(21,174,245,.15)]
+          bg-card dark:bg-[linear-gradient(145deg,#101827_0%,#1a2235_20%,#0f172a_55%,#050816_100%)]
+          shadow-sm dark:shadow-[0_12px_40px_rgba(0,0,0,.45)]
+          hover:shadow-md dark:hover:shadow-[0_20px_50px_rgba(21,174,245,.15)]
           transition-shadow duration-500
         "
       >
@@ -272,7 +272,7 @@ export default function ActivityLogTable() {
             return (
               <Table.Row key={log.id}>
                 {/* Time */}
-                <div className="text-xs text-slate-400 font-mono">
+                <div className="text-xs text-muted font-mono">
                   {new Date(log.createdAt).toLocaleString("vi-VN", {
                     year: "numeric",
                     month: "2-digit",
@@ -285,7 +285,7 @@ export default function ActivityLogTable() {
 
                 {/* Actor */}
                 <div className="flex items-center gap-2.5 min-w-0 pr-2">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 text-xs font-bold text-cyan-300">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-slate-100 text-slate-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-cyan-500/20 dark:to-blue-600/20 text-xs font-bold dark:text-cyan-300">
                     {initials}
                   </div>
                   <div className="flex flex-col min-w-0 justify-center">
@@ -313,13 +313,13 @@ export default function ActivityLogTable() {
                 {/* Target Type */}
                 <div className="flex items-center gap-2 min-w-0 pr-2">
                   {getTargetTypeIcon(log.targetType)}
-                  <span className="text-xs font-medium text-slate-300 truncate" title={log.targetType || "—"}>
+                  <span className="text-xs font-medium text-foreground/90 dark:text-slate-300 truncate" title={log.targetType || "—"}>
                     {log.targetType || "—"}
                   </span>
                 </div>
 
                 {/* Changed Details / Description */}
-                <div className="text-xs text-slate-300 pr-2 break-words leading-relaxed font-medium line-clamp-2">
+                <div className="text-xs text-foreground/80 dark:text-slate-300 pr-2 break-words leading-relaxed font-medium line-clamp-2">
                   {log.description || "—"}
                 </div>
 
@@ -328,7 +328,7 @@ export default function ActivityLogTable() {
                   <button
                     type="button"
                     onClick={() => setSelectedLog(log)}
-                    className="flex items-center gap-1.5 rounded-lg border border-cyan-400/20 bg-cyan-500/10 px-2.5 py-1 text-xs font-medium text-cyan-300 transition hover:border-cyan-400/40 hover:bg-cyan-500/20 active:scale-95 cursor-pointer shadow-sm"
+                    className="flex items-center gap-1.5 rounded-lg border border-border bg-card/60 px-2.5 py-1 text-xs font-medium text-muted hover:text-foreground hover:bg-card hover:border-border-strong dark:border-cyan-400/20 dark:bg-cyan-500/10 dark:text-cyan-300 dark:hover:border-cyan-400/40 dark:hover:bg-cyan-500/20 transition active:scale-95 cursor-pointer shadow-sm"
                   >
                     <Eye className="h-3.5 w-3.5" />
                     <span>{t("admin.activityLogs.viewDetail")}</span>
@@ -355,7 +355,7 @@ export default function ActivityLogTable() {
                   type="button"
                   disabled={meta.page <= 1}
                   onClick={() => goToPage(meta.page - 1)}
-                  className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                  className="rounded-xl border border-border bg-slate-100 hover:bg-slate-200 text-slate-700 dark:border-white/10 dark:bg-white/[0.03] dark:text-muted dark:hover:border-white/20 dark:hover:bg-white/[0.06] dark:hover:text-foreground px-3 py-2 transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                   aria-label="Previous page"
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -365,7 +365,7 @@ export default function ActivityLogTable() {
                   type="button"
                   disabled={meta.page >= meta.totalPages}
                   onClick={() => goToPage(meta.page + 1)}
-                  className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                  className="rounded-xl border border-border bg-slate-100 hover:bg-slate-200 text-slate-700 dark:border-white/10 dark:bg-white/[0.03] dark:text-muted dark:hover:border-white/20 dark:hover:bg-white/[0.06] dark:hover:text-foreground px-3 py-2 transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                   aria-label="Next page"
                 >
                   <ChevronRight className="h-4 w-4" />

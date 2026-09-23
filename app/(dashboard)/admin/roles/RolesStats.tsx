@@ -28,21 +28,21 @@ export default function RolesStats() {
       title: t("admin.roles.stats.totalRoles"),
       value: stats.totalRoles,
       icon: ShieldCheck,
-      iconBg: "from-cyan-500/20 to-sky-400/10",
+      containerClass: "border-cyan-300 bg-cyan-100/80 text-cyan-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-cyan-500/20 dark:to-sky-400/10 dark:text-cyan-300",
       lineGradient: "from-cyan-400/70 to-transparent",
     },
     {
       title: t("admin.roles.stats.systemRoles"),
       value: stats.systemRoles,
       icon: Lock,
-      iconBg: "from-indigo-500/20 to-purple-400/10",
+      containerClass: "border-indigo-300 bg-indigo-100/80 text-indigo-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-indigo-500/20 dark:to-purple-400/10 dark:text-indigo-300",
       lineGradient: "from-indigo-400/70 to-transparent",
     },
     {
       title: t("admin.roles.stats.customRoles"),
       value: stats.customRoles,
       icon: Sparkles,
-      iconBg: "from-emerald-500/20 to-green-400/10",
+      containerClass: "border-emerald-300 bg-emerald-100/80 text-emerald-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-emerald-500/20 dark:to-green-400/10 dark:text-emerald-300",
       lineGradient: "from-emerald-400/70 to-transparent",
     },
   ];
@@ -94,13 +94,12 @@ export default function RolesStats() {
               <div
                 className={`
                   flex h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14 shrink-0 items-center justify-center
-                  rounded-xl sm:rounded-2xl border border-white/10
-                  bg-gradient-to-br ${card.iconBg}
-                  shadow-lg transition-all duration-500
+                  rounded-xl sm:rounded-2xl border ${card.containerClass}
+                  shadow-sm dark:shadow-lg transition-all duration-500
                   group-hover:rotate-6 group-hover:scale-110
                 `}
               >
-                <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                <Icon className="h-5 w-5 sm:h-6 sm:w-6 shrink-0" />
               </div>
             </div>
           </MetalCard>

@@ -35,9 +35,9 @@ export default function LeaderTaskHeader() {
                   <Modal.Open opens="import">
                     <button
                       type="button"
-                      className="flex items-center gap-2 rounded-xl border border-border dark:border-white/10 bg-card/60 px-4 py-2.5 text-sm font-medium text-muted transition hover:border-white/20 hover:bg-card hover:text-foreground active:scale-95 shadow-sm cursor-pointer"
+                      className="flex items-center gap-2 rounded-xl border border-border bg-card/60 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-muted transition hover:border-slate-300 dark:hover:border-white/20 hover:bg-card hover:text-foreground active:scale-95 shadow-sm cursor-pointer"
                     >
-                      <FileSpreadsheet className="h-4 w-4 shrink-0 text-emerald-400" />
+                      <FileSpreadsheet className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
                       <span>{t("importTasks")}</span>
                     </button>
                   </Modal.Open>
@@ -45,7 +45,7 @@ export default function LeaderTaskHeader() {
                   <Modal.Open opens="create-task">
                     <button
                       type="button"
-                      className="flex items-center gap-2 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2.5 text-sm font-medium text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20 active:scale-95 shadow-sm cursor-pointer"
+                      className="flex items-center gap-2 rounded-xl border border-cyan-300 bg-cyan-100/80 text-cyan-700 hover:bg-cyan-200/80 hover:border-cyan-400 dark:border-cyan-400/30 dark:bg-cyan-500/10 dark:text-cyan-300 dark:hover:border-cyan-400/50 dark:hover:bg-cyan-500/20 px-4 py-2.5 text-sm font-medium transition active:scale-95 shadow-sm cursor-pointer"
                     >
                       <Plus className="h-4 w-4 shrink-0" />
                       <span>{t("createTask")}</span>
@@ -58,7 +58,7 @@ export default function LeaderTaskHeader() {
                 <Modal.Open opens="create-group">
                   <button
                     type="button"
-                    className="flex items-center gap-2 rounded-xl border border-purple-400/30 bg-purple-500/10 px-4 py-2.5 text-sm font-medium text-purple-300 transition hover:border-purple-400/50 hover:bg-purple-500/20 active:scale-95 shadow-sm cursor-pointer"
+                    className="flex items-center gap-2 rounded-xl border border-purple-300 bg-purple-100/80 text-purple-700 hover:bg-purple-200/80 hover:border-purple-400 dark:border-purple-400/30 dark:bg-purple-500/10 dark:text-purple-300 dark:hover:border-purple-400/50 dark:hover:bg-purple-500/20 px-4 py-2.5 text-sm font-medium transition active:scale-95 shadow-sm cursor-pointer"
                   >
                     <Layers className="h-4 w-4 shrink-0" />
                     <span>{t("createGroup")}</span>

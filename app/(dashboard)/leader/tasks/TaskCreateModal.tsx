@@ -465,10 +465,10 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
   return (
     <div className="flex flex-col">
       {/* Sticky Header (Rule 44 Compliant: Icon + Heading inside a dedicated flex container) */}
-      <div className="sticky top-0 z-20 bg-[#0c1222]/95 backdrop-blur-xl pb-4 pt-1 -mt-1 border-b border-white/10 pr-10 sm:pr-12">
+      <div className="sticky top-0 z-20 bg-white/95 dark:bg-[#0c1222]/95 backdrop-blur-xl pb-4 pt-1 -mt-1 border-b border-border dark:border-white/10 pr-10 sm:pr-12">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.2)]">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-cyan-100 border border-cyan-300 text-cyan-700 dark:bg-cyan-500/15 dark:border-cyan-500/30 dark:text-cyan-300 shadow-sm dark:shadow-[0_0_12px_rgba(6,182,212,0.2)]">
               <Plus className="h-5 w-5 shrink-0" />
             </div>
             <div className="min-w-0">
@@ -499,17 +499,17 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
               <div
                 className={`flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full text-xs sm:text-sm font-bold transition-all duration-300 ${
                   step > s.num
-                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                    ? "bg-emerald-100 text-emerald-700 border border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30"
                     : step === s.num
-                    ? "bg-cyan-500/20 text-cyan-300 border border-cyan-400/50 shadow-[0_0_16px_rgba(6,182,212,0.3)]"
-                    : "bg-white/5 text-muted border border-white/10"
+                    ? "bg-cyan-100 text-cyan-700 border border-cyan-300 dark:bg-cyan-500/20 dark:text-cyan-300 dark:border-cyan-400/50 shadow-sm dark:shadow-[0_0_16px_rgba(6,182,212,0.3)]"
+                    : "bg-slate-100 text-muted border border-border dark:bg-white/5 dark:border-white/10"
                 }`}
               >
                 {step > s.num ? <CheckCircle2 className="h-4 w-4" /> : s.num}
               </div>
               <span
                 className={`text-[11px] sm:text-xs font-semibold uppercase tracking-wider transition-colors duration-300 ${
-                  step === s.num ? "metal-text metal-glow" : step > s.num ? "text-emerald-400" : "text-muted"
+                  step === s.num ? "metal-text metal-glow" : step > s.num ? "text-emerald-600 dark:text-emerald-400" : "text-muted"
                 }`}
               >
                 {s.label}
@@ -519,7 +519,7 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
               </span>
             </div>
             {i < arr.length - 1 && (
-              <div className={`mx-1 sm:mx-3 mb-6 sm:mb-8 h-px w-8 sm:w-14 md:w-20 transition-colors duration-300 ${step > s.num ? "bg-emerald-500/40" : "bg-white/10"}`} />
+              <div className={`mx-1 sm:mx-3 mb-6 sm:mb-8 h-px w-8 sm:w-14 md:w-20 transition-colors duration-300 ${step > s.num ? "bg-emerald-500/40" : "bg-border dark:bg-white/10"}`} />
             )}
           </div>
         ))}
@@ -825,7 +825,7 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
                       const color = getFileColor(cat);
                       const status = fileStatuses[f.id] ?? "pending";
                       return (
-                        <div key={f.id} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-2.5 group">
+                        <div key={f.id} className="flex items-center gap-3 rounded-xl border border-border bg-slate-50/70 p-2.5 group dark:border-white/10 dark:bg-white/5">
                           <Icon className={`h-5 w-5 shrink-0 ${color}`} />
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm text-foreground">{f.name}</p>
@@ -837,7 +837,7 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
                             {status === "error" && <AlertCircle className="h-4 w-4 text-red-400" />}
                           </div>
                           {!isUploading && (
-                            <button type="button" onClick={() => removeFile(f.id)} className="shrink-0 rounded p-1 text-muted hover:bg-white/10 hover:text-red-400 cursor-pointer transition-colors">
+                            <button type="button" onClick={() => removeFile(f.id)} className="shrink-0 rounded p-1 text-muted hover:bg-slate-200 dark:hover:bg-white/10 hover:text-red-400 cursor-pointer transition-colors">
                               <X className="h-3.5 w-3.5" />
                             </button>
                           )}
@@ -849,7 +849,7 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
                       const status = linkStatuses[l.id] ?? "pending";
                       const domain = (() => { try { return new URL(l.fileUrl).hostname; } catch { return ""; } })();
                       return (
-                        <div key={l.id} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-2.5 group">
+                        <div key={l.id} className="flex items-center gap-3 rounded-xl border border-border bg-slate-50/70 p-2.5 group dark:border-white/10 dark:bg-white/5">
                           <Link className="h-5 w-5 shrink-0 text-blue-400" />
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm text-foreground">{l.fileName}</p>
@@ -861,7 +861,7 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
                             {status === "error" && <AlertCircle className="h-4 w-4 text-red-400" />}
                           </div>
                           {!isUploading && (
-                            <button type="button" onClick={() => removeLink(l.id)} className="shrink-0 rounded p-1 text-muted hover:bg-white/10 hover:text-red-400 cursor-pointer transition-colors">
+                            <button type="button" onClick={() => removeLink(l.id)} className="shrink-0 rounded p-1 text-muted hover:bg-slate-200 dark:hover:bg-white/10 hover:text-red-400 cursor-pointer transition-colors">
                               <X className="h-3.5 w-3.5" />
                             </button>
                           )}
@@ -878,7 +878,7 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
             </div>
 
             {/* Assign to Intern */}
-            <div className="pt-2 border-t border-white/10">
+            <div className="pt-2 border-t border-border dark:border-white/10">
               <label className="mb-2 flex items-center gap-1 text-xs sm:text-sm font-medium text-foreground/90 select-none">
                 Phân công thực tập sinh
               </label>
@@ -897,8 +897,8 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
                     disabled={isUploading}
                     className={`rounded-xl px-3 py-2 text-xs font-medium transition cursor-pointer ${
                       assignMode === mode
-                        ? "bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
-                        : "bg-white/5 text-muted border border-white/10 hover:bg-white/10 hover:text-foreground"
+                        ? "bg-cyan-100 text-cyan-800 border border-cyan-300 shadow-sm dark:bg-cyan-500/20 dark:text-cyan-300 dark:border-cyan-400/40 dark:shadow-[0_0_12px_rgba(6,182,212,0.2)]"
+                        : "bg-slate-50 text-muted border border-border hover:bg-slate-100 hover:text-foreground dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10 dark:hover:text-foreground"
                     }`}
                   >
                     {mode === "none" && "Chưa giao việc"}
@@ -999,7 +999,7 @@ export default function TaskCreateModal({ onCloseModal }: Props) {
         )}
 
         {/* Navigation */}
-        <div className="flex items-center justify-between pt-3 border-t border-white/10">
+        <div className="flex items-center justify-between pt-3 border-t border-border dark:border-white/10">
           {step > 1 ? (
             <Button type="button" variant="glass" size="md" disabled={isPending} onClick={() => setStep((s) => s - 1)}>
               ← Quay lại

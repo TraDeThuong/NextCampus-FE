@@ -140,7 +140,7 @@ export default function TaskGroupAiAllocationModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-4xl max-h-[94vh] flex flex-col rounded-[28px] border border-white/10 bg-[#0d1117] shadow-glass overflow-hidden"
+        className="relative w-full max-w-4xl max-h-[94vh] flex flex-col rounded-[28px] border border-border bg-card shadow-glass overflow-hidden dark:border-white/10 dark:bg-[#0d1117]"
       >
         {/* Top bar glowing accent */}
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sky-400/60 to-transparent" />
@@ -148,20 +148,20 @@ export default function TaskGroupAiAllocationModal({
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute right-5 top-5 z-10 flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all"
+          className="absolute right-5 top-5 z-10 flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-slate-100 hover:bg-slate-200 text-muted hover:text-foreground transition-all cursor-pointer dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
         >
           <X className="h-4 w-4" />
         </button>
 
         {/* Header */}
-        <div className="p-6 pb-4 border-b border-slate-800 shrink-0">
+        <div className="p-6 pb-4 border-b border-border shrink-0 dark:border-slate-800">
           <div className="flex items-start gap-3.5 pr-10">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-sky-500/10 border border-sky-500/20">
-              <Sparkles className="h-6 w-6 text-sky-400" />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-sky-100 border border-sky-300 text-sky-700 dark:bg-sky-500/10 dark:border-sky-500/20 dark:text-sky-400">
+              <Sparkles className="h-6 w-6" />
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-lg font-bold text-white">AI Phân công hàng loạt</h2>
+                <h2 className="text-lg font-bold text-foreground">AI Phân công hàng loạt</h2>
                 {data?.department && (
                   <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-sky-500/30 bg-sky-500/10 text-sky-400">
                     <Building className="h-3 w-3" />

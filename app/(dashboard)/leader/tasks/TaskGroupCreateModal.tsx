@@ -62,10 +62,10 @@ export default function TaskGroupCreateModal({ onCloseModal }: Props) {
   return (
     <div className="flex flex-col">
       {/* Sticky Header (Rule 44 Compliant: Icon + Heading inside a dedicated flex container) */}
-      <div className="sticky top-0 z-20 bg-[#0c1222]/95 backdrop-blur-xl pb-4 pt-1 -mt-1 border-b border-white/10 pr-10 sm:pr-12">
+      <div className="sticky top-0 z-20 bg-white/95 dark:bg-[#0c1222]/95 backdrop-blur-xl pb-4 pt-1 -mt-1 border-b border-border dark:border-white/10 pr-10 sm:pr-12">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-purple-500/15 border border-purple-500/30 text-purple-300 shadow-[0_0_12px_rgba(168,85,247,0.2)]">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-purple-100 border border-purple-300 text-purple-700 dark:bg-purple-500/15 dark:border-purple-500/30 dark:text-purple-300 shadow-sm dark:shadow-[0_0_12px_rgba(168,85,247,0.2)]">
               <Layers className="h-5 w-5 shrink-0" />
             </div>
             <div className="min-w-0">
@@ -164,7 +164,7 @@ export default function TaskGroupCreateModal({ onCloseModal }: Props) {
           </div>
         </div>
 
-        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-white/[0.03] p-3 hover:bg-white/[0.05] transition-colors">
+        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-slate-50/70 hover:bg-slate-100 dark:bg-white/[0.03] dark:hover:bg-white/[0.05] p-3 transition-colors">
           <input
             type="checkbox"
             {...register("requireAllMembers")}
@@ -190,7 +190,7 @@ export default function TaskGroupCreateModal({ onCloseModal }: Props) {
           />
         </div>
 
-        <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+        <div className="flex items-center justify-end gap-3 pt-3 border-t border-border dark:border-white/10">
           <Button
             type="button"
             variant="glass"

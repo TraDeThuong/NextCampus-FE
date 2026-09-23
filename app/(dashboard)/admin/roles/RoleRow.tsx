@@ -142,8 +142,8 @@ export default function RoleRow({
         <div
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${
             role.isSystem
-              ? "border-cyan-400/20 bg-cyan-500/10 text-cyan-400"
-              : "border-emerald-400/20 bg-emerald-500/10 text-emerald-400"
+              ? "border-cyan-300 bg-cyan-100/80 text-cyan-700 dark:border-cyan-400/20 dark:bg-cyan-500/10 dark:text-cyan-400"
+              : "border-emerald-300 bg-emerald-100/80 text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-500/10 dark:text-emerald-400"
           }`}
         >
           {role.isSystem ? (
@@ -153,7 +153,7 @@ export default function RoleRow({
           )}
         </div>
         <div className="min-w-0">
-          <p className="font-bold text-sm text-foreground group-hover:text-cyan-400 transition-colors truncate">
+          <p className="font-bold text-sm text-foreground group-hover:text-cyan-500 dark:group-hover:text-cyan-400 transition-colors truncate">
             {role.name}
           </p>
           <p
@@ -168,12 +168,12 @@ export default function RoleRow({
       {/* 2. Role Type Badge */}
       <div className="flex items-center">
         {role.isSystem ? (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-2.5 py-1 text-xs font-semibold text-cyan-300">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan-300 bg-cyan-100/80 px-2.5 py-1 text-xs font-semibold text-cyan-800 dark:border-cyan-400/30 dark:bg-cyan-500/10 dark:text-cyan-300">
             <Lock className="h-3 w-3 shrink-0" />
             <span>{t("admin.roles.table.systemBadge")}</span>
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-300">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-100/80 px-2.5 py-1 text-xs font-semibold text-emerald-800 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-300">
             <Sparkles className="h-3 w-3 shrink-0" />
             <span>{t("admin.roles.table.customBadge")}</span>
           </span>
@@ -247,7 +247,7 @@ export default function RoleRow({
               aria-expanded={menuOpen}
               aria-controls={`role-action-menu-${menuId}`}
               onClick={toggleMenu}
-              className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-card/40 text-muted transition hover:border-white/20 hover:bg-card hover:text-foreground active:scale-95"
+              className="flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-card/60 text-muted transition hover:border-border-strong hover:bg-card hover:text-foreground active:scale-95 cursor-pointer"
               title={t("admin.roles.table.moreActions")}
             >
               <MoreVertical className="h-4 w-4" />
@@ -260,7 +260,7 @@ export default function RoleRow({
                   id={`role-action-menu-${menuId}`}
                   role="menu"
                   style={menuStyle}
-                  className="rounded-2xl border border-white/10 bg-[#0c1322]/95 p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn"
+                  className="rounded-2xl border border-border bg-card/95 dark:border-white/10 dark:bg-[#0c1322]/95 p-1.5 shadow-xl dark:shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn"
                 >
                   {/* Users item */}
                   {canUsers && (
@@ -271,9 +271,9 @@ export default function RoleRow({
                         setMenuOpen(false);
                         onOpenUsers(role);
                       }}
-                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-foreground/90 transition hover:bg-indigo-500/15 hover:text-indigo-300 active:scale-98 cursor-pointer"
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground transition hover:bg-indigo-50 dark:hover:bg-indigo-500/15 hover:text-indigo-700 dark:hover:text-indigo-300 active:scale-98 cursor-pointer"
                     >
-                      <Users className="h-4 w-4 shrink-0 text-indigo-400" />
+                      <Users className="h-4 w-4 shrink-0 text-indigo-600 dark:text-indigo-400" />
                       <span>{t("admin.roles.table.usersBtn")}</span>
                     </button>
                   )}
@@ -287,9 +287,9 @@ export default function RoleRow({
                         setMenuOpen(false);
                         onOpenPermissions(role);
                       }}
-                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-foreground/90 transition hover:bg-cyan-500/15 hover:text-cyan-300 active:scale-98 cursor-pointer"
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground transition hover:bg-cyan-50 dark:hover:bg-cyan-500/15 hover:text-cyan-700 dark:hover:text-cyan-300 active:scale-98 cursor-pointer"
                     >
-                      <KeyRound className="h-4 w-4 shrink-0 text-cyan-400" />
+                      <KeyRound className="h-4 w-4 shrink-0 text-cyan-600 dark:text-cyan-400" />
                       <span>{t("admin.roles.table.permissionsBtn")}</span>
                     </button>
                   )}
@@ -303,9 +303,9 @@ export default function RoleRow({
                         setMenuOpen(false);
                         onOpenEdit(role);
                       }}
-                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-foreground/90 transition hover:bg-white/10 hover:text-foreground active:scale-98 cursor-pointer"
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground transition hover:bg-slate-100 dark:hover:bg-white/10 active:scale-98 cursor-pointer"
                     >
-                      <Edit2 className="h-4 w-4 shrink-0 text-muted" />
+                      <Edit2 className="h-4 w-4 shrink-0 text-slate-500 dark:text-muted" />
                       <span>{t("admin.roles.table.editBtn")}</span>
                     </button>
                   )}
@@ -332,7 +332,7 @@ export default function RoleRow({
                       }
                       className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs transition active:scale-98 ${
                         isDeletable
-                          ? "text-rose-400 hover:bg-rose-500/15 hover:text-rose-300 cursor-pointer"
+                          ? "text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/15 hover:text-rose-700 dark:hover:text-rose-300 cursor-pointer"
                           : "text-muted/40 cursor-not-allowed opacity-50"
                       }`}
                     >

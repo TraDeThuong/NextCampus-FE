@@ -27,16 +27,16 @@ export default function DepartmentRow({ department }: DepartmentRowProps) {
   return (
     <Modal>
       <Table.Row>
-        <div className="text-sm font-medium text-white min-w-0 pr-4 relative">
+        <div className="text-sm font-medium text-foreground min-w-0 pr-4 relative">
           <span>{department.name}</span>
         </div>
 
         <div className="flex flex-wrap items-center">
           {department.positions.length === 0 ? (
-            <span className="text-xs text-slate-500 italic">{t("noPositions")}</span>
+            <span className="text-xs text-muted italic">{t("noPositions")}</span>
           ) : (
             department.positions.map((pos) => (
-              <span key={pos.id} className="inline-flex items-center rounded-md bg-cyan-400/10 px-2 py-0.5 text-xs font-medium text-cyan-400 ring-1 ring-inset ring-cyan-400/20 mr-1.5 mb-1">
+              <span key={pos.id} className="inline-flex items-center rounded-md bg-cyan-500/10 px-2 py-0.5 text-xs font-medium text-cyan-600 dark:text-cyan-400 ring-1 ring-inset ring-cyan-500/20 mr-1.5 mb-1">
                 {pos.name}
               </span>
             ))
@@ -51,16 +51,16 @@ export default function DepartmentRow({ department }: DepartmentRowProps) {
                 const email = leader.user.email;
                 return (
                   <div key={leader.id} className="flex flex-col min-w-0">
-                    <span className="font-medium text-white truncate" title={name || t("noName")}>
+                    <span className="font-medium text-foreground truncate" title={name || t("noName")}>
                       {name || t("noName")}
                     </span>
-                    <span className="text-xs text-slate-400 truncate" title={email}>{email}</span>
+                    <span className="text-xs text-muted truncate" title={email}>{email}</span>
                   </div>
                 );
               })}
             </div>
           ) : (
-            <span className="text-xs text-slate-500 italic">{t("noLeader")}</span>
+            <span className="text-xs text-muted italic">{t("noLeader")}</span>
           )}
         </div>
 
@@ -70,7 +70,7 @@ export default function DepartmentRow({ department }: DepartmentRowProps) {
               <button
                 type="button"
                 title={t("managePositions")}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-slate-400 transition hover:border-white/10 hover:bg-white/5 hover:text-white"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card/60 text-muted transition hover:border-border-strong hover:bg-card hover:text-foreground dark:border-transparent dark:text-slate-400 dark:hover:border-white/10 dark:hover:bg-white/5 dark:hover:text-white"
               >
                 <Settings className="h-4 w-4" />
               </button>
@@ -168,15 +168,15 @@ function ManagePositions({
   return (
     <div className="px-2 py-4 text-left">
       <div className="flex items-center gap-2 mb-4">
-        <Briefcase className="h-5 w-5 text-cyan-400 shrink-0" />
-        <h3 className="text-lg font-bold text-white">
+        <Briefcase className="h-5 w-5 text-cyan-500 dark:text-cyan-400 shrink-0" />
+        <h3 className="text-lg font-bold text-foreground">
           {t("positionsOf", { name: department.name })}
         </h3>
       </div>
 
       <div className="space-y-2 max-h-60 overflow-y-auto mb-6 pr-1 custom-scrollbar">
         {department.positions.length === 0 ? (
-          <p className="text-sm text-slate-500 italic py-2">{t("noPositionsDefined")}</p>
+          <p className="text-sm text-muted italic py-2">{t("noPositionsDefined")}</p>
         ) : (
           department.positions.map((pos) => {
             const editPosExists = department.positions.some(
@@ -184,7 +184,7 @@ function ManagePositions({
             );
 
             return (
-              <div key={pos.id} className="flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-3.5 py-2 relative">
+              <div key={pos.id} className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card/60 dark:border-white/5 dark:bg-white/[0.02] px-3.5 py-2 relative">
                 {editingPosId === pos.id ? (
                   <div className="flex-1 relative">
                     <input
@@ -199,31 +199,31 @@ function ManagePositions({
                         }
                         setEditingPosId(null);
                       }}
-                      className="w-full rounded-lg border border-cyan-400/30 bg-[#0f172a] px-2 py-1 text-sm text-white outline-none"
+                      className="w-full rounded-lg border border-cyan-500/30 bg-card dark:bg-[#0f172a] px-2 py-1 text-sm text-foreground outline-none"
                       autoFocus
                     />
                     <datalist id={`leader-positions-list-${pos.id}`}>
                       {predefinedForDept.map((posName) => <option key={posName} value={posName} />)}
                     </datalist>
                     {editPosExists && (
-                      <p className="absolute left-0 top-full z-10 text-[9px] text-yellow-500 bg-[#0f172a] border border-yellow-500/20 px-1.5 py-0.5 rounded shadow-md whitespace-nowrap">
+                      <p className="absolute left-0 top-full z-10 text-[9px] text-yellow-600 dark:text-yellow-500 bg-card dark:bg-[#0f172a] border border-yellow-500/20 px-1.5 py-0.5 rounded shadow-md whitespace-nowrap">
                         {t("positionExists")}
                       </p>
                     )}
                   </div>
                 ) : (
-                  <span className="text-sm text-slate-300 font-medium">{pos.name}</span>
+                  <span className="text-sm text-foreground/90 font-medium">{pos.name}</span>
                 )}
 
                 <div className="flex items-center gap-1 shrink-0">
                   {editingPosId === pos.id ? (
-                    <button type="button" onClick={() => setEditingPosId(null)} className="p-1 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white">
+                    <button type="button" onClick={() => setEditingPosId(null)} className="p-1 rounded-lg hover:bg-muted text-muted hover:text-foreground">
                       <X className="h-4 w-4" />
                     </button>
                   ) : (
                     <>
                       {canUpdatePos && (
-                        <button type="button" onClick={() => { setEditingPosId(pos.id); setEditingPosName(pos.name); setOriginalEditPosTyped(pos.name); setEditPosSuggestIdx(0); }} className="p-1 rounded-lg hover:bg-white/5 text-slate-400 hover:text-cyan-400 transition">
+                        <button type="button" onClick={() => { setEditingPosId(pos.id); setEditingPosName(pos.name); setOriginalEditPosTyped(pos.name); setEditPosSuggestIdx(0); }} className="p-1 rounded-lg hover:bg-muted text-muted hover:text-cyan-500 transition">
                           <Edit3 className="h-4 w-4" />
                         </button>
                       )}
@@ -232,7 +232,7 @@ function ManagePositions({
                           if (confirm(t("confirmDeletePosition", { name: pos.name }))) {
                             deletePosition({ id: pos.id, departmentId: department.id });
                           }
-                        }} className="p-1 rounded-lg hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition">
+                        }} className="p-1 rounded-lg hover:bg-rose-500/10 text-muted hover:text-rose-500 transition">
                           <X className="h-4 w-4" />
                         </button>
                       )}
@@ -246,7 +246,7 @@ function ManagePositions({
       </div>
 
       {canCreatePos && (
-        <form onSubmit={handleAdd} className="flex flex-col gap-2 border-t border-white/10 pt-4">
+        <form onSubmit={handleAdd} className="flex flex-col gap-2 border-t border-border dark:border-white/10 pt-4">
           <div className="flex gap-2 relative">
             <div className="flex-1 relative">
               <input
@@ -256,7 +256,7 @@ function ManagePositions({
                 onChange={(e) => { setNewPositionName(e.target.value); setOriginalNewPosTyped(e.target.value); setAddPosSuggestIdx(0); }}
                 onKeyDown={handleAddPosKeyDown}
                 placeholder={t("addPositionPlaceholder")}
-                className="w-full rounded-xl border border-white/10 bg-white/5 py-2 px-4 text-sm text-white outline-none transition focus:border-cyan-400/50 placeholder:text-slate-600"
+                className="w-full rounded-xl border border-border bg-card dark:border-white/10 dark:bg-white/5 py-2 px-4 text-sm text-foreground outline-none transition focus:border-cyan-500/50 placeholder:text-muted"
                 disabled={creating}
               />
               <datalist id={`leader-positions-list-add-${department.id}`}>

@@ -238,7 +238,7 @@ export default function DepartmentLeaderSelect({
             aria-label={`Leaders for ${department.name}`}
             aria-multiselectable="true"
             style={dropdownStyle}
-            className="rounded-2xl border border-border dark:border-white/10 bg-[#0c1322]/95 p-2 shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn flex flex-col"
+            className="rounded-2xl border border-border dark:border-white/10 bg-card/95 dark:bg-[#0c1322]/95 p-2 shadow-xl dark:shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn flex flex-col"
           >
             {/* Header and Quick Search */}
             <div className="px-2 pt-1 pb-2 shrink-0">

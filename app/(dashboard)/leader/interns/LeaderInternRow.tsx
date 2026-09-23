@@ -101,9 +101,9 @@ export default function LeaderInternRow({
   };
 
   const statusBadge: Record<string, string> = {
-    ACTIVE: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
-    COMPLETED: "border-cyan-500/30 bg-cyan-500/10 text-cyan-400",
-    DROPPED: "border-rose-500/30 bg-rose-500/10 text-rose-400",
+    ACTIVE: "border-emerald-500/30 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400",
+    COMPLETED: "border-cyan-500/30 bg-cyan-50 text-cyan-700 dark:bg-cyan-500/10 dark:text-cyan-400",
+    DROPPED: "border-rose-500/30 bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400",
   };
 
   const completed = taskProgress?.completedTasks ?? 0;
@@ -197,12 +197,12 @@ export default function LeaderInternRow({
       <Table.Row>
         {/* Intern Details */}
         <div className="flex items-center gap-3 min-w-0">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-slate-600 to-slate-800 text-sm font-bold text-white shadow-sm ring-1 ring-white/10">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-slate-100 text-sm font-bold text-slate-700 shadow-sm dark:border-white/10 dark:bg-gradient-to-br dark:from-slate-600 dark:to-slate-800 dark:text-white">
             {intern.fullName?.charAt(0)?.toUpperCase() ?? "?"}
           </div>
           <div className="min-w-0">
             <p
-              className="truncate text-sm font-medium text-foreground cursor-pointer hover:text-cyan-400 transition"
+              className="truncate text-sm font-medium text-foreground cursor-pointer hover:text-cyan-600 dark:hover:text-cyan-400 transition"
               onClick={() => router.push(`/leader/interns/${intern.id}`)}
             >
               {intern.fullName}
@@ -313,8 +313,8 @@ export default function LeaderInternRow({
             onClick={toggleMenu}
             className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-all duration-200 active:scale-90 ${
               menuOpen
-                ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400 shadow-sm"
-                : "border-transparent text-muted hover:border-border hover:bg-white/5 hover:text-foreground"
+                ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 shadow-sm"
+                : "border-transparent text-muted hover:border-border hover:bg-slate-100 dark:hover:bg-white/5 hover:text-foreground"
             }`}
           >
             <MoreVertical className="h-4 w-4" />
@@ -348,9 +348,9 @@ export default function LeaderInternRow({
                 setMenuOpen(false);
                 router.push(`/leader/interns/${intern.id}`);
               }}
-              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-foreground/90 transition hover:bg-white/10 hover:text-cyan-400 active:scale-95"
+              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-foreground/90 transition hover:bg-slate-100 dark:hover:bg-white/10 hover:text-cyan-600 dark:hover:text-cyan-400 active:scale-95"
             >
-              <Eye className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
+              <Eye className="h-3.5 w-3.5 shrink-0 text-cyan-600 dark:text-cyan-400" />
               <span>{t("viewDetails")}</span>
             </button>
 
@@ -361,9 +361,9 @@ export default function LeaderInternRow({
                 setMenuOpen(false);
                 setTasksModalOpen(true);
               }}
-              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-foreground/90 transition hover:bg-white/10 hover:text-sky-400 active:scale-95"
+              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-foreground/90 transition hover:bg-slate-100 dark:hover:bg-white/10 hover:text-sky-600 dark:hover:text-sky-400 active:scale-95"
             >
-              <ListTodo className="h-3.5 w-3.5 shrink-0 text-sky-400" />
+              <ListTodo className="h-3.5 w-3.5 shrink-0 text-sky-600 dark:text-sky-400" />
               <span>{t("viewTasks")}</span>
             </button>
 
@@ -375,9 +375,9 @@ export default function LeaderInternRow({
                   setMenuOpen(false);
                   setOverdueModalOpen(true);
                 }}
-                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-rose-400 transition hover:bg-rose-500/10 hover:text-rose-300 active:scale-95"
+                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-rose-600 dark:text-rose-400 transition hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-700 dark:hover:text-rose-300 active:scale-95"
               >
-                <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-rose-400" />
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-rose-600 dark:text-rose-400" />
                 <span>{t("viewOverdue")}</span>
               </button>
             )}

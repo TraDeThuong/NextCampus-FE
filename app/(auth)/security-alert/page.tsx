@@ -46,7 +46,7 @@ function SecurityAlertContent() {
   }, [token]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-[#060816] text-slate-100">
+    <div className="w-full flex items-center justify-center p-4 text-foreground">
       <div className="w-full max-w-md">
         <MetalCard className="p-8 text-center space-y-6">
           {status === "loading" && (
@@ -134,7 +134,7 @@ export default function SecurityAlertPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#060816]">
+        <div className="min-h-[50vh] flex items-center justify-center">
           <Spinner size="lg" />
         </div>
       }

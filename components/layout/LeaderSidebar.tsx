@@ -21,16 +21,16 @@ import { useActionCounts } from "@/hooks/notification/useActionCounts";
 import { SidebarBadge } from "@/components/ui/SidebarBadge";
 
 const baseClass =
-  "flex items-center justify-center w-14 h-14 rounded-2xl border transition-all duration-300 shadow-shadow-soft cursor-pointer";
+  "flex items-center justify-center w-14 h-14 rounded-2xl border transition-all duration-300 shadow-sm dark:shadow-shadow-soft cursor-pointer";
 
 const activeClass =
-  "bg-primary-main/20 border-primary-light text-gray-300 scale-110 shadow-[0_0_24px_primary-white]";
+  "bg-primary-main/10 border-primary-main text-primary-main dark:bg-primary-main/20 dark:border-primary-light dark:text-cyan-300 scale-110 shadow-sm dark:shadow-[0_0_24px_primary-white]";
 
 const inactiveClass =
-  "bg-card border-border text-muted hover:bg-card-hover hover:border-border-strong hover:text-foreground hover:scale-110";
+  "bg-white/80 border-slate-200 text-slate-500 hover:bg-slate-100 hover:border-slate-300 hover:text-slate-900 dark:bg-card dark:border-border dark:text-muted dark:hover:bg-card-hover dark:hover:border-border-strong dark:hover:text-foreground hover:scale-110";
 
 const tooltipClass =
-  "text-metal pointer-events-none absolute top-full mt-2 translate-y-1 whitespace-nowrap text-xs font-medium opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100 z-30";
+  "pointer-events-none absolute top-full mt-2 translate-y-1 whitespace-nowrap text-xs font-semibold px-2 py-1 rounded-md bg-slate-900 text-white dark:bg-slate-800 dark:text-slate-100 shadow-lg opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100 z-30";
 
 export default function LeaderSidebar() {
   const pathname = usePathname();

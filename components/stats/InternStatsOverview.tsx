@@ -167,7 +167,7 @@ export default function InternStatsOverview() {
 
             <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
               {/* Live Status Badge */}
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-emerald-400 text-xs font-medium">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-emerald-300/80 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/5 dark:text-emerald-400 text-xs font-semibold">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
@@ -183,9 +183,9 @@ export default function InternStatsOverview() {
                 disabled={isFetching}
                 title={t("reloadTooltip")}
                 aria-label={t("reloadTooltip")}
-                className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-muted hover:text-cyan-400 hover:bg-white/10 transition-all active:scale-90 disabled:opacity-50 cursor-pointer"
+                className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100/80 text-slate-600 hover:text-cyan-600 hover:bg-cyan-50 dark:border-white/10 dark:bg-white/5 dark:text-muted dark:hover:text-cyan-400 dark:hover:bg-white/10 transition-all active:scale-90 disabled:opacity-50 cursor-pointer"
               >
-                <RotateCw className={`h-4 w-4 ${isFetching ? "animate-spin text-cyan-400" : ""}`} />
+                <RotateCw className={`h-4 w-4 ${isFetching ? "animate-spin text-cyan-600 dark:text-cyan-400" : ""}`} />
               </button>
             </div>
           </div>
@@ -196,16 +196,16 @@ export default function InternStatsOverview() {
       <div
         className={`flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-2xl border p-4 transition-all duration-300 ${
           isTodayReportSubmitted
-            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-            : "border-amber-500/30 bg-amber-500/10 text-amber-300 shadow-[0_0_24px_rgba(245,158,11,0.1)]"
+            ? "border-emerald-300/80 bg-emerald-50/80 text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300"
+            : "border-amber-300/80 bg-amber-50/80 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300 shadow-sm dark:shadow-[0_0_24px_rgba(245,158,11,0.1)]"
         }`}
       >
         <div className="flex items-center gap-3">
           <div
             className={`flex h-10 w-10 items-center justify-center rounded-xl shrink-0 ${
               isTodayReportSubmitted
-                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                ? "bg-emerald-100 text-emerald-700 border border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30"
+                : "bg-amber-100 text-amber-700 border border-amber-300 dark:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/30"
             }`}
           >
             {isTodayReportSubmitted ? (
@@ -219,8 +219,8 @@ export default function InternStatsOverview() {
               <span
                 className={`text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${
                   isTodayReportSubmitted
-                    ? "border-emerald-500/30 bg-emerald-500/20 text-emerald-300"
-                    : "border-amber-500/30 bg-amber-500/20 text-amber-300"
+                    ? "border-emerald-300 bg-emerald-100/80 text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/20 dark:text-emerald-300"
+                    : "border-amber-300 bg-amber-100/80 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/20 dark:text-amber-300"
                 }`}
               >
                 {isTodayReportSubmitted
@@ -253,7 +253,7 @@ export default function InternStatsOverview() {
           title={t("tasksInProgress")}
           value={tasksInProgress}
           subtitle={t("totalTasks", { n: totalTasks })}
-          icon={<ClipboardList className="h-6 w-6 text-cyan-400" />}
+          icon={<ClipboardList className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />}
           href="/intern/task"
           trend={{ text: t("completionRate", { n: completionRate }), positive: true }}
         />
@@ -262,7 +262,7 @@ export default function InternStatsOverview() {
           title={t("tasksCompleted")}
           value={tasksCompleted}
           subtitle={t("tasksCompletedSubtitle", { done: tasksCompleted, total: totalTasks })}
-          icon={<CheckCircle2 className="h-6 w-6 text-emerald-400" />}
+          icon={<CheckCircle2 className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />}
           href="/intern/task?status=DONE"
           trend={{
             text: tasksBlocked > 0 ? `${tasksBlocked} ${t("needsUnblockSupport")}` : t("updateProgress"),
@@ -274,7 +274,7 @@ export default function InternStatsOverview() {
           title={t("tasksOverdue")}
           value={tasksOverdue}
           subtitle={tasksOverdue > 0 ? t("tasksOverdueSubtitle", { n: tasksOverdue }) : t("noOverdueTasks")}
-          icon={<AlertTriangle className={`h-6 w-6 ${tasksOverdue > 0 ? "text-rose-400 animate-pulse" : "text-emerald-400"}`} />}
+          icon={<AlertTriangle className={`h-6 w-6 ${tasksOverdue > 0 ? "text-rose-600 dark:text-rose-400 animate-pulse" : "text-emerald-600 dark:text-emerald-400"}`} />}
           href="/intern/task?status=OVERDUE"
           trend={{
             text: tasksOverdue > 0 ? t("needsUrgentAction") : t("onTrack"),
@@ -286,7 +286,7 @@ export default function InternStatsOverview() {
           title={t("weeklyScore")}
           value={typeof lastWeekScore === "number" ? `${lastWeekScore.toFixed(1)}/10` : `${avgScore.toFixed(1)}/10`}
           subtitle={t("avgScore", { score: avgScore.toFixed(1) })}
-          icon={<Award className="h-6 w-6 text-purple-400" />}
+          icon={<Award className="h-6 w-6 text-purple-600 dark:text-purple-400" />}
           href="/intern/weekly-evaluation"
           trend={{ text: t("scoreResults"), positive: avgScore >= 7 }}
         />

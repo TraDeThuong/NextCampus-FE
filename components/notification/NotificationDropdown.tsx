@@ -90,15 +90,15 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
   };
 
   return (
-    <div className="fixed left-3 right-3 top-[76px] sm:top-full sm:absolute sm:left-auto sm:right-0 sm:mt-3 sm:w-96 max-w-[calc(100vw-24px)] sm:max-w-none rounded-2xl border border-white/10 bg-[#0B1020]/95 p-4 text-white shadow-[0_16px_48px_rgba(0,0,0,0.7)] backdrop-blur-2xl z-50 animate-in fade-in zoom-in-95 duration-150 max-h-[calc(100dvh-88px)] flex flex-col">
+    <div className="fixed left-3 right-3 top-[76px] sm:top-full sm:absolute sm:left-auto sm:right-0 sm:mt-3 sm:w-96 max-w-[calc(100vw-24px)] sm:max-w-none rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0B1020]/95 p-4 text-slate-800 dark:text-white shadow-2xl dark:shadow-[0_16px_48px_rgba(0,0,0,0.7)] backdrop-blur-2xl z-50 animate-in fade-in zoom-in-95 duration-150 max-h-[calc(100dvh-88px)] flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-white/10 pb-3 shrink-0">
+      <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3 shrink-0">
         <div className="flex items-center gap-2">
           {selectedNotification ? (
             <>
               <button
                 onClick={() => setSelectedNotification(null)}
-                className="rounded-lg p-1 text-slate-400 transition-colors hover:bg-white/10 hover:text-white cursor-pointer"
+                className="rounded-lg p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white transition-colors cursor-pointer"
                 aria-label={t("back")}
                 title={t("back")}
               >
@@ -110,7 +110,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
             <>
               <h3 className="font-semibold metal-text tracking-wide text-sm uppercase">{t("title")}</h3>
               {unreadNotifications.length > 0 && (
-                <span className="rounded-full bg-cyan-400/20 px-2 py-0.5 text-xs font-medium text-cyan-300 border border-cyan-400/30">
+                <span className="rounded-full bg-cyan-50 text-cyan-700 border border-cyan-200 dark:bg-cyan-400/20 dark:text-cyan-300 dark:border-cyan-400/30 px-2 py-0.5 text-xs font-semibold">
                   {t("newCount", { count: unreadNotifications.length })}
                 </span>
               )}
@@ -125,7 +125,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
                 <button
                   onClick={handleMarkAllRead}
                   disabled={isMarkingAllRead}
-                  className="flex items-center gap-1 text-xs text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-1 text-xs text-slate-500 hover:text-cyan-600 dark:text-slate-400 dark:hover:text-cyan-300 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   title={t("markAllReadTitle")}
                 >
                   <Check size={14} className={isMarkingAllRead ? "animate-spin" : ""} />
@@ -137,7 +137,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
                 <button
                   onClick={handleClearRead}
                   disabled={isClearingRead}
-                  className="flex items-center gap-1 text-xs text-slate-400 hover:text-red-400 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-1 text-xs text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-red-400 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   title={t("clearReadTitle")}
                 >
                   <Trash2 size={13} className={isClearingRead ? "animate-spin" : ""} />
@@ -148,7 +148,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
               {canReadSettings && (
                 <button
                   onClick={() => setShowSettingsModal(true)}
-                  className="flex items-center gap-1 text-xs text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer p-1 rounded-lg hover:bg-white/5"
+                  className="flex items-center gap-1 text-xs text-slate-500 hover:text-cyan-600 dark:text-slate-400 dark:hover:text-cyan-300 transition-colors cursor-pointer p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5"
                   title={t("settings")}
                   aria-label={t("settings")}
                 >
@@ -161,7 +161,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
           {onClose && (
             <button
               onClick={onClose}
-              className="sm:hidden flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
+              className="sm:hidden flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white transition-colors cursor-pointer"
               aria-label="Đóng"
             >
               <X size={15} />
@@ -171,7 +171,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
       </div>
 
       {/* Content */}
-      <div className="mt-2 flex-1 max-h-[calc(100dvh-180px)] sm:max-h-80 overflow-y-auto scroll-smooth overscroll-contain divide-y divide-white/5 pr-1 scrollbar-thin scrollbar-thumb-white/10">
+      <div className="mt-2 flex-1 max-h-[calc(100dvh-180px)] sm:max-h-80 overflow-y-auto scroll-smooth overscroll-contain divide-y divide-slate-100 dark:divide-white/5 pr-1 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-white/10">
         {isLoading ? (
           <div className="flex h-32 items-center justify-center">
             <Spinner size="sm" />
@@ -179,23 +179,23 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
         ) : selectedNotification ? (
           <div className="p-3">
             <div className="flex items-center justify-between gap-3">
-              <div className="rounded-lg bg-white/5 p-2 border border-white/10 shrink-0">
+              <div className="rounded-lg bg-slate-100 dark:bg-white/5 p-2 border border-slate-200 dark:border-white/10 shrink-0">
                 {getIconForType(selectedNotification.type)}
               </div>
-              <span className="text-[10px] text-slate-400">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400">
                 {formatTime(selectedNotification.createdAt)}
               </span>
             </div>
-            <h4 className="mt-3 break-words text-sm font-semibold leading-relaxed text-white">
+            <h4 className="mt-3 break-words text-sm font-semibold leading-relaxed text-slate-900 dark:text-white">
               {selectedNotification.title}
             </h4>
-            <p className="mt-2 whitespace-pre-wrap break-words text-xs leading-relaxed text-slate-300">
+            <p className="mt-2 whitespace-pre-wrap break-words text-xs leading-relaxed text-slate-600 dark:text-slate-300">
               {selectedNotification.content}
             </p>
           </div>
         ) : notifications.length === 0 ? (
-          <div className="flex h-36 flex-col items-center justify-center gap-2 text-slate-400 text-xs">
-            <BellOff className="h-8 w-8 text-slate-600" />
+          <div className="flex h-36 flex-col items-center justify-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
+            <BellOff className="h-8 w-8 text-slate-400 dark:text-slate-600" />
             <p>{t("empty")}</p>
           </div>
         ) : (
@@ -214,17 +214,17 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
               tabIndex={0}
               className={`group relative flex items-start gap-3 p-3 rounded-xl transition-all duration-200 cursor-pointer ${
                 item.isRead
-                  ? "bg-transparent hover:bg-white/5 opacity-70"
-                  : "bg-white/5 hover:bg-white/10 border-l-2 border-cyan-400"
+                  ? "bg-transparent hover:bg-slate-50 dark:hover:bg-white/5 opacity-70"
+                  : "bg-slate-50/80 hover:bg-slate-100/80 dark:bg-white/5 dark:hover:bg-white/10 border-l-2 border-cyan-500"
               }`}
             >
-              <div className="mt-0.5 rounded-lg bg-white/5 p-2 border border-white/10 shrink-0">
+              <div className="mt-0.5 rounded-lg bg-slate-100 dark:bg-white/5 p-2 border border-slate-200 dark:border-white/10 shrink-0">
                 {getIconForType(item.type)}
               </div>
 
               <div className="flex-1 min-w-0 pr-6">
                 <div className="flex items-center justify-between gap-2">
-                  <p className={`text-xs font-semibold truncate ${item.isRead ? "text-slate-300" : "text-white"}`}>
+                  <p className={`text-xs font-semibold truncate ${item.isRead ? "text-slate-600 dark:text-slate-300" : "text-slate-900 dark:text-white"}`}>
                     {item.title}
                   </p>
                   <span className="text-[10px] text-slate-400 shrink-0">
@@ -232,20 +232,20 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
                   </span>
                 </div>
 
-                <p className="mt-1 text-xs text-slate-300 line-clamp-2 leading-relaxed">
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-300 line-clamp-2 leading-relaxed">
                   {item.content}
                 </p>
-                <span className="mt-1.5 inline-block text-[10px] font-medium text-cyan-300/80 group-hover:text-cyan-300">
+                <span className="mt-1.5 inline-block text-[10px] font-medium text-cyan-600 group-hover:text-cyan-700 dark:text-cyan-300/80 dark:group-hover:text-cyan-300">
                   {tCommon("viewDetails")}
                 </span>
               </div>
 
               {/* Action buttons on hover */}
               {canDelete && (
-                <div className="absolute right-2 top-2 hidden group-hover:flex items-center gap-1 bg-[#0B1020] p-1 rounded-lg border border-white/10 shadow-lg">
+                <div className="absolute right-2 top-2 hidden group-hover:flex items-center gap-1 bg-white dark:bg-[#0B1020] p-1 rounded-lg border border-slate-200 dark:border-white/10 shadow-lg">
                   <button
                     onClick={(e) => handleDeleteItem(e, item.id)}
-                    className="text-slate-400 hover:text-red-400 transition-colors p-1 cursor-pointer"
+                    className="text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors p-1 cursor-pointer"
                     title={t("deleteTitle")}
                   >
                     <Trash2 size={14} />
@@ -254,7 +254,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
               )}
 
               {!item.isRead && (
-                <span className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(21,174,245,0.8)] shrink-0 mt-1 group-hover:hidden" />
+                <span className="h-2 w-2 rounded-full bg-cyan-500 dark:bg-cyan-400 shadow-[0_0_8px_rgba(21,174,245,0.8)] shrink-0 mt-1 group-hover:hidden" />
               )}
             </div>
           ))

@@ -26,7 +26,7 @@ export default function WeeklyEvaluationStats({
       value: stats.totalEvaluations,
       subtitle: t("stats.totalEvaluationsSub"),
       icon: ClipboardCheck,
-      iconBg: "from-sky-500/25 to-cyan-400/10",
+      containerClass: "border-sky-300 bg-sky-100/80 text-sky-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-sky-500/25 dark:to-cyan-400/10 dark:text-cyan-300",
       accent: "from-sky-400/70",
     },
     {
@@ -34,7 +34,7 @@ export default function WeeklyEvaluationStats({
       value: stats.averageScore > 0 ? stats.averageScore.toFixed(1) : "—",
       subtitle: t("stats.averageScoreSub"),
       icon: Award,
-      iconBg: "from-emerald-500/25 to-teal-400/10",
+      containerClass: "border-emerald-300 bg-emerald-100/80 text-emerald-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-emerald-500/25 dark:to-teal-400/10 dark:text-emerald-300",
       accent: "from-emerald-400/70",
     },
     {
@@ -42,7 +42,7 @@ export default function WeeklyEvaluationStats({
       value: `${stats.goodRate}%`,
       subtitle: t("stats.goodRateSub"),
       icon: TrendingUp,
-      iconBg: "from-purple-500/25 to-indigo-400/10",
+      containerClass: "border-purple-300 bg-purple-100/80 text-purple-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-purple-500/25 dark:to-indigo-400/10 dark:text-purple-300",
       accent: "from-purple-400/70",
     },
     {
@@ -50,7 +50,7 @@ export default function WeeklyEvaluationStats({
       value: stats.aiAssistedCount,
       subtitle: t("stats.aiAssistedSub"),
       icon: Sparkles,
-      iconBg: "from-amber-500/25 to-orange-400/10",
+      containerClass: "border-amber-300 bg-amber-100/80 text-amber-800 dark:border-white/10 dark:bg-gradient-to-br dark:from-amber-500/25 dark:to-orange-400/10 dark:text-amber-300",
       accent: "from-amber-400/70",
     },
   ];
@@ -79,13 +79,12 @@ export default function WeeklyEvaluationStats({
               <div
                 className={`
                   flex h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14 shrink-0 items-center justify-center
-                  rounded-xl sm:rounded-2xl border border-white/10
-                  bg-gradient-to-br ${card.iconBg}
-                  shadow-lg transition-all duration-500
+                  rounded-xl sm:rounded-2xl border ${card.containerClass}
+                  shadow-sm dark:shadow-lg transition-all duration-500
                   group-hover:rotate-6 group-hover:scale-110
                 `}
               >
-                <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-white shrink-0" />
+                <Icon className="h-5 w-5 sm:h-6 sm:w-6 shrink-0" />
               </div>
             </div>
           </MetalCard>

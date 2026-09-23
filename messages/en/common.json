@@ -89,5 +89,56 @@
       "vi": "Tiếng Việt",
       "en": "English"
     }
+  },
+  "notFound": {
+    "title": "404 - Page Not Found",
+    "heading": "Page Not Found",
+    "desc": "The page you are looking for doesn't exist or has been moved.",
+    "backHome": "Back to Home"
+  },
+  "auth": {
+    "welcomeBack": "Welcome Back",
+    "welcomeSub": "Sign in to access the Internship Management System.",
+    "emailLabel": "Email Address",
+    "emailPlaceholder": "name@company.com",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot password?",
+    "signIn": "Sign In",
+    "signingIn": "Signing in...",
+    "emailRequired": "Email is required",
+    "invalidEmail": "Invalid email address",
+    "passwordRequired": "Password is required",
+    "accountInactive": "Your account has been deactivated or suspended.",
+    "invalidCredentials": "Invalid username or password.",
+    "loginFailed": "Login failed. Please try again.",
+    "loginSuccess": "Welcome back, {name}!",
+    "forgotTitle": "Forgot Password",
+    "forgotDesc": "Enter your email address and we will send you a link to reset your password.",
+    "sendResetLink": "Send Reset Link",
+    "sending": "Sending...",
+    "resetLinkSent": "If an account with that email exists, a reset link has been sent.",
+    "backToSignIn": "Back to Sign In",
+    "resetTitle": "Reset Password",
+    "resetDesc": "Enter your new password below.",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "resetting": "Resetting...",
+    "invalidLink": "Invalid Link",
+    "invalidLinkDesc": "The password reset link is missing or invalid. Please request a new one.",
+    "requestNewLink": "Request New Link",
+    "passwordMinLength": "Password must be at least 8 characters",
+    "passwordComplexity": "Password must include uppercase, lowercase, number, and special character",
+    "confirmPasswordRequired": "Please confirm your password",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "resetSuccess": "Password reset successfully. You can now sign in.",
+    "resetFailed": "Failed to reset password. The link may have expired."
+  },
+  "error": {
+    "title": "500 - System Error",
+    "desc": "An unexpected error occurred. Our technical team has been notified.",
+    "retry": "Try Again",
+    "backHome": "Back to Home"
   }
 }

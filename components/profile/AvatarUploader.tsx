@@ -59,20 +59,20 @@ export default function AvatarUploader({
 
     return (
         <MetalCard>
-            <section className="rounded-3xl border border-slate-200 p-6 shadow-sm">
+            <section className="rounded-3xl border border-border p-6 shadow-sm">
                 <div className="mb-6">
                     <h2 className="text-xl font-semibold metal-text">
                         Profile Picture
                     </h2>
 
-                    <p className="mt-1 text-sm text-slate-500">
+                    <p className="mt-1 text-sm text-muted-foreground">
                         Upload a new avatar for your account.
                     </p>
                 </div>
 
                 <div className="flex flex-col items-center">
                     <div className="relative">
-                        <div className="relative h-40 w-40 overflow-hidden rounded-full border-4 border-slate-100 bg-slate-100 shadow-md">
+                        <div className="relative h-40 w-40 overflow-hidden rounded-full border-4 border-border bg-slate-100 dark:border-white/10 dark:bg-slate-900 shadow-md">
                             {preview ? (
                                 <Image
                                     src={preview}
@@ -82,7 +82,7 @@ export default function AvatarUploader({
                                     className="object-cover"
                                 />
                             ) : (
-                                <div className="flex h-full w-full items-center justify-center text-5xl font-bold text-slate-500">
+                                <div className="flex h-full w-full items-center justify-center text-5xl font-bold text-muted-foreground">
                                     {avatarLetter}
                                 </div>
                             )}
@@ -116,7 +116,7 @@ export default function AvatarUploader({
                         type="button"
                         onClick={handleChooseFile}
                         disabled={isPending}
-                        className="mt-6 inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="mt-6 inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         <Upload className="h-4 w-4" />
 
@@ -125,7 +125,7 @@ export default function AvatarUploader({
                             : "Choose image"}
                     </button>
 
-                    <p className="mt-4 text-center text-xs text-slate-500">
+                    <p className="mt-4 text-center text-xs text-muted-foreground">
                         PNG, JPG, WEBP or GIF.
                         <br />
                         Maximum size: {UPLOAD_LIMITS_MB.avatar} MB.

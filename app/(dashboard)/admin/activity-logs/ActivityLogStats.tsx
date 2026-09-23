@@ -18,7 +18,7 @@ interface StatItem {
   title: string;
   value: number;
   icon: LucideIcon;
-  iconBg: string;
+  containerClass: string;
 }
 
 export default function ActivityLogStats() {
@@ -49,25 +49,25 @@ export default function ActivityLogStats() {
       title: t("admin.activityLogs.statTotal"),
       value: totalCount,
       icon: Shield,
-      iconBg: "from-sky-500/20 to-cyan-400/10",
+      containerClass: "border-sky-300 bg-sky-100/80 text-sky-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-sky-500/20 dark:to-cyan-400/10 dark:text-sky-300",
     },
     {
       title: t("admin.activityLogs.statToday"),
       value: todayCount,
       icon: Clock,
-      iconBg: "from-emerald-500/20 to-green-400/10",
+      containerClass: "border-emerald-300 bg-emerald-100/80 text-emerald-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-emerald-500/20 dark:to-green-400/10 dark:text-emerald-300",
     },
     {
       title: t("admin.activityLogs.statAdmin"),
       value: userCount,
       icon: UserCog,
-      iconBg: "from-violet-500/20 to-purple-400/10",
+      containerClass: "border-violet-300 bg-violet-100/80 text-violet-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-violet-500/20 dark:to-purple-400/10 dark:text-violet-300",
     },
     {
       title: t("admin.activityLogs.statIntern"),
       value: internCount,
       icon: Users,
-      iconBg: "from-amber-500/20 to-orange-400/10",
+      containerClass: "border-amber-300 bg-amber-100/80 text-amber-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-amber-500/20 dark:to-orange-400/10 dark:text-amber-300",
     },
   ];
 
@@ -109,13 +109,12 @@ export default function ActivityLogStats() {
               <div
                 className={`
                   flex h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14 shrink-0 items-center justify-center
-                  rounded-xl sm:rounded-2xl border border-white/10
-                  bg-gradient-to-br ${card.iconBg}
-                  shadow-lg transition-all duration-500
+                  rounded-xl sm:rounded-2xl border ${card.containerClass}
+                  shadow-sm dark:shadow-lg transition-all duration-500
                   group-hover:rotate-6 group-hover:scale-110
                 `}
               >
-                <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                <Icon className="h-5 w-5 sm:h-6 sm:w-6 shrink-0" />
               </div>
             </div>
           </MetalCard>

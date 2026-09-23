@@ -19,11 +19,11 @@ export default function AdminProfilePage() {
     if (!profile) {
         return (
             <div className="flex h-[60vh] items-center justify-center">
-                <div className="rounded-2xl border border-slate-200 bg-white px-8 py-10 text-center shadow-sm">
-                    <h2 className="text-lg font-semibold text-slate-900">
+                <div className="rounded-2xl border border-border bg-card px-8 py-10 text-center shadow-sm">
+                    <h2 className="text-lg font-semibold text-foreground">
                         {t("loadError")}
                     </h2>
-                    <p className="mt-2 text-sm text-slate-500">
+                    <p className="mt-2 text-sm text-muted-foreground">
                         {t("loadErrorDesc")}
                     </p>
                 </div>
@@ -36,7 +36,7 @@ export default function AdminProfilePage() {
             <h1 className="text-3xl font-bold metal-text">
                 {t("title")}
             </h1>
-            <p className="text-slate-400">
+            <p className="text-muted-foreground">
                 {t("description")}
             </p>
             <ProfileHeader profile={profile} />

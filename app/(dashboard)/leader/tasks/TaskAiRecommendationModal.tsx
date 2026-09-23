@@ -307,7 +307,7 @@ export default function TaskAiRecommendationModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-3xl max-h-[92vh] overflow-y-auto rounded-[28px] border border-white/10 bg-[#0d1117] shadow-glass"
+        className="relative w-full max-w-3xl max-h-[92vh] overflow-y-auto rounded-[28px] border border-border bg-card shadow-glass dark:border-white/10 dark:bg-[#0d1117]"
       >
         {/* Top gradient accent */}
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sky-400/60 to-transparent" />
@@ -315,7 +315,7 @@ export default function TaskAiRecommendationModal({
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute right-5 top-5 z-10 flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all"
+          className="absolute right-5 top-5 z-10 flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-slate-100 hover:bg-slate-200 text-muted hover:text-foreground transition-all cursor-pointer dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
         >
           <X className="h-4 w-4" />
         </button>
@@ -324,8 +324,8 @@ export default function TaskAiRecommendationModal({
           {/* ─── Header conforming to .agents/memory.md ──────────────── */}
           <div className="flex items-start justify-between gap-4 pr-10">
             <div className="flex items-start gap-3.5 min-w-0">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-sky-500/10 border border-sky-500/20">
-                <Sparkles className="h-6 w-6 text-sky-400" />
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-sky-100 border border-sky-300 text-sky-700 dark:bg-sky-500/10 dark:border-sky-500/20 dark:text-sky-400">
+                <Sparkles className="h-6 w-6" />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2 mb-1">

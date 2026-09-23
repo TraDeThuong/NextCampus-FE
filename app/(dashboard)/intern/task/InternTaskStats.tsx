@@ -8,7 +8,7 @@ import { useTaskAssignments } from "@/hooks/task-assignment/useTaskAssignments";
 import type { TaskAssignment } from "@/types/task-assignment";
 import MetalCard from "@/components/ui/MetalCard";
 
-interface StatCard { title: string; value: string | number; icon: LucideIcon; iconBg: string; }
+interface StatCard { title: string; value: string | number; icon: LucideIcon; iconBg?: string; containerClass?: string; }
 
 function extractArray<T>(data: unknown): T[] {
   if (Array.isArray(data)) return data as T[];
@@ -89,31 +89,31 @@ export default function InternTaskStats() {
       title: t("totalTasks"),
       value: stats.total,
       icon: CheckSquare,
-      iconBg: "from-sky-500/20 to-cyan-400/10",
+      containerClass: "border-sky-300 bg-sky-100/80 text-sky-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-sky-500/20 dark:to-cyan-400/10 dark:text-sky-300",
     },
     {
       title: t("inProgress"),
       value: stats.inProgress,
       icon: Clock,
-      iconBg: "from-blue-500/20 to-indigo-400/10",
+      containerClass: "border-blue-300 bg-blue-100/80 text-blue-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-blue-500/20 dark:to-indigo-400/10 dark:text-blue-300",
     },
     {
       title: t.has("overdue") ? t("overdue") : tCommon("overdue"),
       value: stats.overdue,
       icon: AlertTriangle,
-      iconBg: "from-rose-500/20 to-red-400/10",
+      containerClass: "border-rose-300 bg-rose-100/80 text-rose-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-rose-500/20 dark:to-red-400/10 dark:text-rose-300",
     },
     {
       title: t("completed"),
       value: stats.completed,
       icon: CheckCircle2,
-      iconBg: "from-emerald-500/20 to-green-400/10",
+      containerClass: "border-emerald-300 bg-emerald-100/80 text-emerald-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-emerald-500/20 dark:to-green-400/10 dark:text-emerald-300",
     },
     {
       title: t("completionRate"),
       value: `${stats.rate}%`,
       icon: Percent,
-      iconBg: "from-violet-500/20 to-purple-400/10",
+      containerClass: "border-violet-300 bg-violet-100/80 text-violet-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-violet-500/20 dark:to-purple-400/10 dark:text-violet-300",
     },
   ];
 
@@ -169,13 +169,12 @@ export default function InternTaskStats() {
               <div
                 className={`
                   flex h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14 shrink-0 items-center justify-center
-                  rounded-xl sm:rounded-2xl border border-white/10
-                  bg-gradient-to-br ${card.iconBg}
-                  shadow-lg transition-all duration-500
+                  rounded-xl sm:rounded-2xl border ${card.containerClass}
+                  shadow-sm dark:shadow-lg transition-all duration-500
                   group-hover:rotate-6 group-hover:scale-110
                 `}
               >
-                <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                <Icon className="h-5 w-5 sm:h-6 sm:w-6 shrink-0" />
               </div>
             </div>
           </MetalCard>

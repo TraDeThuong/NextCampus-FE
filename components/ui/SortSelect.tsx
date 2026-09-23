@@ -243,7 +243,7 @@ export default function SortSelect({
                   focusOption(activeIndex - 1);
                 }
               }}
-              className="rounded-2xl border border-white/10 bg-[#0c1322]/95 p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn"
+              className="rounded-2xl border border-border bg-card/95 dark:border-white/10 dark:bg-[#0c1322]/95 p-1.5 shadow-xl dark:shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn"
             >
               <div className="max-h-[260px] overflow-y-auto scrollbar-dropdown">
                 {options.map((opt, index) => {
@@ -267,15 +267,15 @@ export default function SortSelect({
                       }}
                       className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors cursor-pointer ${
                         isSelected
-                          ? "text-cyan-400 bg-cyan-400/10 font-medium"
-                          : "text-slate-300 hover:bg-white/5 hover:text-white"
+                          ? "text-primary-main dark:text-cyan-400 bg-primary-main/10 dark:bg-cyan-400/10 font-medium"
+                          : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white"
                       }`}
                     >
                       <span className="flex-1 truncate text-left">
                         {opt.label}
                       </span>
                       {isSelected && (
-                        <Check className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
+                        <Check className="h-3.5 w-3.5 shrink-0 text-primary-main dark:text-cyan-400" />
                       )}
                     </button>
                   );

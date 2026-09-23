@@ -220,7 +220,7 @@ export default function FilterSelect({
                                     focusOption(activeIndex - 1);
                                 }
                             }}
-                            className="rounded-xl border border-white/10 bg-[#0f172a] p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl"
+                            className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0f172a] p-1.5 shadow-xl dark:shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl"
                         >
                             <div className="max-h-[240px] overflow-y-auto scrollbar-dropdown">
                                 {allOptions.map((opt, index) => {
@@ -243,17 +243,17 @@ export default function FilterSelect({
                                                 handleChange(opt.value);
                                                 triggerRef.current?.focus();
                                             }}
-                                            className={`flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm transition-colors ${
+                                            className={`flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm transition-colors cursor-pointer ${
                                                 isSelected
-                                                    ? "text-cyan-400 bg-cyan-400/10"
-                                                    : "text-slate-300 hover:bg-white/5 hover:text-white"
+                                                    ? "text-primary-main dark:text-cyan-400 bg-primary-main/10 dark:bg-cyan-400/10 font-semibold"
+                                                    : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white"
                                             }`}
                                         >
                                             <span className="flex-1 truncate text-left">
                                                 {opt.label}
                                             </span>
                                             {isSelected && (
-                                                <Check className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
+                                                <Check className="h-3.5 w-3.5 shrink-0 text-primary-main dark:text-cyan-400" />
                                             )}
                                         </button>
                                     );

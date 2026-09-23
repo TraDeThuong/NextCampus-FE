@@ -51,36 +51,32 @@ export default function DailyReportStats({
       subtitle:
         currentStreak > 0 ? t("streakDescActive") : t("streakDescInactive"),
       icon: Flame,
-      iconBg: "from-amber-500/25 to-orange-400/10",
-      accent: "from-amber-400/70",
-      iconColor: "text-amber-300",
+      containerClass: "border-amber-300 bg-amber-100/80 text-amber-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-amber-500/25 dark:to-orange-400/10 dark:text-amber-300",
+      accent: "from-amber-500",
     },
     {
       title: t("reported"),
       value: reportedDays,
       subtitle: t("submissionRate", { rate: submissionRate }),
       icon: FileCheck,
-      iconBg: "from-emerald-500/25 to-teal-400/10",
-      accent: "from-emerald-400/70",
-      iconColor: "text-emerald-300",
+      containerClass: "border-emerald-300 bg-emerald-100/80 text-emerald-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-emerald-500/25 dark:to-teal-400/10 dark:text-emerald-300",
+      accent: "from-emerald-500",
     },
     {
       title: t("workingDays"),
       value: totalWorkingDays,
       subtitle: t("workingDaysDesc"),
       icon: Calendar,
-      iconBg: "from-sky-500/25 to-cyan-400/10",
-      accent: "from-sky-400/70",
-      iconColor: "text-sky-300",
+      containerClass: "border-sky-300 bg-sky-100/80 text-sky-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-sky-500/25 dark:to-cyan-400/10 dark:text-sky-300",
+      accent: "from-sky-500",
     },
     {
       title: t("missing"),
       value: missingDays,
       subtitle: t("missingDesc"),
       icon: AlertCircle,
-      iconBg: "from-rose-500/25 to-red-400/10",
-      accent: "from-rose-400/70",
-      iconColor: "text-rose-300",
+      containerClass: "border-rose-300 bg-rose-100/80 text-rose-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-rose-500/25 dark:to-red-400/10 dark:text-rose-300",
+      accent: "from-rose-500",
     },
   ];
 
@@ -110,13 +106,12 @@ export default function DailyReportStats({
                 <div
                   className={`
                     flex h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14 shrink-0 items-center justify-center
-                    rounded-xl sm:rounded-2xl border border-white/10
-                    bg-gradient-to-br ${card.iconBg}
-                    shadow-lg transition-all duration-500
+                    rounded-xl sm:rounded-2xl border ${card.containerClass}
+                    shadow-sm dark:shadow-lg transition-all duration-500
                     group-hover:rotate-6 group-hover:scale-110
                   `}
                 >
-                  <Icon className={`h-5 w-5 sm:h-6 sm:w-6 ${card.iconColor} shrink-0`} />
+                  <Icon className="h-5 w-5 sm:h-6 sm:w-6 shrink-0" />
                 </div>
               </div>
             </MetalCard>
@@ -169,10 +164,10 @@ export default function DailyReportStats({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/5">
-              <div className="flex flex-col items-center p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20">
-                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-cyan-300">
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
+            <div className="grid grid-cols-2 gap-3 pt-3 border-t border-border/60 dark:border-white/5">
+              <div className="flex flex-col items-center p-2.5 rounded-xl bg-cyan-50 border border-cyan-300 text-cyan-800 dark:bg-cyan-500/10 dark:border-cyan-500/20 dark:text-cyan-300">
+                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-cyan-700 dark:text-cyan-300">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
                   {t("reported")}
                 </div>
                 <span className="text-sm font-bold text-foreground mt-0.5">
@@ -182,9 +177,9 @@ export default function DailyReportStats({
                   </span>
                 </span>
               </div>
-              <div className="flex flex-col items-center p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20">
-                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-rose-300">
-                  <span className="w-1.5 h-1.5 rounded-full bg-rose-400 shadow-[0_0_6px_rgba(244,63,94,0.8)]" />
+              <div className="flex flex-col items-center p-2.5 rounded-xl bg-rose-50 border border-rose-300 text-rose-800 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-300">
+                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-rose-700 dark:text-rose-300">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500 dark:bg-rose-400 shadow-[0_0_6px_rgba(244,63,94,0.8)]" />
                   {t("missing")}
                 </div>
                 <span className="text-sm font-bold text-foreground mt-0.5">
@@ -203,8 +198,8 @@ export default function DailyReportStats({
           <MetalCard className="p-5 sm:p-6 flex flex-col justify-between h-full">
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/15 border border-indigo-500/30">
-                  <CalendarDays className="h-5 w-5 text-indigo-300" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-indigo-300 bg-indigo-100/80 text-indigo-700 dark:border-indigo-500/30 dark:bg-indigo-500/15 dark:text-indigo-300">
+                  <CalendarDays className="h-5 w-5 shrink-0" />
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-foreground">{t("thisWeek")}</h4>
@@ -220,7 +215,7 @@ export default function DailyReportStats({
               </div>
               <p className="text-xs text-muted">{t("daysReported")}</p>
 
-              <div className="mt-4 h-2.5 w-full rounded-full bg-white/5 overflow-hidden">
+              <div className="mt-4 h-2.5 w-full rounded-full bg-slate-100 dark:bg-white/5 overflow-hidden">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400 transition-all duration-500"
                   style={{ width: `${weekPercent}%` }}
@@ -228,11 +223,11 @@ export default function DailyReportStats({
               </div>
               <div className="mt-2 flex items-center justify-between text-xs text-muted">
                 <span>{t("weekRateTitle")}:</span>
-                <span className="font-bold text-indigo-300">{weekPercent}%</span>
+                <span className="font-bold text-indigo-600 dark:text-indigo-300">{weekPercent}%</span>
               </div>
             </div>
 
-            <div className="mt-4 rounded-xl border border-white/5 bg-white/[0.02] p-3 text-xs text-muted">
+            <div className="mt-4 rounded-xl border border-border bg-slate-50/80 dark:border-white/5 dark:bg-white/[0.02] p-3 text-xs text-muted">
               <p className="font-semibold text-foreground mb-1">{t("policyTitle")}</p>
               <p>{t("policyDesc", { time: activeDeadline })}</p>
             </div>

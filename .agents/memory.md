@@ -253,6 +253,12 @@ Chỉ lưu các quyết định kiến trúc và UI/UX đã được xác nhận
     * Custom Hook: `hooks/pdf-export/useClientExportWeeklyEvaluation.ts` (quản lý việc mount template off-screen, chụp canvas scale 2x và xuất PDF A4 tự động).
     * Nút xuất: `WeeklyEvaluationExportButton.tsx` (tích hợp trạng thái loading và toast thông báo chuẩn mực).
 
-
-
-
+- **2026-09-23 — Chuẩn Hóa Thứ Tự Nút Điều Khiển & Quy Chuẩn Đa Ngôn Ngữ Trang Độc Lập**:
+  - **Thứ tự nút Sáng/Tối và Ngôn ngữ**:
+    * **QUY TẮC BẮT BUỘC**: Nút chỉnh Sáng/Tối (`<ThemeToggle />`) BẮT BUỘC ĐỨNG TRƯỚC (bên trái), nút chuyển đổi Ngôn ngữ (`<LanguageToggle />`) BẮT BUỘC ĐỨNG SAU (bên phải).
+    * Áp dụng trên 100% các thanh action bar: Header chính (`components/layout/Header.tsx`), trang 404 (`app/not-found.tsx`), Auth layout (`app/(auth)/layout.tsx`), Onboarding layout (`app/(onboarding)/layout.tsx`), Error page (`app/error.tsx`).
+  - **Quy chuẩn Đa ngôn ngữ (i18n) cho Auth, 404, Error**:
+    * Tuyệt đối không hardcode text tiếng Anh hay tiếng Việt trên các trang độc lập. Phải dùng `useTranslations(...)` đầy đủ.
+    * Luôn duy trì tính toàn vẹn 2 chiều giữa `messages/vi/*.json` và `messages/en/*.json` (các namespace `auth`, `notFound`, `error` nằm trong `common.json`).
+    * Trang 404 tách Client Component `NotFoundContent.tsx` để khi click nút cờ thì văn bản trang đổi tức thì trong 0ms.
+    * Trong `LocaleProvider.tsx`, hàm `setLocale` phải gọi `router.refresh()` kèm lưu cookie `NEXT_LOCALE` / `locale` để đồng bộ Server Components.

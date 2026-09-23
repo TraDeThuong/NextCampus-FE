@@ -1,18 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useForgotPassword } from "@/hooks/auth/useForgotPassword";
 import Button from "../ui/Button";
 
 export default function ForgotPasswordForm() {
+    const t = useTranslations("auth");
     const { register, errors, isSubmitting, handleSubmit } = useForgotPassword();
 
     return (
         <>
             <div className="text-center space-y-2">
-                <h1 className="text-2xl font-bold text-white">Forgot Password</h1>
+                <h1 className="text-2xl font-bold text-foreground">{t("forgotTitle")}</h1>
                 <p className="text-sm text-muted">
-                    Enter your email address and we will send you a link to reset your password.
+                    {t("forgotDesc")}
                 </p>
             </div>
 
@@ -22,22 +24,22 @@ export default function ForgotPasswordForm() {
                         htmlFor="email"
                         className="block text-sm font-medium text-foreground/90"
                     >
-                        Email address
+                        {t("emailLabel")}
                     </label>
                     <input
                         id="email"
                         type="email"
-                        placeholder="name@company.com"
+                        placeholder={t("emailPlaceholder")}
                         className={`w-full rounded-xl border bg-transparent px-4 py-3 text-sm text-foreground outline-none transition-all placeholder:text-muted/60
                             ${errors.email
                                 ? "border-danger focus:border-danger focus:ring-4 focus:ring-danger/10"
                                 : "border-border focus:border-primary-light focus:ring-4 focus:ring-primary-light/10"
                             }`}
                         {...register("email", {
-                            required: "Email is required",
+                            required: t("emailRequired"),
                             pattern: {
                                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                message: "Invalid email address",
+                                message: t("invalidEmail"),
                             },
                         })}
                     />
@@ -59,19 +61,19 @@ export default function ForgotPasswordForm() {
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                             </svg>
-                            <span>Sending...</span>
+                            <span>{t("sending")}</span>
                         </div>
                     ) : (
-                        <span className="tracking-wide">Send Reset Link</span>
+                        <span className="tracking-wide">{t("sendResetLink")}</span>
                     )}
                 </Button>
 
                 <div className="text-center">
                     <Link
                         href="/login"
-                        className="text-sm font-medium text-primary-light hover:text-white hover:underline transition"
+                        className="text-sm font-medium text-primary-main hover:text-primary-main/80 hover:underline dark:text-primary-light dark:hover:text-white transition"
                     >
-                        Back to Sign In
+                        {t("backToSignIn")}
                     </Link>
                 </div>
             </form>

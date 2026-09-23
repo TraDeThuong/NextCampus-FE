@@ -38,8 +38,8 @@ export default function DashboardLayout({ children, sidebar }: Props) {
         <aside
           className={`
             fixed left-0 top-0 z-40 flex h-screen w-30 shrink-0 flex-col overflow-y-auto no-scrollbar
-            border-r border-white/10 px-6 py-8 backdrop-blur-2xl shadow-2xl transition-transform duration-300
-            bg-background/95 md:bg-white/5
+            border-r border-slate-200/80 dark:border-white/10 px-6 py-8 backdrop-blur-2xl shadow-sm dark:shadow-2xl transition-transform duration-300
+            bg-white/85 dark:bg-background/95 md:bg-white/70 dark:md:bg-white/5
             ${isMobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
           `}
         >

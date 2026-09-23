@@ -447,7 +447,7 @@ export default function TaskEditModal({ taskId, onClose, onCloseModal }: Props) 
                 {existingAttachments.map((a) => {
                   const cat = getFileCategory(a.mimeType); const Icon = getFileIcon(cat); const color = getFileColor(cat);
                   return (
-                    <div key={a.id} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-2.5 group">
+                    <div key={a.id} className="flex items-center gap-3 rounded-xl border border-border bg-slate-50/70 p-2.5 group dark:border-white/10 dark:bg-white/5">
                       <Icon className={`h-5 w-5 shrink-0 ${color}`} />
                       <div className="min-w-0 flex-1"><p className="truncate text-sm text-foreground">{a.fileName}</p><p className="text-xs text-muted">{formatFileSize(a.fileSize)}</p></div>
                       <button type="button" onClick={() => deleteAttachment.mutate({ taskId, attachmentId: a.id })} disabled={isPending} className="shrink-0 rounded p-0.5 text-muted opacity-0 hover:bg-red-500/10 hover:text-red-400 group-hover:opacity-100 transition disabled:opacity-50"><Trash2 className="h-3.5 w-3.5" /></button>
@@ -485,22 +485,22 @@ export default function TaskEditModal({ taskId, onClose, onCloseModal }: Props) 
                 {fileItems.map((f) => {
                   const cat = getFileCategory(f.mimeType); const Icon = getFileIcon(cat); const color = getFileColor(cat); const status = fileStatuses[f.id] ?? "pending";
                   return (
-                    <div key={f.id} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-2.5 group">
+                    <div key={f.id} className="flex items-center gap-3 rounded-xl border border-border bg-slate-50/70 p-2.5 group dark:border-white/10 dark:bg-white/5">
                       <Icon className={`h-5 w-5 shrink-0 ${color}`} />
                       <div className="min-w-0 flex-1"><p className="truncate text-sm text-foreground">{f.name}</p><p className="text-xs text-muted">{formatFileSize(f.size)}</p></div>
                       <div className="shrink-0">{status === "uploading" && <Loader2 className="h-4 w-4 animate-spin text-info" />}{status === "success" && <CheckCircle2 className="h-4 w-4 text-emerald-400" />}{status === "error" && <AlertCircle className="h-4 w-4 text-red-400" />}</div>
-                      {!isPending && <button type="button" onClick={() => removeFile(f.id)} className="shrink-0 rounded p-0.5 text-muted hover:bg-white/10 hover:text-red-400"><X className="h-3.5 w-3.5" /></button>}
+                      {!isPending && <button type="button" onClick={() => removeFile(f.id)} className="shrink-0 rounded p-0.5 text-muted hover:bg-slate-200 dark:hover:bg-white/10 hover:text-red-400"><X className="h-3.5 w-3.5" /></button>}
                     </div>
                   );
                 })}
                 {linkItems.map((l) => {
                   const status = linkStatuses[l.id] ?? "pending"; const domain = (() => { try { return new URL(l.fileUrl).hostname; } catch { return ""; } })();
                   return (
-                    <div key={l.id} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-2.5 group">
+                    <div key={l.id} className="flex items-center gap-3 rounded-xl border border-border bg-slate-50/70 p-2.5 group dark:border-white/10 dark:bg-white/5">
                       <Link className="h-5 w-5 shrink-0 text-blue-400" />
                       <div className="min-w-0 flex-1"><p className="truncate text-sm text-foreground">{l.fileName}</p><p className="truncate text-xs text-muted">{domain}</p></div>
                       <div className="shrink-0">{status === "uploading" && <Loader2 className="h-4 w-4 animate-spin text-info" />}{status === "success" && <CheckCircle2 className="h-4 w-4 text-emerald-400" />}{status === "error" && <AlertCircle className="h-4 w-4 text-red-400" />}</div>
-                      {!isPending && <button type="button" onClick={() => removeLink(l.id)} className="shrink-0 rounded p-0.5 text-muted hover:bg-white/10 hover:text-red-400"><X className="h-3.5 w-3.5" /></button>}
+                      {!isPending && <button type="button" onClick={() => removeLink(l.id)} className="shrink-0 rounded p-0.5 text-muted hover:bg-slate-200 dark:hover:bg-white/10 hover:text-red-400"><X className="h-3.5 w-3.5" /></button>}
                     </div>
                   );
                 })}

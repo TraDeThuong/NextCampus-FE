@@ -36,25 +36,25 @@ export default function InternInfoCard({ intern }: InternInfoCardProps) {
     const statusConfig: Record<string, { label: string; className: string; dotClass: string }> = {
         ACTIVE: {
             label: t("active"),
-            className: "border-emerald-400/20 bg-emerald-500/10 text-emerald-300",
-            dotClass: "text-emerald-400",
+            className: "border-emerald-500/30 bg-emerald-50 text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-500/10 dark:text-emerald-300",
+            dotClass: "text-emerald-500 dark:text-emerald-400",
         },
         COMPLETED: {
             label: t("completed"),
-            className: "border-blue-400/20 bg-blue-500/10 text-blue-300",
-            dotClass: "text-blue-400",
+            className: "border-blue-500/30 bg-blue-50 text-blue-700 dark:border-blue-400/20 dark:bg-blue-500/10 dark:text-blue-300",
+            dotClass: "text-blue-500 dark:text-blue-400",
         },
         DROPPED: {
             label: t("dropped"),
-            className: "border-red-400/20 bg-red-500/10 text-red-300",
-            dotClass: "text-red-400",
+            className: "border-rose-500/30 bg-rose-50 text-rose-700 dark:border-red-400/20 dark:bg-red-500/10 dark:text-red-300",
+            dotClass: "text-rose-500 dark:text-red-400",
         },
     };
 
     const status = statusConfig[intern.status] ?? {
         label: intern.status,
-        className: "border-slate-400/20 bg-slate-500/10 text-slate-300",
-        dotClass: "text-slate-400",
+        className: "border-slate-300 bg-slate-100 text-slate-700 dark:border-slate-400/20 dark:bg-slate-500/10 dark:text-slate-300",
+        dotClass: "text-slate-500 dark:text-slate-400",
     };
 
     return (
@@ -103,7 +103,7 @@ type InfoFieldProps = {
 
 function InfoField({ icon: Icon, label, value, extra, extraLabel }: InfoFieldProps) {
     return (
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+        <div className="rounded-2xl border border-border bg-slate-50/80 dark:border-white/10 dark:bg-white/[0.03] p-4">
             <div className="mb-2 flex items-center gap-2 text-xs sm:text-sm font-medium text-muted-foreground">
                 <Icon className="h-4 w-4 shrink-0" />
                 <span>{label}</span>
@@ -126,7 +126,7 @@ function StatusField({
     label: string;
 }) {
     return (
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+        <div className="rounded-2xl border border-border bg-slate-50/80 dark:border-white/10 dark:bg-white/[0.03] p-4">
             <div className="mb-2 flex items-center gap-2 text-xs sm:text-sm font-medium text-muted-foreground">
                 <Circle className="h-4 w-4 shrink-0" />
                 <span>{label}</span>

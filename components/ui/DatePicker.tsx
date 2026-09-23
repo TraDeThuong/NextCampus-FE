@@ -536,26 +536,26 @@ export function DateRangePicker({
                         data-portal="datepicker"
                         style={popoverStyle}
                         className="
-                            rounded-2xl border border-white/10 bg-[#0c1322]/95 p-3.5 sm:p-4
-                            text-slate-200 shadow-[0_24px_60px_rgba(0,0,0,0.7)]
-                            backdrop-blur-2xl ring-1 ring-white/10
+                            rounded-2xl border border-border dark:border-white/10 bg-card/95 dark:bg-[#0c1322]/95 p-3.5 sm:p-4
+                            text-foreground dark:text-slate-200 shadow-2xl
+                            backdrop-blur-2xl ring-1 ring-border dark:ring-white/10
                             animate-in fade-in zoom-in-95 duration-200
                             max-h-[calc(100dvh-20px)] overflow-y-auto flex flex-col scrollbar-dropdown
                         "
                     >
                         {/* Quick Presets (horizontal scroll on mobile to save vertical space) */}
                         {showPresets && resolvedPresets.length > 0 && (
-                            <div className="flex items-center gap-1.5 overflow-x-auto pb-2.5 mb-2.5 border-b border-white/10 no-scrollbar scrollbar-none">
+                            <div className="flex items-center gap-1.5 overflow-x-auto pb-2.5 mb-2.5 border-b border-border dark:border-white/10 no-scrollbar scrollbar-none">
                                 {resolvedPresets.map((preset) => (
                                     <button
                                         key={preset.label}
                                         type="button"
                                         onClick={() => handleApplyPreset(preset)}
                                         className="
-                                            shrink-0 rounded-lg border border-white/5 bg-white/[0.03]
-                                            px-2.5 py-1 text-[11px] font-medium text-slate-400
+                                            shrink-0 rounded-lg border border-border dark:border-white/5 bg-slate-100 dark:bg-white/[0.03]
+                                            px-2.5 py-1 text-[11px] font-medium text-slate-700 dark:text-slate-400
                                             transition-all duration-200 cursor-pointer
-                                            hover:border-cyan-500/40 hover:bg-cyan-500/10 hover:text-cyan-300
+                                            hover:border-cyan-500/40 hover:bg-cyan-50 dark:hover:bg-cyan-500/10 hover:text-cyan-700 dark:hover:text-cyan-300
                                             active:scale-95
                                         "
                                     >
@@ -573,15 +573,15 @@ export function DateRangePicker({
                                 aria-label="Tháng trước"
                                 className="
                                     flex h-7 w-7 items-center justify-center rounded-lg
-                                    border border-white/10 bg-white/[0.04] text-slate-400
-                                    transition-all hover:bg-white/10 hover:text-white hover:border-white/20
+                                    border border-border dark:border-white/10 bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.04] text-slate-700 dark:text-slate-400
+                                    transition-all dark:hover:bg-white/10 dark:hover:text-white dark:hover:border-white/20
                                     active:scale-90 cursor-pointer
                                 "
                             >
                                 <ChevronLeft className="h-4 w-4" />
                             </button>
 
-                            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-200">
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground dark:text-slate-200">
                                 {monthLabel}
                             </h4>
 
@@ -591,8 +591,8 @@ export function DateRangePicker({
                                 aria-label="Tháng sau"
                                 className="
                                     flex h-7 w-7 items-center justify-center rounded-lg
-                                    border border-white/10 bg-white/[0.04] text-slate-400
-                                    transition-all hover:bg-white/10 hover:text-white hover:border-white/20
+                                    border border-border dark:border-white/10 bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.04] text-slate-700 dark:text-slate-400
+                                    transition-all dark:hover:bg-white/10 dark:hover:text-white dark:hover:border-white/20
                                     active:scale-90 cursor-pointer
                                 "
                             >
@@ -605,7 +605,7 @@ export function DateRangePicker({
                             {(isVi ? VI_WEEKDAYS : EN_WEEKDAYS).map((day) => (
                                 <div
                                     key={day}
-                                    className="text-[10px] font-bold uppercase tracking-wider text-slate-500 py-1"
+                                    className="text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-500 py-1"
                                 >
                                     {day}
                                 </div>
@@ -649,8 +649,8 @@ export function DateRangePicker({
 
                                     let cellBg = "";
                                     let textColor = isCurrentMonth
-                                        ? "text-slate-200"
-                                        : "text-slate-600";
+                                        ? "text-slate-800 dark:text-slate-200"
+                                        : "text-slate-400 dark:text-slate-600";
 
                                     if (isStart && isEnd) {
                                         cellBg =
@@ -969,9 +969,9 @@ export function DatePicker({
                             data-portal="datepicker"
                             style={popoverStyle}
                             className="
-                                rounded-2xl border border-white/10 bg-[#0c1322]/95 p-3.5
-                                text-slate-200 shadow-[0_24px_60px_rgba(0,0,0,0.7)]
-                                backdrop-blur-2xl ring-1 ring-white/10
+                                rounded-2xl border border-border dark:border-white/10 bg-card/95 dark:bg-[#0c1322]/95 p-3.5
+                                text-foreground dark:text-slate-200 shadow-2xl
+                                backdrop-blur-2xl ring-1 ring-border dark:ring-white/10
                                 animate-in fade-in zoom-in-95 duration-200
                                 max-h-[calc(100dvh-20px)] overflow-y-auto flex flex-col scrollbar-dropdown
                             "
@@ -986,11 +986,11 @@ export function DatePicker({
                                             setViewMonth(11);
                                         } else setViewMonth((m) => m - 1);
                                     }}
-                                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-400 hover:bg-white/10 hover:text-white transition"
+                                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-border dark:border-white/10 bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.04] text-slate-700 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white transition"
                                 >
                                     <ChevronLeft className="h-4 w-4" />
                                 </button>
-                                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-200">
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-foreground dark:text-slate-200">
                                     {monthLabel}
                                 </h4>
                                 <button
@@ -1001,7 +1001,7 @@ export function DatePicker({
                                             setViewMonth(0);
                                         } else setViewMonth((m) => m + 1);
                                     }}
-                                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-400 hover:bg-white/10 hover:text-white transition"
+                                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-border dark:border-white/10 bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.04] text-slate-700 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white transition"
                                 >
                                     <ChevronRight className="h-4 w-4" />
                                 </button>
@@ -1012,7 +1012,7 @@ export function DatePicker({
                                 {(isVi ? VI_WEEKDAYS : EN_WEEKDAYS).map((day) => (
                                     <div
                                         key={day}
-                                        className="text-[10px] font-bold uppercase tracking-wider text-slate-500 py-1"
+                                        className="text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-500 py-1"
                                     >
                                         {day}
                                     </div>
@@ -1050,8 +1050,8 @@ export function DatePicker({
                                                         isSelected
                                                             ? "bg-gradient-to-r from-cyan-500 to-blue-600 font-bold text-white shadow-[0_0_12px_rgba(6,182,212,0.4)]"
                                                             : isCurrentMonth
-                                                              ? "text-slate-200 hover:bg-white/10 hover:text-white"
-                                                              : "text-slate-600 hover:bg-white/5"
+                                                              ? "text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
+                                                              : "text-slate-400 dark:text-slate-600 hover:bg-slate-50 dark:hover:bg-white/5"
                                                     }
                                                     ${isCellDisabled ? "opacity-25 cursor-not-allowed pointer-events-none" : ""}
                                                 `}

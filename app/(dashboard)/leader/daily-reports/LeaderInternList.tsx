@@ -63,8 +63,8 @@ export default function LeaderInternList({
               onClick={() => onSelect(intern.id)}
               className={`group w-full text-left p-3 rounded-2xl text-sm transition-all duration-200 border cursor-pointer active:scale-[0.98] ${
                 isSelected
-                  ? "border-cyan-400/40 bg-cyan-500/15 text-cyan-200 shadow-[0_0_15px_rgba(6,182,212,0.15)] ring-1 ring-cyan-400/30"
-                  : "border-white/5 bg-white/[0.02] text-slate-400 hover:text-slate-200 hover:bg-white/5 hover:border-white/10"
+                  ? "border-cyan-500/40 bg-cyan-500/15 text-cyan-800 dark:text-cyan-200 shadow-sm ring-1 ring-cyan-500/30"
+                  : "border-border bg-card/60 text-muted hover:text-foreground hover:bg-card hover:border-border-strong dark:border-white/5 dark:bg-white/[0.02] dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-white/5 dark:hover:border-white/10"
               }`}
             >
               <div className="flex items-center gap-3">
@@ -72,8 +72,8 @@ export default function LeaderInternList({
                 <div
                   className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xs font-bold transition-transform group-hover:scale-105 ${
                     isSelected
-                      ? "bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-[0_0_10px_rgba(6,182,212,0.5)]"
-                      : "border border-white/10 bg-white/5 text-slate-300"
+                      ? "bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-sm dark:shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+                      : "border border-border bg-slate-100 text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-300"
                   }`}
                 >
                   {initials}

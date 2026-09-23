@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useLogin } from "@/hooks/auth/useLogin";
 import LoginHeader from "./LoginHeader";
 import PasswordInput from "./PasswordInput";
@@ -10,6 +11,7 @@ import Link from "next/link";
 import Spinner from "../ui/Spinner";
 
 export default function LoginForm() {
+    const t = useTranslations("auth");
     const { register, errors, isSubmitting, loginError, handleSubmit } = useLogin();
     const searchParams = useSearchParams();
     const isInactive = searchParams.get("reason") === "inactive";
@@ -21,7 +23,7 @@ export default function LoginForm() {
             {isInactive && (
                 <div className="mt-4 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-3.5 text-sm text-red-300">
                     <AlertTriangle className="h-5 w-5 shrink-0 text-red-400" />
-                    <span>Tài khoản của bạn đã bị khóa hoặc ngừng hoạt động.</span>
+                    <span>{t("accountInactive")}</span>
                 </div>
             )}
 
@@ -39,22 +41,22 @@ export default function LoginForm() {
                         htmlFor="email" 
                         className="block text-sm font-medium text-foreground/90"
                     >
-                        Email address
+                        {t("emailLabel")}
                     </label>
                     <input
                         id="email"
                         type="email"
-                        placeholder="name@company.com"
+                        placeholder={t("emailPlaceholder")}
                         className={`w-full rounded-xl border bg-transparent px-4 py-3 text-sm text-foreground outline-none transition-all placeholder:text-muted/60 
                             ${errors.email 
                                 ? "border-danger focus:border-danger focus:ring-4 focus:ring-danger/10" 
                                 : "border-border focus:border-primary-light focus:ring-4 focus:ring-primary-light/10"
                             }`}
                         {...register("email", { 
-                            required: "Email is required",
+                            required: t("emailRequired"),
                             pattern: {
                                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                message: "Invalid email address"
+                                message: t("invalidEmail"),
                             }
                         })}
                     />
@@ -67,7 +69,13 @@ export default function LoginForm() {
 
                 {/* Password Field */}
                 <div className="space-y-2">
-                    <PasswordInput register={register} error={errors.password?.message} />
+                    <PasswordInput
+                        register={register}
+                        error={errors.password?.message}
+                        label={t("passwordLabel")}
+                        placeholder={t("passwordPlaceholder")}
+                        rules={{ required: t("passwordRequired") }}
+                    />
                 </div>
 
                 {/* Remember Me & Forgot Password Utilities */}
@@ -80,14 +88,14 @@ export default function LoginForm() {
                             {...register("remember")}
                         />
                         <span className="ml-2 text-sm text-muted group-hover:text-foreground transition">
-                            Remember me
+                            {t("rememberMe")}
                         </span>
                     </label>
                     <Link
                         href="/forgot-password"
-                        className="text-sm font-medium text-primary-light hover:text-white hover:underline transition metal-glow"
+                        className="text-sm font-medium text-primary-main hover:text-primary-main/80 hover:underline dark:text-primary-light dark:hover:text-white transition"
                     >
-                        Forgot password?
+                        {t("forgotPassword")}
                     </Link>
                 </div>
 
@@ -99,10 +107,10 @@ export default function LoginForm() {
                         {isSubmitting ? (
                             <div className="flex items-center gap-2">
                                 <Spinner size="sm"/>
-                                <span>Signing In...</span>
+                                <span>{t("signingIn")}</span>
                             </div>
                         ) : (
-                            <span className="tracking-wide">Sign In</span>
+                            <span className="tracking-wide">{t("signIn")}</span>
                         )}
 
                 </Button>

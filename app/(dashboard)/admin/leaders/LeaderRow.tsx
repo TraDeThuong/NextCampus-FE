@@ -245,7 +245,7 @@ export default function LeaderRow({ leader }: LeaderRowProps) {
 
                 {/* Intern Count */}
                 <div className="flex items-center justify-center">
-                    <span className="inline-flex items-center justify-center min-w-[28px] px-2 py-0.5 rounded-lg bg-cyan-500/10 text-cyan-400 font-semibold text-xs border border-cyan-500/20">
+                    <span className="inline-flex items-center justify-center min-w-[28px] px-2 py-0.5 rounded-lg bg-cyan-100/80 text-cyan-700 font-semibold text-xs border border-cyan-300 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-500/20">
                         {leader.internCount ?? 0}
                     </span>
                 </div>
@@ -270,15 +270,15 @@ export default function LeaderRow({ leader }: LeaderRowProps) {
                                 <span
                                     className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
                                         leader.user.isActive
-                                            ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-300 hover:border-emerald-400/50"
-                                            : "border-red-400/30 bg-red-500/10 text-red-300 hover:border-red-400/50"
+                                            ? "border-emerald-300 bg-emerald-100/80 text-emerald-700 hover:border-emerald-400 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:border-emerald-400/50"
+                                            : "border-rose-300 bg-rose-100/80 text-rose-700 hover:border-rose-400 dark:border-red-400/30 dark:bg-red-500/10 dark:text-red-300 dark:hover:border-red-400/50"
                                     }`}
                                 >
                                     <span
                                         className={`h-1.5 w-1.5 rounded-full ${
                                             leader.user.isActive
-                                                ? "bg-emerald-400"
-                                                : "bg-red-400"
+                                                ? "bg-emerald-500 dark:bg-emerald-400"
+                                                : "bg-rose-500 dark:bg-red-400"
                                         }`}
                                     />
                                     {label}
@@ -289,15 +289,15 @@ export default function LeaderRow({ leader }: LeaderRowProps) {
                         <span
                             className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${
                                 leader.user.isActive
-                                    ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-300"
-                                    : "border-red-400/30 bg-red-500/10 text-red-300"
+                                    ? "border-emerald-300 bg-emerald-100/80 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-300"
+                                    : "border-rose-300 bg-rose-100/80 text-rose-700 dark:border-red-400/30 dark:bg-red-500/10 dark:text-red-300"
                             }`}
                         >
                             <span
                                 className={`h-1.5 w-1.5 rounded-full ${
                                     leader.user.isActive
-                                        ? "bg-emerald-400"
-                                        : "bg-red-400"
+                                        ? "bg-emerald-500 dark:bg-emerald-400"
+                                        : "bg-rose-500 dark:bg-red-400"
                                 }`}
                             />
                             {leader.user.isActive ? t("admin.leaders.active") : t("admin.leaders.inactive")}

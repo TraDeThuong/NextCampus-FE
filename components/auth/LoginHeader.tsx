@@ -1,6 +1,11 @@
+"use client";
+
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 export default function LoginHeader() {
+    const t = useTranslations("auth");
+
     return (
         <div className="text-center">
             <Image
@@ -14,11 +19,11 @@ export default function LoginHeader() {
             />
 
             <h1 className="mt-6 text-3xl font-bold metal-text">
-                Welcome Back
+                {t("welcomeBack")}
             </h1>
 
-            <p className="mt-2 text-sm text-slate-500">
-                Sign in to access the Internship Onboarding System.
+            <p className="mt-2 text-sm text-muted">
+                {t("welcomeSub")}
             </p>
         </div>
     );

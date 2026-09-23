@@ -107,10 +107,10 @@ export default function TaskImportModal({ onCloseModal }: Props) {
   return (
     <div className="flex flex-col">
       {/* Sticky Header (Rule 44 Compliant: Icon + Heading inside a dedicated flex container) */}
-      <div className="sticky top-0 z-20 bg-[#0c1222]/95 backdrop-blur-xl pb-4 pt-1 -mt-1 border-b border-white/10 pr-10 sm:pr-12">
+      <div className="sticky top-0 z-20 bg-white/95 dark:bg-[#0c1222]/95 backdrop-blur-xl pb-4 pt-1 -mt-1 border-b border-border dark:border-white/10 pr-10 sm:pr-12">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.2)]">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 border border-emerald-300 text-emerald-700 shadow-sm dark:bg-emerald-500/15 dark:border-emerald-500/30 dark:text-emerald-300 dark:shadow-[0_0_12px_rgba(16,185,129,0.2)]">
               <FileSpreadsheet className="h-5 w-5 shrink-0" />
             </div>
             <div className="min-w-0">
@@ -144,17 +144,17 @@ export default function TaskImportModal({ onCloseModal }: Props) {
                 <div
                   className={`flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full text-xs sm:text-sm font-bold transition-all duration-300 ${
                     isPassed
-                      ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                      ? "bg-emerald-100 text-emerald-700 border border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30"
                       : isCurrent
-                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-400/50 shadow-[0_0_16px_rgba(16,185,129,0.3)]"
-                      : "bg-white/5 text-muted border border-white/10"
+                      ? "bg-emerald-100 text-emerald-700 border border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-400/50 shadow-sm dark:shadow-[0_0_16px_rgba(16,185,129,0.3)]"
+                      : "bg-slate-100 text-muted border border-border dark:bg-white/5 dark:border-white/10"
                   }`}
                 >
                   {isPassed ? <CheckCircle className="h-4 w-4" /> : i + 1}
                 </div>
                 <span
                   className={`text-[11px] sm:text-xs font-semibold uppercase tracking-wider transition-colors duration-300 ${
-                    isCurrent ? "metal-text metal-glow" : isPassed ? "text-emerald-400" : "text-muted"
+                    isCurrent ? "metal-text metal-glow" : isPassed ? "text-emerald-600 dark:text-emerald-400" : "text-muted"
                   }`}
                 >
                   {s.label}
@@ -166,7 +166,7 @@ export default function TaskImportModal({ onCloseModal }: Props) {
               {i < arr.length - 1 && (
                 <div
                   className={`mx-1 sm:mx-3 mb-6 sm:mb-8 h-px w-8 sm:w-14 md:w-20 transition-colors duration-300 ${
-                    isPassed ? "bg-emerald-500/40" : "bg-white/10"
+                    isPassed ? "bg-emerald-500/40" : "bg-border dark:bg-white/10"
                   }`}
                 />
               )}
@@ -262,7 +262,7 @@ export default function TaskImportModal({ onCloseModal }: Props) {
                 </div>
               </div>
 
-              <div className="mt-5 pt-4 border-t border-white/10 flex flex-wrap items-center gap-3">
+              <div className="mt-5 pt-4 border-t border-border dark:border-white/10 flex flex-wrap items-center gap-3">
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -324,7 +324,7 @@ export default function TaskImportModal({ onCloseModal }: Props) {
 
             {/* Task Group info */}
             {previewData.taskGroupName && (
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-xs sm:text-sm text-muted">
+              <div className="rounded-xl border border-border bg-slate-50/70 px-4 py-2.5 text-xs sm:text-sm text-muted dark:border-white/10 dark:bg-white/[0.03]">
                 Nhóm công việc áp dụng:{" "}
                 <span className="font-semibold text-foreground">
                   {previewData.taskGroupName}
@@ -338,7 +338,7 @@ export default function TaskImportModal({ onCloseModal }: Props) {
                 <h3 className="text-xs sm:text-sm font-semibold text-foreground/90 flex items-center gap-1.5">
                   Khớp nối tài khoản thực tập sinh ({previewData.internMappings.length})
                 </h3>
-                <div className="overflow-x-auto scrollbar-dropdown rounded-2xl border border-white/10 bg-card/40">
+                <div className="overflow-x-auto scrollbar-dropdown rounded-2xl border border-border bg-card dark:border-white/10 dark:bg-card/40">
                   <Table columns="1fr 1.4fr 1fr 120px">
                     <Table.Header>
                       <div>Excel Alias</div>
@@ -380,7 +380,7 @@ export default function TaskImportModal({ onCloseModal }: Props) {
                 <h3 className="text-xs sm:text-sm font-semibold text-foreground/90 flex items-center gap-1.5">
                   Dòng hợp lệ ({previewData.validRows.length})
                 </h3>
-                <div className="overflow-x-auto scrollbar-dropdown rounded-2xl border border-white/10 bg-card/40">
+                <div className="overflow-x-auto scrollbar-dropdown rounded-2xl border border-border bg-card dark:border-white/10 dark:bg-card/40">
                   <Table columns="100px 1fr 120px 100px 140px 100px">
                     <Table.Header>
                       <div>Mã task</div>
@@ -462,7 +462,7 @@ export default function TaskImportModal({ onCloseModal }: Props) {
             )}
 
             {/* Actions */}
-            <div className="flex items-center justify-between pt-3 border-t border-white/10">
+            <div className="flex items-center justify-between pt-3 border-t border-border dark:border-white/10">
               <Button variant="glass" size="md" onClick={reset}>
                 ← Quay lại
               </Button>
@@ -559,7 +559,7 @@ export default function TaskImportModal({ onCloseModal }: Props) {
             )}
 
             {/* Actions */}
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-border dark:border-white/10">
               <Button variant="glass" size="md" onClick={reset}>
                 Nhập tệp khác
               </Button>

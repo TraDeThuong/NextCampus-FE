@@ -126,10 +126,10 @@ function InviteAdminForm({
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500/10 text-cyan-400">
                 <UserPlus className="h-6 w-6" />
             </div>
-            <h3 className="mt-4 text-base font-semibold text-white">
+            <h3 className="mt-4 text-base font-semibold text-foreground">
                 {t("admin.adminTeam.inviteModalTitle")}
             </h3>
-            <p className="mt-2 text-sm text-slate-400">
+            <p className="mt-2 text-sm text-muted">
                 {t("admin.adminTeam.inviteModalDescription")}
             </p>
 
@@ -141,11 +141,11 @@ function InviteAdminForm({
                 className="mt-6 space-y-4 text-left"
             >
                 <div>
-                    <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
+                    <label className="block text-xs font-semibold uppercase text-muted mb-1.5">
                         {t("admin.adminTeam.emailLabel")} <span className="text-rose-500">*</span>
                     </label>
                     <div className="relative">
-                        <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                        <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
                         <input
                             type="email"
                             placeholder={t("admin.adminTeam.emailPlaceholder")}
@@ -156,11 +156,11 @@ function InviteAdminForm({
                                     message: t("admin.adminTeam.invalidEmail"),
                                 },
                             })}
-                            className="w-full rounded-xl border border-white/10 bg-white/5 py-3 pl-11 pr-4 text-sm text-white outline-none transition focus:border-cyan-400/50 placeholder:text-slate-600"
+                            className="w-full rounded-xl border border-border bg-card py-3 pl-11 pr-4 text-sm text-foreground outline-none transition focus:border-cyan-500/50 placeholder:text-muted dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-slate-600"
                         />
                     </div>
                     {errors.email && (
-                        <p className="text-xs text-red-400 mt-1">
+                        <p className="text-xs text-rose-500 mt-1">
                             {errors.email.message}
                         </p>
                     )}
@@ -187,7 +187,7 @@ function InviteAdminForm({
                         type="button"
                         onClick={onCloseModal}
                         disabled={isPending}
-                        className="rounded-xl border border-white/10 bg-white/5 px-5 py-2 text-sm text-slate-300 transition hover:text-white disabled:opacity-50"
+                        className="rounded-xl border border-border bg-card px-5 py-2 text-sm text-muted hover:text-foreground dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:text-white disabled:opacity-50"
                     >
                         {t("admin.adminTeam.cancel")}
                     </button>

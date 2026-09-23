@@ -1,25 +1,27 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useResetPassword } from "@/hooks/auth/useResetPassword";
 import PasswordInput from "./PasswordInput";
 import Button from "../ui/Button";
 
 export default function ResetPasswordForm() {
+    const t = useTranslations("auth");
     const { register, errors, isSubmitting, handleSubmit, watch, token } = useResetPassword();
 
     if (!token) {
         return (
             <div className="text-center space-y-4">
-                <h1 className="text-2xl font-bold text-white">Invalid Link</h1>
+                <h1 className="text-2xl font-bold text-foreground">{t("invalidLink")}</h1>
                 <p className="text-sm text-muted">
-                    The password reset link is missing or invalid. Please request a new one.
+                    {t("invalidLinkDesc")}
                 </p>
                 <Link
                     href="/forgot-password"
-                    className="inline-block text-sm font-medium text-primary-light hover:text-white hover:underline transition"
+                    className="inline-block text-sm font-medium text-primary-main hover:text-primary-main/80 hover:underline dark:text-primary-light dark:hover:text-white transition"
                 >
-                    Request New Reset Link
+                    {t("requestNewLink")}
                 </Link>
             </div>
         );
@@ -28,9 +30,9 @@ export default function ResetPasswordForm() {
     return (
         <>
             <div className="text-center space-y-2">
-                <h1 className="text-2xl font-bold text-white">Reset Password</h1>
+                <h1 className="text-2xl font-bold text-foreground">{t("resetTitle")}</h1>
                 <p className="text-sm text-muted">
-                    Enter your new password below.
+                    {t("resetDesc")}
                 </p>
             </div>
 
@@ -39,14 +41,14 @@ export default function ResetPasswordForm() {
                     register={register}
                     error={errors.password?.message}
                     name="password"
-                    label="New Password"
-                    placeholder="Enter new password"
+                    label={t("newPassword")}
+                    placeholder={t("newPassword")}
                     rules={{
-                        required: "Password is required",
-                        minLength: { value: 8, message: "Password must be at least 8 characters" },
+                        required: t("passwordRequired"),
+                        minLength: { value: 8, message: t("passwordMinLength") },
                         pattern: {
                             value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/,
-                            message: "Password must include uppercase, lowercase, number, and special character",
+                            message: t("passwordComplexity"),
                         },
                     }}
                 />
@@ -55,12 +57,12 @@ export default function ResetPasswordForm() {
                     register={register}
                     error={errors.confirmPassword?.message}
                     name="confirmPassword"
-                    label="Confirm Password"
-                    placeholder="Re-enter new password"
+                    label={t("confirmPassword")}
+                    placeholder={t("confirmPassword")}
                     rules={{
-                        required: "Please confirm your password",
+                        required: t("confirmPasswordRequired"),
                         validate: (value: string) =>
-                            value === watch("password") || "Passwords do not match",
+                            value === watch("password") || t("passwordsDoNotMatch"),
                     }}
                 />
 
@@ -75,19 +77,19 @@ export default function ResetPasswordForm() {
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                             </svg>
-                            <span>Resetting...</span>
+                            <span>{t("resetting")}</span>
                         </div>
                     ) : (
-                        <span className="tracking-wide">Reset Password</span>
+                        <span className="tracking-wide">{t("resetTitle")}</span>
                     )}
                 </Button>
 
                 <div className="text-center">
                     <Link
                         href="/login"
-                        className="text-sm font-medium text-primary-light hover:text-white hover:underline transition"
+                        className="text-sm font-medium text-primary-main hover:text-primary-main/80 hover:underline dark:text-primary-light dark:hover:text-white transition"
                     >
-                        Back to Sign In
+                        {t("backToSignIn")}
                     </Link>
                 </div>
             </form>

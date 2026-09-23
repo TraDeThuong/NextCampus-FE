@@ -27,15 +27,15 @@ type Props = {
 };
 
 const priorityBadge: Record<string, string> = {
-  HIGH: "bg-rose-500/10 text-rose-400 border border-rose-500/20",
-  MEDIUM: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
-  LOW: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
+  HIGH: "bg-rose-100/80 text-rose-700 border border-rose-300 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20",
+  MEDIUM: "bg-amber-100/80 text-amber-700 border border-amber-300 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20",
+  LOW: "bg-emerald-100/80 text-emerald-700 border border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20",
 };
 
 const reviewStatusBadge: Record<string, string> = {
-  PENDING: "border-amber-400/20 bg-amber-500/10 text-amber-300",
-  APPROVED: "border-emerald-400/20 bg-emerald-500/10 text-emerald-300",
-  REJECTED: "border-red-400/20 bg-red-500/10 text-red-300",
+  PENDING: "border-amber-300 bg-amber-100/80 text-amber-700 dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-300",
+  APPROVED: "border-emerald-300 bg-emerald-100/80 text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-500/10 dark:text-emerald-300",
+  REJECTED: "border-rose-300 bg-rose-100/80 text-rose-700 dark:border-red-400/20 dark:bg-red-500/10 dark:text-red-300",
 };
 
 function formatFileSize(bytes: number) {
@@ -96,10 +96,10 @@ export default function TaskReviewModal({ assignmentId, onClose }: Props) {
 
   return createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 backdrop-blur-md">
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-[28px] border border-white/10 bg-card shadow-glass">
+      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-[28px] border border-border dark:border-white/10 bg-card shadow-glass">
         <button
           onClick={onClose}
-          className="absolute right-5 top-5 z-10 flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-muted hover:text-foreground hover:bg-white/10 transition-all"
+          className="absolute right-5 top-5 z-10 flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-slate-100 hover:bg-slate-200 text-muted hover:text-foreground dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10 transition-all cursor-pointer"
         >
           <X className="h-5 w-5" />
         </button>
@@ -128,7 +128,7 @@ export default function TaskReviewModal({ assignmentId, onClose }: Props) {
                       {assignment.task.priority}
                     </span>
                   )}
-                  <span className="inline-flex rounded-lg px-2 py-0.5 text-xs bg-purple-500/10 text-purple-400">
+                  <span className="inline-flex rounded-lg border border-purple-300 bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700 dark:border-transparent dark:bg-purple-500/10 dark:text-purple-400">
                     {assignment.status.replace("_", " ")}
                   </span>
                 </div>
@@ -165,7 +165,7 @@ export default function TaskReviewModal({ assignmentId, onClose }: Props) {
 
               {/* Latest Submission */}
               {latestSubmission && (
-                <div className="mb-6 rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                <div className="mb-6 rounded-xl border border-border bg-slate-50/70 p-4 dark:border-white/10 dark:bg-white/[0.03]">
                   <h3 className="text-sm font-semibold text-foreground mb-3">
                     Latest Submission (Attempt #{latestSubmission.attempt})
                   </h3>
@@ -176,7 +176,7 @@ export default function TaskReviewModal({ assignmentId, onClose }: Props) {
                         href={latestSubmission.prLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs text-cyan-400 hover:underline"
+                        className="inline-flex items-center gap-1.5 text-xs text-cyan-600 hover:text-cyan-700 hover:underline dark:text-cyan-400 dark:hover:text-cyan-300"
                       >
                         <ExternalLink className="h-3 w-3" />
                         Pull Request
@@ -190,7 +190,7 @@ export default function TaskReviewModal({ assignmentId, onClose }: Props) {
                         href={latestSubmission.videoDemo}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs text-cyan-400 hover:underline"
+                        className="inline-flex items-center gap-1.5 text-xs text-cyan-600 hover:text-cyan-700 hover:underline dark:text-cyan-400 dark:hover:text-cyan-300"
                       >
                         <ExternalLink className="h-3 w-3" />
                         Video Demo
@@ -211,18 +211,18 @@ export default function TaskReviewModal({ assignmentId, onClose }: Props) {
                             href={attachment.fileUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="group flex min-w-0 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 transition hover:border-cyan-400/30 hover:bg-white/[0.06]"
+                            className="group flex min-w-0 items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 transition hover:border-cyan-400/40 hover:bg-slate-100/70 dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-cyan-400/30 dark:hover:bg-white/[0.06]"
                           >
-                            <Paperclip className="h-4 w-4 shrink-0 text-cyan-400" />
+                            <Paperclip className="h-4 w-4 shrink-0 text-cyan-600 dark:text-cyan-400" />
                             <span className="min-w-0 flex-1">
-                              <span className="block truncate text-xs font-medium text-foreground group-hover:text-cyan-300">
+                              <span className="block truncate text-xs font-medium text-foreground group-hover:text-cyan-600 dark:group-hover:text-cyan-300">
                                 {attachment.fileName}
                               </span>
                               <span className="block truncate text-[10px] text-muted">
                                 {formatFileSize(attachment.fileSize)} · {attachment.mimeType}
                               </span>
                             </span>
-                            <ExternalLink className="h-3.5 w-3.5 shrink-0 text-muted group-hover:text-cyan-400" />
+                            <ExternalLink className="h-3.5 w-3.5 shrink-0 text-muted group-hover:text-cyan-600 dark:group-hover:text-cyan-400" />
                           </a>
                         ))}
                       </div>
@@ -230,7 +230,7 @@ export default function TaskReviewModal({ assignmentId, onClose }: Props) {
                   )}
 
                   {latestSubmission.note && (
-                    <div className="mt-2 rounded-lg border border-white/5 bg-white/[0.02] p-3">
+                    <div className="mt-2 rounded-lg border border-border bg-card p-3 dark:border-white/5 dark:bg-white/[0.02]">
                       <p className="text-xs text-muted mb-1">Intern&apos;s Note:</p>
                       <p className="text-sm text-foreground whitespace-pre-wrap">
                         {latestSubmission.note}
@@ -268,7 +268,7 @@ export default function TaskReviewModal({ assignmentId, onClose }: Props) {
                     {submissions.slice(1).map((s) => (
                       <div
                         key={s.id}
-                        className="flex items-center justify-between rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2 text-xs"
+                        className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2 text-xs dark:border-white/5 dark:bg-white/[0.02]"
                       >
                         <span className="text-muted">
                           Attempt #{s.attempt} —{" "}
@@ -295,12 +295,12 @@ export default function TaskReviewModal({ assignmentId, onClose }: Props) {
                   No submissions yet.
                 </p>
               ) : latestSubmission.reviewStatus === "APPROVED" ? (
-                <div className="rounded-xl border border-emerald-400/20 bg-emerald-500/10 p-4 text-center text-sm text-emerald-300">
+                <div className="rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-center text-sm font-medium text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-500/10 dark:text-emerald-300">
                   <CheckCircle className="h-5 w-5 mx-auto mb-1" />
                   This submission has been approved.
                 </div>
               ) : canReviewSubmission ? (
-                <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                <div className="rounded-xl border border-border bg-slate-50/70 p-4 dark:border-white/10 dark:bg-white/[0.03]">
                   <div className="flex items-center justify-between mb-2">
                     <label className="text-sm font-medium text-foreground">
                       Nhận xét / Góp ý duyệt bài
@@ -320,7 +320,7 @@ export default function TaskReviewModal({ assignmentId, onClose }: Props) {
                     className={`w-full rounded-xl border px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus:outline-none resize-none transition-all ${
                       commentError
                         ? "border-rose-500 bg-rose-500/5 focus:border-rose-500"
-                        : "border-white/10 bg-white/5 focus:border-primary-light/40"
+                        : "border-border bg-card focus:border-primary-light/40 dark:border-white/10 dark:bg-white/5"
                     }`}
                     disabled={isProcessing}
                   />
@@ -351,7 +351,7 @@ export default function TaskReviewModal({ assignmentId, onClose }: Props) {
                           type="button"
                           onClick={() => handleReview("REJECTED")}
                           disabled={isProcessing}
-                          className="flex items-center gap-1.5 rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-2.5 text-xs font-semibold text-rose-300 transition hover:bg-rose-500/20 disabled:opacity-50"
+                          className="flex items-center gap-1.5 rounded-xl border border-rose-300 bg-rose-50 px-4 py-2.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 disabled:opacity-50 dark:border-rose-500/40 dark:bg-rose-500/10 dark:text-rose-300 dark:hover:bg-rose-500/20"
                         >
                           <RotateCcw className="h-4 w-4" />
                           Yêu cầu làm lại (Reject ➔ TODO)

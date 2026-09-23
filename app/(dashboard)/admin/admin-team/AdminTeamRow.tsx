@@ -95,10 +95,10 @@ export default function AdminTeamRow({ admin }: AdminTeamRowProps) {
                         </div>
                     )}
                     <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-white">
+                        <p className="truncate text-sm font-medium text-foreground">
                             {admin.fullName ?? admin.email}
                         </p>
-                        <p className="truncate text-xs text-slate-500">
+                        <p className="truncate text-xs text-muted">
                             {admin.email}
                         </p>
                     </div>
@@ -124,15 +124,15 @@ export default function AdminTeamRow({ admin }: AdminTeamRowProps) {
                                 <span
                                     className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
                                         admin.isActive
-                                            ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-300 hover:border-emerald-400/50"
-                                            : "border-red-400/30 bg-red-500/10 text-red-300 hover:border-red-400/50"
+                                            ? "border-emerald-300 bg-emerald-100/80 text-emerald-700 hover:border-emerald-400 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:border-emerald-400/50"
+                                            : "border-rose-300 bg-rose-100/80 text-rose-700 hover:border-rose-400 dark:border-red-400/30 dark:bg-red-500/10 dark:text-red-300 dark:hover:border-red-400/50"
                                     }`}
                                 >
                                     <span
                                         className={`h-1.5 w-1.5 rounded-full ${
                                             admin.isActive
-                                                ? "bg-emerald-400"
-                                                : "bg-red-400"
+                                                ? "bg-emerald-500 dark:bg-emerald-400"
+                                                : "bg-rose-500 dark:bg-red-400"
                                         }`}
                                     />
                                     {label}
@@ -143,15 +143,15 @@ export default function AdminTeamRow({ admin }: AdminTeamRowProps) {
                         <span
                             className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${
                                 admin.isActive
-                                    ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-300"
-                                    : "border-red-400/30 bg-red-500/10 text-red-300"
+                                    ? "border-emerald-300 bg-emerald-100/80 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-300"
+                                    : "border-rose-300 bg-rose-100/80 text-rose-700 dark:border-red-400/30 dark:bg-red-500/10 dark:text-red-300"
                             }`}
                         >
                             <span
                                 className={`h-1.5 w-1.5 rounded-full ${
                                     admin.isActive
-                                        ? "bg-emerald-400"
-                                        : "bg-red-400"
+                                        ? "bg-emerald-500 dark:bg-emerald-400"
+                                        : "bg-rose-500 dark:bg-red-400"
                                 }`}
                             />
                             {admin.isActive ? t("admin.adminTeam.active") : t("admin.adminTeam.inactive")}
@@ -160,7 +160,7 @@ export default function AdminTeamRow({ admin }: AdminTeamRowProps) {
                 </div>
 
                 {/* Joined */}
-                <div className="text-sm text-slate-400">{joinedDate}</div>
+                <div className="text-sm text-muted">{joinedDate}</div>
 
                 {/* Actions */}
                 <div className="relative" ref={menuRef}>
@@ -170,20 +170,20 @@ export default function AdminTeamRow({ admin }: AdminTeamRowProps) {
                                 type="button"
                                 aria-label="Actions"
                                 onClick={() => setMenuOpen((prev) => !prev)}
-                                className="flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-slate-400 transition hover:border-white/10 hover:bg-white/5 hover:text-white"
+                                className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card/60 text-muted transition hover:border-border-strong hover:bg-card hover:text-foreground dark:border-transparent dark:text-slate-400 dark:hover:border-white/10 dark:hover:bg-white/5 dark:hover:text-white"
                             >
                                 <MoreVertical className="h-4 w-4" />
                             </button>
 
                             {menuOpen && (
-                                <div className="absolute right-0 top-full z-50 mt-1 w-44 rounded-2xl border border-white/10 bg-[#0f172a] p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl">
+                                <div className="absolute right-0 top-full z-50 mt-1 w-44 rounded-2xl border border-border bg-card/95 p-1.5 shadow-xl dark:border-white/10 dark:bg-[#0f172a] dark:shadow-[0_16px_48px_rgba(0,0,0,.55)] backdrop-blur-2xl">
                                     <Modal.Open
                                         opens={`delete-admin-${admin.id}`}
                                     >
                                         <button
                                             type="button"
                                             onClick={() => setMenuOpen(false)}
-                                            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-red-400 transition hover:bg-red-500/10"
+                                            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-rose-600 dark:text-red-400 transition hover:bg-rose-50 dark:hover:bg-red-500/10"
                                         >
                                             <Trash2 className="h-4 w-4" />
                                             {t("admin.adminTeam.delete")}
@@ -227,27 +227,27 @@ function DeleteConfirm({
     const t = useTranslations();
     return (
         <div className="px-2 py-8 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 text-red-400">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-rose-500/10 text-rose-500 dark:text-red-400">
                 <Trash2 className="h-6 w-6" />
             </div>
-            <h3 className="mt-4 text-base font-semibold text-white">
+            <h3 className="mt-4 text-base font-semibold text-foreground">
                 {t("admin.adminTeam.deleteTitle")}
             </h3>
-            <p className="mt-2 text-sm text-slate-400">
+            <p className="mt-2 text-sm text-muted">
                 {t("admin.adminTeam.deleteConfirm", { name })}
             </p>
             <div className="mt-6 flex justify-center gap-3">
                 <button
                     onClick={onCloseModal}
                     disabled={deleting}
-                    className="rounded-xl border border-white/10 bg-white/5 px-5 py-2 text-sm text-slate-300 hover:text-white disabled:opacity-50"
+                    className="rounded-xl border border-border bg-card px-5 py-2 text-sm text-muted hover:text-foreground dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:text-white disabled:opacity-50"
                 >
                     {t("admin.adminTeam.cancel")}
                 </button>
                 <button
                     onClick={() => onConfirm(onCloseModal)}
                     disabled={deleting}
-                    className="rounded-xl bg-red-600 px-5 py-2 text-sm font-medium text-white hover:bg-red-500 disabled:opacity-50"
+                    className="rounded-xl bg-rose-600 px-5 py-2 text-sm font-medium text-white hover:bg-rose-500 disabled:opacity-50"
                 >
                     {t("admin.adminTeam.delete")}
                 </button>

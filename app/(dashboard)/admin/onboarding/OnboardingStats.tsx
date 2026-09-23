@@ -20,7 +20,7 @@ interface StatCard {
   title: string;
   value: number;
   icon: LucideIcon;
-  iconBg: string;
+  containerClass: string;
 }
 
 export default function OnboardingStats() {
@@ -58,25 +58,25 @@ export default function OnboardingStats() {
       title: t("admin.onboarding.activeInvites"),
       value: stats.activeInvites,
       icon: Mail,
-      iconBg: "from-sky-500/20 to-cyan-400/10",
+      containerClass: "border-sky-300 bg-sky-100/80 text-sky-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-sky-500/20 dark:to-cyan-400/10 dark:text-sky-300",
     },
     {
       title: t("admin.onboarding.pendingApplications"),
       value: stats.pendingApplications,
       icon: Clock,
-      iconBg: "from-amber-500/20 to-yellow-400/10",
+      containerClass: "border-amber-300 bg-amber-100/80 text-amber-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-amber-500/20 dark:to-yellow-400/10 dark:text-amber-300",
     },
     {
       title: t("admin.onboarding.approvedApplications"),
       value: stats.approvedApplications,
       icon: CheckCircle2,
-      iconBg: "from-emerald-500/20 to-green-400/10",
+      containerClass: "border-emerald-300 bg-emerald-100/80 text-emerald-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-emerald-500/20 dark:to-green-400/10 dark:text-emerald-300",
     },
     {
       title: t("admin.onboarding.rejectedApplications"),
       value: stats.rejectedApplications,
       icon: XCircle,
-      iconBg: "from-red-500/20 to-rose-400/10",
+      containerClass: "border-rose-300 bg-rose-100/80 text-rose-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-red-500/20 dark:to-rose-400/10 dark:text-rose-300",
     },
   ];
 
@@ -123,14 +123,13 @@ export default function OnboardingStats() {
                 className={`
                   flex h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14 shrink-0 items-center justify-center
                   rounded-xl sm:rounded-2xl
-                  border border-white/10
-                  bg-gradient-to-br ${card.iconBg}
-                  shadow-lg
+                  border ${card.containerClass}
+                  shadow-sm dark:shadow-lg
                   transition-all duration-500
                   group-hover:rotate-6 group-hover:scale-110
                 `}
               >
-                <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                <Icon className="h-5 w-5 sm:h-6 sm:w-6 shrink-0" />
               </div>
             </div>
           </MetalCard>

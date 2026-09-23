@@ -27,7 +27,7 @@ export default function LeaderDailyReportsStats({
       value: stats.totalInterns,
       subtitle: t("assignedToYou"),
       icon: Users,
-      iconBg: "from-sky-500/25 to-cyan-400/10",
+      containerClass: "border-sky-300 bg-sky-100/80 text-sky-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-sky-500/25 dark:to-cyan-400/10 dark:text-cyan-300",
       accent: "from-sky-400/70",
     },
     {
@@ -40,7 +40,7 @@ export default function LeaderDailyReportsStats({
             : 0,
       }),
       icon: FileCheck,
-      iconBg: "from-emerald-500/25 to-teal-400/10",
+      containerClass: "border-emerald-300 bg-emerald-100/80 text-emerald-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-emerald-500/25 dark:to-teal-400/10 dark:text-emerald-300",
       accent: "from-emerald-400/70",
     },
     {
@@ -48,7 +48,7 @@ export default function LeaderDailyReportsStats({
       value: stats.missingToday,
       subtitle: t("notSubmittedYet"),
       icon: AlertCircle,
-      iconBg: "from-rose-500/25 to-red-400/10",
+      containerClass: "border-rose-300 bg-rose-100/80 text-rose-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-rose-500/25 dark:to-red-400/10 dark:text-rose-300",
       accent: "from-rose-400/70",
     },
     {
@@ -56,7 +56,7 @@ export default function LeaderDailyReportsStats({
       value: `${stats.weekRate}%`,
       subtitle: t("workingDays", { days: stats.weekWorkingDays }),
       icon: CalendarDays,
-      iconBg: "from-indigo-500/25 to-purple-400/10",
+      containerClass: "border-indigo-300 bg-indigo-100/80 text-indigo-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-indigo-500/25 dark:to-purple-400/10 dark:text-indigo-300",
       accent: "from-indigo-400/70",
     },
   ];
@@ -85,13 +85,12 @@ export default function LeaderDailyReportsStats({
               <div
                 className={`
                   flex h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14 shrink-0 items-center justify-center
-                  rounded-xl sm:rounded-2xl border border-white/10
-                  bg-gradient-to-br ${card.iconBg}
-                  shadow-lg transition-all duration-500
+                  rounded-xl sm:rounded-2xl border ${card.containerClass}
+                  shadow-sm dark:shadow-lg transition-all duration-500
                   group-hover:rotate-6 group-hover:scale-110
                 `}
               >
-                <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-white shrink-0" />
+                <Icon className="h-5 w-5 sm:h-6 sm:w-6 shrink-0" />
               </div>
             </div>
           </MetalCard>

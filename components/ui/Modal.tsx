@@ -169,7 +169,7 @@ function Window({ children, name, size = "lg", title, onClose }: WindowProps) {
 
           rounded-xl sm:rounded-[2rem]
           border border-border
-          bg-[#0c1222]/95 dark:bg-[#0c1222]/95
+          bg-white dark:bg-[#0c1222]/95
           shadow-glass
           backdrop-blur-2xl
 
@@ -180,13 +180,13 @@ function Window({ children, name, size = "lg", title, onClose }: WindowProps) {
           before:inset-0
           before:rounded-xl sm:before:rounded-[2rem]
           before:border
-          before:border-white/10
+          before:border-border dark:before:border-white/10
 
           after:pointer-events-none
           after:absolute
           after:inset-0
           after:rounded-xl sm:after:rounded-[2rem]
-          after:shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]
+          after:shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:after:shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]
 
           ${windowSizes[size]}
         `}

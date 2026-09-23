@@ -15,45 +15,45 @@ export default function ChangePasswordCard() {
 
     return (
         <MetalCard>
-            <section className="rounded-3xl border border-slate-200 p-6 shadow-sm">
+            <section className="rounded-3xl border border-border p-6 shadow-sm">
                 <div className="mb-6">
                     <h2 className="text-xl font-semibold metal-text">
                         <span className="inline-flex items-center gap-2">
                             <KeyRound className="h-5 w-5" /> {t("security")}
                         </span>
                     </h2>
-                    <p className="mt-1 text-sm text-slate-500">
+                    <p className="mt-1 text-sm text-muted-foreground">
                         {t("securityDesc")}
                     </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <div>
-                        <label className="mb-2 block text-sm font-medium text-slate-700">
+                        <label className="mb-2 block text-sm font-medium text-foreground/90">
                             {t("currentPassword")}
                         </label>
                         <div className="relative">
-                            <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                            <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <input
                                 type={showPassword ? "text" : "password"}
                                 placeholder={t("currentPasswordPlaceholder")}
                                 {...register("oldPassword", {
                                     required: t("currentPasswordRequired"),
                                 })}
-                                className="w-full rounded-xl border border-slate-200 py-3 pl-11 pr-4 outline-none transition focus:border-slate-400"
+                                className="w-full rounded-xl border border-border bg-card text-foreground py-3 pl-11 pr-4 outline-none transition focus:border-primary-light/50 focus:ring-2 focus:ring-primary-light"
                             />
                         </div>
                         {errors.oldPassword && (
-                            <p className="mt-2 text-sm text-red-500">{errors.oldPassword.message}</p>
+                            <p className="mt-2 text-sm text-danger">{errors.oldPassword.message}</p>
                         )}
                     </div>
 
                     <div>
-                        <label className="mb-2 block text-sm font-medium text-slate-700">
+                        <label className="mb-2 block text-sm font-medium text-foreground/90">
                             {t("newPassword")}
                         </label>
                         <div className="relative">
-                            <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                            <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <input
                                 type={showPassword ? "text" : "password"}
                                 placeholder={t("newPasswordPlaceholder")}
@@ -68,20 +68,20 @@ export default function ChangePasswordCard() {
                                         message: t("passwordPattern"),
                                     },
                                 })}
-                                className="w-full rounded-xl border border-slate-200 py-3 pl-11 pr-4 outline-none transition focus:border-slate-400"
+                                className="w-full rounded-xl border border-border bg-card text-foreground py-3 pl-11 pr-4 outline-none transition focus:border-primary-light/50 focus:ring-2 focus:ring-primary-light"
                             />
                         </div>
                         {errors.newPassword && (
-                            <p className="mt-2 text-sm text-red-500">{errors.newPassword.message}</p>
+                            <p className="mt-2 text-sm text-danger">{errors.newPassword.message}</p>
                         )}
                     </div>
 
                     <div>
-                        <label className="mb-2 block text-sm font-medium text-slate-700">
+                        <label className="mb-2 block text-sm font-medium text-foreground/90">
                             {t("confirmPassword")}
                         </label>
                         <div className="relative">
-                            <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                            <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <input
                                 type={showPassword ? "text" : "password"}
                                 placeholder={t("confirmPasswordPlaceholder")}
@@ -89,12 +89,12 @@ export default function ChangePasswordCard() {
                                     required: t("confirmPasswordRequired"),
                                     validate: (value) =>
                                         value === watch("newPassword") || t("passwordsDoNotMatch"),
-                                })}
-                                className="w-full rounded-xl border border-slate-200 py-3 pl-11 pr-4 outline-none transition focus:border-slate-400"
+                                    })}
+                                className="w-full rounded-xl border border-border bg-card text-foreground py-3 pl-11 pr-4 outline-none transition focus:border-primary-light/50 focus:ring-2 focus:ring-primary-light"
                             />
                         </div>
                         {errors.confirmPassword && (
-                            <p className="mt-2 text-sm text-red-500">{errors.confirmPassword.message}</p>
+                            <p className="mt-2 text-sm text-danger">{errors.confirmPassword.message}</p>
                         )}
                     </div>
 
@@ -109,7 +109,7 @@ export default function ChangePasswordCard() {
                                 reset();
                                 setShowPassword(false);
                             }}
-                            className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 transition hover:border-white/20 hover:text-white"
+                            className="flex items-center gap-2 rounded-xl border border-border bg-slate-100 dark:border-white/10 dark:bg-white/5 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 transition hover:bg-slate-200 dark:hover:bg-white/10 hover:text-foreground dark:hover:text-white"
                         >
                             {t("cancel")}
                         </button>
@@ -117,7 +117,7 @@ export default function ChangePasswordCard() {
                         <button
                             type="button"
                             onClick={() => setShowPassword((prev) => !prev)}
-                            className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 transition hover:border-white/20 hover:text-white"
+                            className="flex items-center gap-2 rounded-xl border border-border bg-slate-100 dark:border-white/10 dark:bg-white/5 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 transition hover:bg-slate-200 dark:hover:bg-white/10 hover:text-foreground dark:hover:text-white"
                         >
                             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                             {showPassword ? t("hide") : t("show")}

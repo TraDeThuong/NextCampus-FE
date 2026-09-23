@@ -36,28 +36,28 @@ export default function EmailsStats() {
       title: t("admin.emails.stats.totalTemplates"),
       value: stats.totalCatalog,
       icon: Bell,
-      iconBg: "from-cyan-500/25 to-sky-400/10",
+      containerClass: "border-cyan-300 bg-cyan-100/80 text-cyan-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-cyan-500/25 dark:to-sky-400/10 dark:text-cyan-300",
       lineGradient: "from-cyan-400/70",
     },
     {
       title: t("admin.emails.stats.savedInDb"),
       value: stats.savedInDb,
       icon: CheckCircle2,
-      iconBg: "from-emerald-500/25 to-teal-400/10",
+      containerClass: "border-emerald-300 bg-emerald-100/80 text-emerald-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-emerald-500/25 dark:to-teal-400/10 dark:text-emerald-300",
       lineGradient: "from-emerald-400/70",
     },
     {
       title: t("admin.emails.stats.systemDefaults"),
       value: stats.systemDefaults,
       icon: FileText,
-      iconBg: "from-indigo-500/25 to-purple-400/10",
+      containerClass: "border-indigo-300 bg-indigo-100/80 text-indigo-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-indigo-500/25 dark:to-purple-400/10 dark:text-indigo-300",
       lineGradient: "from-indigo-400/70",
     },
     {
       title: t("admin.emails.stats.omnichannel"),
       value: stats.omnichannel,
       icon: Globe,
-      iconBg: "from-amber-500/25 to-orange-400/10",
+      containerClass: "border-amber-300 bg-amber-100/80 text-amber-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-amber-500/25 dark:to-orange-400/10 dark:text-amber-300",
       lineGradient: "from-amber-400/70",
     },
   ];
@@ -102,13 +102,12 @@ export default function EmailsStats() {
               <div
                 className={`
                   flex h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14 shrink-0 items-center justify-center
-                  rounded-xl sm:rounded-2xl border border-white/10
-                  bg-gradient-to-br ${card.iconBg}
-                  shadow-lg transition-all duration-500
+                  rounded-xl sm:rounded-2xl border ${card.containerClass}
+                  shadow-sm dark:shadow-lg transition-all duration-500
                   group-hover:rotate-6 group-hover:scale-110
                 `}
               >
-                <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-white shrink-0" />
+                <Icon className="h-5 w-5 sm:h-6 sm:w-6 shrink-0" />
               </div>
             </div>
           </MetalCard>

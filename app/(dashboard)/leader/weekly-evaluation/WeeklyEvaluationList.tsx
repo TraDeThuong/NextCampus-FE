@@ -214,7 +214,7 @@ export default function WeeklyEvaluationList() {
       {/* 4. Table without outer MetalCard wrapper (Aligned with /leader/department standard) */}
       <Table
         columns={COLUMNS}
-        className="bg-[linear-gradient(145deg,#101827_0%,#1a2235_20%,#0f172a_55%,#050816_100%)] shadow-[0_12px_40px_rgba(0,0,0,.45)] hover:shadow-[0_20px_50px_rgba(21,174,245,.15)] transition-shadow duration-500"
+        className="bg-card dark:bg-[linear-gradient(145deg,#101827_0%,#1a2235_20%,#0f172a_55%,#050816_100%)] shadow-sm dark:shadow-[0_12px_40px_rgba(0,0,0,.45)] hover:shadow-md dark:hover:shadow-[0_20px_50px_rgba(21,174,245,.15)] transition-shadow duration-500"
       >
         <Table.Header>
           <span>{t("colIntern")}</span>
@@ -230,9 +230,9 @@ export default function WeeklyEvaluationList() {
         {isLoading ? (
           <Table.Body data={[]} isLoading={true} skeletonRows={5} render={() => null} />
         ) : filteredEvaluations.length === 0 ? (
-          <div className="py-16 text-center space-y-3 border-t border-white/5">
+          <div className="py-16 text-center space-y-3 border-t border-border dark:border-white/5">
             <div className="flex justify-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-muted">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-slate-100 text-muted dark:border-white/10 dark:bg-white/5">
                 {hasFilters ? <SearchX className="h-7 w-7" /> : <ClipboardList className="h-7 w-7" />}
               </div>
             </div>
@@ -317,12 +317,12 @@ export default function WeeklyEvaluationList() {
                   {/* Col 4: AI Status */}
                   <div className="flex justify-center">
                     {item.aiComment || item.aiRatings ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg border text-emerald-400 border-emerald-500/30 bg-emerald-500/10">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg border text-emerald-600 border-emerald-300 bg-emerald-50 dark:text-emerald-400 dark:border-emerald-500/30 dark:bg-emerald-500/10">
                         <Bot className="h-3 w-3 shrink-0" />
                         <span>{t("aiLabel")}</span>
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg border text-muted border-white/10 bg-white/5">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg border text-muted border-border bg-slate-100 dark:border-white/10 dark:bg-white/5">
                         <Bot className="h-3 w-3 shrink-0" />
                         <span>{t("notYet")}</span>
                       </span>

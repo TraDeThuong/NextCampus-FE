@@ -6,6 +6,7 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { authService } from "@/services/auth.service";
 import { ApiErrorResponse } from "@/types/auth";
@@ -20,6 +21,7 @@ export interface LoginFormValues {
 }
 
 export function useLogin() {
+    const t = useTranslations("auth");
     const router = useRouter();
     const { login } = useAuth();
 
@@ -72,7 +74,7 @@ export function useLogin() {
             // No `remember` param — cookie duration is already set by the server
             login({ accessToken }, user);
 
-            toast.success(`Welcome back, ${user.fullName}!`);
+            toast.success(t("loginSuccess", { name: user.fullName }));
 
             const targetDashboard = getDashboardPath(user.role);
             router.push(targetDashboard);
@@ -83,11 +85,11 @@ export function useLogin() {
             const message = error.response?.data?.message;
 
             if (code === "USER_INACTIVE" || message?.toLowerCase().includes("inactive")) {
-                toast.error("Tài khoản của bạn đã bị khóa hoặc ngừng hoạt động.");
+                toast.error(t("accountInactive"));
             } else if (message === "Invalid credentials" || error.response?.status === 401) {
-                toast.error("Tài khoản hoặc mật khẩu không chính xác.");
+                toast.error(t("invalidCredentials"));
             } else {
-                toast.error(message || "Đăng nhập thất bại. Vui lòng thử lại.");
+                toast.error(message || t("loginFailed"));
             }
         },
     });
@@ -102,10 +104,10 @@ export function useLogin() {
         const msg = loginMutation.error.response?.data?.message;
 
         if (code === "USER_INACTIVE" || msg?.toLowerCase().includes("inactive")) {
-            return "Tài khoản của bạn đã bị khóa hoặc ngừng hoạt động.";
+            return t("accountInactive");
         }
         if (msg === "Invalid credentials" || loginMutation.error.response?.status === 401) {
-            return "Tên đăng nhập hoặc mật khẩu không chính xác.";
+            return t("invalidCredentials");
         }
         return msg;
     };

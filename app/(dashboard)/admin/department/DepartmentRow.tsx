@@ -197,7 +197,7 @@ export default function DepartmentRow({
               aria-expanded={menuOpen}
               aria-controls={`dept-actions-${menuId}`}
               onClick={toggleMenu}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-card/40 text-muted transition hover:border-white/20 hover:bg-card hover:text-foreground active:scale-95 cursor-pointer"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-card/60 text-muted transition hover:border-border-strong hover:bg-card hover:text-foreground active:scale-95 cursor-pointer"
             >
               <MoreVertical className="h-4 w-4 shrink-0" />
             </button>
@@ -210,7 +210,7 @@ export default function DepartmentRow({
                   ref={menuRef}
                   role="menu"
                   style={menuStyle}
-                  className="rounded-2xl border border-white/10 bg-[#0c1322]/95 p-1.5 shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn text-left"
+                  className="rounded-2xl border border-border bg-card/95 dark:border-white/10 dark:bg-[#0c1322]/95 p-1.5 shadow-xl dark:shadow-[0_16px_48px_rgba(0,0,0,.6)] backdrop-blur-2xl animate-fadeIn text-left"
                 >
                   {canEdit && (
                     <button
@@ -220,9 +220,9 @@ export default function DepartmentRow({
                         setMenuOpen(false);
                         onOpenEdit(department);
                       }}
-                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground/90 transition hover:bg-white/10 hover:text-foreground active:scale-98 cursor-pointer"
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground transition hover:bg-slate-100 dark:hover:bg-white/10 active:scale-98 cursor-pointer"
                     >
-                      <Edit3 className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
+                      <Edit3 className="h-3.5 w-3.5 shrink-0 text-cyan-600 dark:text-cyan-400" />
                       <span>{t("admin.department.editDepartment")}</span>
                     </button>
                   )}
@@ -235,9 +235,9 @@ export default function DepartmentRow({
                         setMenuOpen(false);
                         onOpenPositions(department);
                       }}
-                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground/90 transition hover:bg-emerald-500/15 hover:text-emerald-300 active:scale-98 cursor-pointer"
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-foreground transition hover:bg-emerald-50 dark:hover:bg-emerald-500/15 hover:text-emerald-700 dark:hover:text-emerald-300 active:scale-98 cursor-pointer"
                     >
-                      <Settings className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                      <Settings className="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
                       <span>{t("admin.department.positions")}</span>
                     </button>
                   )}
@@ -250,7 +250,7 @@ export default function DepartmentRow({
                         setMenuOpen(false);
                         onOpenDelete(department);
                       }}
-                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-rose-400 transition hover:bg-rose-500/15 hover:text-rose-300 active:scale-98 cursor-pointer"
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-rose-600 dark:text-rose-400 transition hover:bg-rose-50 dark:hover:bg-rose-500/15 hover:text-rose-700 dark:hover:text-rose-300 active:scale-98 cursor-pointer"
                     >
                       <Trash2 className="h-3.5 w-3.5 shrink-0" />
                       <span>{t("admin.department.delete")}</span>

@@ -11,7 +11,7 @@ interface StatCard {
   title: string;
   value: number;
   icon: LucideIcon;
-  iconBg: string;
+  containerClass: string;
 }
 
 export default function LeaderInternStats() {
@@ -42,11 +42,11 @@ export default function LeaderInternStats() {
   const isPending = allLoading || activeLoading || completedLoading || droppedLoading || newLoading;
 
   const cards: StatCard[] = [
-    { title: t("totalInterns"), value: allData?.meta?.total ?? 0, icon: Users, iconBg: "from-sky-500/20 to-cyan-400/10" },
-    { title: t("active"), value: activeData?.meta?.total ?? 0, icon: Circle, iconBg: "from-emerald-500/20 to-green-400/10" },
-    { title: t("completed"), value: completedData?.meta?.total ?? 0, icon: CheckCircle2, iconBg: "from-blue-500/20 to-indigo-400/10" },
-    { title: t("dropped"), value: droppedData?.meta?.total ?? 0, icon: XCircle, iconBg: "from-rose-500/20 to-pink-400/10" },
-    { title: t("newThisMonth"), value: newData?.meta?.total ?? 0, icon: CalendarPlus, iconBg: "from-violet-500/20 to-purple-400/10" },
+    { title: t("totalInterns"), value: allData?.meta?.total ?? 0, icon: Users, containerClass: "border-sky-300 bg-sky-100/80 text-sky-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-sky-500/20 dark:to-cyan-400/10 dark:text-sky-300" },
+    { title: t("active"), value: activeData?.meta?.total ?? 0, icon: Circle, containerClass: "border-emerald-300 bg-emerald-100/80 text-emerald-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-emerald-500/20 dark:to-green-400/10 dark:text-emerald-300" },
+    { title: t("completed"), value: completedData?.meta?.total ?? 0, icon: CheckCircle2, containerClass: "border-blue-300 bg-blue-100/80 text-blue-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-blue-500/20 dark:to-indigo-400/10 dark:text-blue-300" },
+    { title: t("dropped"), value: droppedData?.meta?.total ?? 0, icon: XCircle, containerClass: "border-rose-300 bg-rose-100/80 text-rose-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-rose-500/20 dark:to-pink-400/10 dark:text-rose-300" },
+    { title: t("newThisMonth"), value: newData?.meta?.total ?? 0, icon: CalendarPlus, containerClass: "border-violet-300 bg-violet-100/80 text-violet-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-violet-500/20 dark:to-purple-400/10 dark:text-violet-300" },
   ];
 
   if (allError) {
@@ -70,11 +70,11 @@ export default function LeaderInternStats() {
           >
             <div className="flex items-start justify-between gap-2 animate-pulse">
               <div className="min-w-0 flex-1 space-y-3">
-                <div className="h-3 w-20 rounded bg-white/10" />
-                <div className="h-8 w-12 rounded bg-white/10" />
-                <div className="h-[2px] w-12 rounded-full bg-white/10" />
+                <div className="h-3 w-20 rounded bg-muted/20" />
+                <div className="h-8 w-12 rounded bg-muted/20" />
+                <div className="h-[2px] w-12 rounded-full bg-muted/20" />
               </div>
-              <div className="h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14 rounded-xl sm:rounded-2xl bg-white/10" />
+              <div className="h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14 rounded-xl sm:rounded-2xl bg-muted/20" />
             </div>
           </MetalCard>
         ))}
@@ -106,13 +106,12 @@ export default function LeaderInternStats() {
               <div
                 className={`
                   flex h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14 shrink-0 items-center justify-center
-                  rounded-xl sm:rounded-2xl border border-white/10
-                  bg-gradient-to-br ${card.iconBg}
-                  shadow-lg transition-all duration-500
+                  rounded-xl sm:rounded-2xl border ${card.containerClass}
+                  shadow-sm dark:shadow-lg transition-all duration-500
                   group-hover:rotate-6 group-hover:scale-110
                 `}
               >
-                <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                <Icon className="h-5 w-5 sm:h-6 sm:w-6 shrink-0" />
               </div>
             </div>
           </MetalCard>

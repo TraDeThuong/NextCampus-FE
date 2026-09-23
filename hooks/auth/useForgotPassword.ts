@@ -3,11 +3,13 @@
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import { useTranslations } from "next-intl";
 import axios from "axios";
 import { authService } from "@/services/auth.service";
 import type { ForgotPasswordPayload } from "@/types/auth";
 
 export function useForgotPassword() {
+    const t = useTranslations("auth");
     const {
         register,
         handleSubmit,
@@ -20,7 +22,7 @@ export function useForgotPassword() {
         mutationFn: (payload: ForgotPasswordPayload) =>
             authService.forgotPassword(payload),
         onSuccess: () => {
-            toast.success("If an account with that email exists, a reset link has been sent.");
+            toast.success(t("resetLinkSent"));
         },
         onError: (error: unknown) => {
             const msg = axios.isAxiosError<{ message?: string }>(error)

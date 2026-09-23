@@ -69,7 +69,7 @@ export default function WeeklyEvaluationFilter({
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder={t("filter.searchPlaceholder")}
-              className="h-[42px] sm:h-[46px] w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-xs sm:text-sm text-foreground placeholder:text-muted transition focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+              className="h-[42px] sm:h-[46px] w-full rounded-xl border border-border bg-card dark:border-white/10 dark:bg-white/5 px-5 py-3 text-xs sm:text-sm text-foreground placeholder:text-muted transition focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
             />
           </div>
 

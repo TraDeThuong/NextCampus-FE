@@ -21,11 +21,11 @@ type ModalType = "tasks" | "groups" | "done";
 type DateRange = { from: string; to: string; queryFrom: string; queryTo: string };
 
 const STAT_COLOR_STYLES: Record<string, { bg: string; text: string; bar: string }> = {
-  blue: { bg: "bg-blue-500/10 text-blue-400", text: "text-blue-400", bar: "bg-blue-500/40" },
-  purple: { bg: "bg-purple-500/10 text-purple-400", text: "text-purple-400", bar: "bg-purple-500/40" },
-  emerald: { bg: "bg-emerald-500/10 text-emerald-400", text: "text-emerald-400", bar: "bg-emerald-500/40" },
-  amber: { bg: "bg-amber-500/10 text-amber-400", text: "text-amber-400", bar: "bg-amber-500/40" },
-  red: { bg: "bg-rose-500/10 text-rose-400", text: "text-rose-400", bar: "bg-rose-500/40" },
+  blue: { bg: "border border-sky-300 bg-sky-100/80 text-sky-700 dark:border-white/10 dark:bg-blue-500/10 dark:text-blue-400", text: "text-sky-700 dark:text-blue-400", bar: "bg-sky-500 dark:bg-blue-500/40" },
+  purple: { bg: "border border-purple-300 bg-purple-100/80 text-purple-700 dark:border-white/10 dark:bg-purple-500/10 dark:text-purple-400", text: "text-purple-700 dark:text-purple-400", bar: "bg-purple-500 dark:bg-purple-500/40" },
+  emerald: { bg: "border border-emerald-300 bg-emerald-100/80 text-emerald-700 dark:border-white/10 dark:bg-emerald-500/10 dark:text-emerald-400", text: "text-emerald-700 dark:text-emerald-400", bar: "bg-emerald-500 dark:bg-emerald-500/40" },
+  amber: { bg: "border border-amber-300 bg-amber-100/80 text-amber-700 dark:border-white/10 dark:bg-amber-500/10 dark:text-amber-400", text: "text-amber-700 dark:text-amber-400", bar: "bg-amber-500 dark:bg-amber-500/40" },
+  red: { bg: "border border-rose-300 bg-rose-100/80 text-rose-700 dark:border-white/10 dark:bg-rose-500/10 dark:text-rose-400", text: "text-rose-700 dark:text-rose-400", bar: "bg-rose-500 dark:bg-rose-500/40" },
 };
 
 function formatLocalDate(date: Date): string {
@@ -170,22 +170,30 @@ export default function LeaderTaskStats() {
         ) : overview ? (
           <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-[minmax(0,720px)_minmax(300px,1fr)]">
             <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
-              <StatButton icon={<Timer className="h-5 w-5 sm:h-6 sm:w-6 text-blue-400" />} color="blue" value={overview.totalTasks} label={t("totalTasks")} onClick={() => setModal({ type: "tasks", title: t("totalTasks"), filters: dateFilters })} />
-              <StatButton icon={<Layers className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400" />} color="purple" value={totalGroups} label={t("totalGroups")} onClick={() => setModal({ type: "groups", title: t("totalGroups"), filters: {}, groups: groupsList })} />
-              <StatButton icon={<CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-400" />} color="emerald" value={doneCount} label={t("done")} sub={`${completionRate}%`} onClick={() => setModal({ type: "done", title: t("done"), filters: { ...dateFilters, status: "DONE" } })} />
-              <StatButton icon={<Clock className="h-5 w-5 sm:h-6 sm:w-6 text-amber-400" />} color="amber" value={inProgressCount} label={t("inProgress")} onClick={() => setModal({ type: "tasks", title: t("inProgress"), filters: { ...dateFilters, status: "IN_PROGRESS" } })} />
-              <StatButton icon={<AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-rose-400" />} color="red" value={overview.overdueTasks} label={t("overdue")} onClick={() => setModal({ type: "tasks", title: t("overdue"), filters: { ...dateFilters, deadlineTo: overdueDeadlineTo, statusNot: "DONE" } })} />
-              <StatButton icon={<AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-rose-400" />} color="red" value={highPriorityCount} label={t("highPriority")} onClick={() => setModal({ type: "tasks", title: t("highPriority"), filters: { ...dateFilters, priority: "HIGH" } })} />
+              <StatButton icon={<Timer className="h-5 w-5 sm:h-6 sm:w-6 text-sky-700 dark:text-blue-400" />} color="blue" value={overview.totalTasks} label={t("totalTasks")} onClick={() => setModal({ type: "tasks", title: t("totalTasks"), filters: dateFilters })} />
+              <StatButton icon={<Layers className="h-5 w-5 sm:h-6 sm:w-6 text-purple-700 dark:text-purple-400" />} color="purple" value={totalGroups} label={t("totalGroups")} onClick={() => setModal({ type: "groups", title: t("totalGroups"), filters: {}, groups: groupsList })} />
+              <StatButton icon={<CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-700 dark:text-emerald-400" />} color="emerald" value={doneCount} label={t("done")} sub={`${completionRate}%`} onClick={() => setModal({ type: "done", title: t("done"), filters: { ...dateFilters, status: "DONE" } })} />
+              <StatButton icon={<Clock className="h-5 w-5 sm:h-6 sm:w-6 text-amber-700 dark:text-amber-400" />} color="amber" value={inProgressCount} label={t("inProgress")} onClick={() => setModal({ type: "tasks", title: t("inProgress"), filters: { ...dateFilters, status: "IN_PROGRESS" } })} />
+              <StatButton icon={<AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-rose-700 dark:text-rose-400" />} color="red" value={overview.overdueTasks} label={t("overdue")} onClick={() => setModal({ type: "tasks", title: t("overdue"), filters: { ...dateFilters, deadlineTo: overdueDeadlineTo, statusNot: "DONE" } })} />
+              <StatButton icon={<AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-rose-700 dark:text-rose-400" />} color="red" value={highPriorityCount} label={t("highPriority")} onClick={() => setModal({ type: "tasks", title: t("highPriority"), filters: { ...dateFilters, priority: "HIGH" } })} />
             </div>
 
-            <MetalCard className="relative overflow-hidden border-purple-500/30 shadow-[0_0_30px_rgba(168,85,247,0.12)]">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/8 via-transparent to-fuchsia-500/5 pointer-events-none" />
+            <MetalCard className="relative overflow-hidden border border-purple-200 bg-card shadow-sm dark:border-purple-500/30 dark:shadow-[0_0_30px_rgba(168,85,247,0.12)]">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-fuchsia-500/5 pointer-events-none" />
               <div className="absolute -top-20 -right-20 h-40 w-40 rounded-full bg-purple-500/10 blur-[80px] pointer-events-none" />
               <div className="relative p-4 sm:p-5">
                 <div className="mb-3 flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-500/20"><Eye className="h-4 w-4 text-purple-300" /></div>
-                  <h3 className="text-sm sm:text-base font-bold tracking-wide uppercase bg-gradient-to-r from-purple-300 via-fuchsia-300 to-purple-200 bg-clip-text text-transparent">{t("awaitingReview")}</h3>
-                  {!reviewLoading && <span className="ml-auto rounded-full bg-purple-500/30 px-2.5 py-0.5 text-xs font-bold text-purple-200 border border-purple-400/30">{reviewTaskCount}</span>}
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-100 text-purple-700 border border-purple-300 dark:bg-purple-500/20 dark:border-transparent dark:text-purple-300">
+                    <Eye className="h-4 w-4" />
+                  </div>
+                  <h3 className="text-sm sm:text-base font-bold tracking-wide uppercase text-purple-800 dark:bg-gradient-to-r dark:from-purple-300 dark:via-fuchsia-300 dark:to-purple-200 dark:bg-clip-text dark:text-transparent">
+                    {t("awaitingReview")}
+                  </h3>
+                  {!reviewLoading && (
+                    <span className="ml-auto rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-bold text-purple-800 border border-purple-300 dark:bg-purple-500/30 dark:text-purple-200 dark:border-purple-400/30">
+                      {reviewTaskCount}
+                    </span>
+                  )}
                 </div>
                 {reviewLoading ? (
                   <div className="flex justify-center py-6"><Spinner size="sm" /></div>
@@ -194,15 +202,19 @@ export default function LeaderTaskStats() {
                 ) : (
                   <div className="space-y-2 max-h-[320px] overflow-y-auto custom-scrollbar pr-1">
                     {reviewTasks.map((task) => (
-                      <button key={task.id} onClick={() => task.assignment?.id && openReview(task.assignment.id)} className="w-full text-left rounded-xl border border-purple-400/20 bg-purple-500/10 px-3 py-2.5 hover:border-purple-400/40 hover:bg-purple-500/20 active:scale-[0.99] transition-all cursor-pointer">
+                      <button
+                        key={task.id}
+                        onClick={() => task.assignment?.id && openReview(task.assignment.id)}
+                        className="w-full text-left rounded-xl border border-purple-200 bg-purple-50/70 px-3 py-2.5 hover:border-purple-300 hover:bg-purple-100/70 dark:border-purple-400/20 dark:bg-purple-500/10 dark:hover:border-purple-400/40 dark:hover:bg-purple-500/20 active:scale-[0.99] transition-all cursor-pointer"
+                      >
                         <div className="flex items-center justify-between gap-2">
-                          <span className="font-mono text-xs font-bold text-purple-300/80">{task.code ?? "—"}</span>
-                          <span className="inline-flex rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-purple-500/30 text-purple-200 border border-purple-400/30">REVIEW</span>
+                          <span className="font-mono text-xs font-bold text-purple-700 dark:text-purple-300/80">{task.code ?? "—"}</span>
+                          <span className="inline-flex rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-purple-100 text-purple-700 border border-purple-300 dark:bg-purple-500/30 dark:text-purple-200 dark:border-purple-400/30">REVIEW</span>
                         </div>
                         <p className="mt-1 text-sm font-medium text-foreground line-clamp-2">{task.title}</p>
                         <div className="mt-1.5 flex items-center gap-2 text-xs text-muted">
-                          {task.assignment?.intern?.fullName && <span className="text-purple-300/70">{task.assignment.intern.fullName}</span>}
-                          {task.deadline && <span className="text-slate-500">{new Date(task.deadline).toLocaleDateString("vi-VN")}</span>}
+                          {task.assignment?.intern?.fullName && <span className="text-purple-700 font-medium dark:text-purple-300/70">{task.assignment.intern.fullName}</span>}
+                          {task.deadline && <span className="text-muted dark:text-slate-500">{new Date(task.deadline).toLocaleDateString("vi-VN")}</span>}
                         </div>
                       </button>
                     ))}
@@ -395,7 +407,7 @@ function TaskTablePagination({
           type="button"
           disabled={meta.page <= 1}
           onClick={() => onPageChange(meta.page - 1)}
-          className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
+          className="rounded-xl border border-border bg-card px-3 py-2 text-muted transition-all hover:border-primary-light/40 hover:bg-slate-100 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-white/20 dark:hover:bg-white/[0.06]"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
@@ -403,7 +415,7 @@ function TaskTablePagination({
           type="button"
           disabled={meta.page >= meta.totalPages}
           onClick={() => onPageChange(meta.page + 1)}
-          className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
+          className="rounded-xl border border-border bg-card px-3 py-2 text-muted transition-all hover:border-primary-light/40 hover:bg-slate-100 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-white/20 dark:hover:bg-white/[0.06]"
         >
           <ChevronRight className="h-4 w-4" />
         </button>
@@ -445,6 +457,10 @@ function GroupTable({ groups }: { groups: { id: string; name: string; descriptio
 }
 
 function PriorityBadge({ priority }: { priority: string }) {
-  const colors: Record<string, string> = { HIGH: "bg-red-500/10 text-red-400", MEDIUM: "bg-amber-500/10 text-amber-400", LOW: "bg-emerald-500/10 text-emerald-400" };
-  return <span className={`inline-flex rounded-lg px-2 py-0.5 text-xs ${colors[priority] ?? "bg-white/5 text-muted"}`}>{priority}</span>;
+  const colors: Record<string, string> = {
+    HIGH: "border border-red-300 bg-red-100 text-red-700 dark:border-transparent dark:bg-red-500/10 dark:text-red-400",
+    MEDIUM: "border border-amber-300 bg-amber-100 text-amber-700 dark:border-transparent dark:bg-amber-500/10 dark:text-amber-400",
+    LOW: "border border-emerald-300 bg-emerald-100 text-emerald-700 dark:border-transparent dark:bg-emerald-500/10 dark:text-emerald-400",
+  };
+  return <span className={`inline-flex rounded-lg px-2 py-0.5 text-xs font-medium ${colors[priority] ?? "border border-border bg-slate-100 text-muted dark:bg-white/5"}`}>{priority}</span>;
 }
