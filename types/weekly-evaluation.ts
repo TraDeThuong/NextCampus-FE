@@ -301,3 +301,46 @@ export interface WeeklyEvaluationSummary {
 
 export type InternEvaluationSummaryDto = WeeklyEvaluationSummary;
 
+/**
+ * Lấy tên ngày bắt đầu mở đánh giá tuần theo cấu hình số ngày làm việc
+ */
+export function getWeeklyEvaluationStartDayName(workingDaysPerWeek: number, locale: string): string {
+  const VI_DAYS: Record<number, string> = {
+    1: "Thứ Hai",
+    2: "Thứ Ba",
+    3: "Thứ Tư",
+    4: "Thứ Năm",
+    5: "Thứ Sáu",
+    6: "Thứ Bảy",
+    7: "Chủ Nhật",
+  };
+  const EN_DAYS: Record<number, string> = {
+    1: "Monday",
+    2: "Tuesday",
+    3: "Wednesday",
+    4: "Thursday",
+    5: "Friday",
+    6: "Saturday",
+    7: "Sunday",
+  };
+  if (locale === "vi") {
+    return VI_DAYS[workingDaysPerWeek] || "Thứ Bảy";
+  }
+  return EN_DAYS[workingDaysPerWeek] || "Saturday";
+}
+
+/**
+ * Kiểm tra xem hiện tại (giờ Việt Nam UTC+7) đã đến khung giờ mở đánh giá tuần hiện tại hay chưa
+ */
+export function isWeeklyEvaluationWindowOpen(workingDaysPerWeek = 6, date = new Date()): boolean {
+  const tzOffset = 7 * 60 * 60 * 1000;
+  const localDate = new Date(date.getTime() + tzOffset);
+  const dayOfWeek = localDate.getUTCDay();
+  const isoDay = dayOfWeek === 0 ? 7 : dayOfWeek;
+  const hours = localDate.getUTCHours();
+  const isLastWorkingDayAllowed = isoDay === workingDaysPerWeek && hours >= 11;
+  const isWeekendAllowed = isoDay > workingDaysPerWeek;
+  return isLastWorkingDayAllowed || isWeekendAllowed;
+}
+
+

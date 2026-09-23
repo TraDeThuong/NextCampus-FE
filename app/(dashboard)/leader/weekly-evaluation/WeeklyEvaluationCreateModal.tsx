@@ -3,17 +3,25 @@
 import { useState, useMemo, useContext, useCallback } from "react";
 import { Sparkles, ChevronDown, ChevronUp, Info, Bot } from "lucide-react";
 import { toast } from "react-hot-toast";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import Button from "@/components/ui/Button";
 import Select from "@/components/ui/Select";
 import { useCreateWeeklyEvaluation } from "@/hooks/weekly-evaluation/useCreateWeeklyEvaluation";
 import { useAiSuggestion } from "@/hooks/weekly-evaluation/useAiSuggestion";
 import { useInterns } from "@/hooks/intern/useInterns";
 import { useWeeklyEvaluations } from "@/hooks/weekly-evaluation/useWeeklyEvaluations";
+import { useSystemSettings } from "@/hooks/system-setting/useSystemSettings";
 import { AuthContext } from "@/contexts/AuthContext";
 import type { CreateWeeklyEvaluationPayload, EvaluationRatings, RatingLevel } from "@/types/weekly-evaluation";
 import type { Intern } from "@/types/intern";
-import { CRITERIA_SECTIONS, DEFAULT_RATINGS, RATING_SCORES, RATING_COLORS } from "@/types/weekly-evaluation";
+import {
+  CRITERIA_SECTIONS,
+  DEFAULT_RATINGS,
+  RATING_SCORES,
+  RATING_COLORS,
+  getWeeklyEvaluationStartDayName,
+  isWeeklyEvaluationWindowOpen,
+} from "@/types/weekly-evaluation";
 
 interface Props {
   onCloseModal?: () => void;
@@ -109,11 +117,18 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal, onSuccess }:
   const t = useTranslations("leader.weeklyEvaluation.createModal");
   const tSections = useTranslations("leader.weeklyEvaluation.sections");
   const tCriteria = useTranslations("leader.weeklyEvaluation.criteria");
+  const locale = useLocale();
 
   const auth = useContext(AuthContext);
   const currentUserId = auth?.state.user?.id;
   const createEvaluation = useCreateWeeklyEvaluation();
   const aiSuggestion = useAiSuggestion();
+  const { data: settingsResponse } = useSystemSettings();
+  const workingDaysPerWeek = settingsResponse?.data?.WORKING_DAYS_PER_WEEK ?? 6;
+  const startDayName = useMemo(
+    () => getWeeklyEvaluationStartDayName(workingDaysPerWeek, locale),
+    [workingDaysPerWeek, locale],
+  );
   const { data: internsData, isLoading: internsLoading } = useInterns({
     status: "ACTIVE",
     leaderId: currentUserId || undefined,
@@ -204,13 +219,8 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal, onSuccess }:
   }, [selectedIntern]);
 
   const isWeekendAllowedForCurrentWeek = useMemo(() => {
-    const tzOffset = 7 * 60 * 60 * 1000;
-    const today = new Date();
-    const todayLocal = new Date(today.getTime() + tzOffset);
-    const dayOfWeek = todayLocal.getUTCDay();
-    const hours = todayLocal.getUTCHours();
-    return (dayOfWeek === 6 && hours >= 11) || dayOfWeek === 0;
-  }, []);
+    return isWeeklyEvaluationWindowOpen(workingDaysPerWeek);
+  }, [workingDaysPerWeek]);
 
   const handleInternChange = (id: string) => {
     setInternId(id);
@@ -299,7 +309,7 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal, onSuccess }:
       Number(week) === maxWeek &&
       !isWeekendAllowedForCurrentWeek
     ) {
-      toast.error(t("weekendOnly"));
+      toast.error(t("weekendOnly", { day: startDayName }));
       return;
     }
     if (evaluatedWeeks.includes(Number(week))) {
@@ -351,7 +361,7 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal, onSuccess }:
       Number(week) === maxWeek &&
       !isWeekendAllowedForCurrentWeek
     ) {
-      toast.error(t("weekendOnly"));
+      toast.error(t("weekendOnly", { day: startDayName }));
       return;
     }
     if (evaluatedWeeks.includes(Number(week))) {
@@ -462,7 +472,7 @@ export default function WeeklyEvaluationCreateModal({ onCloseModal, onSuccess }:
                   !isInternMidWeekThisWeek(selectedIntern) &&
                   !isWeekendAllowedForCurrentWeek && (
                     <p className="text-[11px] text-amber-400 font-semibold">
-                      {t("weekendNotice")}
+                      {t("weekendNotice", { day: startDayName })}
                     </p>
                   )}
                 {evaluatedWeeks.includes(Number(week)) && (
