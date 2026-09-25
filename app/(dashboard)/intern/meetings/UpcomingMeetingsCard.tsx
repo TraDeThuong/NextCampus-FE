@@ -39,8 +39,10 @@ export default function UpcomingMeetingsCard({
     order: "asc",
     limit: 10,
   });
+  const now = new Date();
   const meetings = (data?.data ?? []).filter(
     (m) =>
+      new Date(m.endTime) > now &&
       (m.status === "SCHEDULED" || m.status === "ONGOING") &&
       isUserParticipating(m, state.user?.id),
   );

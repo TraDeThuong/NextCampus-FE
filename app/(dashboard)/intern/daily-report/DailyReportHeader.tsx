@@ -61,7 +61,7 @@ export default function DailyReportHeader({
     to: todayStr,
     limit: 1,
   });
-  const existingReport = data?.data?.[0];
+  const existingReport = (data?.data ?? data?.items)?.[0];
   const hasReportedToday = !!existingReport;
 
   return (

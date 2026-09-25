@@ -90,8 +90,9 @@ export default function DailyReportContent() {
 
   const reportsMap = useMemo(() => {
     const map = new Map<string, DailyReport>();
-    if (reportsData?.data) {
-      for (const r of reportsData.data) {
+    const reports = reportsData?.data ?? reportsData?.items ?? [];
+    if (reports.length > 0) {
+      for (const r of reports) {
         const dateStr = r.date
           ? isoDate(new Date(r.date))
           : dateStrFromISO(r.createdAt);

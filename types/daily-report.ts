@@ -77,6 +77,11 @@ export interface DailyReportSuccessResponse {
 export interface DailyReportListResponse {
   success: boolean;
   data: DailyReport[];
+  items?: DailyReport[];
+  total?: number;
+  page?: number;
+  limit?: number;
+  totalPages?: number;
   meta: {
     total: number;
     page: number;

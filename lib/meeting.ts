@@ -12,5 +12,7 @@ export function isUserParticipating(
   if (meeting.createdBy === userId) return true;
   if (meeting.hostId === userId) return true;
   if (meeting.host?.id === userId) return true;
-  return meeting.participants?.some((p) => p.userId === userId) ?? false;
+  const participant = meeting.participants?.find((p) => p.userId === userId);
+  if (!participant) return false;
+  return participant.invitationStatus !== "DECLINED";
 }
