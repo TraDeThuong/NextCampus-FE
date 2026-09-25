@@ -3,7 +3,7 @@
 import { useMemo, useRef } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { X, RotateCcw } from "lucide-react";
+import { X, RotateCcw, Clock } from "lucide-react";
 import FilterSelect from "@/components/ui/FilterSelect";
 import SortSelect from "@/components/ui/SortSelect";
 import { DateRangePicker } from "@/components/ui/DatePicker";
@@ -35,6 +35,7 @@ export default function LeaderTaskFilters() {
       { value: "DONE", label: t("statusDone") },
       { value: "BLOCKED", label: t("statusBlocked") },
       { value: "PENDING_APPROVAL", label: t("statusPendingApproval") },
+      { value: "EXTENSION_PENDING", label: t("statusExtensionPending") },
     ],
     [t],
   );
@@ -119,6 +120,80 @@ export default function LeaderTaskFilters() {
   return (
     <MetalCard className="px-6 py-5">
       <div className="space-y-4">
+        {/* Quick Filter Tabs */}
+        <div className="flex flex-wrap items-center gap-2 border-b border-border/40 pb-3">
+          <button
+            type="button"
+            onClick={() => {
+              const params = new URLSearchParams(searchParams.toString());
+              params.delete("status");
+              params.set("page", "1");
+              router.push(`${pathname}?${params.toString()}`);
+            }}
+            className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold transition active:scale-95 cursor-pointer ${
+              !paramStatus
+                ? "bg-primary-main/20 text-primary-light border border-primary-light/40 shadow-[0_0_12px_rgba(21,174,245,0.2)]"
+                : "border border-border/60 bg-card/60 text-muted hover:text-foreground hover:bg-card"
+            }`}
+          >
+            {t("allTasks")}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              const params = new URLSearchParams(searchParams.toString());
+              params.set("status", "REVIEW");
+              params.set("page", "1");
+              router.push(`${pathname}?${params.toString()}`);
+            }}
+            className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold transition active:scale-95 cursor-pointer flex items-center gap-1.5 ${
+              paramStatus === "REVIEW"
+                ? "bg-purple-500/20 text-purple-300 border border-purple-400/50 shadow-[0_0_12px_rgba(168,85,247,0.2)]"
+                : "border border-border/60 bg-card/60 text-muted hover:text-foreground hover:bg-card"
+            }`}
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-purple-400 animate-pulse" />
+            {t("statusReview")}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              const params = new URLSearchParams(searchParams.toString());
+              params.set("status", "EXTENSION_PENDING");
+              params.set("page", "1");
+              router.push(`${pathname}?${params.toString()}`);
+            }}
+            className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold transition active:scale-95 cursor-pointer flex items-center gap-1.5 ${
+              paramStatus === "EXTENSION_PENDING"
+                ? "bg-amber-500/25 text-amber-300 border border-amber-400/60 shadow-[0_0_14px_rgba(245,158,11,0.25)] animate-pulse"
+                : "border border-amber-500/30 bg-amber-500/10 text-amber-300/80 hover:text-amber-200 hover:bg-amber-500/15"
+            }`}
+          >
+            <Clock className="h-3.5 w-3.5 text-amber-400" />
+            <span>{t("tabExtensionRequests")}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              const params = new URLSearchParams(searchParams.toString());
+              params.set("status", "BLOCKED");
+              params.set("page", "1");
+              router.push(`${pathname}?${params.toString()}`);
+            }}
+            className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold transition active:scale-95 cursor-pointer flex items-center gap-1.5 ${
+              paramStatus === "BLOCKED"
+                ? "bg-rose-500/20 text-rose-300 border border-rose-400/50 shadow-[0_0_12px_rgba(244,63,94,0.2)]"
+                : "border border-border/60 bg-card/60 text-muted hover:text-foreground hover:bg-card"
+            }`}
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-rose-400" />
+            {t("statusBlocked")}
+          </button>
+        </div>
+
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-end">
           {/* 1. Code Search */}
           <div className="flex flex-col gap-3">

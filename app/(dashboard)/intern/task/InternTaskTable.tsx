@@ -24,6 +24,7 @@ import type { TaskAssignment, AssignmentStatus } from "@/types/task-assignment";
 import type { TaskSubmission } from "@/types/task-submission";
 import TaskDetailModal from "./TaskDetailModal";
 import TaskSubmissionModal from "./TaskSubmissionModal";
+import TaskExtensionRequestModal from "./TaskExtensionRequestModal";
 
 const priorityBadge: Record<string, string> = {
   HIGH: "bg-red-500/10 text-red-400 border-red-500/30",
@@ -38,6 +39,7 @@ const statusBadge: Record<string, string> = {
   TODO: "border-slate-500/30 bg-slate-500/10 text-muted-foreground",
   BLOCKED: "border-red-500/30 bg-red-500/10 text-red-400",
   PENDING_APPROVAL: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+  EXTENSION_PENDING: "border-amber-400/40 bg-amber-500/15 text-amber-300 font-bold animate-pulse shadow-[0_0_12px_rgba(245,158,11,0.2)]",
 };
 
 function extractArray<T>(data: unknown): T[] {
@@ -101,6 +103,13 @@ export default function InternTaskTable() {
     assignment: TaskAssignment | null;
     submission?: TaskSubmission;
     readOnly?: boolean;
+  }>({
+    isOpen: false,
+    assignment: null,
+  });
+  const [extensionModalState, setExtensionModalState] = useState<{
+    isOpen: boolean;
+    assignment: TaskAssignment | null;
   }>({
     isOpen: false,
     assignment: null,
@@ -228,6 +237,13 @@ export default function InternTaskTable() {
       assignment,
       submission: sub,
       readOnly: false,
+    });
+  };
+
+  const handleOpenExtensionRequest = (assignment: TaskAssignment) => {
+    setExtensionModalState({
+      isOpen: true,
+      assignment,
     });
   };
 
@@ -464,6 +480,7 @@ export default function InternTaskTable() {
                       assignment={assignment}
                       onOpenDetail={() => handleOpenDetail(assignment)}
                       onOpenSubmission={() => handleOpenSubmission(assignment)}
+                      onOpenExtensionRequest={() => handleOpenExtensionRequest(assignment)}
                     />
                   </div>
                 </Table.Row>
@@ -515,6 +532,7 @@ export default function InternTaskTable() {
           onOpenSubmission={() => handleOpenSubmission(activeAssignment)}
           onViewSubmission={(sub) => handleViewSubmission(activeAssignment, sub)}
           onEditSubmission={(sub) => handleEditSubmission(activeAssignment, sub)}
+          onOpenExtensionRequest={() => handleOpenExtensionRequest(activeAssignment)}
         />
       )}
 
@@ -535,6 +553,20 @@ export default function InternTaskTable() {
           }
         />
       )}
+
+      {/* Task Extension Request Modal */}
+      {extensionModalState.isOpen && extensionModalState.assignment && (
+        <TaskExtensionRequestModal
+          isOpen={extensionModalState.isOpen}
+          assignment={extensionModalState.assignment}
+          onClose={() =>
+            setExtensionModalState({
+              isOpen: false,
+              assignment: null,
+            })
+          }
+        />
+      )}
     </>
   );
 }
@@ -546,10 +578,12 @@ function TaskTableRowActions({
   assignment,
   onOpenDetail,
   onOpenSubmission,
+  onOpenExtensionRequest,
 }: {
   assignment: TaskAssignment;
   onOpenDetail: () => void;
   onOpenSubmission: () => void;
+  onOpenExtensionRequest: () => void;
 }) {
   const t = useTranslations("intern.tasks");
   const { can, canAny } = useRBAC();
@@ -560,7 +594,11 @@ function TaskTableRowActions({
   const showStart = canStart && assignment.status === "TODO";
   const showSubmit = canSubmit && assignment.status === "IN_PROGRESS";
   const showBlock = canSubmit && assignment.status === "IN_PROGRESS";
-  const hasAnyAction = canView || showStart || showSubmit || showBlock;
+  const showExtension =
+    assignment.status !== "DONE" &&
+    assignment.status !== "BLOCKED" &&
+    assignment.status !== "EXTENSION_PENDING";
+  const hasAnyAction = canView || showStart || showSubmit || showBlock || showExtension;
 
   const startTaskMutation = useStartTaskAssignment();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -743,6 +781,21 @@ function TaskTableRowActions({
               >
                 <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
                 <span>{t("blockTask")}</span>
+              </button>
+            )}
+
+            {/* Request Extension (not DONE) */}
+            {showExtension && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onOpenExtensionRequest();
+                }}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-amber-300 hover:bg-amber-500/10 transition cursor-pointer"
+              >
+                <Clock className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+                <span>{t("requestExtension")}</span>
               </button>
             )}
           </div>,

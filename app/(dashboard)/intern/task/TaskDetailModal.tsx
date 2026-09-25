@@ -37,6 +37,7 @@ interface TaskDetailModalProps {
   onOpenSubmission: () => void;
   onViewSubmission: (sub: TaskSubmission) => void;
   onEditSubmission: (sub: TaskSubmission) => void;
+  onOpenExtensionRequest?: () => void;
 }
 
 const priorityBadge: Record<string, string> = {
@@ -52,6 +53,7 @@ const statusBadge: Record<string, string> = {
   TODO: "border-slate-500/30 bg-slate-500/10 text-muted-foreground",
   BLOCKED: "border-red-500/30 bg-red-500/10 text-red-400",
   PENDING_APPROVAL: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+  EXTENSION_PENDING: "border-amber-500/30 bg-amber-500/10 text-amber-400",
 };
 
 export default function TaskDetailModal({
@@ -60,6 +62,7 @@ export default function TaskDetailModal({
   onOpenSubmission,
   onViewSubmission,
   onEditSubmission,
+  onOpenExtensionRequest,
 }: TaskDetailModalProps) {
   const t = useTranslations("intern.tasks");
   const { can } = useRBAC();
@@ -164,7 +167,7 @@ export default function TaskDetailModal({
                 </div>
               )}
 
-              {assignment.status === "TODO" && canStartTask && (
+              {assignment.status === "TODO" && (
                 <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-3">
                   <div className="flex items-center gap-2">
                     <Play className="h-4 w-4 text-cyan-400 shrink-0" />
@@ -172,18 +175,33 @@ export default function TaskDetailModal({
                       {t("readyToStart")}
                     </span>
                   </div>
-                  <button
-                    onClick={() => startTaskMutation.mutate(assignment.id)}
-                    disabled={startTaskMutation.isPending}
-                    className="flex items-center gap-1.5 rounded-xl bg-cyan-600 px-4 py-2 text-xs font-medium text-white transition hover:bg-cyan-500 active:scale-95 disabled:opacity-50 cursor-pointer"
-                  >
-                    {startTaskMutation.isPending ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                      <Play className="h-3.5 w-3.5" />
+                  <div className="flex items-center gap-2">
+                    {onOpenExtensionRequest && (
+                      <button
+                        type="button"
+                        onClick={onOpenExtensionRequest}
+                        className="flex items-center gap-1.5 rounded-xl border border-amber-400/30 bg-amber-500/10 px-3.5 py-2 text-xs font-medium text-amber-300 transition hover:bg-amber-500/20 active:scale-95 cursor-pointer"
+                      >
+                        <Clock className="h-3.5 w-3.5 text-amber-400" />
+                        <span>{t("requestExtension")}</span>
+                      </button>
                     )}
-                    {t("startWorking")}
-                  </button>
+                    {canStartTask && (
+                      <button
+                        type="button"
+                        onClick={() => startTaskMutation.mutate(assignment.id)}
+                        disabled={startTaskMutation.isPending}
+                        className="flex items-center gap-1.5 rounded-xl bg-cyan-600 px-4 py-2 text-xs font-medium text-white transition hover:bg-cyan-500 active:scale-95 disabled:opacity-50 cursor-pointer"
+                      >
+                        {startTaskMutation.isPending ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Play className="h-3.5 w-3.5" />
+                        )}
+                        {t("startWorking")}
+                      </button>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -203,6 +221,24 @@ export default function TaskDetailModal({
                 </div>
               )}
 
+              {assignment.status === "EXTENSION_PENDING" && (
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3.5 text-amber-300">
+                  <div className="flex items-center gap-3">
+                    <Clock className="h-5 w-5 shrink-0 text-amber-400 animate-pulse" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold">
+                        {t("extensionModal.pendingBannerTitle")}
+                      </p>
+                      <p className="mt-0.5 text-xs text-amber-300/80">
+                        {assignment.extensionRequests?.[0]?.reason
+                          ? `${t("extensionModal.reason")}: ${assignment.extensionRequests[0].reason}`
+                          : t("statusExtensionPending")}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {assignment.status === "IN_PROGRESS" && (
                 <div className="space-y-3">
                   <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/80 bg-card/60 p-4">
@@ -213,30 +249,44 @@ export default function TaskDetailModal({
                       </span>
                     </div>
 
-                    {canSubmitTask && (
-                      <div className="flex items-center gap-2.5">
-                        {latestSubmission?.reviewStatus !== "PENDING" && (
-                          <button
-                            onClick={onOpenSubmission}
-                            className="flex items-center gap-1.5 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-xs font-medium text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20 active:scale-95 cursor-pointer shadow-sm"
-                          >
-                            <Send className="h-3.5 w-3.5" />
-                            {t("submitWork")}
-                          </button>
-                        )}
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      {onOpenExtensionRequest && (
+                        <button
+                          type="button"
+                          onClick={onOpenExtensionRequest}
+                          className="flex items-center gap-1.5 rounded-xl border border-amber-400/30 bg-amber-500/10 px-3.5 py-2 text-xs font-medium text-amber-300 transition hover:bg-amber-500/20 active:scale-95 cursor-pointer"
+                        >
+                          <Clock className="h-3.5 w-3.5 text-amber-400" />
+                          <span>{t("requestExtension")}</span>
+                        </button>
+                      )}
 
-                        {!showBlockForm && (
-                          <button
-                            type="button"
-                            onClick={() => setShowBlockForm(true)}
-                            className="flex items-center gap-1.5 rounded-xl border border-amber-400/30 bg-amber-500/10 px-3.5 py-2 text-xs font-medium text-amber-300 transition hover:bg-amber-500/20 active:scale-95 cursor-pointer"
-                          >
-                            <AlertTriangle className="h-3.5 w-3.5" />
-                            {t("blockTask")}
-                          </button>
-                        )}
-                      </div>
-                    )}
+                      {canSubmitTask && (
+                        <>
+                          {latestSubmission?.reviewStatus !== "PENDING" && (
+                            <button
+                              type="button"
+                              onClick={onOpenSubmission}
+                              className="flex items-center gap-1.5 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-xs font-medium text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20 active:scale-95 cursor-pointer shadow-sm"
+                            >
+                              <Send className="h-3.5 w-3.5" />
+                              {t("submitWork")}
+                            </button>
+                          )}
+
+                          {!showBlockForm && (
+                            <button
+                              type="button"
+                              onClick={() => setShowBlockForm(true)}
+                              className="flex items-center gap-1.5 rounded-xl border border-rose-400/30 bg-rose-500/10 px-3.5 py-2 text-xs font-medium text-rose-300 transition hover:bg-rose-500/20 active:scale-95 cursor-pointer"
+                            >
+                              <AlertTriangle className="h-3.5 w-3.5" />
+                              {t("blockTask")}
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
 
                   {canSubmitTask && showBlockForm && (

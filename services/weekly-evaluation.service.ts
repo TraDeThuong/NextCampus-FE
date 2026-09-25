@@ -14,11 +14,47 @@ export const weeklyEvaluationService = {
   getWeeklyEvaluations: async (
     params?: WeeklyEvaluationQueryParams,
   ): Promise<WeeklyEvaluationListResponse> => {
-    const response = await api.get<WeeklyEvaluationListResponse>(
+    const response = await api.get<Record<string, unknown>>(
       "/weekly-evaluations",
       { params },
     );
-    return response.data;
+    const resData = response.data || {};
+    const rawItems = (
+      Array.isArray(resData.data)
+        ? resData.data
+        : Array.isArray(resData.items)
+          ? resData.items
+          : []
+    ) as WeeklyEvaluation[];
+
+    const metaObj = (
+      resData.meta && typeof resData.meta === "object" ? resData.meta : {}
+    ) as Record<string, unknown>;
+
+    const total = Number(resData.total ?? metaObj.total ?? rawItems.length);
+    const page = Number(resData.page ?? metaObj.page ?? (params?.page || 1));
+    const limit = Number(resData.limit ?? metaObj.limit ?? (params?.limit || 20));
+    const totalPages = Number(
+      resData.totalPages ??
+        metaObj.totalPages ??
+        Math.max(1, Math.ceil(total / Math.max(1, limit))),
+    );
+
+    return {
+      success: resData.success !== false,
+      data: rawItems,
+      items: rawItems,
+      total,
+      page,
+      limit,
+      totalPages,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages,
+      },
+    };
   },
 
   getWeeklyEvaluation: async (id: string): Promise<{ success: boolean; data: WeeklyEvaluation }> => {

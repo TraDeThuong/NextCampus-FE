@@ -80,19 +80,19 @@ export function useNotificationSSE() {
               t.visible
                 ? "animate-in fade-in slide-in-from-top-5 duration-200"
                 : "animate-out fade-out slide-out-to-top-5 duration-150"
-            } max-w-sm w-full bg-[#0B1020]/95 border border-cyan-400/40 shadow-[0_0_25px_rgba(21,174,245,0.35)] rounded-2xl p-4 backdrop-blur-xl cursor-pointer hover:border-cyan-400 transition-all text-white`}
+            } max-w-sm w-full bg-white/95 dark:bg-[#0B1020]/95 border border-slate-200/90 dark:border-cyan-400/40 shadow-[0_10px_30px_rgba(15,23,42,0.08),0_2px_8px_rgba(15,23,42,0.04)] dark:shadow-[0_0_25px_rgba(21,174,245,0.35)] rounded-2xl p-4 backdrop-blur-xl cursor-pointer hover:border-primary-light/60 dark:hover:border-cyan-400 transition-all text-slate-900 dark:text-white`}
           >
             <div className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
+              <span className="h-2.5 w-2.5 rounded-full bg-cyan-500 dark:bg-cyan-400 animate-pulse shrink-0" />
               <p className="text-xs font-bold metal-text tracking-wide uppercase">
                 {label}
               </p>
             </div>
-            <p className="mt-1.5 text-sm font-semibold text-white truncate">
+            <p className="mt-1.5 text-sm font-semibold text-slate-900 dark:text-white truncate">
               {title}
             </p>
             {content && (
-              <p className="mt-1 text-xs text-slate-300 line-clamp-2 leading-relaxed">
+              <p className="mt-1 text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">
                 {content}
               </p>
             )}

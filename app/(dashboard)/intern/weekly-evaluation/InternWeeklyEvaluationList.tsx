@@ -60,8 +60,20 @@ export default function InternWeeklyEvaluationList() {
   }, [searchParams]);
 
   const { data: response, isLoading, refetch, isFetching } = useWeeklyEvaluations(params);
-  const evaluations = useMemo(() => response?.data ?? [], [response?.data]);
-  const meta = response?.meta;
+  const evaluations = useMemo(
+    () => response?.data ?? response?.items ?? [],
+    [response],
+  );
+  const meta =
+    response?.meta ??
+    (response
+      ? {
+          total: response.total ?? 0,
+          page: response.page ?? 1,
+          limit: response.limit ?? 10,
+          totalPages: response.totalPages ?? 1,
+        }
+      : undefined);
 
 
   const handlePageChange = (newPage: number) => {

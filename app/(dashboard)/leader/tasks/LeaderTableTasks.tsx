@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo, useContext, useCallback, useId } from "react";
 import { createPortal } from "react-dom";
-import { Layers, MoreVertical, Eye, Pencil, Trash2, Loader2, ChevronLeft, ChevronRight, Check, ChevronDown, UserPlus, UserX, Sparkles, Building, RotateCcw } from "lucide-react";
+import { Layers, MoreVertical, Eye, Pencil, Trash2, Loader2, ChevronLeft, ChevronRight, Check, ChevronDown, UserPlus, UserX, Sparkles, Building, RotateCcw, Clock } from "lucide-react";
 import { useTranslations } from "next-intl";
 import TaskAiRecommendationModal from "./TaskAiRecommendationModal";
 import TaskGroupAiAllocationModal from "./TaskGroupAiAllocationModal";
@@ -69,6 +69,12 @@ export default function LeaderTableTasks() {
     router.push(`${pathname}?${p.toString()}`, { scroll: false });
   };
 
+  const handleOpenReviewExtension = (aId: string) => {
+    const p = new URLSearchParams(searchParams.toString());
+    p.set("reviewExtensionAssignmentId", aId);
+    router.push(`${pathname}?${p.toString()}`, { scroll: false });
+  };
+
   const unblockTask = useUnblockTaskAssignment();
   const handleUnblockTask = (aId: string) => {
     unblockTask.mutate(aId);
@@ -114,7 +120,11 @@ export default function LeaderTableTasks() {
 
   const { data: tasksData, isLoading: tasksLoading, refetch: tasksRefetch, isFetching: tasksFetching } = useTasks(params);
   const tasks = useMemo(() => extractTasks(tasksData?.data), [tasksData]);
-  const meta = tasksData?.meta ?? (tasksData?.data as any)?.meta;
+  const meta =
+    tasksData?.meta ??
+    (tasksData?.data && typeof tasksData.data === "object" && "meta" in tasksData.data
+      ? (tasksData.data as { meta?: { total: number; page: number; limit: number; totalPages: number } }).meta
+      : undefined);
   const openAction = (a: GroupAction) => { setAction(a); triggerRef.current?.click(); };
 
   function goToPage(page: number) {
@@ -216,6 +226,7 @@ export default function LeaderTableTasks() {
                       task={task}
                       pathname={pathname}
                       onOpenReview={handleOpenReview}
+                      onOpenReviewExtension={handleOpenReviewExtension}
                       onUnblockTask={handleUnblockTask}
                       isUnblocking={unblockTask.isPending}
                       onOpenTaskAction={openTaskAction}
@@ -271,6 +282,7 @@ export default function LeaderTableTasks() {
                           task={task}
                           pathname={pathname}
                           onOpenReview={handleOpenReview}
+                          onOpenReviewExtension={handleOpenReviewExtension}
                           onUnblockTask={handleUnblockTask}
                           isUnblocking={unblockTask.isPending}
                           onOpenTaskAction={openTaskAction}
@@ -563,6 +575,7 @@ function TaskTableRow({
   task,
   pathname,
   onOpenReview,
+  onOpenReviewExtension,
   onUnblockTask,
   isUnblocking,
   onOpenTaskAction,
@@ -571,6 +584,7 @@ function TaskTableRow({
   task: Task;
   pathname: string;
   onOpenReview: (aId: string) => void;
+  onOpenReviewExtension: (aId: string) => void;
   onUnblockTask: (aId: string) => void;
   isUnblocking: boolean;
   onOpenTaskAction: (a: { type: "edit" | "delete"; taskId: string; taskTitle: string }) => void;
@@ -580,6 +594,7 @@ function TaskTableRow({
   const { can } = useRBAC();
   const canAiAssign = can("TASK_ASSIGNMENT_CREATE");
   const canUnblock = can("TASK_ASSIGNMENT_UPDATE");
+  const canReview = can("TASK_SUBMISSION_REVIEW") || can("TASK_ASSIGNMENT_UPDATE");
   const canView = can("TASK_READ");
   const canEdit = can("TASK_UPDATE");
   const canDelete = can("TASK_DELETE");
@@ -596,7 +611,8 @@ function TaskTableRow({
 
   const showAiAssign = canAiAssign && (!task.assignment || !task.assignment.internId) && !checkIsOverdue(task.deadline);
   const showUnblock = canUnblock && isBlocked && !!task.assignment?.id;
-  const hasAnyTaskAction = showAiAssign || showUnblock || canView || canEdit || canDelete;
+  const showReviewExtension = canReview && task.assignment?.status === "EXTENSION_PENDING" && !!task.assignment?.id;
+  const hasAnyTaskAction = showAiAssign || showUnblock || showReviewExtension || canView || canEdit || canDelete;
 
   const updateMenuPosition = useCallback(() => {
     if (!triggerRef.current) return;
@@ -718,6 +734,7 @@ function TaskTableRow({
           assignmentId={task.assignment?.id}
           taskId={task.id}
           onReviewClick={onOpenReview}
+          onReviewExtensionClick={onOpenReviewExtension}
           onUnblockClick={onUnblockTask}
           isUnblocking={isUnblocking}
         />
@@ -783,6 +800,21 @@ function TaskTableRow({
                 </button>
               )}
 
+              {showReviewExtension && (
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onOpenReviewExtension(task.assignment!.id);
+                  }}
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-amber-300 hover:bg-amber-500/10 active:scale-95 transition font-medium cursor-pointer"
+                >
+                  <Clock className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+                  <span>{t("reviewExtension")}</span>
+                </button>
+              )}
+
               {canView && (
                 <button
                   type="button"
@@ -845,6 +877,7 @@ function TaskCardItem({
   task,
   pathname,
   onOpenReview,
+  onOpenReviewExtension,
   onUnblockTask,
   isUnblocking,
   onOpenTaskAction,
@@ -853,6 +886,7 @@ function TaskCardItem({
   task: Task;
   pathname: string;
   onOpenReview: (aId: string) => void;
+  onOpenReviewExtension: (aId: string) => void;
   onUnblockTask: (aId: string) => void;
   isUnblocking: boolean;
   onOpenTaskAction: (a: { type: "edit" | "delete"; taskId: string; taskTitle: string }) => void;
@@ -862,6 +896,7 @@ function TaskCardItem({
   const { can } = useRBAC();
   const canAiAssign = can("TASK_ASSIGNMENT_CREATE");
   const canUnblock = can("TASK_ASSIGNMENT_UPDATE");
+  const canReview = can("TASK_SUBMISSION_REVIEW") || can("TASK_ASSIGNMENT_UPDATE");
   const canView = can("TASK_READ");
   const canEdit = can("TASK_UPDATE");
   const canDelete = can("TASK_DELETE");
@@ -878,7 +913,8 @@ function TaskCardItem({
 
   const showAiAssign = canAiAssign && (!task.assignment || !task.assignment.internId) && !checkIsOverdue(task.deadline);
   const showUnblock = canUnblock && isBlocked && !!task.assignment?.id;
-  const hasAnyTaskAction = showAiAssign || showUnblock || canView || canEdit || canDelete;
+  const showReviewExtension = canReview && task.assignment?.status === "EXTENSION_PENDING" && !!task.assignment?.id;
+  const hasAnyTaskAction = showAiAssign || showUnblock || showReviewExtension || canView || canEdit || canDelete;
 
   const updateMenuPosition = useCallback(() => {
     if (!triggerRef.current) return;
@@ -984,6 +1020,7 @@ function TaskCardItem({
             assignmentId={task.assignment?.id}
             taskId={task.id}
             onReviewClick={onOpenReview}
+            onReviewExtensionClick={onOpenReviewExtension}
             onUnblockClick={onUnblockTask}
             isUnblocking={isUnblocking}
           />
@@ -1044,6 +1081,21 @@ function TaskCardItem({
                   >
                     <RotateCcw className="h-3.5 w-3.5 shrink-0" />
                     <span>{t("unblockTask")}</span>
+                  </button>
+                )}
+
+                {showReviewExtension && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onOpenReviewExtension(task.assignment!.id);
+                    }}
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-amber-300 hover:bg-amber-500/10 active:scale-95 transition font-medium cursor-pointer"
+                  >
+                    <Clock className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+                    <span>{t("reviewExtension")}</span>
                   </button>
                 )}
 
@@ -1827,6 +1879,7 @@ function StatusBadge({
   assignmentId,
   taskId,
   onReviewClick,
+  onReviewExtensionClick,
   onUnblockClick,
   isUnblocking,
 }: {
@@ -1834,6 +1887,7 @@ function StatusBadge({
   assignmentId?: string;
   taskId?: string;
   onReviewClick?: (assignmentId: string, taskId: string) => void;
+  onReviewExtensionClick?: (assignmentId: string) => void;
   onUnblockClick?: (assignmentId: string) => void;
   isUnblocking?: boolean;
 }) {
@@ -1849,6 +1903,7 @@ function StatusBadge({
     TODO: "border-slate-700 bg-slate-800/60 text-slate-400",
     BLOCKED: "border-rose-500/30 bg-rose-500/10 text-rose-300",
     PENDING_APPROVAL: "border-amber-500/30 bg-amber-500/10 text-amber-300",
+    EXTENSION_PENDING: "border-amber-400/40 bg-amber-500/15 text-amber-300 font-bold animate-pulse shadow-[0_0_12px_rgba(245,158,11,0.2)]",
     UNASSIGNED: "border-orange-500/30 bg-orange-500/10 text-orange-300",
   };
 
@@ -1890,6 +1945,23 @@ function StatusBadge({
           {t("unblock")}
         </button>
       </div>
+    );
+  }
+
+  if (status === "EXTENSION_PENDING" && assignmentId && onReviewExtensionClick) {
+    return (
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onReviewExtensionClick(assignmentId);
+        }}
+        title={t("reviewExtension")}
+        className="inline-flex items-center gap-1.5 rounded-lg border border-amber-400/40 bg-amber-500/15 px-2 py-0.5 text-xs font-semibold text-amber-300 hover:bg-amber-500/25 transition cursor-pointer animate-pulse shadow-[0_0_12px_rgba(245,158,11,0.2)]"
+      >
+        <Clock className="h-3 w-3 shrink-0 text-amber-400" />
+        {t("statusExtensionPending")}
+      </button>
     );
   }
 

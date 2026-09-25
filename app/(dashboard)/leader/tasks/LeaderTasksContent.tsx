@@ -6,6 +6,7 @@ import LeaderTaskStats from "./LeaderTaskStats";
 import LeaderTaskFilters from "./LeaderTaskFilters";
 import LeaderTableTasks from "./LeaderTableTasks";
 import TaskReviewModal from "./TaskReviewModal";
+import TaskExtensionReviewModal from "./TaskExtensionReviewModal";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export default function LeaderTasksContent() {
@@ -13,10 +14,18 @@ export default function LeaderTasksContent() {
   const router = useRouter();
   const pathname = usePathname();
   const reviewAssignmentId = searchParams.get("reviewAssignmentId");
+  const reviewExtensionAssignmentId = searchParams.get("reviewExtensionAssignmentId");
 
   const closeReview = () => {
     const params = new URLSearchParams(searchParams.toString());
     params.delete("reviewAssignmentId");
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  };
+
+  const closeExtensionReview = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("reviewExtensionAssignmentId");
     const query = params.toString();
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
   };
@@ -33,6 +42,13 @@ export default function LeaderTasksContent() {
         <TaskReviewModal
           assignmentId={reviewAssignmentId}
           onClose={closeReview}
+        />
+      )}
+
+      {reviewExtensionAssignmentId && (
+        <TaskExtensionReviewModal
+          assignmentId={reviewExtensionAssignmentId}
+          onClose={closeExtensionReview}
         />
       )}
       </div>

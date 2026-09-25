@@ -179,6 +179,11 @@ export interface WeeklyEvaluationSuccessResponse {
 export interface WeeklyEvaluationListResponse {
   success: boolean;
   data: WeeklyEvaluation[];
+  items?: WeeklyEvaluation[];
+  total?: number;
+  page?: number;
+  limit?: number;
+  totalPages?: number;
   meta: {
     total: number;
     page: number;

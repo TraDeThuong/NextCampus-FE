@@ -13,6 +13,7 @@ export function useConfirmView() {
       queryClient.invalidateQueries({ queryKey: ["weekly-evaluations"] });
       queryClient.invalidateQueries({ queryKey: ["weekly-evaluation", id] });
       queryClient.invalidateQueries({ queryKey: ["stats", "intern"] });
+      queryClient.invalidateQueries({ queryKey: ["action-counts"] });
       toast.success("Đã xác nhận xem đánh giá tuần thành công.");
     },
     onError: () => {

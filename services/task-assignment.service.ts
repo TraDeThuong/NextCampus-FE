@@ -7,6 +7,12 @@ import type {
   CreateTaskAssignmentPayload,
   AssignTaskPayload,
   UpdateTaskAssignmentPayload,
+  RequestExtensionPayload,
+  RejectExtensionPayload,
+  TaskExtensionRequestResponse,
+  TaskExtensionRequestListResponse,
+  TaskAssignmentExtensionRequestsResponse,
+  TaskExtensionRequestQueryParams,
 } from "@/types/task-assignment";
 
 export const taskAssignmentService = {
@@ -134,6 +140,63 @@ export const taskAssignmentService = {
   ): Promise<TaskAssignmentDeleteResponse> => {
     const response = await api.delete<TaskAssignmentDeleteResponse>(
       `/task-assignments/${id}`,
+    );
+    return response.data;
+  },
+
+  // ─── Extension Requests (Workflow gia hạn deadline) ──────────────────────
+
+  // POST /task-assignments/:id/request-extension (Intern xin gia hạn)
+  requestExtension: async (
+    id: string,
+    payload: RequestExtensionPayload,
+  ): Promise<TaskExtensionRequestResponse> => {
+    const response = await api.post<TaskExtensionRequestResponse>(
+      `/task-assignments/${id}/request-extension`,
+      payload,
+    );
+    return response.data;
+  },
+
+  // GET /task-assignments/extension-requests (Leader danh sách yêu cầu)
+  getExtensionRequests: async (
+    params?: TaskExtensionRequestQueryParams,
+  ): Promise<TaskExtensionRequestListResponse> => {
+    const response = await api.get<TaskExtensionRequestListResponse>(
+      "/task-assignments/extension-requests",
+      { params },
+    );
+    return response.data;
+  },
+
+  // GET /task-assignments/:id/extension-requests (Lịch sử gia hạn của assignment)
+  getExtensionRequestsByAssignment: async (
+    id: string,
+  ): Promise<TaskAssignmentExtensionRequestsResponse> => {
+    const response = await api.get<TaskAssignmentExtensionRequestsResponse>(
+      `/task-assignments/${id}/extension-requests`,
+    );
+    return response.data;
+  },
+
+  // POST /task-assignments/extension-requests/:requestId/approve (Leader duyệt)
+  approveExtension: async (
+    requestId: string,
+  ): Promise<TaskExtensionRequestResponse> => {
+    const response = await api.post<TaskExtensionRequestResponse>(
+      `/task-assignments/extension-requests/${requestId}/approve`,
+    );
+    return response.data;
+  },
+
+  // POST /task-assignments/extension-requests/:requestId/reject (Leader từ chối)
+  rejectExtension: async (
+    requestId: string,
+    payload: RejectExtensionPayload,
+  ): Promise<TaskExtensionRequestResponse> => {
+    const response = await api.post<TaskExtensionRequestResponse>(
+      `/task-assignments/extension-requests/${requestId}/reject`,
+      payload,
     );
     return response.data;
   },
