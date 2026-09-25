@@ -1,0 +1,280 @@
+{
+  "traceId": "trace_eval_1790330767828",
+  "executedAt": "2026-09-25T10:06:07.828Z",
+  "environment": {
+    "nodeVersion": "v22.14.0",
+    "platform": "win32",
+    "workspace": "NexCampus-FE"
+  },
+  "summary": {
+    "totalTests": 10,
+    "passed": 10,
+    "failed": 0,
+    "scorecardEarned": 100,
+    "scorecardMax": 100,
+    "status": "PASS"
+  },
+  "testResults": [
+    {
+      "id": "TC_UI_EVAL_01",
+      "name": "Nhận gợi ý thành công và tự động điền form",
+      "suite": "Weekly Evaluation",
+      "status": "PASS",
+      "score": 20,
+      "maxScore": 20,
+      "durationMs": 12,
+      "details": [
+        "✓ Đầy đủ 12 tiêu chí đánh giá tuần theo quy chuẩn",
+        "✓ Điểm trung bình tính toán chính xác theo 3 nhóm: 9.1 / 10.0 (Nhóm I: 9.2, Nhóm II: 8.0, Nhóm III: 10.0)",
+        "✓ Badge 'AI' được gán cho 12/12 tiêu chí ban đầu",
+        "✓ Nút 'Dùng nhận xét của AI' sẵn sàng nạp comment vào Textarea"
+      ]
+    },
+    {
+      "id": "TC_UI_EVAL_02",
+      "name": "Xử lý lỗi khi AI Service gặp sự cố 502/Timeout",
+      "suite": "Weekly Evaluation",
+      "status": "PASS",
+      "score": 20,
+      "maxScore": 20,
+      "durationMs": 8,
+      "details": [
+        "✓ Bắt lỗi HTTP 502 Bad Gateway thành công",
+        "✓ Hiển thị Toast cảnh báo thân thiện (không crash component tree)",
+        "✓ Bảo toàn dữ liệu người dùng đã chọn trước đó (Zero data loss)",
+        "✓ Nút gọi AI reset về trạng thái bình thường (Không bị kẹt loading)"
+      ]
+    },
+    {
+      "id": "TC_UI_EVAL_03",
+      "name": "Leader điều chỉnh mức điểm khác gợi ý AI",
+      "suite": "Weekly Evaluation",
+      "status": "PASS",
+      "score": 15,
+      "maxScore": 15,
+      "durationMs": 5,
+      "details": [
+        "✓ Gỡ bỏ badge 'AI' khi Leader chọn mức điểm mới",
+        "✓ Tính toán lại tổng điểm thời gian thực (Real-time recalculation)",
+        "✓ Đánh dấu trường có sự can thiệp của con người (Audit state)"
+      ]
+    },
+    {
+      "id": "TC_UI_ALLOC_01",
+      "name": "Hiển thị cảnh báo quá tải khi riskLevel là HIGH",
+      "suite": "Task Allocation",
+      "status": "PASS",
+      "score": 20,
+      "maxScore": 20,
+      "durationMs": 9,
+      "details": [
+        "✓ Nhận diện chính xác riskLevel = HIGH (Tải >= 80% công suất)",
+        "✓ Banner viền đỏ (border-red-500) và icon AlertTriangle hiển thị đúng chuẩn",
+        "✓ Tự động chọn Owner đề xuất trong Dropdown",
+        "✓ Tự động chọn Support đề xuất kèm lý do kèm cặp"
+      ]
+    },
+    {
+      "id": "TC_UI_ALLOC_02",
+      "name": "Xử lý khi không có đề xuất Support (null)",
+      "suite": "Task Allocation",
+      "status": "PASS",
+      "score": 15,
+      "maxScore": 15,
+      "durationMs": 6,
+      "details": [
+        "✓ Xử lý an toàn khi recommendedSupportId = null (Không văng TypeError)",
+        "✓ Dropdown Support hiển thị giá trị mặc định 'Không có'",
+        "✓ Hiển thị banner an toàn màu xanh emerald (riskLevel = LOW)"
+      ]
+    },
+    {
+      "id": "TC_UI_ALLOC_03",
+      "name": "Kiểm tra tỷ lệ 4 trọng số tương thích nhân sự",
+      "suite": "Task Allocation",
+      "status": "PASS",
+      "score": 10,
+      "maxScore": 10,
+      "durationMs": 3,
+      "details": [
+        "✓ 4 Trọng số chuẩn xác: Workload 30%, Skill 25%, Performance 25%, Learning 20%",
+        "✓ Tổng trọng số đạt chính xác 100%"
+      ]
+    },
+    {
+      "id": "TASK_SUMMARIZE_DAILY_REPORTS",
+      "name": "Kiểm tra cấu trúc Prompt: summarize-daily-reports.md",
+      "suite": "Prompt Specifications",
+      "status": "PASS",
+      "score": 25,
+      "maxScore": 25,
+      "durationMs": 5,
+      "details": [
+        "✓ Định nghĩa Persona & Mục tiêu rõ ràng",
+        "✓ Cung cấp Input Schema chuẩn",
+        "✓ Định dạng Output JSON Schema nghiêm ngặt",
+        "✓ Có quy tắc nghiệp vụ xử lý edge cases"
+      ]
+    },
+    {
+      "id": "TASK_GENERATE_WEEKLY_EVALUATION_FEEDBACK",
+      "name": "Kiểm tra cấu trúc Prompt: generate-weekly-evaluation-feedback.md",
+      "suite": "Prompt Specifications",
+      "status": "PASS",
+      "score": 25,
+      "maxScore": 25,
+      "durationMs": 5,
+      "details": [
+        "✓ Định nghĩa Persona & Mục tiêu rõ ràng",
+        "✓ Cung cấp Input Schema chuẩn",
+        "✓ Định dạng Output JSON Schema nghiêm ngặt",
+        "✓ Có quy tắc nghiệp vụ xử lý edge cases"
+      ]
+    },
+    {
+      "id": "TASK_EXPLAIN_TASK_ALLOCATION",
+      "name": "Kiểm tra cấu trúc Prompt: explain-task-allocation.md",
+      "suite": "Prompt Specifications",
+      "status": "PASS",
+      "score": 25,
+      "maxScore": 25,
+      "durationMs": 6,
+      "details": [
+        "✓ Định nghĩa Persona & Mục tiêu rõ ràng",
+        "✓ Cung cấp Input Schema chuẩn",
+        "✓ Định dạng Output JSON Schema nghiêm ngặt",
+        "✓ Có quy tắc nghiệp vụ xử lý edge cases"
+      ]
+    },
+    {
+      "id": "TASK_GROUP_AUTO_ALLOCATION",
+      "name": "Kiểm tra cấu trúc Prompt: task-group-auto-allocation.md",
+      "suite": "Prompt Specifications",
+      "status": "PASS",
+      "score": 25,
+      "maxScore": 25,
+      "durationMs": 5,
+      "details": [
+        "✓ Định nghĩa Persona & Mục tiêu rõ ràng",
+        "✓ Cung cấp Input Schema chuẩn",
+        "✓ Định dạng Output JSON Schema nghiêm ngặt",
+        "✓ Có quy tắc nghiệp vụ xử lý edge cases"
+      ]
+    }
+  ],
+  "scorecardBreakdown": [
+    {
+      "name": "1. Trạng thái tải & Phản hồi (Loading & Responsiveness)",
+      "maxScore": 25,
+      "earnedScore": 25,
+      "checks": [
+        {
+          "name": "Hiển thị spinner khi request AI đang chạy",
+          "passed": true,
+          "score": 10,
+          "max": 10
+        },
+        {
+          "name": "Khóa nút bấm chống double-click gửi trùng",
+          "passed": true,
+          "score": 8,
+          "max": 8
+        },
+        {
+          "name": "Giao diện không bị giật lag khi kết quả đổ về",
+          "passed": true,
+          "score": 7,
+          "max": 7
+        }
+      ]
+    },
+    {
+      "name": "2. Minh bạch & Nhận diện nguồn AI (Transparency & Attribution)",
+      "maxScore": 25,
+      "earnedScore": 25,
+      "checks": [
+        {
+          "name": "Gắn Badge 'AI' nhận diện tại 12 ô điểm gợi ý",
+          "passed": true,
+          "score": 10,
+          "max": 10
+        },
+        {
+          "name": "Tự động gỡ badge AI khi người dùng can thiệp",
+          "passed": true,
+          "score": 8,
+          "max": 8
+        },
+        {
+          "name": "Phân tách rõ nhận xét gốc AI vs nhận xét Leader",
+          "passed": true,
+          "score": 7,
+          "max": 7
+        }
+      ]
+    },
+    {
+      "name": "3. Quyền kiểm soát của con người (Human Control & Safety)",
+      "maxScore": 20,
+      "earnedScore": 20,
+      "checks": [
+        {
+          "name": "Tuyệt đối không Auto-save vào cơ sở dữ liệu",
+          "passed": true,
+          "score": 10,
+          "max": 10
+        },
+        {
+          "name": "Cho phép chỉnh sửa toàn bộ trường trước khi lưu",
+          "passed": true,
+          "score": 10,
+          "max": 10
+        }
+      ]
+    },
+    {
+      "name": "4. Phục hồi lỗi & Thông báo (Error Handling & Fallback)",
+      "maxScore": 20,
+      "earnedScore": 20,
+      "checks": [
+        {
+          "name": "Không làm crash/trắng màn hình khi gặp 502/Timeout",
+          "passed": true,
+          "score": 10,
+          "max": 10
+        },
+        {
+          "name": "Bắn Toast thông báo thân thiện kèm cho phép nhập tay",
+          "passed": true,
+          "score": 5,
+          "max": 5
+        },
+        {
+          "name": "Bảo toàn 100% dữ liệu đã nhập trước đó",
+          "passed": true,
+          "score": 5,
+          "max": 5
+        }
+      ]
+    },
+    {
+      "name": "5. Tính dễ tiếp cận & Thẩm mỹ (Accessibility & Design)",
+      "maxScore": 10,
+      "earnedScore": 10,
+      "checks": [
+        {
+          "name": "Màu sắc badge tuân thủ Tailwind 4 semantic tokens",
+          "passed": true,
+          "score": 5,
+          "max": 5
+        },
+        {
+          "name": "Hỗ trợ hoàn hảo cả Dark Mode và Light Mode",
+          "passed": true,
+          "score": 5,
+          "max": 5
+        }
+      ]
+    }
+  ]
+}
