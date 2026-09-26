@@ -2,11 +2,10 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import InternTaskHeader from "./InternTaskHeader";
-import InternTaskFilters from "./InternTaskFilters";
-import InternTaskStats from "./InternTaskStats";
-import InternTaskTable from "./InternTaskTable";
+import InternTaskContent from "./InternTaskContent";
 
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import InternTaskSkeleton from "@/components/task/InternTaskSkeleton";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations();
@@ -21,14 +20,8 @@ export default function InternTaskPage() {
     >
       <div className="space-y-6">
         <InternTaskHeader />
-        <Suspense fallback={null}>
-          <InternTaskFilters />
-        </Suspense>
-        <Suspense fallback={null}>
-          <InternTaskStats />
-        </Suspense>
-        <Suspense fallback={null}>
-          <InternTaskTable />
+        <Suspense fallback={<InternTaskSkeleton />}>
+          <InternTaskContent />
         </Suspense>
       </div>
     </ProtectedRoute>

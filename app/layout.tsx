@@ -56,10 +56,14 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     loadLocaleMessages("en"),
   ]);
 
+  const rawTheme = cookieStore.get("nexcampus-theme")?.value || cookieStore.get("theme")?.value;
+  const isLight = rawTheme === "light";
+  const initialThemeClass = isLight ? "" : "dark";
+
   return (
     <html
       lang={initialLocale}
-      className={`dark ${headingFont.variable} ${headingFontVi.variable} ${bodyFont.variable} ${bodyFontVi.variable}`}
+      className={`${initialThemeClass} ${headingFont.variable} ${headingFontVi.variable} ${bodyFont.variable} ${bodyFontVi.variable}`}
       suppressHydrationWarning
     >
       <head>
@@ -68,7 +72,12 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             __html: `
               (function() {
                 try {
-                  var theme = localStorage.getItem('nexcampus-theme') || localStorage.getItem('theme') || 'system';
+                  var theme = localStorage.getItem('nexcampus-theme') || localStorage.getItem('theme');
+                  if (!theme) {
+                    var match = document.cookie.match(/(?:^|; )nexcampus-theme=([^;]*)/);
+                    if (match) theme = decodeURIComponent(match[1]);
+                  }
+                  if (!theme) theme = 'system';
                   var isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
                   if (isDark) {
                     document.documentElement.classList.add('dark');

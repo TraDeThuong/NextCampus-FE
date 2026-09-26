@@ -6,8 +6,17 @@ import { useTranslations } from "next-intl";
 
 type ThemeMode = "light" | "dark" | "system";
 
+function setCookieTheme(mode: ThemeMode) {
+  if (typeof document === "undefined") return;
+  try {
+    document.cookie = `nexcampus-theme=${mode}; path=/; max-age=31536000; SameSite=Lax`;
+    document.cookie = `theme=${mode}; path=/; max-age=31536000; SameSite=Lax`;
+  } catch {}
+}
+
 function applyTheme(mode: ThemeMode) {
   if (typeof document === "undefined") return;
+  setCookieTheme(mode);
   if (mode === "dark") {
     document.documentElement.classList.add("dark");
   } else if (mode === "light") {

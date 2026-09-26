@@ -44,6 +44,8 @@ export interface AssignmentTask {
   updatedAt: string;
   recreatedTaskId: string | null;
   recreatedTask: { id: string; title: string; code: string | null; assignment: { intern: { fullName: string } } | null } | null;
+  dependsOn?: Array<{ id: string; code: string | null; title: string; assignment?: { id: string; status: string } | null }>;
+  dependencies?: Array<{ id: string; code: string | null; title: string; assignment?: { id: string; status: string } | null }>;
 }
 
 export interface AssignmentAssigner {
@@ -55,7 +57,7 @@ export interface AssignmentAssigner {
 export interface AssignmentSupport {
   id: string;
   fullName: string;
-  user: { id: string; email: string; fullName: string };
+  user: { id: string; email: string; fullName: string; avatarUrl?: string | null };
 }
 
 export interface TaskExtensionRequest {
@@ -174,6 +176,7 @@ export interface TaskAssignmentQueryParams {
   assignedBy?: string;
   leaderId?: string;
   status?: AssignmentStatus;
+  role?: "ALL" | "OWNER" | "SUPPORT";
   sortBy?: "assignedAt" | "status";
   order?: "asc" | "desc";
   page?: number;

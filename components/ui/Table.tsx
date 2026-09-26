@@ -181,7 +181,7 @@ function Body<T>({
   if (isLoading) {
     const colCount = Math.max(1, columns.split(" ").length);
     return (
-      <section className="divide-y divide-white/5 animate-pulse">
+      <section className="divide-y divide-slate-200/80 dark:divide-white/5 animate-pulse">
         {Array.from({ length: skeletonRows }).map((_, rIdx) => (
           <div
             key={`table-skel-row-${rIdx}`}

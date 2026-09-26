@@ -91,7 +91,7 @@ function SkeletonTable({
       {/* Header */}
       <div
         style={{ gridTemplateColumns: columns }}
-        className="grid items-center gap-x-4 md:gap-x-6 border-b border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.02)_100%)] px-4 md:px-6 py-4"
+        className="grid items-center gap-x-4 md:gap-x-6 border-b border-border bg-slate-100/80 dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.02)_100%)] px-4 md:px-6 py-4"
       >
         {Array.from({ length: colCount }).map((_, i) => (
           <Skeleton
@@ -104,7 +104,7 @@ function SkeletonTable({
       </div>
 
       {/* Rows */}
-      <div className="divide-y divide-white/5">
+      <div className="divide-y divide-border/60 dark:divide-white/5">
         {Array.from({ length: rows }).map((_, r) => (
           <div
             key={`tr-skel-${r}`}

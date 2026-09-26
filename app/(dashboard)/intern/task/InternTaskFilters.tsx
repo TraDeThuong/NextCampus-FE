@@ -19,6 +19,7 @@ export default function InternTaskFilters() {
   const paramPriority = searchParams.get("priority") ?? "";
   const paramDeadlineFrom = searchParams.get("deadlineFrom") ?? "";
   const paramDeadlineTo = searchParams.get("deadlineTo") ?? "";
+  const paramRole = searchParams.get("role") ?? "ALL";
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -96,6 +97,17 @@ export default function InternTaskFilters() {
     router.push(`${pathname}?${params.toString()}`);
   };
 
+  const handleRoleChange = (role: "ALL" | "OWNER" | "SUPPORT") => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (role === "ALL") {
+      params.delete("role");
+    } else {
+      params.set("role", role);
+    }
+    params.set("page", "1");
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
   const handleClearAll = () => {
     const params = new URLSearchParams();
     params.set("page", "1");
@@ -107,12 +119,52 @@ export default function InternTaskFilters() {
       paramStatus ||
       paramPriority ||
       paramDeadlineFrom ||
-      paramDeadlineTo,
+      paramDeadlineTo ||
+      (paramRole && paramRole !== "ALL"),
   );
 
   return (
     <MetalCard className="px-6 py-5">
       <div className="space-y-4">
+        {/* Role Filter Pills */}
+        <div className="flex flex-wrap items-center gap-2 pb-3 border-b border-border/40">
+          <button
+            type="button"
+            onClick={() => handleRoleChange("ALL")}
+            className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold transition cursor-pointer ${
+              paramRole === "ALL"
+                ? "border border-cyan-300 bg-cyan-100/90 text-cyan-800 shadow-sm dark:border-cyan-500/40 dark:bg-cyan-500/20 dark:text-cyan-300 dark:shadow-[0_0_12px_rgba(6,182,212,0.2)]"
+                : "border border-border/70 bg-surface-elevated text-muted hover:bg-slate-100 hover:text-foreground dark:hover:bg-white/5 dark:hover:text-foreground"
+            }`}
+          >
+            {t("roleAll")}
+          </button>
+          <button
+            type="button"
+            onClick={() => handleRoleChange("OWNER")}
+            className={`flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-semibold transition cursor-pointer ${
+              paramRole === "OWNER"
+                ? "border border-emerald-300 bg-emerald-100/90 text-emerald-800 shadow-sm dark:border-emerald-500/40 dark:bg-emerald-500/20 dark:text-emerald-300 dark:shadow-[0_0_12px_rgba(16,185,129,0.2)]"
+                : "border border-border/70 bg-surface-elevated text-muted hover:bg-slate-100 hover:text-foreground dark:hover:bg-white/5 dark:hover:text-foreground"
+            }`}
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400"></span>
+            {t("roleOwner")}
+          </button>
+          <button
+            type="button"
+            onClick={() => handleRoleChange("SUPPORT")}
+            className={`flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-semibold transition cursor-pointer ${
+              paramRole === "SUPPORT"
+                ? "border border-purple-300 bg-purple-100/90 text-purple-800 shadow-sm dark:border-purple-500/40 dark:bg-purple-500/20 dark:text-purple-300 dark:shadow-[0_0_12px_rgba(168,85,247,0.2)]"
+                : "border border-border/70 bg-surface-elevated text-muted hover:bg-slate-100 hover:text-foreground dark:hover:bg-white/5 dark:hover:text-foreground"
+            }`}
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-purple-500 dark:bg-purple-400"></span>
+            {t("roleSupport")}
+          </button>
+        </div>
+
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 items-end">
           {/* 1. Search by Code or Title */}
           <div className="flex flex-col gap-1.5">
@@ -180,12 +232,12 @@ export default function InternTaskFilters() {
               </span>
 
               {search && (
-                <span className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-400/20 bg-cyan-500/10 px-2.5 py-1 text-xs text-cyan-300">
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-200 bg-cyan-50 px-2.5 py-1 text-xs text-cyan-800 dark:border-cyan-400/20 dark:bg-cyan-500/10 dark:text-cyan-300">
                   {t("searchCodeOrTitle")}: {search}
                   <button
                     type="button"
                     onClick={handleClearSearch}
-                    className="hover:text-rose-400 transition cursor-pointer"
+                    className="hover:text-rose-500 transition cursor-pointer"
                     aria-label="Remove search filter"
                   >
                     <X className="h-3 w-3 shrink-0" />
@@ -194,14 +246,14 @@ export default function InternTaskFilters() {
               )}
 
               {paramStatus && (
-                <span className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-400/20 bg-cyan-500/10 px-2.5 py-1 text-xs text-cyan-300">
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-200 bg-cyan-50 px-2.5 py-1 text-xs text-cyan-800 dark:border-cyan-400/20 dark:bg-cyan-500/10 dark:text-cyan-300">
                   {t("status")}:{" "}
                   {STATUS_OPTIONS.find((s) => s.value === paramStatus)?.label ??
                     paramStatus}
                   <button
                     type="button"
                     onClick={() => handleClearParam("status")}
-                    className="hover:text-rose-400 transition cursor-pointer"
+                    className="hover:text-rose-500 transition cursor-pointer"
                     aria-label="Remove status filter"
                   >
                     <X className="h-3 w-3 shrink-0" />
@@ -210,14 +262,14 @@ export default function InternTaskFilters() {
               )}
 
               {paramPriority && (
-                <span className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-400/20 bg-cyan-500/10 px-2.5 py-1 text-xs text-cyan-300">
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-200 bg-cyan-50 px-2.5 py-1 text-xs text-cyan-800 dark:border-cyan-400/20 dark:bg-cyan-500/10 dark:text-cyan-300">
                   {t("priority")}:{" "}
                   {PRIORITY_OPTIONS.find((p) => p.value === paramPriority)?.label ??
                     paramPriority}
                   <button
                     type="button"
                     onClick={() => handleClearParam("priority")}
-                    className="hover:text-rose-400 transition cursor-pointer"
+                    className="hover:text-rose-500 transition cursor-pointer"
                     aria-label="Remove priority filter"
                   >
                     <X className="h-3 w-3 shrink-0" />
@@ -226,13 +278,13 @@ export default function InternTaskFilters() {
               )}
 
               {(paramDeadlineFrom || paramDeadlineTo) && (
-                <span className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-400/20 bg-cyan-500/10 px-2.5 py-1 text-xs text-cyan-300">
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-200 bg-cyan-50 px-2.5 py-1 text-xs text-cyan-800 dark:border-cyan-400/20 dark:bg-cyan-500/10 dark:text-cyan-300">
                   {t("deadline")}: {paramDeadlineFrom || "..."} →{" "}
                   {paramDeadlineTo || "..."}
                   <button
                     type="button"
                     onClick={handleClearDateRange}
-                    className="hover:text-rose-400 transition cursor-pointer"
+                    className="hover:text-rose-500 transition cursor-pointer"
                     aria-label="Remove deadline filter"
                   >
                     <X className="h-3 w-3 shrink-0" />

@@ -9,7 +9,7 @@ export interface TaskGroupMember {
     leaderId: string | null;
     fullName: string;
     status: "ACTIVE" | "COMPLETED" | "DROPPED";
-    user: { email: string | null };
+    user: { email: string | null; avatarUrl?: string | null };
     department: { id: string; name: string } | null;
     position: { id: string; name: string } | null;
   };
@@ -62,9 +62,29 @@ export interface TaskGroupTask {
     status: string;
     internId: string;
     supportId: string | null;
-    intern?: { id: string; fullName: string } | null;
-    support?: { id: string; fullName: string } | null;
+    intern?: {
+      id: string;
+      fullName: string;
+      user?: { email?: string | null; avatarUrl?: string | null };
+    } | null;
+    support?: {
+      id: string;
+      fullName: string;
+      user?: { email?: string | null; avatarUrl?: string | null };
+    } | null;
   } | null;
+  dependsOn?: Array<{
+    id: string;
+    code: string | null;
+    title: string;
+    assignment?: { id: string; status: string } | null;
+  }>;
+  dependencies?: Array<{
+    id: string;
+    code: string | null;
+    title: string;
+    assignment?: { id: string; status: string } | null;
+  }>;
 }
 
 // ─── Response wrappers ────────────────────────────────────────────────────

@@ -29,15 +29,15 @@ export default function Spinner({ size = "md" }: SpinnerProps) {
   return (
     <div className={`relative ${s.wrapper}`}>
       <div
-        className={`absolute inset-0 rounded-full ${s.outer} border-zinc-700`}
+        className={`absolute inset-0 rounded-full ${s.outer} border-slate-200 dark:border-zinc-700`}
       />
 
       <div
-        className={`absolute inset-0 rounded-full ${s.outer} border-transparent border-t-white border-r-zinc-300 animate-spin`}
+        className={`absolute inset-0 rounded-full ${s.outer} border-transparent border-t-cyan-600 dark:border-t-white border-r-slate-400 dark:border-r-zinc-300 animate-spin`}
       />
 
       <div
-        className={`absolute ${s.inset} rounded-full ${s.inner} border-transparent border-b-zinc-500 animate-spin [animation-direction:reverse] [animation-duration:1.5s]`}
+        className={`absolute ${s.inset} rounded-full ${s.inner} border-transparent border-b-cyan-600 dark:border-b-zinc-500 animate-spin [animation-direction:reverse] [animation-duration:1.5s]`}
       />
     </div>
   );

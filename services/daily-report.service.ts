@@ -1,6 +1,7 @@
 import api from "@/lib/axios";
 import { UPLOAD_REQUEST_TIMEOUT_MS } from "@/lib/upload-policy";
 import type {
+  DailyReport,
   DailyReportListResponse,
   DailyReportSuccessResponse,
   DailyReportQueryParams,

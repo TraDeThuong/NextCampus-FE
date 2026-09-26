@@ -20,6 +20,7 @@ import Table from "@/components/ui/Table";
 import { useTaskAssignments } from "@/hooks/task-assignment/useTaskAssignments";
 import { useStartTaskAssignment } from "@/hooks/task-assignment/useStartTaskAssignment";
 import { useRBAC } from "@/hooks/rbac/useRBAC";
+import { useAuth } from "@/hooks/auth/useAuth";
 import type { TaskAssignment, AssignmentStatus } from "@/types/task-assignment";
 import type { TaskSubmission } from "@/types/task-submission";
 import TaskDetailModal from "./TaskDetailModal";
@@ -27,19 +28,19 @@ import TaskSubmissionModal from "./TaskSubmissionModal";
 import TaskExtensionRequestModal from "./TaskExtensionRequestModal";
 
 const priorityBadge: Record<string, string> = {
-  HIGH: "bg-red-500/10 text-red-400 border-red-500/30",
-  MEDIUM: "bg-amber-500/10 text-amber-400 border-amber-500/30",
-  LOW: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
+  HIGH: "border-red-200 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400",
+  MEDIUM: "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-400",
+  LOW: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400",
 };
 
 const statusBadge: Record<string, string> = {
-  DONE: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
-  IN_PROGRESS: "border-blue-500/30 bg-blue-500/10 text-blue-400",
-  REVIEW: "border-purple-500/30 bg-purple-500/10 text-purple-400",
-  TODO: "border-slate-500/30 bg-slate-500/10 text-muted-foreground",
-  BLOCKED: "border-red-500/30 bg-red-500/10 text-red-400",
-  PENDING_APPROVAL: "border-amber-500/30 bg-amber-500/10 text-amber-400",
-  EXTENSION_PENDING: "border-amber-400/40 bg-amber-500/15 text-amber-300 font-bold animate-pulse shadow-[0_0_12px_rgba(245,158,11,0.2)]",
+  DONE: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400",
+  IN_PROGRESS: "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-400",
+  REVIEW: "border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-500/30 dark:bg-purple-500/10 dark:text-purple-400",
+  TODO: "border-slate-200 bg-slate-100 text-slate-700 dark:border-slate-500/30 dark:bg-slate-500/10 dark:text-muted-foreground",
+  BLOCKED: "border-red-200 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400",
+  PENDING_APPROVAL: "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-400",
+  EXTENSION_PENDING: "border-amber-300 bg-amber-100 text-amber-800 font-bold dark:border-amber-400/40 dark:bg-amber-500/15 dark:text-amber-300 animate-pulse shadow-sm dark:shadow-[0_0_12px_rgba(245,158,11,0.2)]",
 };
 
 function extractArray<T>(data: unknown): T[] {
@@ -92,10 +93,22 @@ export default function InternTaskTable() {
   const search = searchParams.get("search")?.toLowerCase().trim() ?? "";
   const paramStatus = searchParams.get("status") as AssignmentStatus | null;
   const paramPriority = searchParams.get("priority");
+  const paramRole = (searchParams.get("role") as "ALL" | "OWNER" | "SUPPORT") || "ALL";
   const deadlineFrom = searchParams.get("deadlineFrom");
   const deadlineTo = searchParams.get("deadlineTo");
   const urlPage = Number(searchParams.get("page")) || 1;
   const assignmentIdParam = searchParams.get("assignmentId");
+
+  const { state: authState } = useAuth();
+  const currentUserId = authState.user?.id;
+  const currentUserEmail = authState.user?.email;
+
+  const isSupportTask = (a: TaskAssignment) =>
+    Boolean(
+      (currentUserId && a.support?.user?.id === currentUserId) ||
+        (currentUserEmail && a.support?.user?.email === currentUserEmail) ||
+        (currentUserId && a.supportId === currentUserId),
+    );
 
   const [selectedAssignment, setSelectedAssignment] = useState<TaskAssignment | null>(null);
   const [submissionModalState, setSubmissionModalState] = useState<{
@@ -123,6 +136,7 @@ export default function InternTaskTable() {
   } = useTaskAssignments({
     limit: 300,
     status: paramStatus || undefined,
+    role: paramRole !== "ALL" ? paramRole : undefined,
   });
 
   const rawAssignments = useMemo(
@@ -309,6 +323,11 @@ export default function InternTaskTable() {
                         ? t(`status${assignment.status}`)
                         : assignment.status.replace("_", " ")}
                     </span>
+                    {isSupportTask(assignment) && (
+                      <span className="inline-flex items-center gap-1 rounded-md border border-purple-200 bg-purple-50 px-2 py-0.5 text-[10px] font-semibold text-purple-700 dark:border-purple-500/30 dark:bg-purple-500/15 dark:text-purple-300">
+                        🤝 {t("roleBadgeSupport")} ({t("supportFor", { name: assignment.intern?.fullName || "" })})
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -421,9 +440,16 @@ export default function InternTaskTable() {
 
                   {/* 2. Title */}
                   <div className="min-w-0 pr-4 space-y-0.5">
-                    <p className="text-sm font-semibold text-foreground truncate hover:text-cyan-400 transition-colors">
-                      {assignment.task.title}
-                    </p>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-semibold text-foreground truncate hover:text-cyan-400 transition-colors">
+                        {assignment.task.title}
+                      </p>
+                      {isSupportTask(assignment) && (
+                        <span className="inline-flex items-center gap-1 rounded-md border border-purple-200 bg-purple-50 px-2 py-0.5 text-[10px] font-semibold text-purple-700 dark:border-purple-500/30 dark:bg-purple-500/15 dark:text-purple-300">
+                          🤝 {t("roleBadgeSupport")} ({t("supportFor", { name: assignment.intern?.fullName || "" })})
+                        </span>
+                      )}
+                    </div>
                     {assignment.task.recreatedTaskId && (
                       <span className="inline-flex items-center text-[10px] text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.2 rounded font-mono">
                         Recreated
@@ -503,7 +529,7 @@ export default function InternTaskTable() {
                     type="button"
                     disabled={currentPage <= 1}
                     onClick={() => goToPage(currentPage - 1)}
-                    className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer"
+                    className="rounded-xl border border-border bg-card px-3 py-2 text-muted transition-all hover:bg-card-hover hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer shadow-sm dark:shadow-none dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/[0.06]"
                     aria-label="Previous page"
                   >
                     <ChevronLeft className="h-4 w-4" />
@@ -512,7 +538,7 @@ export default function InternTaskTable() {
                     type="button"
                     disabled={currentPage >= totalPages}
                     onClick={() => goToPage(currentPage + 1)}
-                    className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-muted transition-all hover:border-white/20 hover:bg-white/[0.06] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer"
+                    className="rounded-xl border border-border bg-card px-3 py-2 text-muted transition-all hover:bg-card-hover hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer shadow-sm dark:shadow-none dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/[0.06]"
                     aria-label="Next page"
                   >
                     <ChevronRight className="h-4 w-4" />

@@ -262,3 +262,23 @@ Chỉ lưu các quyết định kiến trúc và UI/UX đã được xác nhận
     * Luôn duy trì tính toàn vẹn 2 chiều giữa `messages/vi/*.json` và `messages/en/*.json` (các namespace `auth`, `notFound`, `error` nằm trong `common.json`).
     * Trang 404 tách Client Component `NotFoundContent.tsx` để khi click nút cờ thì văn bản trang đổi tức thì trong 0ms.
     * Trong `LocaleProvider.tsx`, hàm `setLocale` phải gọi `router.refresh()` kèm lưu cookie `NEXT_LOCALE` / `locale` để đồng bộ Server Components.
+
+- **2026-09-26 — Chế Độ Xem Bảng Nhóm & Góc Nhìn Task Hỗ Trợ (Squad Project Board & Support Task Architecture)**:
+  - **Kiến trúc điều hướng chế độ xem (View Switcher)**:
+    - Tại `/intern/task`, `InternTaskHeader` cung cấp bộ chuyển đổi trực quan giữa `[ 👤 Công việc của tôi ]` (My Tasks) và `[ 👥 Bảng dự án nhóm ]` (Squad Project Board) thông qua URL query parameter `?view=my|team`.
+    - Server Component `page.tsx` bọc Client Component `InternTaskContent` bên trong `Suspense` giúp chuyển đổi tức thì không gây giật lag.
+  - **Phân tách trách nhiệm cá nhân & vai trò Hỗ trợ (Support Task Filter & Indicators)**:
+    - Bổ sung bộ lọc vai trò nhanh: `[ Tất cả ]`, `[ 👤 Phụ trách chính ]`, `[ 🤝 Hỗ trợ đồng đội (Support) ]` đồng bộ với URL param `?role=ALL|OWNER|SUPPORT`.
+    - Thẻ/Dòng công việc mà TTS đóng vai trò trợ lực được gắn badge `[ Trợ Lực ]` (màu tím Indigo/Purple glow đặc trưng) kèm chú thích `Hỗ trợ: {tên PIC chính}` trên cả giao diện Desktop Table và Mobile Cards.
+  - **Bảng Dự Án Nhóm (Squad Board) — Kanban Mode**:
+    - Trực quan hóa tiến trình công việc của cả nhóm (`TODO`, `IN_PROGRESS`, `REVIEW`, `DONE`, `BLOCKED`).
+    - Hỗ trợ kéo thả tự nhiên bằng HTML5 Drag-and-Drop (không phụ thuộc thư viện ngoài nặng nề). TTS chỉ có quyền kéo thả công việc của chính mình; công việc của đồng đội hiển thị chế độ xem an toàn (Read-only) chống sửa nhầm.
+    - Kéo từ `TODO` sang `IN_PROGRESS` tự động kích hoạt API `startTask` với kiểm tra điều kiện tiên quyết.
+  - **Sơ Đồ Phụ Thuộc (Dependency Graph DAG)**:
+    - Tính toán tầng phân cấp (topological levels) tự động dựa trên mối quan hệ `dependsOn` / `dependencies`.
+    - Vẽ đường kết nối Bezier SVG thời gian thực: đường nét liền xanh lá phát sáng (Cyberpunk glow) nếu điều kiện tiên quyết đã xong (`DONE`), hoặc đường nét đứt vàng cam nếu đang chờ điều kiện.
+    - Thẻ công việc của chính người đang đăng nhập được viền neon cyan phát sáng nổi bật để định vị ngay vị trí trong dây chuyền dự án.
+  - **Đồng Bộ Giao Diện Sáng / Tối (Light & Dark Theme Parity)**:
+    - Nút chuyển đổi chế độ xem `[ Công Việc Của Tôi ]` / `[ Bảng Dự Án Nhóm ]` và nút chuyển Kanban / Graph sử dụng container `border border-border/80 bg-slate-100/90 shadow-sm dark:border-white/10 dark:bg-slate-900/60 dark:shadow-none`.
+    - Toàn bộ các cột Kanban, thẻ công việc, thẻ KPI Mini, nhãn vai trò, bảng sơ đồ DAG có biến thể màu sắc rõ ràng cho Light Mode (`bg-card`, `bg-surface-elevated`, `text-*-700|800`, `border-*-200|300`) kết hợp song song với hiệu ứng Cyberpunk neon glow trong Dark Mode qua prefix `dark:`.
+
