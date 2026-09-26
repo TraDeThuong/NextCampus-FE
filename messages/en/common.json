@@ -109,6 +109,7 @@
     "forgotPassword": "Forgot password?",
     "signIn": "Sign In",
     "signingIn": "Signing in...",
+    "redirecting": "Redirecting to your workspace...",
     "emailRequired": "Email is required",
     "invalidEmail": "Invalid email address",
     "passwordRequired": "Password is required",
