@@ -109,6 +109,7 @@
     "forgotPassword": "Quên mật khẩu?",
     "signIn": "Đăng nhập",
     "signingIn": "Đang đăng nhập...",
+    "redirecting": "Đang chuyển hướng đến trang làm việc...",
     "emailRequired": "Vui lòng nhập email",
     "invalidEmail": "Địa chỉ email không hợp lệ",
     "passwordRequired": "Vui lòng nhập mật khẩu",
