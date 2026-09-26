@@ -59,7 +59,7 @@ export default function SquadOverviewBanner({ group, tasks }: SquadOverviewBanne
                 <Users className="h-3.5 w-3.5" />
                 {t("squadMembers")} ({group.members.length})
               </span>
-              <div className="flex items-center -space-x-2.5 px-3 py-2 overflow-visible">
+              <div className="flex items-center -space-x-2.5 py-2 overflow-visible">
                 {group.members.map((member) => {
                   const avatar = member.intern.user.avatarUrl;
                   const name = member.intern.fullName;

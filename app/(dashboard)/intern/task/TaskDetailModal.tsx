@@ -184,12 +184,16 @@ export default function TaskDetailModal({
             </div>
           ) : (
             <>
-              {/* Read-only banner if viewing a teammate's task */}
-              {!isMine && (
+              {/* Unassigned or Read-only banner */}
+              {!assignment.id || !assignment.internId ? (
+                <div className="rounded-2xl border border-amber-300 bg-amber-50/90 px-4 py-3 text-xs text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
+                  {t("unassignedNotice")}
+                </div>
+              ) : !isMine ? (
                 <div className="rounded-2xl border border-indigo-300 bg-indigo-50/90 px-4 py-3 text-xs text-indigo-700 dark:border-indigo-500/30 dark:bg-indigo-500/10 dark:text-indigo-300">
                   {t("readOnlyTeammateTaskNotice")}
                 </div>
-              )}
+              ) : null}
 
               {/* Status Action Cards */}
               {assignment.status === "DONE" && (

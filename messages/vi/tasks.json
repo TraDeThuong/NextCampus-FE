@@ -305,6 +305,7 @@
       "legendPrereqPending": "Đang chờ điều kiện",
       "legendMyTask": "Công việc của bạn",
       "readOnlyTeammateTaskNotice": "Bạn đang xem thông tin công việc của thành viên khác trong nhóm. Chế độ chỉ xem.",
+      "unassignedNotice": "Công việc này chưa được phân công cho thành viên nào.",
       "statsError": "Không thể tải thống kê công việc.",
       "totalTasks": "Tổng Công Việc",
       "inProgress": "Đang Làm",

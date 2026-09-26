@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useMemo, useContext, useCallback, useId } 
 import { createPortal } from "react-dom";
 import { Layers, MoreVertical, Eye, Pencil, Trash2, Loader2, ChevronLeft, ChevronRight, Check, ChevronDown, UserPlus, UserX, Sparkles, Building, RotateCcw, Clock } from "lucide-react";
 import { useTranslations } from "next-intl";
+import DOMPurify from "isomorphic-dompurify";
 import TaskAiRecommendationModal from "./TaskAiRecommendationModal";
 import TaskGroupAiAllocationModal from "./TaskGroupAiAllocationModal";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
@@ -1502,7 +1503,22 @@ function DeleteTaskConfirm({
           </div>
           <div className="space-y-2">
             <h3 className="text-base font-semibold text-foreground">{td("title")}</h3>
-            <p className="text-sm leading-6 text-muted" dangerouslySetInnerHTML={{ __html: td("confirm", { title: taskTitle }) }} />
+            <p
+              className="text-sm leading-6 text-muted"
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(
+                  td("confirm", {
+                    title: taskTitle.replace(/[&<>"']/g, (m) => ({
+                      "&": "&amp;",
+                      "<": "&lt;",
+                      ">": "&gt;",
+                      '"': "&quot;",
+                      "'": "&#39;",
+                    }[m] || m)),
+                  }),
+                ),
+              }}
+            />
             <p className="text-sm text-muted">{td("warning")}</p>
           </div>
         </div>

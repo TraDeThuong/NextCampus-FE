@@ -13,7 +13,9 @@
     "close": "Đóng",
     "cancel": "Hủy",
     "save": "Lưu",
-    "processing": "Đang xử lý..."
+    "processing": "Đang xử lý...",
+    "loading": "Đang tải...",
+    "unauthorized": "Bạn không có quyền truy cập vào trang này"
   },
   "stats": {
     "riskHealthy": "An toàn",
