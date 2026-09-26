@@ -43,8 +43,13 @@ export interface TaskAttachmentSummary {
 
 export interface TaskDependency {
   id: string;
-  code: string;
+  code: string | null;
   title: string;
+  assignment?: {
+    id: string;
+    status: string;
+    intern?: { id: string; fullName: string } | null;
+  } | null;
 }
 
 // ─── Entity ───────────────────────────────────────────────────────────────

@@ -20,6 +20,8 @@ import {
   FileText,
   Eye,
   Download,
+  Lock,
+  Workflow,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRBAC } from "@/hooks/rbac/useRBAC";
@@ -92,6 +94,10 @@ export default function TaskDetailModal({
   });
   const task = taskData?.data ?? null;
   const basicTask = task ?? assignment.task;
+
+  const dependsOn = task?.dependsOn ?? assignment.task?.dependsOn ?? [];
+  const dependencies = task?.dependencies ?? assignment.task?.dependencies ?? [];
+  const hasDependenciesInfo = dependsOn.length > 0 || dependencies.length > 0;
 
   const startTaskMutation = useStartTaskAssignment();
   const blockTaskMutation = useBlockTaskAssignment();
@@ -438,6 +444,125 @@ export default function TaskDetailModal({
                   />
                 )}
               </div>
+
+              {/* Task Dependencies & Prerequisites */}
+              {hasDependenciesInfo && (
+                <div className="space-y-3 rounded-2xl border border-border/80 bg-card/40 p-4">
+                  {/* 1. Prerequisites (dependsOn) */}
+                  {dependsOn.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Lock className="h-4 w-4 text-amber-500 dark:text-amber-400" />
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-muted">
+                          {t("dependsOnSection")} ({dependsOn.length})
+                        </h4>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-2">
+                        {dependsOn.map((prereq) => {
+                          const pStatus = prereq.assignment?.status || "TODO";
+                          const isDone = pStatus === "DONE";
+                          const isBlocked = pStatus === "BLOCKED";
+
+                          return (
+                            <div
+                              key={prereq.id}
+                              className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border p-3 transition-all ${
+                                isDone
+                                  ? "border-emerald-300/80 bg-emerald-50/50 dark:border-emerald-500/30 dark:bg-emerald-500/10"
+                                  : isBlocked
+                                  ? "border-rose-300/80 bg-rose-50/50 dark:border-rose-500/30 dark:bg-rose-500/10"
+                                  : "border-border/80 bg-surface-elevated/60 dark:border-border/60 dark:bg-slate-900/60"
+                              }`}
+                            >
+                              <div className="flex items-start gap-2.5 min-w-0">
+                                <div className="mt-0.5 shrink-0">
+                                  {isDone ? (
+                                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
+                                      <CheckCircle2 className="h-3.5 w-3.5" />
+                                    </span>
+                                  ) : (
+                                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400">
+                                      <Lock className="h-3.5 w-3.5" />
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-mono text-xs font-bold text-cyan-600 dark:text-cyan-400">
+                                      {prereq.code || "TASK"}
+                                    </span>
+                                    {prereq.assignment?.intern?.fullName && (
+                                      <span className="text-[11px] text-muted">
+                                        • {t("prereqAssignee")}: <span className="font-medium text-foreground">{prereq.assignment.intern.fullName}</span>
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-xs font-semibold text-foreground line-clamp-1 mt-0.5">
+                                    {prereq.title}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
+                                <span
+                                  className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold border ${
+                                    isDone
+                                      ? "border-emerald-200 bg-emerald-100/80 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/20 dark:text-emerald-300"
+                                      : isBlocked
+                                      ? "border-rose-200 bg-rose-100/80 text-rose-800 dark:border-rose-500/40 dark:bg-rose-500/20 dark:text-rose-300"
+                                      : "border-slate-200 bg-slate-100 text-slate-700 dark:border-slate-600/40 dark:bg-slate-700/20 dark:text-slate-300"
+                                  }`}
+                                >
+                                  {isDone ? t("prereqCompleted") : pStatus}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 2. Successors (dependencies) */}
+                  {dependencies.length > 0 && (
+                    <div className="space-y-2 pt-2 border-t border-border/50">
+                      <div className="flex items-center gap-2">
+                        <Workflow className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-muted">
+                          {t("dependenciesSection")} ({dependencies.length})
+                        </h4>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-2">
+                        {dependencies.map((dep) => {
+                          const dStatus = dep.assignment?.status || "TODO";
+                          return (
+                            <div
+                              key={dep.id}
+                              className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-border/80 bg-surface-elevated/40 p-3 dark:border-border/60 dark:bg-slate-900/40"
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <span className="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400 shrink-0">
+                                  {dep.code || "TASK"}
+                                </span>
+                                <p className="text-xs font-medium text-foreground line-clamp-1">
+                                  {dep.title}
+                                </p>
+                              </div>
+                              {dep.assignment?.intern?.fullName && (
+                                <span className="text-[11px] text-muted shrink-0">
+                                  {t("prereqAssignee")}: <span className="font-medium text-foreground">{dep.assignment.intern.fullName}</span>
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Task Description */}
               {basicTask.description && (

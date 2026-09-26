@@ -44,8 +44,18 @@ export interface AssignmentTask {
   updatedAt: string;
   recreatedTaskId: string | null;
   recreatedTask: { id: string; title: string; code: string | null; assignment: { intern: { fullName: string } } | null } | null;
-  dependsOn?: Array<{ id: string; code: string | null; title: string; assignment?: { id: string; status: string } | null }>;
-  dependencies?: Array<{ id: string; code: string | null; title: string; assignment?: { id: string; status: string } | null }>;
+  dependsOn?: Array<{
+    id: string;
+    code: string | null;
+    title: string;
+    assignment?: { id: string; status: string; intern?: { id: string; fullName: string } | null } | null;
+  }>;
+  dependencies?: Array<{
+    id: string;
+    code: string | null;
+    title: string;
+    assignment?: { id: string; status: string; intern?: { id: string; fullName: string } | null } | null;
+  }>;
 }
 
 export interface AssignmentAssigner {
