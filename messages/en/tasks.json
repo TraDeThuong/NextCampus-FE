@@ -305,6 +305,7 @@
       "legendPrereqPending": "Prerequisite Pending",
       "legendMyTask": "Your Assigned Task",
       "readOnlyTeammateTaskNotice": "You are viewing a teammate's task. Read-only mode.",
+      "unassignedNotice": "This task has not been assigned to any member yet.",
       "statsError": "Failed to load task stats.",
       "totalTasks": "Total Tasks",
       "inProgress": "In Progress",

@@ -21,7 +21,7 @@ import type { TaskSubmission } from "@/types/task-submission";
 
 function mapGroupTaskToAssignment(task: TaskGroupTask): TaskAssignment {
   return {
-    id: task.assignment?.id || task.id,
+    id: task.assignment?.id || "",
     taskId: task.id,
     internId: task.assignment?.internId || "",
     supportId: task.assignment?.supportId || null,
@@ -231,12 +231,14 @@ export default function SquadViewContainer() {
           assignment={selectedAssignment}
           onClose={() => setSelectedTask(null)}
           onOpenSubmission={() => {
+            if (!selectedAssignment.id) return;
             setSubmissionModalState({
               isOpen: true,
               assignment: selectedAssignment,
             });
           }}
           onViewSubmission={(submission) => {
+            if (!selectedAssignment.id) return;
             setSubmissionModalState({
               isOpen: true,
               assignment: selectedAssignment,
@@ -245,6 +247,7 @@ export default function SquadViewContainer() {
             });
           }}
           onEditSubmission={(submission) => {
+            if (!selectedAssignment.id) return;
             setSubmissionModalState({
               isOpen: true,
               assignment: selectedAssignment,
@@ -253,6 +256,7 @@ export default function SquadViewContainer() {
             });
           }}
           onOpenExtensionRequest={() => {
+            if (!selectedAssignment.id) return;
             setExtensionModalState({
               isOpen: true,
               assignment: selectedAssignment,

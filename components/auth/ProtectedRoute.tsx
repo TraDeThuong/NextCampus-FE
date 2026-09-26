@@ -3,6 +3,7 @@
 import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/auth/useAuth";
 import {
   getPortalName,
@@ -27,6 +28,7 @@ export default function ProtectedRoute({
   requiredPermissions,
   permissionMode = "ALL",
 }: ProtectedRouteProps) {
+  const t = useTranslations("common");
   const { state } = useAuth();
   const router = useRouter();
 
@@ -84,10 +86,10 @@ export default function ProtectedRoute({
 
     if (!isAuthorized) {
       const safePath = getFirstAuthorizedPath(userRole, userPermissions);
-      toast.error("Bạn không có quyền truy cập vào trang này");
+      toast.error(t("unauthorized"));
       router.replace(safePath);
     }
-  }, [state.isLoading, state.isAuthenticated, isAuthorized, userRole, userPermissions, router]);
+  }, [state.isLoading, state.isAuthenticated, isAuthorized, userRole, userPermissions, router, t]);
 
   if (state.isLoading) {
     return (
@@ -97,7 +99,7 @@ export default function ProtectedRoute({
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
           </svg>
-          <p className="text-muted text-sm font-medium">Đang tải...</p>
+          <p className="text-muted text-sm font-medium">{t("loading")}</p>
         </div>
       </div>
     );

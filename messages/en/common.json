@@ -13,7 +13,9 @@
     "close": "Close",
     "cancel": "Cancel",
     "save": "Save",
-    "processing": "Processing..."
+    "processing": "Processing...",
+    "loading": "Loading...",
+    "unauthorized": "You do not have permission to access this page"
   },
   "stats": {
     "riskHealthy": "Healthy",
