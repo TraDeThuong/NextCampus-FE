@@ -41,11 +41,21 @@ export const taskAttachmentService = {
     fileName: string,
     mimeType: string,
     fileSize: number,
-  ): Promise<{ success: boolean; data: { uploadUrl: string; filePath: string; publicUrl: string } }> => {
-    const response = await api.get(`/tasks/${taskId}/attachments/upload-url`, {
-      params: { fileName, mimeType, fileSize },
+  ): Promise<{ success: boolean; data: { uploadUrl: string; filePath: string; publicUrl: string; key?: string } }> => {
+    const response = await api.get<{
+      success: boolean;
+      data: { uploadUrl: string; filePath?: string; key?: string; publicUrl: string };
+    }>(`/tasks/${taskId}/attachments/upload-url`, {
+      params: { fileName, mimeType, contentType: mimeType, fileSize },
     });
-    return response.data;
+    const resData = response.data.data;
+    return {
+      ...response.data,
+      data: {
+        ...resData,
+        filePath: resData.filePath ?? resData.key ?? "",
+      },
+    };
   },
 
   confirmTaskAttachmentUpload: async (
@@ -134,12 +144,22 @@ export const taskAttachmentService = {
     fileName: string,
     mimeType: string,
     fileSize: number,
-  ): Promise<{ success: true; data: { uploadUrl: string; filePath: string; publicUrl: string } }> => {
-    const response = await api.get(
+  ): Promise<{ success: boolean; data: { uploadUrl: string; filePath: string; publicUrl: string; key?: string } }> => {
+    const response = await api.get<{
+      success: boolean;
+      data: { uploadUrl: string; filePath?: string; key?: string; publicUrl: string };
+    }>(
       `/task-submissions/${submissionId}/attachments/upload-url`,
-      { params: { fileName, mimeType, fileSize } },
+      { params: { fileName, mimeType, contentType: mimeType, fileSize } },
     );
-    return response.data;
+    const resData = response.data.data;
+    return {
+      ...response.data,
+      data: {
+        ...resData,
+        filePath: resData.filePath ?? resData.key ?? "",
+      },
+    };
   },
 
   // POST /task-submissions/:submissionId/attachments/confirm

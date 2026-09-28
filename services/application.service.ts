@@ -73,17 +73,19 @@ export const getApplicationAttachmentPutUrl = async (
 ): Promise<{ success: boolean; data: { uploadUrl: string; fileKey: string; key?: string; filePath?: string; publicUrl?: string } }> => {
   const response = await api.get<{
     success: boolean;
-    data: { uploadUrl: string; key: string; publicUrl?: string };
+    data: { uploadUrl: string; key: string; filePath?: string; publicUrl?: string };
   }>("/applications/attachments/upload-url", {
-    params: { token, fileName, contentType },
+    params: { token, fileName, contentType, mimeType: contentType },
   });
   const resData = response.data.data;
+  const key = resData.filePath ?? resData.key;
   return {
     ...response.data,
     data: {
       ...resData,
-      fileKey: resData.key,
-      filePath: resData.key,
+      fileKey: key,
+      filePath: key,
+      key,
     },
   };
 };

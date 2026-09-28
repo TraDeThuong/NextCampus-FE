@@ -108,11 +108,21 @@ export const dailyReportService = {
   getVideoPutUrl: async (
     id: string,
     mimeType: string,
-  ): Promise<{ success: boolean; data: { uploadUrl: string; filePath: string; publicUrl: string } }> => {
-    const response = await api.get(`/daily-reports/${id}/video/upload-url`, {
-      params: { mimeType },
+  ): Promise<{ success: boolean; data: { uploadUrl: string; filePath: string; publicUrl: string; key?: string } }> => {
+    const response = await api.get<{
+      success: boolean;
+      data: { uploadUrl: string; filePath?: string; key?: string; publicUrl: string };
+    }>(`/daily-reports/${id}/video/upload-url`, {
+      params: { mimeType, contentType: mimeType },
     });
-    return response.data;
+    const resData = response.data.data;
+    return {
+      ...response.data,
+      data: {
+        ...resData,
+        filePath: resData.filePath ?? resData.key ?? "",
+      },
+    };
   },
 
   confirmVideoUpload: async (

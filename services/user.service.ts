@@ -37,11 +37,21 @@ export const uploadAvatarService = async (file: File): Promise<UserSuccessRespon
 
 export const getAvatarPutUrlService = async (
   mimeType: string,
-): Promise<{ success: boolean; data: { uploadUrl: string; filePath: string; publicUrl: string } }> => {
-  const response = await api.get("/users/avatar/upload-url", {
-    params: { mimeType },
+): Promise<{ success: boolean; data: { uploadUrl: string; filePath: string; publicUrl: string; key?: string } }> => {
+  const response = await api.get<{
+    success: boolean;
+    data: { uploadUrl: string; filePath?: string; key?: string; publicUrl: string };
+  }>("/users/avatar/upload-url", {
+    params: { mimeType, contentType: mimeType },
   });
-  return response.data;
+  const resData = response.data.data;
+  return {
+    ...response.data,
+    data: {
+      ...resData,
+      filePath: resData.filePath ?? resData.key ?? "",
+    },
+  };
 };
 
 export const confirmAvatarUploadService = async (
@@ -49,7 +59,7 @@ export const confirmAvatarUploadService = async (
 ): Promise<UserSuccessResponse> => {
   const response = await api.post<UserSuccessResponse>(
     "/users/avatar/confirm",
-    { filePath },
+    { filePath, key: filePath },
   );
   return response.data;
 };

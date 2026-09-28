@@ -37,12 +37,22 @@ export const reportAttachmentService = {
     fileName: string,
     mimeType: string,
     fileSize: number,
-  ): Promise<{ success: boolean; data: { uploadUrl: string; filePath: string; publicUrl: string } }> => {
-    const response = await api.get(
+  ): Promise<{ success: boolean; data: { uploadUrl: string; filePath: string; publicUrl: string; key?: string } }> => {
+    const response = await api.get<{
+      success: boolean;
+      data: { uploadUrl: string; filePath?: string; key?: string; publicUrl: string };
+    }>(
       `/daily-reports/${reportId}/attachments/upload-url`,
-      { params: { fileName, mimeType, fileSize } },
+      { params: { fileName, mimeType, contentType: mimeType, fileSize } },
     );
-    return response.data;
+    const resData = response.data.data;
+    return {
+      ...response.data,
+      data: {
+        ...resData,
+        filePath: resData.filePath ?? resData.key ?? "",
+      },
+    };
   },
 
   confirmReportAttachmentUpload: async (
