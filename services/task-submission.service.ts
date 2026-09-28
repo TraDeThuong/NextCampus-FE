@@ -84,12 +84,22 @@ export const taskSubmissionService = {
   getVideoPutUrl: async (
     id: string,
     mimeType: string,
-  ): Promise<{ success: true; data: { uploadUrl: string; filePath: string; publicUrl: string } }> => {
-    const response = await api.get(
+  ): Promise<{ success: boolean; data: { uploadUrl: string; filePath: string; publicUrl: string; key?: string } }> => {
+    const response = await api.get<{
+      success: boolean;
+      data: { uploadUrl: string; filePath?: string; key?: string; publicUrl: string };
+    }>(
       `/task-submissions/${id}/video/upload-url`,
-      { params: { mimeType } },
+      { params: { mimeType, contentType: mimeType } },
     );
-    return response.data;
+    const resData = response.data.data;
+    return {
+      ...response.data,
+      data: {
+        ...resData,
+        filePath: resData.filePath ?? resData.key ?? "",
+      },
+    };
   },
 
   // POST /task-submissions/:id/video/confirm
