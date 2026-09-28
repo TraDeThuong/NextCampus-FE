@@ -1,5 +1,8 @@
 import api from "@/lib/axios";
-import type { PdfExportResponse } from "@/types/pdf-export";
+import type {
+  PdfExportResponse,
+  InternshipSummaryDataResponse,
+} from "@/types/pdf-export";
 
 export const pdfExportService = {
   exportWeeklyEvaluation: async (id: string): Promise<PdfExportResponse> => {
@@ -9,6 +12,13 @@ export const pdfExportService = {
 
   exportInternshipSummary: async (internId: string): Promise<PdfExportResponse> => {
     const response = await api.post<PdfExportResponse>(`/pdf-export/internship-summary/${internId}`);
+    return response.data;
+  },
+
+  getInternshipSummaryData: async (internId: string): Promise<InternshipSummaryDataResponse> => {
+    const response = await api.get<InternshipSummaryDataResponse>(
+      `/pdf-export/internship-summary/${internId}/data`
+    );
     return response.data;
   },
 };
