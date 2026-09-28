@@ -24,8 +24,12 @@ export function useExecuteImport() {
       queryClient.invalidateQueries({ queryKey: ["task-groups"], exact: false });
     },
 
-    onError: () => {
-      toast.error("Failed to import tasks.");
+    onError: (error: any) => {
+      const msg =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to import tasks.";
+      toast.error(msg);
     },
   });
 }

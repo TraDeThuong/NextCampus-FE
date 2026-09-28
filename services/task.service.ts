@@ -79,7 +79,10 @@ export const taskService = {
     const response = await api.post<ImportPreviewResponse>(
       "/tasks/import/preview",
       formData,
-      { headers: { "Content-Type": "multipart/form-data" } },
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+        timeout: 120000,
+      },
     );
     return response.data;
   },
@@ -97,7 +100,10 @@ export const taskService = {
     const response = await api.post<ImportResultResponse>(
       "/tasks/import",
       formData,
-      { headers: { "Content-Type": "multipart/form-data" } },
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+        timeout: 120000,
+      },
     );
     return response.data;
   },

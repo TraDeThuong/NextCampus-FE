@@ -261,6 +261,9 @@ export default function TaskImportModal({ onCloseModal }: Props) {
                   />
                 </div>
               </div>
+              <p className="mt-2 text-[11px] sm:text-xs text-muted">
+                💡 <span className="font-medium text-foreground/80">Tự động đặt nhóm:</span> Nếu bạn không chọn nhóm và để trống tên nhóm, hệ thống sẽ tự động khởi tạo một nhóm công việc mới theo thời gian nhập và liên kết trực tiếp với phòng ban của bạn.
+              </p>
 
               <div className="mt-5 pt-4 border-t border-border dark:border-white/10 flex flex-wrap items-center gap-3">
                 <input
