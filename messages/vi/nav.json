@@ -26,6 +26,7 @@
       "taskGroups": "Nhóm công việc",
       "dailyReports": "Báo cáo ngày",
       "meetings": "Cuộc họp",
+      "absences": "Duyệt nghỉ phép",
       "weeklyEvaluation": "Đánh giá tuần",
       "profile": "Hồ sơ"
     }
@@ -36,6 +37,7 @@
       "task": "Nhiệm vụ",
       "dailyReport": "Báo cáo ngày",
       "meetings": "Cuộc họp",
+      "absences": "Đơn xin nghỉ",
       "weeklyEvaluation": "Đánh giá tuần",
       "profile": "Hồ sơ"
     }
@@ -65,6 +67,7 @@
       "taskGroups": "Nhóm công việc",
       "dailyReports": "Báo cáo ngày",
       "meetings": "Cuộc họp",
+      "absences": "Duyệt nghỉ phép",
       "weeklyEvaluation": "Đánh giá tuần",
       "profile": "Hồ sơ"
     },
@@ -73,6 +76,7 @@
       "task": "Nhiệm vụ",
       "dailyReport": "Báo cáo ngày",
       "meetings": "Cuộc họp",
+      "absences": "Đơn xin nghỉ",
       "weeklyEvaluation": "Đánh giá tuần",
       "profile": "Hồ sơ"
     }

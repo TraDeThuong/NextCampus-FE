@@ -12,6 +12,7 @@ import {
   UserRoundPen,
   Building2,
   Layers,
+  CalendarRange,
 } from "lucide-react";
 import { LuAlarmClock } from "react-icons/lu";
 import { useTranslations } from "next-intl";
@@ -49,6 +50,7 @@ export default function LeaderSidebar() {
         { name: t("leader.nav.tasks"),            href: "/leader/tasks",             icon: CheckSquare,      permissions: ["TASK_READ"],                               badge: counts.pendingSubmissions },
         { name: t("leader.nav.meetings"),         href: "/leader/meetings",          icon: LuAlarmClock,     permissions: ["MEETING_READ"],                            badge: counts.pendingMeetingRsvp },
         { name: t("leader.nav.dailyReports"),     href: "/leader/daily-reports",     icon: ClipboardCheck,   permissions: ["DAILY_REPORT_READ"],                       badge: counts.unreviewedReports },
+        { name: t("leader.nav.absences"),         href: "/leader/absences",          icon: CalendarRange,    permissions: ["ABSENCE_REVIEW", "ABSENCE_READ", "DAILY_REPORT_READ"], badge: counts.pendingAbsences },
         { name: t("leader.nav.weeklyEvaluation"), href: "/leader/weekly-evaluation", icon: FileBarChart,     permissions: ["WEEKLY_EVALUATION_READ"],                  badge: counts.pendingEvaluations },
         { name: t("leader.nav.profile"),          href: "/leader/profile",           icon: UserRoundPen,     permissions: undefined,                                   badge: undefined },
       ];

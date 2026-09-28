@@ -71,6 +71,7 @@ export interface ActionCountsResponse {
   pendingSubmissions?: number;
   unreviewedReports?: number;
   pendingEvaluations?: number;
+  pendingAbsences?: number;
   // Admin
   pendingApplications?: number;
 }

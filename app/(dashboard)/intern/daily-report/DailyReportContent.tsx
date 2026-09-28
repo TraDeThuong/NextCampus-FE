@@ -16,6 +16,7 @@ import DailyReportStats from "./DailyReportStats";
 import { useIntern } from "@/hooks/profile/useIntern";
 import { useDailyReports } from "@/hooks/daily-report/useDailyReports";
 import { useDailyReport } from "@/hooks/daily-report/useDailyReport";
+import { useAbsences } from "@/hooks/absence/useAbsences";
 import { useSystemSettings } from "@/hooks/system-setting/useSystemSettings";
 import type { DailyReport } from "@/types/daily-report";
 
@@ -76,6 +77,41 @@ export default function DailyReportContent() {
   );
 
   const {
+    data: absencesData,
+    refetch: refetchAbsences,
+    isFetching: absencesFetching,
+  } = useAbsences(
+    dateRange
+      ? {
+          status: "APPROVED",
+          startDate: isoDate(dateRange.start),
+          endDate: isoDate(dateRange.end),
+          limit: 100,
+        }
+      : undefined,
+  );
+
+  const approvedLeavesMap = useMemo(() => {
+    const map = new Map<string, { reason: string; durationUnit?: string }>();
+    const items = absencesData?.data ?? [];
+    for (const item of items) {
+      if (item.status === "APPROVED") {
+        const start = new Date(item.startDate);
+        const end = new Date(item.endDate);
+        const cur = new Date(start);
+        while (cur <= end) {
+          map.set(isoDate(cur), {
+            reason: item.reason,
+            durationUnit: item.durationUnit,
+          });
+          cur.setDate(cur.getDate() + 1);
+        }
+      }
+    }
+    return map;
+  }, [absencesData]);
+
+  const {
     data: singleReportData,
     isFetching: singleReportFetching,
     refetch: refetchSingleReport,
@@ -107,17 +143,26 @@ export default function DailyReportContent() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     let workingDays = 0;
+    let excusedDays = 0;
     const cursor = new Date(dateRange.start);
     while (cursor <= today) {
       const dow = cursor.getDay();
       const isoDow = dow === 0 ? 7 : dow;
-      if (isoDow <= workingDaysPerWeek) workingDays++;
+      if (isoDow <= workingDaysPerWeek) {
+        const dStr = isoDate(cursor);
+        // Nếu có phép được duyệt và chưa nộp report thì tính là ngày miễn trừ
+        if (approvedLeavesMap.has(dStr) && !reportsMap.has(dStr)) {
+          excusedDays++;
+        } else {
+          workingDays++;
+        }
+      }
       cursor.setDate(cursor.getDate() + 1);
     }
     const reportedDays = reportsMap.size;
     const missingDays = Math.max(0, workingDays - reportedDays);
     const submissionRate =
-      workingDays > 0 ? Math.round((reportedDays / workingDays) * 100) : 0;
+      workingDays > 0 ? Math.min(100, Math.round((reportedDays / workingDays) * 100)) : 100;
 
     // Week stats (Mon-Sat or configured working days, from monday to today)
     const monday = new Date(today);
@@ -129,8 +174,13 @@ export default function DailyReportContent() {
       const dow = w.getDay();
       const isoDow = dow === 0 ? 7 : dow;
       if (isoDow <= workingDaysPerWeek) {
-        weekWorkingDays++;
-        if (reportsMap.has(isoDate(w))) weekReportedDays++;
+        const dStr = isoDate(w);
+        if (approvedLeavesMap.has(dStr) && !reportsMap.has(dStr)) {
+          // Excused
+        } else {
+          weekWorkingDays++;
+        }
+        if (reportsMap.has(dStr)) weekReportedDays++;
       }
       w.setDate(w.getDate() + 1);
     }
@@ -143,7 +193,7 @@ export default function DailyReportContent() {
       weekWorkingDays,
       weekReportedDays,
     };
-  }, [dateRange, reportsMap, workingDaysPerWeek]);
+  }, [dateRange, reportsMap, approvedLeavesMap, workingDaysPerWeek]);
 
   const selectedReport = useMemo(() => {
     if (!selectedId) return null;
@@ -268,6 +318,7 @@ export default function DailyReportContent() {
               startDate={dateRange.start}
               endDate={dateRange.end}
               reportsMap={reportsMap}
+              approvedLeavesMap={approvedLeavesMap}
               selectedReportId={selectedId}
               onSelectDate={handleSelectDate}
             />

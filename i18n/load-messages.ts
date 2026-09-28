@@ -120,6 +120,10 @@ export async function loadLocaleMessages(
   const settings = (await import(`../messages/${locale}/settings.json`)).default;
   deepMerge(files, settings);
 
+  // 18. Absences (Quản lý nghỉ phép)
+  const absences = (await import(`../messages/${locale}/absences.json`)).default;
+  deepMerge(files, absences);
+
   const messages = files as AbstractIntlMessages;
 
   if (shouldCacheMessages) {

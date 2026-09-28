@@ -26,6 +26,7 @@
       "taskGroups": "Task Groups",
       "dailyReports": "Daily Reports",
       "meetings": "Meetings",
+      "absences": "Leave Requests",
       "weeklyEvaluation": "Weekly Evaluation",
       "profile": "Profile"
     }
@@ -36,6 +37,7 @@
       "task": "Task",
       "dailyReport": "Daily Report",
       "meetings": "Meetings",
+      "absences": "Leave Requests",
       "weeklyEvaluation": "Weekly Evaluation",
       "profile": "Profile"
     }
@@ -65,6 +67,7 @@
       "taskGroups": "Task Groups",
       "dailyReports": "Daily Reports",
       "meetings": "Meetings",
+      "absences": "Leave Requests",
       "weeklyEvaluation": "Weekly Evaluation",
       "profile": "Profile"
     },
@@ -73,6 +76,7 @@
       "task": "Task",
       "dailyReport": "Daily Report",
       "meetings": "Meetings",
+      "absences": "Leave Requests",
       "weeklyEvaluation": "Weekly Evaluation",
       "profile": "Profile"
     }

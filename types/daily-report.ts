@@ -142,7 +142,8 @@ export type CalendarDayStatus =
   | "MISSING"
   | "FUTURE"
   | "WEEKEND"
-  | "OUT_OF_RANGE";
+  | "OUT_OF_RANGE"
+  | "LEAVE_APPROVED";
 
 export interface CalendarDayDto {
   date: string;             // YYYY-MM-DD
@@ -151,6 +152,8 @@ export interface CalendarDayDto {
   reportId?: string;
   hoursWorked?: number;
   hasFeedback?: boolean;
+  leaveReason?: string;
+  leaveDurationUnit?: string;
 }
 
 export interface DailyReportCalendarQueryDto {
@@ -166,6 +169,7 @@ export interface DailyReportCalendarResponseDto {
   totalWorkingDays: number;
   reportedDays: number;
   missingDays: number;
+  approvedLeaveDays?: number;
   submissionRate: number;   // Percentage 0 - 100
   days: CalendarDayDto[];
 }

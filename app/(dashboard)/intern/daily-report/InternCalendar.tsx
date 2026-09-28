@@ -13,6 +13,7 @@ type Props = {
   startDate: Date;
   endDate: Date;
   reportsMap: Map<string, DailyReport>;
+  approvedLeavesMap?: Map<string, { reason: string; durationUnit?: string }>;
   selectedReportId: string | null;
   onSelectDate: (dateStr: string, report?: DailyReport) => void;
 };
@@ -67,6 +68,7 @@ export default function InternCalendar({
   startDate,
   endDate,
   reportsMap,
+  approvedLeavesMap,
   selectedReportId,
   onSelectDate,
 }: Props) {
@@ -135,7 +137,10 @@ export default function InternCalendar({
     const dow = d.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
     const isoDow = dow === 0 ? 7 : dow; // 1 = Mon ... 7 = Sun
     if (isoDow > workingDaysPerWeek) return false; // weekend based on system setting
-    return !reportsMap.has(isoDate(d));
+    const dateKey = isoDate(d);
+    // Nếu có đơn nghỉ phép đã duyệt thì KHÔNG tính là missing!
+    if (approvedLeavesMap?.has(dateKey)) return false;
+    return !reportsMap.has(dateKey);
   }
 
   return (
@@ -192,6 +197,7 @@ export default function InternCalendar({
 
             const dateStr = isoDate(day);
             const report = reportsMap.get(dateStr);
+            const leave = approvedLeavesMap?.get(dateStr);
             const inRange = isInRange(day);
             const missing = isMissingReport(day);
             const isToday = sameDay(day, today);
@@ -207,6 +213,10 @@ export default function InternCalendar({
             } else if (report) {
               cellClass +=
                 "text-cyan-800 dark:text-cyan-100 bg-cyan-100/90 dark:bg-cyan-500/25 font-bold shadow-xs hover:bg-cyan-200/80 dark:hover:bg-cyan-500/35 border border-cyan-300 dark:border-cyan-400/30 ";
+            } else if (leave) {
+              // Ngày nghỉ phép hợp lệ được phê duyệt (không bị đánh dấu missing)
+              cellClass +=
+                "text-purple-800 dark:text-purple-200 bg-purple-100/90 dark:bg-purple-500/20 font-bold shadow-xs hover:bg-purple-200/80 dark:hover:bg-purple-500/30 border border-purple-300 dark:border-purple-500/30 ";
             } else if (missing) {
               cellClass +=
                 "text-rose-800 dark:text-rose-200 bg-rose-100/90 dark:bg-rose-500/15 font-semibold hover:bg-rose-200/80 dark:hover:bg-rose-500/25 border border-rose-300 dark:border-rose-500/20 ";
@@ -214,12 +224,14 @@ export default function InternCalendar({
               cellClass += "text-slate-800 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 border border-slate-200/40 dark:border-transparent ";
             }
 
-            if (isToday && !report) {
+            if (isToday && !report && !leave) {
               cellClass += "ring-1 ring-slate-400 dark:ring-white/40 ";
             }
 
-            if (isToday && report) {
-              cellClass += "ring-1 ring-primary-main dark:ring-cyan-400 ";
+            if (isToday && (report || leave)) {
+              cellClass += leave && !report
+                ? "ring-1 ring-purple-500 dark:ring-purple-400 "
+                : "ring-1 ring-primary-main dark:ring-cyan-400 ";
             }
 
             if (isSelected) {
@@ -233,10 +245,14 @@ export default function InternCalendar({
                 className={cellClass}
                 onClick={() => onSelectDate(dateStr, report)}
                 disabled={!inRange}
+                title={leave ? `Nghỉ phép có lý do: ${leave.reason}` : undefined}
               >
                 <span>{day.getDate()}</span>
                 {report && (
                   <span className="block w-1.5 h-1.5 rounded-full bg-cyan-600 dark:bg-cyan-300 mt-0.5 shadow-xs" />
+                )}
+                {!report && leave && (
+                  <span className="block w-1.5 h-1.5 rounded-full bg-purple-600 dark:bg-purple-400 mt-0.5 shadow-xs" />
                 )}
               </button>
             );
@@ -249,6 +265,10 @@ export default function InternCalendar({
         <div className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-cyan-500 dark:bg-cyan-400 shadow-[0_0_4px_rgba(6,182,212,0.6)]" />
           <span>{t("legendSubmitted")}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-purple-500 dark:bg-purple-400 shadow-[0_0_4px_rgba(168,85,247,0.6)]" />
+          <span>{isVi ? "Nghỉ có phép" : "Approved Leave"}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-rose-500 dark:bg-rose-400/80" />

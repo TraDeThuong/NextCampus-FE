@@ -9,6 +9,7 @@ import {
   FileClock,
   ClipboardCheck,
   UserRoundPen,
+  CalendarRange,
 } from "lucide-react";
 import { LuAlarmClock } from "react-icons/lu";
 import { useTranslations } from "next-intl";
@@ -43,6 +44,7 @@ export default function InternSidebar() {
         { name: t("intern.nav.task"),             href: "/intern/task",              icon: CheckSquare,    permissions: ["TASK_READ", "TASK_ASSIGNMENT_READ"],                            badge: counts.pendingTasks },
         { name: t("intern.nav.meetings"),         href: "/intern/meetings",          icon: LuAlarmClock,   permissions: ["MEETING_READ"],                                                 badge: counts.pendingMeetingRsvp },
         { name: t("intern.nav.dailyReport"),      href: "/intern/daily-report",      icon: FileClock,      permissions: ["DAILY_REPORT_READ"],                                            badge: counts.missedReports },
+        { name: t("intern.nav.absences"),         href: "/intern/absences",          icon: CalendarRange,  permissions: undefined,                                                        badge: undefined },
         { name: t("intern.nav.weeklyEvaluation"), href: "/intern/weekly-evaluation", icon: ClipboardCheck,  permissions: ["WEEKLY_EVALUATION_READ"],                                      badge: counts.unviewedEvaluations },
         { name: t("intern.nav.profile"),          href: "/intern/profile",           icon: UserRoundPen,   permissions: undefined,                                                        badge: undefined },
       ];
