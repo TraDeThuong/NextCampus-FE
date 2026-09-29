@@ -4,7 +4,10 @@ export type SystemSettingKey =
   | "MAX_ACTIVE_TASKS"               // Số task tối đa 1 TTS được nhận cùng lúc (VD: "5")
   | "MAX_WORKLOAD_DAYS"              // Hạn mức ngày công việc tối đa (VD: "10")
   | "SUBMISSION_MAX_FILE_SIZE_MB"    // Dung lượng file nộp bài tối đa (VD: "25")
-  | "REPORT_ATTACHMENT_MAX_SIZE_MB"; // Dung lượng tệp đính kèm báo cáo tối đa (VD: "10")
+  | "REPORT_ATTACHMENT_MAX_SIZE_MB"  // Dung lượng tệp đính kèm báo cáo tối đa (VD: "10")
+  | "DISCORD_BOT_ENABLED"
+  | "DISCORD_BOT_TOKEN"
+  | "DISCORD_GUILD_ID";
 
 export interface SystemSetting {
   id: string;
@@ -22,6 +25,7 @@ export interface SystemSettings {
   WORKING_DAYS_PER_WEEK?: number;
   MAX_ACTIVE_TASKS?: number;
   MAX_WORKLOAD_DAYS?: number;
+  MAX_LEADER_DEPARTMENTS?: number;
   AVATAR_MAX_FILE_SIZE_MB?: number;
   REPORT_MAX_FILE_SIZE_MB?: number;
   REPORT_VIDEO_MAX_FILE_SIZE_MB?: number;
@@ -31,6 +35,11 @@ export interface SystemSettings {
   TASK_ATTACHMENT_MAX_FILE_SIZE_MB?: number;
   APPLICATION_MAX_FILE_SIZE_MB?: number;
   TASK_IMPORT_MAX_FILE_SIZE_MB?: number;
+  ALLOW_CROSS_DEPARTMENT_ASSIGNMENT?: boolean;
+  AUTO_EVALUATION_ENABLED?: boolean;
+  DISCORD_BOT_ENABLED?: boolean;
+  DISCORD_BOT_TOKEN?: string;
+  DISCORD_GUILD_ID?: string;
   [key: string]: string | number | boolean | undefined;
 }
 

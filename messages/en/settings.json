@@ -33,7 +33,9 @@
         "storage": "File Storage & Upload Policies",
         "storageDesc": "Manage maximum upload sizes for submission videos, attachments, and onboarding CVs",
         "automation": "Automation & Operational Rules",
-        "automationDesc": "Configure cross-department assignment policies and AI-assisted weekly evaluation"
+        "automationDesc": "Configure cross-department assignment policies and AI-assisted weekly evaluation",
+        "discord": "Discord Integration & Automation",
+        "discordDesc": "Manage Discord Bot credentials, Server ID, and automated notification webhooks"
       },
       "dailyReportDeadlineTitle": "Daily Report Deadline Time",
       "dailyReportDeadlineDesc": "Cutoff time for interns to submit their daily reports (Format HH:mm, e.g. 17:30)",
@@ -67,6 +69,21 @@
       "allowCrossDepartmentDesc": "Allow leaders to assign tasks to interns belonging to other departments",
       "autoEvaluationTitle": "AI Weekly Evaluation Suggestions",
       "autoEvaluationDesc": "Enable AI to automatically summarize reports and suggest 12-criteria evaluation scores",
+      "discordBotEnabledTitle": "Discord Bot Automation",
+      "discordBotEnabledDesc": "Enable Discord Bot to automatically create department roles, provision private threads, and manage dynamic department webhooks",
+      "discordGuildIdTitle": "Discord Server ID (Guild ID)",
+      "discordGuildIdDesc": "The unique snowflake identifier of the NexCampus Discord server (16–21 digits)",
+      "discordGuildIdPlaceholder": "e.g. 1554412392673320960",
+      "discordBotTokenTitle": "Discord Bot Token",
+      "discordBotTokenDesc": "Secret token granting bot permissions from the Discord Developer Portal (encrypted and secured)",
+      "discordBotTokenPlaceholder": "Enter Bot Token (e.g. MTU1NDQ0NzM...)",
+      "discordAutoWebhookTitle": "Automated Department Webhooks & Routing",
+      "discordAutoWebhookNotice": "The system utilizes the Bot Token and Server ID to automatically create webhooks, roles, and private threads for each department. You can inspect dynamic webhooks in the Discord Management section.",
+      "discordManageWebhooksLink": "View Department Webhooks",
+      "discordSecurityNotice": "Discord Bot Token is a sensitive credential accessible only by Administrators.",
+      "discordCopyTokenSuccess": "Discord Bot Token copied to clipboard!",
+      "discordHideToken": "Hide Token",
+      "discordShowToken": "Show Token",
       "enabled": "Enabled",
       "disabled": "Disabled",
       "tasksUnit": "tasks",
@@ -84,7 +101,9 @@
         "reportAttachmentSizeRange": "Report attachment size must be between 1 and 100 MB",
         "reportVideoSizeRange": "Report video size must be between 1 and 100 MB",
         "taskAttachmentSizeRange": "Task attachment size must be between 1 and 100 MB",
-        "applicationSizeRange": "Application file size must be between 1 and 50 MB"
+        "applicationSizeRange": "Application file size must be between 1 and 50 MB",
+        "discordGuildIdFormat": "Server ID must be a numeric string between 16 and 21 digits",
+        "discordTokenRequired": "Discord Bot Token cannot be empty when bot automation is enabled"
       },
       "resetModal": {
         "title": "Confirm Reset to Factory Defaults",

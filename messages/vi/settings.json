@@ -33,7 +33,9 @@
         "storage": "Chính Sách Tệp & Dung Lượng Lưu Trữ",
         "storageDesc": "Quản lý giới hạn dung lượng tải lên cho bài nộp, video demo, đính kèm và hồ sơ ứng tuyển",
         "automation": "Quy Tắc Vận Hành & Tự Động Hóa",
-        "automationDesc": "Thiết lập phân công công việc chéo phòng ban và tự động hóa đánh giá năng lực qua AI"
+        "automationDesc": "Thiết lập phân công công việc chéo phòng ban và tự động hóa đánh giá năng lực qua AI",
+        "discord": "Cấu Hình & Tự Động Hóa Discord",
+        "discordDesc": "Quản lý kết nối Bot Discord, Server ID và các kênh Webhook điều phối thông báo tự động"
       },
       "dailyReportDeadlineTitle": "Giờ Chốt Nộp Báo Cáo Ngày",
       "dailyReportDeadlineDesc": "Hạn chốt nộp báo cáo hằng ngày của thực tập sinh (Định dạng HH:mm, ví dụ: 17:30)",
@@ -67,6 +69,21 @@
       "allowCrossDepartmentDesc": "Cho phép Trưởng nhóm giao việc cho thực tập sinh thuộc phòng ban khác",
       "autoEvaluationTitle": "Tự Động Đề Xuất Đánh Giá Tuần (AI)",
       "autoEvaluationDesc": "Kích hoạt AI tự động tổng hợp báo cáo và đề xuất điểm 12 tiêu chí đánh giá tuần",
+      "discordBotEnabledTitle": "Tự Động Hóa Discord Bot",
+      "discordBotEnabledDesc": "Kích hoạt Discord Bot tự động tạo Role phòng ban, phân luồng Private Threads và quản lý Webhooks động theo phòng ban",
+      "discordGuildIdTitle": "Discord Server ID (Guild ID)",
+      "discordGuildIdDesc": "Mã định danh duy nhất của máy chủ Discord NexCampus (chuỗi gồm 16–21 chữ số)",
+      "discordGuildIdPlaceholder": "Ví dụ: 1554412392673320960",
+      "discordBotTokenTitle": "Mã Token Discord Bot (Bot Token)",
+      "discordBotTokenDesc": "Token bí mật cấp quyền cho Bot từ Discord Developer Portal (được mã hóa và bảo vệ an toàn)",
+      "discordBotTokenPlaceholder": "Nhập mã Bot Token (ví dụ: MTU1NDQ0NzM...)",
+      "discordAutoWebhookTitle": "Tự Động Tạo & Điều Phối Webhooks Theo Phòng Ban",
+      "discordAutoWebhookNotice": "Hệ thống sử dụng Bot Token và Server ID để tự động tạo Webhooks, Role và Private Threads tương ứng cho từng phòng ban. Bạn có thể xem danh sách Webhooks động tại mục Quản lý Discord.",
+      "discordManageWebhooksLink": "Xem danh sách Webhooks phòng ban",
+      "discordSecurityNotice": "Token Discord Bot chỉ có Quản trị viên mới được quyền xem và cấu hình.",
+      "discordCopyTokenSuccess": "Đã sao chép Discord Bot Token vào bộ nhớ tạm!",
+      "discordHideToken": "Ẩn mã Token",
+      "discordShowToken": "Hiển thị mã Token",
       "enabled": "Đã kích hoạt",
       "disabled": "Đang vô hiệu hóa",
       "tasksUnit": "task",
@@ -84,7 +101,9 @@
         "reportAttachmentSizeRange": "Dung lượng đính kèm báo cáo phải từ 1 đến 100 MB",
         "reportVideoSizeRange": "Dung lượng video báo cáo phải từ 1 đến 100 MB",
         "taskAttachmentSizeRange": "Dung lượng đính kèm task phải từ 1 đến 100 MB",
-        "applicationSizeRange": "Dung lượng hồ sơ tuyển dụng phải từ 1 đến 50 MB"
+        "applicationSizeRange": "Dung lượng hồ sơ tuyển dụng phải từ 1 đến 50 MB",
+        "discordGuildIdFormat": "Server ID phải là chuỗi số gồm 16 đến 21 chữ số",
+        "discordTokenRequired": "Token Discord Bot không được để trống khi bật tự động hóa"
       },
       "resetModal": {
         "title": "Xác Nhận Khôi Phục Cài Đặt Gốc",

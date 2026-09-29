@@ -19,7 +19,15 @@ import {
   FileCheck,
   Sparkles,
   GitBranch,
+  Bot,
+  Eye,
+  EyeOff,
+  Copy,
+  ShieldCheck,
+  ExternalLink,
 } from "lucide-react";
+import Link from "next/link";
+import toast from "react-hot-toast";
 import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
 import Button from "@/components/ui/Button";
@@ -44,6 +52,9 @@ const FACTORY_DEFAULTS = {
   APPLICATION_MAX_FILE_SIZE_MB: "10",
   ALLOW_CROSS_DEPARTMENT_ASSIGNMENT: "true",
   AUTO_EVALUATION_ENABLED: "false",
+  DISCORD_BOT_ENABLED: "true",
+  DISCORD_BOT_TOKEN: "",
+  DISCORD_GUILD_ID: "",
 };
 
 const DEADLINE_PRESETS = ["17:00", "17:30", "18:00", "18:30", "19:00"];
@@ -160,15 +171,42 @@ function AdminSettingsFields({
       initialData.AUTO_EVALUATION_ENABLED != null
         ? String(Boolean(initialData.AUTO_EVALUATION_ENABLED))
         : FACTORY_DEFAULTS.AUTO_EVALUATION_ENABLED,
+    DISCORD_BOT_ENABLED:
+      initialData.DISCORD_BOT_ENABLED != null
+        ? String(Boolean(initialData.DISCORD_BOT_ENABLED))
+        : FACTORY_DEFAULTS.DISCORD_BOT_ENABLED,
+    DISCORD_BOT_TOKEN:
+      typeof initialData.DISCORD_BOT_TOKEN === "string"
+        ? initialData.DISCORD_BOT_TOKEN
+        : FACTORY_DEFAULTS.DISCORD_BOT_TOKEN,
+    DISCORD_GUILD_ID:
+      typeof initialData.DISCORD_GUILD_ID === "string"
+        ? initialData.DISCORD_GUILD_ID
+        : FACTORY_DEFAULTS.DISCORD_GUILD_ID,
   }), [initialData]);
 
   const [formValues, setFormValues] = useState(initialValues);
+  const [showBotToken, setShowBotToken] = useState(false);
+  const [copiedToken, setCopiedToken] = useState(false);
+
+  const handleCopyToken = () => {
+    if (!formValues.DISCORD_BOT_TOKEN) return;
+    navigator.clipboard.writeText(formValues.DISCORD_BOT_TOKEN);
+    setCopiedToken(true);
+    toast.success(t("discordCopyTokenSuccess"));
+    setTimeout(() => setCopiedToken(false), 2000);
+  };
 
   const handleChange = (key: keyof typeof formValues, val: string) => {
     setFormValues((prev) => ({ ...prev, [key]: val }));
   };
 
-  const handleToggle = (key: "ALLOW_CROSS_DEPARTMENT_ASSIGNMENT" | "AUTO_EVALUATION_ENABLED") => {
+  const handleToggle = (
+    key:
+      | "ALLOW_CROSS_DEPARTMENT_ASSIGNMENT"
+      | "AUTO_EVALUATION_ENABLED"
+      | "DISCORD_BOT_ENABLED"
+  ) => {
     setFormValues((prev) => ({
       ...prev,
       [key]: prev[key] === "true" ? "false" : "true",
@@ -252,6 +290,12 @@ function AdminSettingsFields({
       errs.APPLICATION_MAX_FILE_SIZE_MB = t("errors.applicationSizeRange");
     }
 
+    if (formValues.DISCORD_GUILD_ID && formValues.DISCORD_GUILD_ID.trim().length > 0) {
+      if (!/^\d{16,21}$/.test(formValues.DISCORD_GUILD_ID.trim())) {
+        errs.DISCORD_GUILD_ID = t("errors.discordGuildIdFormat");
+      }
+    }
+
     return errs;
   }, [formValues, t]);
 
@@ -283,6 +327,9 @@ function AdminSettingsFields({
       APPLICATION_MAX_FILE_SIZE_MB: Number(formValues.APPLICATION_MAX_FILE_SIZE_MB),
       ALLOW_CROSS_DEPARTMENT_ASSIGNMENT: formValues.ALLOW_CROSS_DEPARTMENT_ASSIGNMENT === "true",
       AUTO_EVALUATION_ENABLED: formValues.AUTO_EVALUATION_ENABLED === "true",
+      DISCORD_BOT_ENABLED: formValues.DISCORD_BOT_ENABLED === "true",
+      DISCORD_BOT_TOKEN: formValues.DISCORD_BOT_TOKEN.trim(),
+      DISCORD_GUILD_ID: formValues.DISCORD_GUILD_ID.trim(),
     };
 
     batchUpdate.mutate(payload);
@@ -849,6 +896,209 @@ function AdminSettingsFields({
                   `}
                 />
               </div>
+            </div>
+          </div>
+        </MetalCard>
+
+        {/* Category 5: Discord Integration & Automation */}
+        <MetalCard className="p-5 sm:p-7 space-y-6">
+          <div className="flex items-start justify-between gap-4 border-b border-border pb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.15)]">
+                <Bot className="h-5 w-5 shrink-0" />
+              </div>
+              <div>
+                <h2 className="text-base sm:text-lg font-bold text-foreground">
+                  {t("categories.discord")}
+                </h2>
+                <p className="text-xs sm:text-sm text-muted">
+                  {t("categories.discordDesc")}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            {/* Master Bot Automation Toggle */}
+            <div
+              onClick={() => handleToggle("DISCORD_BOT_ENABLED")}
+              className={`
+                flex items-start justify-between gap-4 rounded-2xl border p-4 sm:p-5
+                transition-all duration-300 cursor-pointer select-none
+                ${
+                  formValues.DISCORD_BOT_ENABLED === "true"
+                    ? "border-indigo-500/40 bg-indigo-500/10 shadow-[0_0_20px_rgba(99,102,241,0.1)]"
+                    : "border-border bg-card hover:border-border-strong hover:bg-card-hover"
+                }
+              `}
+            >
+              <div className="flex items-start gap-3.5 min-w-0">
+                <div
+                  className={`
+                    flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-colors
+                    ${
+                      formValues.DISCORD_BOT_ENABLED === "true"
+                        ? "border-indigo-400/40 bg-indigo-500/20 text-indigo-300"
+                        : "border-border bg-card text-muted"
+                    }
+                  `}
+                >
+                  <Bot className="h-5 w-5 shrink-0" />
+                </div>
+                <div className="space-y-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm sm:text-base font-bold text-foreground">
+                      {t("discordBotEnabledTitle")}
+                    </h3>
+                    <span
+                      className={`
+                        inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-semibold tracking-wide
+                        ${
+                          formValues.DISCORD_BOT_ENABLED === "true"
+                            ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
+                            : "bg-slate-500/10 text-muted border border-border"
+                        }
+                      `}
+                    >
+                      {formValues.DISCORD_BOT_ENABLED === "true" ? t("enabled") : t("disabled")}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted leading-relaxed">
+                    {t("discordBotEnabledDesc")}
+                  </p>
+                </div>
+              </div>
+
+              {/* Toggle Switch */}
+              <div
+                className={`
+                  relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-300 mt-1
+                  ${
+                    formValues.DISCORD_BOT_ENABLED === "true"
+                      ? "bg-indigo-500"
+                      : "bg-slate-700"
+                  }
+                `}
+              >
+                <span
+                  className={`
+                    inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 shadow-md
+                    ${
+                      formValues.DISCORD_BOT_ENABLED === "true"
+                        ? "translate-x-6"
+                        : "translate-x-1"
+                    }
+                  `}
+                />
+              </div>
+            </div>
+
+            {/* Server ID & Bot Token Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start pt-2">
+              <div>
+                <Input
+                  label={t("discordGuildIdTitle")}
+                  type="text"
+                  placeholder={t("discordGuildIdPlaceholder")}
+                  value={formValues.DISCORD_GUILD_ID}
+                  onChange={(e) => handleChange("DISCORD_GUILD_ID", e.target.value)}
+                  disabled={batchUpdate.isPending}
+                  error={errors.DISCORD_GUILD_ID}
+                  helperText={t("discordGuildIdDesc")}
+                />
+              </div>
+
+              {/* Bot Token with Reveal & Copy */}
+              <div className="space-y-1.5">
+                <label className="text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center justify-between">
+                  <span>{t("discordBotTokenTitle")}</span>
+                  {formValues.DISCORD_BOT_TOKEN && (
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setShowBotToken(!showBotToken)}
+                        className="inline-flex items-center gap-1 text-[11px] text-muted hover:text-foreground transition-colors px-1.5 py-0.5 rounded hover:bg-card-hover"
+                        title={showBotToken ? t("discordHideToken") : t("discordShowToken")}
+                      >
+                        {showBotToken ? (
+                          <>
+                            <EyeOff className="h-3 w-3" />
+                            <span>{t("discordHideToken")}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Eye className="h-3 w-3" />
+                            <span>{t("discordShowToken")}</span>
+                          </>
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCopyToken}
+                        className="inline-flex items-center gap-1 text-[11px] text-indigo-400 hover:text-indigo-300 transition-colors px-1.5 py-0.5 rounded hover:bg-indigo-500/10"
+                        title="Copy Token"
+                      >
+                        {copiedToken ? (
+                          <>
+                            <Check className="h-3 w-3 text-emerald-400" />
+                            <span className="text-emerald-400">Copied</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="h-3 w-3" />
+                            <span>Copy</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+                </label>
+                <div className="relative">
+                  <Input
+                    type={showBotToken ? "text" : "password"}
+                    placeholder={t("discordBotTokenPlaceholder")}
+                    value={formValues.DISCORD_BOT_TOKEN}
+                    onChange={(e) => handleChange("DISCORD_BOT_TOKEN", e.target.value)}
+                    disabled={batchUpdate.isPending}
+                    error={errors.DISCORD_BOT_TOKEN}
+                    helperText={t("discordBotTokenDesc")}
+                    className="font-mono text-xs pr-10"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Auto Webhook Provisioning Notice Box */}
+            <div className="pt-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 rounded-2xl border border-indigo-500/25 bg-indigo-500/10 p-4 sm:p-5 backdrop-blur-md">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-400">
+                    <Sparkles className="h-4 w-4" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs sm:text-sm font-semibold text-foreground">
+                      {t("discordAutoWebhookTitle")}
+                    </p>
+                    <p className="text-xs text-muted leading-relaxed">
+                      {t("discordAutoWebhookNotice")}
+                    </p>
+                  </div>
+                </div>
+
+                <Link
+                  href="/admin/discord"
+                  className="inline-flex items-center gap-1.5 shrink-0 self-start sm:self-center rounded-xl border border-indigo-500/30 bg-indigo-500/15 hover:bg-indigo-500/25 px-3.5 py-2 text-xs font-semibold text-indigo-300 transition-all shadow-sm"
+                >
+                  <span>{t("discordManageWebhooksLink")}</span>
+                  <ExternalLink className="h-3.5 w-3.5 shrink-0" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Security Notice Box */}
+            <div className="flex items-center gap-2.5 rounded-xl border border-border bg-card/60 p-3.5 text-xs text-muted">
+              <ShieldCheck className="h-4 w-4 shrink-0 text-indigo-400" />
+              <span>{t("discordSecurityNotice")}</span>
             </div>
           </div>
         </MetalCard>

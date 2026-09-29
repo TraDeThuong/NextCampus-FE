@@ -13,6 +13,7 @@
       "regulations": "Regulations",
       "roles": "Roles & Permissions",
       "settings": "Settings",
+      "discord": "Discord Integration",
       "activityLogs": "Activity Logs",
       "profile": "Profile"
     }
@@ -56,6 +57,7 @@
       "regulations": "Regulations",
       "roles": "Roles & Permissions",
       "settings": "Settings",
+      "discord": "Discord Integration",
       "activityLogs": "Activity Logs",
       "profile": "Profile"
     },

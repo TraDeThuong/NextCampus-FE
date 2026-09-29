@@ -20,6 +20,8 @@ export interface User {
   roleId: string;
   isActive: boolean;
   avatarUrl: string | null;
+  discordUserId?: string | null;
+  discordUsername?: string | null;
   createdAt: string;
   updatedAt: string;
   role: UserRole;

@@ -15,6 +15,7 @@ export interface Intern {
     position: { id: string; name: string } | null;
     startDate: string;
     duration: number;
+    discordUserId: string | null;
     discordUsername: string | null;
     discordRoleGranted: boolean;
     status: "ACTIVE" | "COMPLETED" | "DROPPED";
@@ -109,7 +110,8 @@ export interface UpdateInternPayload {
 
 export interface UpdateMeInternPayload {
     phone?: string;
-    departmentId?: string;
-    positionId?: string;
+    discordUserId?: string | null;
     discordUsername?: string | null;
+    university?: string | null;
+    major?: string | null;
 }
