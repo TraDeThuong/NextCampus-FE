@@ -79,8 +79,24 @@ export default function OnboardingRow({ invite }: Props) {
     const application = invite.application;
     const appStatus = application?.status ?? null;
     const canAssign = can("APPLICATION_ASSIGN") && invite.status === "USED" && appStatus === "PENDING";
-    const assignedDepartmentId = application?.department?.id ?? null;
-    const assignedPositionId = application?.position?.id ?? null;
+
+    const [localDeptId, setLocalDeptId] = useState<string | null | undefined>(undefined);
+    const [localPosId, setLocalPosId] = useState<string | null | undefined>(undefined);
+
+    useEffect(() => {
+        setLocalDeptId(undefined);
+        setLocalPosId(undefined);
+    }, [invite]);
+
+    const assignedDepartmentId =
+        localDeptId !== undefined
+            ? localDeptId
+            : (application?.department?.id ?? (application as any)?.departmentId ?? null);
+
+    const assignedPositionId =
+        localPosId !== undefined
+            ? localPosId
+            : (application?.position?.id ?? (application as any)?.positionId ?? null);
 
     const { data: departmentData } = useDepartments();
     const departments = departmentData?.data ?? [];
@@ -202,18 +218,36 @@ export default function OnboardingRow({ invite }: Props) {
 
     function handleDepartmentChange(departmentId: string | null) {
         if (!application || !canAssign) return;
-        assignApplication({
-            id: application.id,
-            payload: { departmentId, positionId: null },
-        });
+        setLocalDeptId(departmentId);
+        setLocalPosId(null);
+        assignApplication(
+            {
+                id: application.id,
+                payload: { departmentId, positionId: null },
+            },
+            {
+                onError: () => {
+                    setLocalDeptId(undefined);
+                    setLocalPosId(undefined);
+                },
+            },
+        );
     }
 
     function handlePositionChange(positionId: string | null) {
         if (!application || !canAssign || !assignedDepartmentId) return;
-        assignApplication({
-            id: application.id,
-            payload: { departmentId: assignedDepartmentId, positionId },
-        });
+        setLocalPosId(positionId);
+        assignApplication(
+            {
+                id: application.id,
+                payload: { departmentId: assignedDepartmentId, positionId },
+            },
+            {
+                onError: () => {
+                    setLocalPosId(undefined);
+                },
+            },
+        );
     }
 
     function handleCopyLink() {

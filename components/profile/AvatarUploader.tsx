@@ -24,6 +24,7 @@ export default function AvatarUploader({
     const [preview, setPreview] = useState<string | null>(
         profile.avatarUrl ?? null,
     );
+    const [avatarError, setAvatarError] = useState(false);
 
     const handleChooseFile = () => {
         inputRef.current?.click();
@@ -47,7 +48,7 @@ export default function AvatarUploader({
         }
 
         const previewUrl = URL.createObjectURL(file);
-
+        setAvatarError(false);
         setPreview(previewUrl);
 
         uploadAvatar(file);
@@ -73,16 +74,18 @@ export default function AvatarUploader({
                 <div className="flex flex-col items-center">
                     <div className="relative">
                         <div className="relative h-40 w-40 overflow-hidden rounded-full border-4 border-border bg-slate-100 dark:border-white/10 dark:bg-slate-900 shadow-md">
-                            {preview ? (
+                            {preview && !avatarError ? (
                                 <Image
                                     src={preview}
                                     alt={profile.fullName}
                                     fill
                                     sizes="160px"
+                                    unoptimized
+                                    onError={() => setAvatarError(true)}
                                     className="object-cover"
                                 />
                             ) : (
-                                <div className="flex h-full w-full items-center justify-center text-5xl font-bold text-muted-foreground">
+                                <div className="flex h-full w-full items-center justify-center text-5xl font-bold text-muted-foreground select-none">
                                     {avatarLetter}
                                 </div>
                             )}

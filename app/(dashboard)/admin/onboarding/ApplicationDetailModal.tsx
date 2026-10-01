@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { toast } from "react-hot-toast";
@@ -154,12 +154,28 @@ export default function ApplicationDetail({ id, isModal, onClose }: Props) {
   const app = invite?.application;
   const appStatus = app?.status ?? null;
   const canAssign = invite?.status === "USED" && appStatus === "PENDING";
-  const assignedDepartmentId = app?.department?.id ?? null;
-  const assignedPositionId = app?.position?.id ?? null;
+
+  const [localDeptId, setLocalDeptId] = useState<string | null | undefined>(undefined);
+  const [localPosId, setLocalPosId] = useState<string | null | undefined>(undefined);
+
+  useEffect(() => {
+    setLocalDeptId(undefined);
+    setLocalPosId(undefined);
+  }, [data]);
+
+  const assignedDepartmentId =
+    localDeptId !== undefined
+      ? localDeptId
+      : (app?.department?.id ?? (app as any)?.departmentId ?? null);
+
+  const assignedPositionId =
+    localPosId !== undefined
+      ? localPosId
+      : (app?.position?.id ?? (app as any)?.positionId ?? null);
 
   const { data: departmentData } = useDepartments();
   const departments = departmentData?.data ?? [];
-  const { data: positionData } = usePositions(
+  const { data: positionData, isLoading: loadingPositions } = usePositions(
     assignedDepartmentId ?? undefined,
   );
   const positions = positionData?.data ?? [];
@@ -178,18 +194,36 @@ export default function ApplicationDetail({ id, isModal, onClose }: Props) {
 
   function handleDepartmentChange(departmentId: string | null) {
     if (!app || !canAssign) return;
-    assignApplication({
-      id: app.id,
-      payload: { departmentId, positionId: null },
-    });
+    setLocalDeptId(departmentId);
+    setLocalPosId(null);
+    assignApplication(
+      {
+        id: app.id,
+        payload: { departmentId, positionId: null },
+      },
+      {
+        onError: () => {
+          setLocalDeptId(undefined);
+          setLocalPosId(undefined);
+        },
+      }
+    );
   }
 
   function handlePositionChange(positionId: string | null) {
     if (!app || !canAssign || !assignedDepartmentId) return;
-    assignApplication({
-      id: app.id,
-      payload: { departmentId: assignedDepartmentId, positionId },
-    });
+    setLocalPosId(positionId);
+    assignApplication(
+      {
+        id: app.id,
+        payload: { departmentId: assignedDepartmentId, positionId },
+      },
+      {
+        onError: () => {
+          setLocalPosId(undefined);
+        },
+      }
+    );
   }
 
   function handleRevoke(onCloseModal?: () => void) {

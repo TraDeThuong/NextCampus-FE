@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
@@ -21,6 +22,11 @@ export default function Header({ role, onMenuClick }: HeaderProps) {
     const t = useTranslations();
     const { state } = useAuth();
     const { logoutMutate, isLoading } = useLogout();
+    const [avatarError, setAvatarError] = useState(false);
+
+    useEffect(() => {
+        setAvatarError(false);
+    }, [state.user?.avatarUrl]);
 
     const handleLogout = () => {
         logoutMutate();
@@ -71,17 +77,25 @@ export default function Header({ role, onMenuClick }: HeaderProps) {
             title={state.user?.fullName ?? "User"}
             className="flex items-center gap-2 md:gap-3 rounded-full border border-slate-200 bg-slate-100/80 hover:bg-slate-200/80 text-foreground dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10 p-1 md:px-3 md:py-2 backdrop-blur-lg transition cursor-pointer max-w-fit md:max-w-[260px] min-w-0"
           >
-            {state.user?.avatarUrl ? (
+            {state.user?.avatarUrl && !avatarError ? (
               <Image
                 src={state.user.avatarUrl}
                 alt={state.user.fullName ?? "User"}
                 width={40}
                 height={40}
+                unoptimized
+                onError={() => setAvatarError(true)}
                 className="h-8 w-8 md:h-10 md:w-10 shrink-0 rounded-full object-cover"
               />
             ) : (
-              <div className="flex h-8 w-8 md:h-10 md:w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-primary-main to-primary-light">
-                <User className="h-4 w-4 md:h-5 md:w-5 text-white" />
+              <div className="flex h-8 w-8 md:h-10 md:w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-primary-main to-primary-light shadow-sm">
+                {state.user?.fullName ? (
+                  <span className="text-xs md:text-sm font-bold text-white uppercase select-none">
+                    {state.user.fullName.trim().charAt(0)}
+                  </span>
+                ) : (
+                  <User className="h-4 w-4 md:h-5 md:w-5 text-white" />
+                )}
               </div>
             )}
             <span className="hidden md:inline-flex items-center min-w-0">

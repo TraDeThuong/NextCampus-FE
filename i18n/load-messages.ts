@@ -124,6 +124,10 @@ export async function loadLocaleMessages(
   const absences = (await import(`../messages/${locale}/absences.json`)).default;
   deepMerge(files, absences);
 
+  // 19. Discord Webhook Automation Hub
+  const discord = (await import(`../messages/${locale}/discord.json`)).default;
+  deepMerge(files, discord);
+
   const messages = files as AbstractIntlMessages;
 
   if (shouldCacheMessages) {
