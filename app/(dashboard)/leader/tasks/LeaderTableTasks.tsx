@@ -70,11 +70,14 @@ export default function LeaderTableTasks() {
     router.push(`${pathname}?${p.toString()}`, { scroll: false });
   };
 
-  const handleOpenReviewExtension = (aId: string) => {
-    const p = new URLSearchParams(searchParams.toString());
-    p.set("reviewExtensionAssignmentId", aId);
-    router.push(`${pathname}?${p.toString()}`, { scroll: false });
-  };
+  const handleOpenReviewExtension = useCallback(
+    (aId: string) => {
+      const p = new URLSearchParams(searchParams.toString());
+      p.set("reviewExtensionAssignmentId", aId);
+      router.push(`${pathname}?${p.toString()}`, { scroll: false });
+    },
+    [pathname, router, searchParams],
+  );
 
   const unblockTask = useUnblockTaskAssignment();
   const handleUnblockTask = (aId: string) => {
@@ -97,6 +100,7 @@ export default function LeaderTableTasks() {
     const deadlineFrom = searchParams.get("deadlineFrom");
     const deadlineTo = searchParams.get("deadlineTo");
     const page = searchParams.get("page");
+    const tab = searchParams.get("tab");
     const limit = searchParams.get("limit");
     const sortBy = searchParams.get("sortBy");
     const order = searchParams.get("order");
@@ -105,7 +109,11 @@ export default function LeaderTableTasks() {
     if (code) p.code = code;
     if (owner) p.owner = owner;
     if (priority) p.priority = priority as TaskQueryParams["priority"];
-    if (status) p.status = status;
+    if (status) {
+      p.status = status;
+    } else if (tab === "extensions") {
+      p.status = "EXTENSION_PENDING";
+    }
     if (phase) p.phase = phase;
     if (module_) p.module = module_;
     if (deadlineFrom) p.deadlineFrom = deadlineFrom;
@@ -121,6 +129,26 @@ export default function LeaderTableTasks() {
 
   const { data: tasksData, isLoading: tasksLoading, refetch: tasksRefetch, isFetching: tasksFetching } = useTasks(params);
   const tasks = useMemo(() => extractTasks(tasksData?.data), [tasksData]);
+
+  const requestId = searchParams.get("requestId");
+  const hasAutoOpenedExtensionRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (requestId && tasks.length > 0 && hasAutoOpenedExtensionRef.current !== requestId) {
+      const matched = tasks.find((t) => {
+        const assignment = t.assignment as { id?: string; extensionRequests?: Array<{ id: string }> } | undefined;
+        return (
+          assignment?.id &&
+          (assignment.extensionRequests?.some((r) => r.id === requestId) || assignment.id === requestId)
+        );
+      });
+      if (matched?.assignment?.id) {
+        hasAutoOpenedExtensionRef.current = requestId;
+        handleOpenReviewExtension(matched.assignment.id);
+      }
+    }
+  }, [requestId, tasks, handleOpenReviewExtension]);
+
   const meta =
     tasksData?.meta ??
     (tasksData?.data && typeof tasksData.data === "object" && "meta" in tasksData.data
