@@ -142,7 +142,7 @@ export default function DiscordRoleSyncModal({
               className="
                 inline-flex items-center gap-2 rounded-xl
                 h-10 px-5 text-xs font-semibold
-                bg-gradient-to-r from-indigo-500 to-cyan-500 text-white
+                bg-linear-to-r from-indigo-500 to-cyan-500 text-white
                 shadow-[0_0_15px_rgba(99,102,241,0.3)]
                 hover:shadow-[0_0_25px_rgba(99,102,241,0.5)]
                 active:scale-95 transition-all
