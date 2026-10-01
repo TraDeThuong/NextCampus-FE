@@ -281,10 +281,12 @@ export default function ReportDetail({
 
       {/* Work Done / Content */}
       <div>
-        <h4 className="text-xs font-semibold text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 mb-2">
           <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-          {t("completedTasks")}
-        </h4>
+          <h4 className="text-xs font-semibold text-muted uppercase tracking-wider">
+            {t("completedTasks")}
+          </h4>
+        </div>
         <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 text-sm text-foreground leading-relaxed whitespace-pre-wrap">
           {report.content}
         </div>
@@ -293,10 +295,12 @@ export default function ReportDetail({
       {/* Blockers / Khó khăn vướng mắc */}
       {report.blockers && (
         <div>
-          <h4 className="text-xs font-semibold text-amber-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 mb-2">
             <AlertTriangle className="h-3.5 w-3.5 text-amber-400 shrink-0" />
-            {t("blockers")}
-          </h4>
+            <h4 className="text-xs font-semibold text-amber-400 uppercase tracking-wider">
+              {t("blockers")}
+            </h4>
+          </div>
           <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm text-amber-200/90 leading-relaxed whitespace-pre-wrap">
             {report.blockers}
           </div>
@@ -306,10 +310,12 @@ export default function ReportDetail({
       {/* Next Plan / Kế hoạch ngày mai */}
       {report.nextPlan && (
         <div>
-          <h4 className="text-xs font-semibold text-cyan-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 mb-2">
             <Compass className="h-3.5 w-3.5 text-cyan-400 shrink-0" />
-            {t("nextPlan")}
-          </h4>
+            <h4 className="text-xs font-semibold text-cyan-400 uppercase tracking-wider">
+              {t("nextPlan")}
+            </h4>
+          </div>
           <div className="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-4 text-sm text-cyan-200/90 leading-relaxed whitespace-pre-wrap">
             {report.nextPlan}
           </div>
@@ -393,10 +399,12 @@ export default function ReportDetail({
       {/* Leader Feedback Section */}
       <div className="pt-4 border-t border-white/5">
         <div className="flex items-center justify-between mb-3">
-          <h4 className="text-xs font-semibold text-muted uppercase tracking-wider flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5">
             <MessageSquare className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
-            {t("feedbackSectionTitle")}
-          </h4>
+            <h4 className="text-xs font-semibold text-muted uppercase tracking-wider">
+              {t("feedbackSectionTitle")}
+            </h4>
+          </div>
           {isLeader && report.feedback && !isEditingFeedback && (
             <button
               type="button"

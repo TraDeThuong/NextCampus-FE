@@ -672,7 +672,7 @@ export default function AdminStatsOverview() {
             </div>
 
             <div className="mt-6 flex-1">
-              <Table columns="2.2fr 1.3fr 1fr 2.5fr 1.2fr">
+              <Table columns="2.2fr 1.3fr 1fr 2.5fr 1.2fr" className="border-0 shadow-none rounded-none bg-transparent">
                 <Table.Header>
                   <span>{t("admin.dashboard.colLeader")}</span>
                   <span>{t("admin.dashboard.colDepartment")}</span>

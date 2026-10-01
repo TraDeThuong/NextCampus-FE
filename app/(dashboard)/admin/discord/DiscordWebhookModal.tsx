@@ -277,7 +277,7 @@ function DiscordWebhookFormContent({
               type="button"
               disabled={isPreTesting}
               onClick={handlePreSaveTest}
-              className="inline-flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 transition cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 font-medium transition cursor-pointer"
             >
               {isPreTesting ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -338,7 +338,7 @@ function DiscordWebhookFormContent({
           type="button"
           onClick={onClose}
           disabled={isSaving}
-          className="px-4 py-2 rounded-xl border border-border bg-card hover:bg-card/80 text-sm font-medium text-foreground transition active:scale-95 cursor-pointer disabled:opacity-50"
+          className="h-[42px] sm:h-[46px] px-5 rounded-xl border border-border bg-card hover:bg-card/80 text-sm font-medium text-foreground transition active:scale-95 cursor-pointer disabled:opacity-50"
         >
           {t("modal.cancelButton")}
         </button>
@@ -346,7 +346,7 @@ function DiscordWebhookFormContent({
           type="submit"
           disabled={isSaving}
           className="
-            inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold
+            inline-flex items-center justify-center gap-2 h-[42px] sm:h-[46px] px-5 rounded-xl text-sm font-semibold
             bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 text-white
             hover:brightness-110 active:scale-95 transition-all
             shadow-[0_0_20px_rgba(99,102,241,0.3)]

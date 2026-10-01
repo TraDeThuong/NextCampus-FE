@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { toast } from "react-hot-toast";
@@ -158,24 +158,26 @@ export default function ApplicationDetail({ id, isModal, onClose }: Props) {
   const [localDeptId, setLocalDeptId] = useState<string | null | undefined>(undefined);
   const [localPosId, setLocalPosId] = useState<string | null | undefined>(undefined);
 
-  useEffect(() => {
+  const [prevDataId, setPrevDataId] = useState(data?.id);
+  if (data?.id !== prevDataId) {
+    setPrevDataId(data?.id);
     setLocalDeptId(undefined);
     setLocalPosId(undefined);
-  }, [data]);
+  }
 
   const assignedDepartmentId =
     localDeptId !== undefined
       ? localDeptId
-      : (app?.department?.id ?? (app as any)?.departmentId ?? null);
+      : (app?.department?.id ?? (app as Record<string, unknown>)?.departmentId as string | null | undefined ?? null);
 
   const assignedPositionId =
     localPosId !== undefined
       ? localPosId
-      : (app?.position?.id ?? (app as any)?.positionId ?? null);
+      : (app?.position?.id ?? (app as Record<string, unknown>)?.positionId as string | null | undefined ?? null);
 
   const { data: departmentData } = useDepartments();
   const departments = departmentData?.data ?? [];
-  const { data: positionData, isLoading: loadingPositions } = usePositions(
+  const { data: positionData } = usePositions(
     assignedDepartmentId ?? undefined,
   );
   const positions = positionData?.data ?? [];

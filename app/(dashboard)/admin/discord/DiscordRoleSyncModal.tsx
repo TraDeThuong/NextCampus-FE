@@ -4,24 +4,18 @@ import React, { useState, useMemo } from "react";
 import {
   RefreshCw,
   Loader2,
-  CheckCircle2,
-  XCircle,
   AlertTriangle,
   Mail,
   Send,
-  Users,
-  Search,
   ShieldCheck,
-  RotateCcw,
 } from "lucide-react";
-import { SiDiscord } from "react-icons/si";
 import { useTranslations } from "next-intl";
 import { toast } from "react-hot-toast";
 import Modal from "@/components/ui/Modal";
 import Badge from "@/components/ui/Badge";
 import { useBatchSyncRoles, useRemindUnlinkedDiscord } from "@/hooks/discord";
 import { useRemindInternDiscord } from "@/hooks/intern/useRemindInternDiscord";
-import type { BatchSyncRoleDetail, BatchSyncRolesResponse } from "@/types/discord";
+import type { BatchSyncRolesResponse } from "@/types/discord";
 
 interface DiscordRoleSyncModalProps {
   isOpen: boolean;
@@ -53,8 +47,10 @@ export default function DiscordRoleSyncModal({
           revoked: res.data.revokedCount,
         }),
       );
-    } catch (err: any) {
-      toast.error(err?.message || t("syncRolesFailed"));
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : t("syncRolesFailed");
+      toast.error(message);
     }
   };
 
@@ -290,17 +286,16 @@ export default function DiscordRoleSyncModal({
                 ))}
               </div>
 
-              <div className="relative w-full sm:w-64">
-                <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted" />
+              <div className="w-full sm:w-64">
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t("searchInternPlaceholder")}
                   className="
-                    h-9 w-full rounded-xl border border-border bg-card/60 pl-8 pr-3 text-xs
-                    text-foreground placeholder:text-muted
-                    focus:outline-none focus:ring-2 focus:ring-indigo-400
+                    h-9 w-full rounded-xl border border-border bg-card px-3.5 text-xs
+                    text-foreground placeholder:text-muted/60
+                    focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/20 transition-all
                   "
                 />
               </div>

@@ -74,7 +74,7 @@ export default function TaskGroupStats() {
         return (
           <MetalCard
             key={card.title}
-            className={`p-4 sm:p-5 lg:p-6 ${
+            className={`group p-4 sm:p-5 lg:p-6 ${
               isFirstAndOdd ? "col-span-2 md:col-span-1" : ""
             }`}
           >

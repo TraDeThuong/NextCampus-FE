@@ -47,10 +47,10 @@ export default function DiscordDeleteModal({
       size="sm"
     >
       <div className="space-y-4">
-        <div className="flex items-start gap-3.5 p-4 rounded-2xl border border-rose-500/20 bg-rose-500/10">
-          <AlertTriangle className="h-6 w-6 text-rose-400 shrink-0 mt-0.5" />
+        <div className="flex items-start gap-3.5 p-4 rounded-2xl border border-rose-200 bg-rose-50/80 dark:border-rose-500/20 dark:bg-rose-500/10">
+          <AlertTriangle className="h-6 w-6 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <p className="text-sm font-semibold text-rose-300">
+            <p className="text-sm font-semibold text-rose-700 dark:text-rose-300">
               {t("modal.deleteConfirmTitle")}
             </p>
             <p className="text-xs text-muted leading-relaxed">
@@ -87,7 +87,7 @@ export default function DiscordDeleteModal({
             type="button"
             onClick={onClose}
             disabled={deleteMutation.isPending}
-            className="px-4 py-2 rounded-xl border border-border bg-card hover:bg-card/80 text-sm font-medium text-foreground transition active:scale-95 cursor-pointer disabled:opacity-50"
+            className="h-[42px] sm:h-[46px] px-5 rounded-xl border border-border bg-card hover:bg-card/80 text-sm font-medium text-foreground transition active:scale-95 cursor-pointer disabled:opacity-50"
           >
             {t("modal.cancelButton")}
           </button>
@@ -96,8 +96,8 @@ export default function DiscordDeleteModal({
             disabled={deleteMutation.isPending}
             onClick={handleDelete}
             className="
-              inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold
-              bg-rose-500 hover:bg-rose-600 text-white transition-all
+              inline-flex items-center justify-center gap-2 h-[42px] sm:h-[46px] px-5 rounded-xl text-sm font-semibold
+              bg-rose-600 hover:bg-rose-700 dark:bg-rose-500 dark:hover:bg-rose-600 text-white transition-all
               shadow-[0_0_15px_rgba(244,63,94,0.3)]
               disabled:opacity-50 disabled:pointer-events-none cursor-pointer active:scale-95
             "

@@ -131,7 +131,7 @@ export default function DepartmentRoutingTable({
           <button
             type="button"
             onClick={() => onOpenCreateForDept(dept.id, purpose)}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-dashed border-border/80 bg-card/40 hover:bg-card text-[11px] font-medium text-muted hover:text-foreground transition active:scale-95 cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-dashed border-border/80 bg-card/40 hover:bg-card hover:border-indigo-400/50 text-[11px] font-medium text-muted hover:text-indigo-600 dark:hover:text-indigo-300 transition active:scale-95 cursor-pointer"
           >
             <Plus className="h-3 w-3" />
             <span>{t("globalSection.setupNow")}</span>
@@ -163,7 +163,9 @@ export default function DepartmentRoutingTable({
               onClick={() => handleTestPing(config)}
               title={t("tooltips.testPing")}
               className="
-                p-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20
+                p-1.5 rounded-lg border border-indigo-300 bg-indigo-100/80 text-indigo-700
+                hover:bg-indigo-200/80 dark:border-indigo-500/20 dark:bg-indigo-500/10
+                dark:text-indigo-400 dark:hover:bg-indigo-500/20
                 disabled:opacity-40 disabled:cursor-not-allowed transition active:scale-95 cursor-pointer
               "
             >
@@ -177,7 +179,7 @@ export default function DepartmentRoutingTable({
               type="button"
               onClick={() => onOpenEdit(config)}
               title={t("tooltips.edit")}
-              className="p-1 rounded-lg border border-border/60 hover:bg-card text-muted hover:text-foreground transition active:scale-95 cursor-pointer"
+              className="p-1.5 rounded-lg border border-border bg-card/60 hover:bg-card text-muted hover:text-foreground hover:border-border-strong transition active:scale-95 cursor-pointer"
             >
               <Edit2 className="h-3.5 w-3.5" />
             </button>
@@ -185,7 +187,7 @@ export default function DepartmentRoutingTable({
               type="button"
               onClick={() => onOpenDelete(config)}
               title={t("tooltips.delete")}
-              className="p-1 rounded-lg border border-rose-500/20 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition active:scale-95 cursor-pointer"
+              className="p-1.5 rounded-lg border border-rose-300 bg-rose-100/80 text-rose-700 hover:bg-rose-200/80 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-400 dark:hover:bg-rose-500/20 transition active:scale-95 cursor-pointer"
             >
               <Trash2 className="h-3.5 w-3.5" />
             </button>
@@ -221,7 +223,10 @@ export default function DepartmentRoutingTable({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-bold text-foreground">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 shrink-0">
+              <Building2 className="h-3.5 w-3.5" />
+            </div>
+            <h2 className="text-lg font-bold text-foreground metal-text">
               {t("departmentSection.title")}
             </h2>
             <Badge variant="primary" size="sm">
@@ -233,14 +238,14 @@ export default function DepartmentRoutingTable({
           </p>
         </div>
 
-        {/* Search input with px-5 py-3 without internal magnifying glass icon */}
+        {/* Search input with px-5 py-3 without internal magnifying glass icon (Rule 45 & 47) */}
         <div className="w-full sm:w-80">
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={t("departmentSection.searchPlaceholder")}
-            className="w-full rounded-2xl border border-border bg-card px-5 py-3 text-sm text-foreground placeholder:text-muted/60 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/20 transition-all shadow-xs"
+            className="w-full h-[42px] sm:h-[46px] rounded-2xl border border-border bg-card px-5 text-sm text-foreground shadow-glass backdrop-blur-xl outline-none transition-all duration-300 hover:border-border-strong focus:border-indigo-400 focus:shadow-[0_0_28px_rgba(99,102,241,0.18)] placeholder:text-muted"
           />
         </div>
       </div>
@@ -357,7 +362,8 @@ export default function DepartmentRoutingTable({
                       title={t("departmentSection.syncDiscordTooltip")}
                       className="
                         inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl
-                        border border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400
+                        border border-cyan-300 bg-cyan-100/80 text-cyan-700 hover:bg-cyan-200/80
+                        dark:border-cyan-500/30 dark:bg-cyan-500/10 dark:text-cyan-400 dark:hover:bg-cyan-500/20
                         text-xs font-semibold shadow-xs
                         disabled:opacity-50 disabled:cursor-not-allowed
                         transition-all active:scale-95 cursor-pointer
@@ -366,7 +372,7 @@ export default function DepartmentRoutingTable({
                       {isSyncing ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       ) : (
-                        <RefreshCw className="h-3.5 w-3.5 text-cyan-400" />
+                        <RefreshCw className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" />
                       )}
                       <span>
                         {isSyncing
@@ -379,7 +385,7 @@ export default function DepartmentRoutingTable({
                       type="button"
                       onClick={() => onOpenCreateForDept(dept.id)}
                       title={t("modal.addTitle")}
-                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-indigo-500/20 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 text-xs font-medium transition active:scale-95 cursor-pointer"
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-indigo-300 bg-indigo-100/80 text-indigo-700 hover:bg-indigo-200/80 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-400 dark:hover:bg-indigo-500/20 text-xs font-medium transition active:scale-95 cursor-pointer"
                     >
                       <Plus className="h-3.5 w-3.5" />
                       <span>{t("departmentSection.actionsColumn")}</span>
