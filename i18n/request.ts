@@ -13,5 +13,6 @@ export default getRequestConfig(async () => {
   return {
     locale,
     messages: await loadLocaleMessages(locale),
+    timeZone: "Asia/Ho_Chi_Minh",
   };
 });
