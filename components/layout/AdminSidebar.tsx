@@ -18,6 +18,7 @@ import { PiBuildingOfficeLight } from "react-icons/pi";
 import { MdManageAccounts } from "react-icons/md";
 import { usePathname } from "@/i18n/navigation";
 import { MdOutlineMailOutline } from "react-icons/md";
+import { SiDiscord } from "react-icons/si";
 import { useTranslations } from "next-intl";
 import { useSidebarPrefetch } from "@/hooks/useSidebarPrefetch";
 import { useRBAC } from "@/hooks/rbac/useRBAC";
@@ -73,6 +74,7 @@ export default function AdminSidebar() {
         "CRON_JOB_READ",
         "CRON_JOB_MANAGE",
       ],                                                                                                                                                badge: undefined },
+      { name: t("admin.nav.discord"),       href: "/admin/discord",       icon: SiDiscord,            permissions: ["WEBHOOK_READ", "WEBHOOK_MANAGE", "SYSTEM_CONFIG_READ"], badge: undefined },
       { name: t("admin.nav.activityLogs"), href: "/admin/activity-logs", icon: History,              permissions: ["AUDIT_LOG_READ"],                badge: undefined },
       { name: t("admin.nav.profile"),       href: "/admin/profile",       icon: UserRoundPen,         permissions: undefined,                         badge: undefined },
     ];

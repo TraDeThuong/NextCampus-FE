@@ -1,16 +1,19 @@
 "use client";
 
 import ChangePasswordCard from "@/components/profile/ChangePasswordCard";
+import DiscordProfileCard from "@/components/profile/DiscordProfileCard";
 import ProfileActions from "@/components/profile/ProfileActions";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileInfoCard from "@/components/profile/ProfileInfoCard";
 import FullPageLoading from "@/components/ui/FullPageLoading";
 import { useProfile } from "@/hooks/profile/useProfile";
+import { useUpdateProfile } from "@/hooks/profile/useUpdateProfile";
 import { useTranslations } from "next-intl";
 
 export default function AdminProfilePage() {
     const t = useTranslations("admin.profile");
     const { profile, isLoading } = useProfile();
+    const { updateProfileAsync } = useUpdateProfile();
 
     if (isLoading) {
         return <FullPageLoading />;
@@ -31,6 +34,17 @@ export default function AdminProfilePage() {
         );
     }
 
+    const handleDiscordUpdate = async (data: {
+        discordUserId?: string | null;
+        discordUsername?: string | null;
+    }) => {
+        await updateProfileAsync({
+            fullName: profile.fullName || "",
+            discordUserId: data.discordUserId,
+            discordUsername: data.discordUsername,
+        });
+    };
+
     return (
         <div className="space-y-2">
             <h1 className="text-3xl font-bold metal-text">
@@ -43,6 +57,12 @@ export default function AdminProfilePage() {
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
                 <div className="space-y-6 xl:col-span-2">
                     <ProfileInfoCard profile={profile} />
+                    <DiscordProfileCard
+                        discordUserId={profile.discordUserId}
+                        discordUsername={profile.discordUsername}
+                        roleName={profile.role}
+                        onUpdate={handleDiscordUpdate}
+                    />
                     <ChangePasswordCard />
                 </div>
                 <div className="space-y-6">

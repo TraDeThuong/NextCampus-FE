@@ -28,6 +28,7 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
     );
 
     const inputRef = useRef<HTMLInputElement>(null);
+    const [avatarError, setAvatarError] = useState(false);
     const { uploadAvatarAsync, isPending } = useUploadAvatar();
     const [preview, setPreview] = useState<string | null>(null);
 
@@ -48,6 +49,7 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
         }
 
         const previewUrl = URL.createObjectURL(file);
+        setAvatarError(false);
         setPreview(previewUrl);
         try {
             await uploadAvatarAsync(file);
@@ -77,17 +79,19 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
                                 disabled={isPending}
                                 className="group/avatar relative h-36 w-36 sm:h-40 sm:w-40 overflow-hidden rounded-[32px] border border-border bg-card shadow-md dark:border-white/15 dark:bg-gradient-to-br dark:from-slate-700 dark:to-slate-950 dark:shadow-[0_12px_40px_rgba(0,0,0,.45)] disabled:cursor-not-allowed"
                             >
-                                {(preview || profile.avatarUrl) ? (
+                                {(preview || (profile.avatarUrl && !avatarError)) ? (
                                     <Image
                                         src={preview ?? profile.avatarUrl!}
                                         alt={profile.fullName}
                                         fill
                                         sizes="160px"
+                                        unoptimized
+                                        onError={() => setAvatarError(true)}
                                         className="object-cover transition group-hover/avatar:scale-110"
                                     />
                                 ) : (
-                                    <div className="flex h-full w-full items-center justify-center text-6xl font-bold text-slate-500 dark:text-slate-300">
-                                        {profile.fullName?.charAt(0).toUpperCase()}
+                                    <div className="flex h-full w-full items-center justify-center text-6xl font-bold text-slate-500 dark:text-slate-300 select-none">
+                                        {profile.fullName?.trim().charAt(0).toUpperCase()}
                                     </div>
                                 )}
                                 <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition group-hover/avatar:opacity-100">

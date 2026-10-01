@@ -1,16 +1,20 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import DiscordContent from "./DiscordContent";
 
-export const metadata: Metadata = {
-  title: "Tích hợp Discord",
-};
-
-export default function page() {
-  return (
-    <div>
-      <h1 className = "metal-text"> DISCORD PAGE </h1>
-      <p> Quan ly discord role </p>
-      <p> Theo doi </p>
-    </div>
-  );
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("discord");
+  return {
+    title: `${t("title")} | NexCampus`,
+    description: t("subtitle"),
+  };
 }
 
+export default function DiscordAdminPage() {
+  return (
+    <ProtectedRoute portal="admin" allowedRoles={["ADMIN"]}>
+      <DiscordContent />
+    </ProtectedRoute>
+  );
+}

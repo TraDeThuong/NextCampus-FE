@@ -71,6 +71,8 @@ export interface MeUser {
     permissions?: string[];
     isActive: boolean;
     avatarUrl: string | null;
+    discordUserId: string | null;
+    discordUsername: string | null;
     createdAt: string;
     updatedAt: string;
     intern: MeIntern | null;
@@ -111,6 +113,8 @@ export interface MessageSuccessResponse {
 // PUT /auth/me
 export interface UpdateProfilePayload {
     fullName: string;
+    discordUserId?: string | null;
+    discordUsername?: string | null;
 }
 
 export interface ChangePasswordPayload {

@@ -1,6 +1,7 @@
 "use client";
 
 import ChangePasswordCard from "@/components/profile/ChangePasswordCard";
+import DiscordProfileCard from "@/components/profile/DiscordProfileCard";
 import InternInfoCard from "@/components/profile/InternInfoCard";
 import ProfileActions from "@/components/profile/ProfileActions";
 import ProfileHeader from "@/components/profile/ProfileHeader";
@@ -8,12 +9,16 @@ import ProfileInfoCard from "@/components/profile/ProfileInfoCard";
 import FullPageLoading from "@/components/ui/FullPageLoading";
 import { useProfile } from "@/hooks/profile/useProfile";
 import { useIntern } from "@/hooks/profile/useIntern";
+import { useUpdateIntern } from "@/hooks/profile/useUpdateIntern";
 import { useTranslations } from "next-intl";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function InternProfilePage() {
     const t = useTranslations("intern.profile");
+    const queryClient = useQueryClient();
     const { profile, isLoading: profileLoading } = useProfile();
     const { intern, isLoading: internLoading } = useIntern();
+    const updateInternMutation = useUpdateIntern();
 
     if (profileLoading || internLoading) return <FullPageLoading />;
 
@@ -28,6 +33,20 @@ export default function InternProfilePage() {
         );
     }
 
+    const handleDiscordUpdate = async (data: {
+        discordUserId?: string | null;
+        discordUsername?: string | null;
+    }) => {
+        // mutateAsync thay vì dùng onSuccess/onError trong hook — card tự xử lý toast
+        await updateInternMutation.mutateAsync(data, {
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: ["my-intern"] });
+            },
+            // Silence hook's default error toast; DiscordProfileCard handles it
+            onError: () => {},
+        });
+    };
+
     return (
         <div className="space-y-2">
             <h1 className="text-3xl font-bold metal-text">{t("title")}</h1>
@@ -37,6 +56,12 @@ export default function InternProfilePage() {
                 <div className="space-y-6 xl:col-span-2">
                     <ProfileInfoCard profile={profile} />
                     {intern && <InternInfoCard intern={intern} />}
+                    {intern && (
+                        <DiscordProfileCard
+                            intern={intern}
+                            onUpdate={handleDiscordUpdate}
+                        />
+                    )}
                     <ChangePasswordCard />
                 </div>
                 <div className="space-y-6"><ProfileActions /></div>

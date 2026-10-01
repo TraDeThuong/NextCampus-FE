@@ -22,7 +22,7 @@ export default function OnboardingPageContent() {
   const t = useTranslations();
   const searchParams = useSearchParams();
 
-  const id = searchParams.get("Id");
+  const id = searchParams.get("Id") || searchParams.get("id");
   const view = searchParams.get("view");
 
   const content = (() => {
