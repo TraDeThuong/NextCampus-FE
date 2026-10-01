@@ -229,10 +229,12 @@ function MaintenanceFormView({ config }: MaintenanceFormViewProps) {
       <MetalCard className="p-6">
         <form onSubmit={handleSaveConfig} className="space-y-6">
           <div className="border-b border-border/40 pb-3">
-            <h4 className="text-base font-semibold text-foreground flex items-center gap-2">
-              <Shield className="h-4 w-4 text-primary-light" />
-              {t("saveConfig")}
-            </h4>
+            <div className="flex items-center gap-2">
+              <Shield className="h-4 w-4 text-primary-light shrink-0" />
+              <h4 className="text-base font-semibold text-foreground">
+                {t("saveConfig")}
+              </h4>
+            </div>
           </div>
 
           {/* Status Mode Select (Buttons) */}

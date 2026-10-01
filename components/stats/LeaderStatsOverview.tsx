@@ -464,7 +464,7 @@ export default function LeaderStatsOverview() {
               </div>
 
               <div className="mt-6">
-                <Table columns="2fr 1.8fr 1fr 1.2fr 1.2fr">
+                <Table columns="2fr 1.8fr 1fr 1.2fr 1.2fr" className="border-0 shadow-none rounded-none bg-transparent">
                   <Table.Header>
                     <span>{t("colIntern")}</span>
                     <span>{t("colTaskProgress")}</span>

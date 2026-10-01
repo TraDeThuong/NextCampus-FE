@@ -83,20 +83,22 @@ export default function OnboardingRow({ invite }: Props) {
     const [localDeptId, setLocalDeptId] = useState<string | null | undefined>(undefined);
     const [localPosId, setLocalPosId] = useState<string | null | undefined>(undefined);
 
-    useEffect(() => {
+    const [prevInviteId, setPrevInviteId] = useState(invite.id);
+    if (invite.id !== prevInviteId) {
+        setPrevInviteId(invite.id);
         setLocalDeptId(undefined);
         setLocalPosId(undefined);
-    }, [invite]);
+    }
 
     const assignedDepartmentId =
         localDeptId !== undefined
             ? localDeptId
-            : (application?.department?.id ?? (application as any)?.departmentId ?? null);
+            : (application?.department?.id ?? (application as Record<string, unknown>)?.departmentId as string | null | undefined ?? null);
 
     const assignedPositionId =
         localPosId !== undefined
             ? localPosId
-            : (application?.position?.id ?? (application as any)?.positionId ?? null);
+            : (application?.position?.id ?? (application as Record<string, unknown>)?.positionId as string | null | undefined ?? null);
 
     const { data: departmentData } = useDepartments();
     const departments = departmentData?.data ?? [];

@@ -29,7 +29,7 @@ export default function SquadOverviewBanner({ group, tasks }: SquadOverviewBanne
   }, [tasks]);
 
   return (
-    <MetalCard className="p-6">
+    <MetalCard className="p-6 group transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:hover:shadow-indigo-950/20">
       <div className="space-y-5">
         {/* Header: Group info + Department */}
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">

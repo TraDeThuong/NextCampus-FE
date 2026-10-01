@@ -807,7 +807,7 @@ function TaskListCard({ assignments }: { assignments: TaskAssignment[] }) {
                         </p>
                     </div>
                 ) : (
-                    <Table columns={TASK_COLUMNS}>
+                    <Table columns={TASK_COLUMNS} className="border-0 shadow-none rounded-none bg-transparent">
                         <Table.Header>
                             <div>{t("admin.interns.details.colTaskCode")}</div>
                             <div>{t("admin.interns.details.colTaskTitle")}</div>

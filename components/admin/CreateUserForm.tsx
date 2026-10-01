@@ -3,6 +3,10 @@
 import React, { useState } from "react";
 import { useCreateUser } from "@/hooks/users/useCreateUser";
 import { useRoles } from "@/hooks/rbac/useRoles";
+import MetalCard from "@/components/ui/MetalCard";
+import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
+import Button from "@/components/ui/Button";
 
 export const CreateUserForm = () => {
   const [email, setEmail] = useState("");
@@ -25,57 +29,55 @@ export const CreateUserForm = () => {
     });
   };
 
+  const roleOptions = [
+    { label: "-- Mặc định --", value: "" },
+    ...roles.map((r) => ({
+      label: `${r.name} ${r.isSystem ? "(Hệ thống)" : "(Tùy chỉnh)"}`,
+      value: r.id,
+    })),
+  ];
+
   return (
-    <div style={{ maxWidth: "400px", margin: "50px auto", padding: "20px", border: "1px solid #ccc", borderRadius: "8px" }}>
-      <h2>Tạo Tài Khoản Mới</h2>
-      <form onSubmit={handleSubmit}>
+    <MetalCard className="max-w-md mx-auto p-6">
+      <h2 className="text-lg font-bold metal-text mb-4">Tạo Tài Khoản Mới</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
         {/* Trường nhập Email */}
-        <div style={{ marginBottom: "15px" }}>
-          <label style={{ display: "block", marginBottom: "5px" }}>Email nhân viên:</label>
-          <input
+        <div>
+          <label className="text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center gap-1 mb-1.5">
+            Email nhân viên
+          </label>
+          <Input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="example@company.com"
-            style={{ width: "100%", padding: "8px", boxSizing: "border-box" }}
+            className="h-[42px] sm:h-[46px]"
           />
         </div>
 
         {/* Chọn Vai trò động */}
-        <div style={{ marginBottom: "20px" }}>
-          <label style={{ display: "block", marginBottom: "5px" }}>Vai trò (Role):</label>
-          <select
+        <div>
+          <label className="text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center gap-1 mb-1.5">
+            Vai trò (Role)
+          </label>
+          <Select
+            options={roleOptions}
             value={roleId}
-            onChange={(e) => setRoleId(e.target.value)}
+            onChange={(val) => setRoleId(val)}
             disabled={loadingRoles}
-            style={{ width: "100%", padding: "8px" }}
-          >
-            <option value="">-- Mặc định --</option>
-            {roles.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.name} {r.isSystem ? "(Hệ thống)" : "(Tùy chỉnh)"}
-              </option>
-            ))}
-          </select>
+          />
         </div>
 
         {/* Nút Submit điều khiển trạng thái Loading */}
-        <button
+        <Button
           type="submit"
+          variant="primary"
           disabled={isPending || loadingRoles}
-          style={{
-            width: "100%",
-            padding: "10px",
-            backgroundColor: isPending ? "#ccc" : "#4f46e5",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: isPending ? "not-allowed" : "pointer",
-          }}
+          className="w-full h-[42px] sm:h-[46px]"
         >
           {isPending ? "Đang xử lý..." : "Tạo tài khoản"}
-        </button>
+        </Button>
       </form>
-    </div>
+    </MetalCard>
   );
 };

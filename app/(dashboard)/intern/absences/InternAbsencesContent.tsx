@@ -35,6 +35,7 @@ import Modal from "@/components/ui/Modal";
 import FilterSelect from "@/components/ui/FilterSelect";
 import { useAbsences } from "@/hooks/absence/useAbsences";
 import { useCancelAbsence } from "@/hooks/absence/useCancelAbsence";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 import CreateAbsenceModal from "./CreateAbsenceModal";
 import type { Absence, AbsenceStatus, AbsenceDuration, AbsenceReasonType } from "@/types/absence";
 
@@ -47,6 +48,10 @@ export default function InternAbsencesContent() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
+
+  const { can } = useRBAC();
+  const canCreate = can("ABSENCE_CREATE");
+  const canCancel = can("ABSENCE_CANCEL");
 
   // URL-first filters
   const searchQuery = searchParams.get("search") ?? "";
@@ -333,14 +338,16 @@ export default function InternAbsencesContent() {
           </div>
         </div>
 
-        <Button
-          variant="primary"
-          onClick={() => setIsCreateOpen(true)}
-          className="flex items-center gap-2 shadow-md shadow-primary-main/20"
-        >
-          <Plus className="h-4 w-4" />
-          <span>{t("createBtn")}</span>
-        </Button>
+        {canCreate && (
+          <Button
+            variant="primary"
+            onClick={() => setIsCreateOpen(true)}
+            className="flex items-center gap-2 shadow-md shadow-primary-main/20"
+          >
+            <Plus className="h-4 w-4" />
+            <span>{t("createBtn")}</span>
+          </Button>
+        )}
       </div>
 
       {/* 2. KPI Stat Cards (Rule 50-51 & Micro-interactions) */}
@@ -450,15 +457,17 @@ export default function InternAbsencesContent() {
           emptyMessage={t("table.empty")}
           emptyDescription={t("table.emptyDescription")}
           emptyAction={
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => setIsCreateOpen(true)}
-              className="mt-2"
-            >
-              <Plus className="h-4 w-4 mr-1.5" />
-              {t("createBtn")}
-            </Button>
+            canCreate ? (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setIsCreateOpen(true)}
+                className="mt-2"
+              >
+                <Plus className="h-4 w-4 mr-1.5" />
+                {t("createBtn")}
+              </Button>
+            ) : undefined
           }
           render={(item) => (
             <Table.Row key={item.id}>
@@ -534,9 +543,9 @@ export default function InternAbsencesContent() {
                 )}
               </div>
 
-              {/* 8. Thao tác (Hủy đơn khi còn PENDING) */}
+              {/* 8. Thao tác (Hủy đơn khi còn PENDING và có quyền) */}
               <div className="flex items-center justify-end">
-                {item.status === "PENDING" ? (
+                {canCancel && item.status === "PENDING" ? (
                   <Button
                     variant="outline"
                     size="sm"

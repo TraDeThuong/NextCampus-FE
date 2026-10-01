@@ -84,7 +84,7 @@ export default function StatsCard({
   );
 
   const cardContent = (
-    <MetalCard className={`p-4 sm:p-5 lg:p-6 h-full flex flex-col group/card ${href ? "cursor-pointer" : ""}`}>
+    <MetalCard className={`p-4 sm:p-5 lg:p-6 h-full flex flex-col group/card transition-all duration-300 hover:-translate-y-1 ${href || onCardClick ? "cursor-pointer" : ""}`}>
       {cardBody}
     </MetalCard>
   );

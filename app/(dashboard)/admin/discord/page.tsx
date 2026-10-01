@@ -13,7 +13,15 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function DiscordAdminPage() {
   return (
-    <ProtectedRoute portal="admin" allowedRoles={["ADMIN"]}>
+    <ProtectedRoute
+      portal="admin"
+      allowedRoles={["ADMIN"]}
+      requiredPermissions={[
+        "DISCORD_READ",
+        "DISCORD_MANAGE",
+      ]}
+      permissionMode="ANY"
+    >
       <DiscordContent />
     </ProtectedRoute>
   );

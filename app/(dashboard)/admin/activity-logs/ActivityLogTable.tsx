@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import {
   ChevronLeft,
   ChevronRight,
@@ -267,6 +268,8 @@ export default function ActivityLogTable() {
             const actorName = log.actor?.fullName || log.user?.fullName || t("admin.activityLogs.system");
             const actorEmail = log.actor?.email || log.user?.email || "";
             const actorRole = log.actor?.role?.name || log.user?.role?.name || null;
+            const actorAvatar = log.actor?.avatarUrl || log.user?.avatarUrl || null;
+            const isSystem = (!log.actor && !log.user?.fullName) || actorName === t("admin.activityLogs.system") || (!log.actorId && !log.userId && !actorEmail);
             const initials = getInitials(actorName);
 
             return (
@@ -284,15 +287,35 @@ export default function ActivityLogTable() {
                 </div>
 
                 {/* Actor */}
-                <div className="flex items-center gap-2.5 min-w-0 pr-2">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-slate-100 text-slate-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-cyan-500/20 dark:to-blue-600/20 text-xs font-bold dark:text-cyan-300">
-                    {initials}
-                  </div>
+                <div className="flex items-center gap-3 min-w-0 pr-2">
+                  {isSystem ? (
+                    <div
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-cyan-300 bg-cyan-100/80 text-cyan-700 dark:border-cyan-400/30 dark:bg-cyan-500/10 dark:text-cyan-300 shadow-xs"
+                      title={actorName}
+                    >
+                      <Shield className="h-4 w-4 shrink-0" />
+                    </div>
+                  ) : actorAvatar ? (
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-white/5 overflow-hidden shadow-xs">
+                      <Image
+                        src={actorAvatar}
+                        alt={actorName}
+                        width={36}
+                        height={36}
+                        unoptimized
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-main to-primary-light text-xs font-bold text-white shadow-xs dark:from-slate-700 dark:to-slate-800 dark:ring-1 dark:ring-white/10">
+                      {initials}
+                    </div>
+                  )}
                   <div className="flex flex-col min-w-0 justify-center">
-                    <span className="text-xs font-bold text-foreground truncate">
+                    <span className="text-xs font-semibold text-foreground truncate" title={actorName}>
                       {actorName}
                     </span>
-                    <span className="text-[10px] text-muted truncate">
+                    <span className="text-[10px] text-muted truncate" title={actorEmail || (actorRole ? `Vai trò: ${actorRole}` : "—")}>
                       {actorEmail || (actorRole ? `Vai trò: ${actorRole}` : "—")}
                     </span>
                   </div>

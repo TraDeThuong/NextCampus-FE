@@ -504,7 +504,7 @@ function TaskListTable({
             <p className="text-sm text-muted">{td("noTasksAssigned")}</p>
           </div>
         ) : (
-          <Table columns={TASK_COLUMNS}>
+          <Table columns={TASK_COLUMNS} className="border-0 shadow-none rounded-none bg-transparent">
             <Table.Header>
               <div>{td("colCode")}</div>
               <div>{td("colTitle")}</div>
@@ -758,7 +758,7 @@ function SubmissionsSection({
             <p className="text-sm text-muted">{td("noSubmissions")}</p>
           </div>
         ) : (
-          <Table columns={SUBMISSION_COLUMNS}>
+          <Table columns={SUBMISSION_COLUMNS} className="border-0 shadow-none rounded-none bg-transparent">
             <Table.Header>
               <div>{td("colAttempt")}</div>
               <div>{td("colTask")}</div>

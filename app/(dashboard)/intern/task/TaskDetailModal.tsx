@@ -539,10 +539,8 @@ export default function TaskDetailModal({
                       </div>
 
                       <div className="grid grid-cols-1 gap-2">
-                        {dependencies.map((dep) => {
-                          const dStatus = dep.assignment?.status || "TODO";
-                          return (
-                            <div
+                        {dependencies.map((dep) => (
+                          <div
                               key={dep.id}
                               className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-border/80 bg-surface-elevated/40 p-3 dark:border-border/60 dark:bg-slate-900/40"
                             >
@@ -560,8 +558,7 @@ export default function TaskDetailModal({
                                 </span>
                               )}
                             </div>
-                          );
-                        })}
+                        ))}
                       </div>
                     </div>
                   )}
@@ -571,10 +568,12 @@ export default function TaskDetailModal({
               {/* Task Description */}
               {basicTask.description && (
                 <div className="space-y-1.5">
-                  <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
-                    <FileText className="h-3.5 w-3.5 text-cyan-400" />
-                    {t("description")}
-                  </h4>
+                  <div className="flex items-center gap-1.5">
+                    <FileText className="h-3.5 w-3.5 text-cyan-400 shrink-0" />
+                    <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted">
+                      {t("description")}
+                    </h4>
+                  </div>
                   <div className="rounded-2xl border border-border/70 bg-card/30 p-4 text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">
                     {basicTask.description}
                   </div>
@@ -584,10 +583,12 @@ export default function TaskDetailModal({
               {/* Acceptance Criteria */}
               {task?.acceptanceCriteria && (
                 <div className="space-y-1.5">
-                  <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
-                    {t("acceptanceCriteria")}
-                  </h4>
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                    <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted">
+                      {t("acceptanceCriteria")}
+                    </h4>
+                  </div>
                   <div className="rounded-2xl border border-border/70 bg-card/30 p-4 text-sm text-foreground/90 leading-relaxed font-mono whitespace-pre-line">
                     {task.acceptanceCriteria}
                   </div>
@@ -609,10 +610,12 @@ export default function TaskDetailModal({
               {/* Task Attachments */}
               {task && task.attachments && task.attachments.length > 0 && (
                 <div className="space-y-2 pt-1">
-                  <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
-                    <Paperclip className="h-3.5 w-3.5 text-cyan-400" />
-                    {t("attachments", { n: task.attachments.length })}
-                  </h4>
+                  <div className="flex items-center gap-1.5">
+                    <Paperclip className="h-3.5 w-3.5 text-cyan-400 shrink-0" />
+                    <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted">
+                      {t("attachments", { n: task.attachments.length })}
+                    </h4>
+                  </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {task.attachments.map((att) => (
                       <a

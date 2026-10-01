@@ -23,6 +23,7 @@ import {
   BarChart3,
   FileText,
 } from "lucide-react";
+import { SiDiscord } from "react-icons/si";
 import Modal from "@/components/ui/Modal";
 import { usePermissions } from "@/hooks/rbac/usePermissions";
 import { useSyncRolePermissions } from "@/hooks/rbac/useSyncRolePermissions";
@@ -50,6 +51,7 @@ const RESOURCE_ICONS: Record<string, React.ElementType> = {
   SETTINGS: Settings,
   REGULATION: FileText,
   STATS: BarChart3,
+  DISCORD: SiDiscord,
 };
 
 const RESOURCE_FALLBACKS: Record<string, string> = {
@@ -64,6 +66,7 @@ const RESOURCE_FALLBACKS: Record<string, string> = {
   MAINTENANCE: "Bảo trì Hệ thống",
   API_KEY: "API Keys",
   WEBHOOK: "Webhooks",
+  DISCORD: "Tích hợp Discord",
   SYSTEM_CONFIG: "Cấu hình Hệ thống",
   CRON_JOB: "Tác vụ Tự động",
   DEPARTMENT: "Phòng ban",

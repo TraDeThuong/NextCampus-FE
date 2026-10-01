@@ -20,14 +20,14 @@
   "stats": {
     "riskHealthy": "An toàn",
     "riskWarning": "Cảnh báo",
-    "riskDanger": "Nguy hiểm (Quá tải)",
+    "riskDanger": "Nguy hiểm",
     "retentionRate": "Tỷ lệ hoàn thành thực tập",
     "reportStreak": "Chuỗi {streak} ngày liên tiếp",
     "activeWorkloadDays": "Khối lượng ngày công việc"
   },
   "pdfExport": {
     "generating": "Đang khởi tạo file PDF...",
-    "downloadWeeklyEvaluation": "Tải phiếu đánh giá tuần (PDF)",
+    "downloadWeeklyEvaluation": "Tải phiếu đánh giá tuần",
     "downloadInternshipSummary": "Tải chứng nhận thực tập",
     "exportSuccess": "Xuất báo cáo PDF thành công",
     "exportFailed": "Lỗi xuất file PDF, vui lòng thử lại"
@@ -86,8 +86,8 @@
     },
     "language": {
       "toggle": "Chuyển ngôn ngữ",
-      "switchToEn": "Chuyển sang Tiếng Anh (EN)",
-      "switchToVi": "Chuyển sang Tiếng Việt (VN)",
+      "switchToEn": "Chuyển sang Tiếng Anh",
+      "switchToVi": "Chuyển sang Tiếng Việt",
       "vi": "Tiếng Việt",
       "en": "English"
     }

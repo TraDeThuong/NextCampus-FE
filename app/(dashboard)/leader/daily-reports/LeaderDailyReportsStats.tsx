@@ -27,7 +27,7 @@ export default function LeaderDailyReportsStats({
       value: stats.totalInterns,
       subtitle: t("assignedToYou"),
       icon: Users,
-      containerClass: "border-sky-300 bg-sky-100/80 text-sky-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-sky-500/25 dark:to-cyan-400/10 dark:text-cyan-300",
+      containerClass: "border-sky-300 bg-sky-100/80 text-sky-700 hover:bg-sky-200/80 dark:border-sky-400/30 dark:bg-sky-500/10 dark:text-sky-300",
       accent: "from-sky-400/70",
     },
     {
@@ -40,7 +40,7 @@ export default function LeaderDailyReportsStats({
             : 0,
       }),
       icon: FileCheck,
-      containerClass: "border-emerald-300 bg-emerald-100/80 text-emerald-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-emerald-500/25 dark:to-teal-400/10 dark:text-emerald-300",
+      containerClass: "border-emerald-300 bg-emerald-100/80 text-emerald-700 hover:bg-emerald-200/80 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-300",
       accent: "from-emerald-400/70",
     },
     {
@@ -48,7 +48,7 @@ export default function LeaderDailyReportsStats({
       value: stats.missingToday,
       subtitle: t("notSubmittedYet"),
       icon: AlertCircle,
-      containerClass: "border-rose-300 bg-rose-100/80 text-rose-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-rose-500/25 dark:to-red-400/10 dark:text-rose-300",
+      containerClass: "border-rose-300 bg-rose-100/80 text-rose-700 hover:bg-rose-200/80 dark:border-rose-400/30 dark:bg-rose-500/10 dark:text-rose-300",
       accent: "from-rose-400/70",
     },
     {
@@ -56,7 +56,7 @@ export default function LeaderDailyReportsStats({
       value: `${stats.weekRate}%`,
       subtitle: t("workingDays", { days: stats.weekWorkingDays }),
       icon: CalendarDays,
-      containerClass: "border-indigo-300 bg-indigo-100/80 text-indigo-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-indigo-500/25 dark:to-purple-400/10 dark:text-indigo-300",
+      containerClass: "border-indigo-300 bg-indigo-100/80 text-indigo-700 hover:bg-indigo-200/80 dark:border-indigo-400/30 dark:bg-indigo-500/10 dark:text-indigo-300",
       accent: "from-indigo-400/70",
     },
   ];

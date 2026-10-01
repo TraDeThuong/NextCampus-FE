@@ -89,18 +89,22 @@ export default function DiscordStats({
       {cards.map((card, idx) => {
         const Icon = card.icon;
         return (
-          <MetalCard key={idx}>
-            <div className="flex items-center justify-between p-4 sm:p-6">
-              <div>
-                <p className="text-xs sm:text-sm font-medium text-muted">
+          <MetalCard
+            key={idx}
+            className="group transition-all duration-300 hover:-translate-y-1"
+          >
+            <div className="flex items-start justify-between p-4 sm:p-5 lg:p-6 gap-2">
+              <div className="space-y-1 min-w-0 flex-1">
+                <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.1em] sm:tracking-[0.14em] text-muted group-hover:text-foreground transition-colors truncate">
                   {card.title}
                 </p>
-                <p className="mt-1 text-2xl sm:text-3xl font-extrabold text-foreground">
+                <h3 className="chrome-text mt-1.5 sm:mt-2 text-2xl sm:text-3xl lg:text-4xl font-bold leading-none tracking-tight truncate">
                   {card.value}
-                </p>
+                </h3>
+                <div className="mt-2.5 sm:mt-3 h-[2px] w-10 sm:w-14 rounded-full bg-gradient-to-r from-primary-main/70 dark:from-primary-light/70 to-transparent" />
               </div>
               <div
-                className={`flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl border transition-all duration-500 group-hover:rotate-6 group-hover:scale-110 ${card.containerClass}`}
+                className={`flex h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl border transition-all duration-500 group-hover:rotate-6 group-hover:scale-110 shadow-xs ${card.containerClass}`}
               >
                 <Icon className="h-5 w-5 sm:h-6 sm:w-6 shrink-0" />
               </div>

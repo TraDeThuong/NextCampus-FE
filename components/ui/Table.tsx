@@ -125,14 +125,17 @@ function Header({ children, className = "", isSticky = true }: HeaderProps) {
       className={`
         grid items-center gap-x-4 md:gap-x-6
         border-b border-slate-200 dark:border-white/10
-        bg-slate-50/80 dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.02)_100%)]
+        ${
+          isSticky
+            ? "sticky top-0 z-10 bg-slate-100/95 dark:bg-[#0c1322]/95"
+            : "bg-slate-100/85 dark:bg-[#0c1322]/85"
+        }
         px-4 md:px-6 py-4
         text-xs font-bold uppercase tracking-[0.12em]
         text-primary-main dark:text-primary-light
         backdrop-blur-xl
         rounded-t-[23px]
         [&>*]:min-w-0
-        ${isSticky ? "sticky top-0 z-10 bg-card/95" : ""}
         ${className}
       `}
     >
@@ -242,10 +245,11 @@ function Footer({
     <footer
       className={`
         flex items-center justify-between
-        border-t border-slate-100 dark:border-white/5
-        bg-slate-50/50 dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.02)_0%,transparent_100%)]
+        border-t border-slate-200 dark:border-white/10
+        bg-slate-100/80 dark:bg-[#0c1322]/80
         px-6 py-4
         backdrop-blur-xl
+        rounded-b-[23px]
         ${className}
       `}
     >

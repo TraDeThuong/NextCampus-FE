@@ -19,6 +19,7 @@ import MetalCard from "@/components/ui/MetalCard";
 import Badge from "@/components/ui/Badge";
 import type { DiscordWebhookConfig, DiscordWebhookPurpose } from "@/types/discord";
 import { useTestDiscordWebhook } from "@/hooks/discord";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 interface GlobalDiscordChannelsProps {
   webhooks: DiscordWebhookConfig[];
@@ -34,6 +35,8 @@ export default function GlobalDiscordChannels({
   onOpenDelete,
 }: GlobalDiscordChannelsProps) {
   const t = useTranslations("discord");
+  const { can } = useRBAC();
+  const canManage = can("DISCORD_MANAGE");
   const testMutation = useTestDiscordWebhook();
   const [testingId, setTestingId] = useState<string | null>(null);
 
@@ -78,7 +81,7 @@ export default function GlobalDiscordChannels({
     const isTesting = testingId === config?.id;
 
     return (
-      <MetalCard className={`relative overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] border ${borderGlow}`}>
+      <MetalCard className={`relative overflow-hidden group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl border ${borderGlow}`}>
         <div
           className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl ${gradient} rounded-bl-full pointer-events-none blur-xl`}
         />
@@ -88,7 +91,7 @@ export default function GlobalDiscordChannels({
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3.5">
               <div
-                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border ${iconColor} shadow-inner`}
+                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border ${iconColor} shadow-inner transition-all duration-500 group-hover:rotate-6 group-hover:scale-110`}
               >
                 <Icon className="h-6 w-6" />
               </div>
@@ -175,22 +178,24 @@ export default function GlobalDiscordChannels({
             </div>
           ) : (
             <div className="py-4 text-center rounded-2xl border border-dashed border-border/70 bg-card/40">
-              <p className="text-xs text-muted mb-3">
+              <p className={`text-xs text-muted ${canManage ? "mb-3" : ""}`}>
                 {t("globalSection.notConfigured")}
               </p>
-              <button
-                type="button"
-                onClick={() => onOpenCreateWithPurpose(purpose)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border bg-card hover:bg-card/80 text-xs font-medium text-foreground transition active:scale-95 cursor-pointer shadow-xs"
-              >
-                <Plus className="h-3.5 w-3.5" />
-                <span>{t("globalSection.setupNow")}</span>
-              </button>
+              {canManage && (
+                <button
+                  type="button"
+                  onClick={() => onOpenCreateWithPurpose(purpose)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border bg-card hover:bg-card/80 text-xs font-medium text-foreground transition active:scale-95 cursor-pointer shadow-xs"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  <span>{t("globalSection.setupNow")}</span>
+                </button>
+              )}
             </div>
           )}
 
           {/* Action buttons */}
-          {config && (
+          {canManage && config && (
             <div className="flex items-center justify-between gap-3 pt-3 border-t border-border/50">
               <button
                 type="button"
@@ -230,7 +235,7 @@ export default function GlobalDiscordChannels({
                   type="button"
                   onClick={() => onOpenDelete(config)}
                   title={t("tooltips.delete")}
-                  className="p-1.5 rounded-xl border border-rose-500/20 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition active:scale-95 cursor-pointer"
+                  className="p-1.5 rounded-xl border border-rose-300 bg-rose-100/80 text-rose-700 hover:bg-rose-200/80 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-400 dark:hover:bg-rose-500/20 transition active:scale-95 cursor-pointer"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -246,10 +251,18 @@ export default function GlobalDiscordChannels({
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-foreground">
-            {t("globalSection.title")}
-          </h2>
-          <p className="text-xs text-muted">
+          <div className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/20 shrink-0">
+              <Trophy className="h-3.5 w-3.5" />
+            </div>
+            <h2 className="text-lg font-bold text-foreground metal-text">
+              {t("globalSection.title")}
+            </h2>
+            <Badge variant="warning" size="sm">
+              2
+            </Badge>
+          </div>
+          <p className="text-xs text-muted mt-0.5">
             {t("globalSection.subtitle")}
           </p>
         </div>

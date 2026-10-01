@@ -338,11 +338,10 @@ export default function TaskImportModal({ onCloseModal }: Props) {
             {/* Intern mappings */}
             {previewData.internMappings.length > 0 && (
               <div className="space-y-2">
-                <h3 className="text-xs sm:text-sm font-semibold text-foreground/90 flex items-center gap-1.5">
+                <h3 className="text-xs sm:text-sm font-semibold text-foreground/90">
                   Khớp nối tài khoản thực tập sinh ({previewData.internMappings.length})
                 </h3>
-                <div className="overflow-x-auto scrollbar-dropdown rounded-2xl border border-border bg-card dark:border-white/10 dark:bg-card/40">
-                  <Table columns="1fr 1.4fr 1fr 120px">
+                <Table columns="1fr 1.4fr 1fr 120px">
                     <Table.Header>
                       <div>Excel Alias</div>
                       <div>Email</div>
@@ -373,18 +372,16 @@ export default function TaskImportModal({ onCloseModal }: Props) {
                       )}
                     />
                   </Table>
-                </div>
               </div>
             )}
 
             {/* Valid rows */}
             {previewData.validRows.length > 0 && (
               <div className="space-y-2">
-                <h3 className="text-xs sm:text-sm font-semibold text-foreground/90 flex items-center gap-1.5">
+                <h3 className="text-xs sm:text-sm font-semibold text-foreground/90">
                   Dòng hợp lệ ({previewData.validRows.length})
                 </h3>
-                <div className="overflow-x-auto scrollbar-dropdown rounded-2xl border border-border bg-card dark:border-white/10 dark:bg-card/40">
-                  <Table columns="100px 1fr 120px 100px 140px 100px">
+                <Table columns="100px 1fr 120px 100px 140px 100px">
                     <Table.Header>
                       <div>Mã task</div>
                       <div>Tiêu đề</div>
@@ -418,18 +415,16 @@ export default function TaskImportModal({ onCloseModal }: Props) {
                       )}
                     />
                   </Table>
-                </div>
               </div>
             )}
 
             {/* Error rows */}
             {previewData.errorRows.length > 0 && (
               <div className="space-y-2">
-                <h3 className="text-xs sm:text-sm font-semibold text-red-400 flex items-center gap-1.5">
+                <h3 className="text-xs sm:text-sm font-semibold text-red-400">
                   Dòng có lỗi ({previewData.errorRows.length})
                 </h3>
-                <div className="overflow-x-auto scrollbar-dropdown rounded-2xl border border-red-500/20 bg-red-500/5">
-                  <Table columns="80px 120px 1fr">
+                <Table columns="80px 120px 1fr" className="border-red-500/20 bg-red-500/5">
                     <Table.Header>
                       <div>Dòng</div>
                       <div>Mã task</div>
@@ -460,7 +455,6 @@ export default function TaskImportModal({ onCloseModal }: Props) {
                       )}
                     />
                   </Table>
-                </div>
               </div>
             )}
 
