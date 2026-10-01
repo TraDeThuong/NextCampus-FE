@@ -125,3 +125,37 @@ export interface ProvisionAllDepartmentsResponse {
     }>;
   };
 }
+
+export interface BatchSyncRoleDetail {
+  internId: string;
+  internCode: string;
+  fullName: string;
+  email: string;
+  departmentName: string;
+  discordUserId: string | null;
+  status: "GRANTED" | "REVOKED" | "ALREADY_SYNCED" | "MISSING_ID" | "FAILED";
+  message: string;
+}
+
+export interface BatchSyncRolesResponse {
+  success: boolean;
+  message: string;
+  data: {
+    totalScanned: number;
+    grantedCount: number;
+    revokedCount: number;
+    alreadySyncedCount: number;
+    missingIdCount: number;
+    failedCount: number;
+    details: BatchSyncRoleDetail[];
+  };
+}
+
+export interface RemindDiscordResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    totalEligible: number;
+    sentCount: number;
+  };
+}

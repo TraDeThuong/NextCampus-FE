@@ -7,7 +7,8 @@ export type SystemSettingKey =
   | "REPORT_ATTACHMENT_MAX_SIZE_MB"  // Dung lượng tệp đính kèm báo cáo tối đa (VD: "10")
   | "DISCORD_BOT_ENABLED"
   | "DISCORD_BOT_TOKEN"
-  | "DISCORD_GUILD_ID";
+  | "DISCORD_GUILD_ID"
+  | "DISCORD_INVITE_URL";
 
 export interface SystemSetting {
   id: string;
@@ -40,6 +41,7 @@ export interface SystemSettings {
   DISCORD_BOT_ENABLED?: boolean;
   DISCORD_BOT_TOKEN?: string;
   DISCORD_GUILD_ID?: string;
+  DISCORD_INVITE_URL?: string;
   [key: string]: string | number | boolean | undefined;
 }
 

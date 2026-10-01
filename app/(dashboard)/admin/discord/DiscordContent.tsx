@@ -7,6 +7,7 @@ import GlobalDiscordChannels from "./GlobalDiscordChannels";
 import DepartmentRoutingTable from "./DepartmentRoutingTable";
 import DiscordWebhookModal from "./DiscordWebhookModal";
 import DiscordDeleteModal from "./DiscordDeleteModal";
+import DiscordRoleSyncModal from "./DiscordRoleSyncModal";
 import { useDiscordWebhooks } from "@/hooks/discord";
 import { useDepartments } from "@/hooks/department/useDepartments";
 import type {
@@ -34,6 +35,7 @@ export default function DiscordContent() {
 
   // Modals state
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRoleSyncOpen, setIsRoleSyncOpen] = useState(false);
   const [editingWebhook, setEditingWebhook] =
     useState<DiscordWebhookConfig | null>(null);
   const [deletingWebhook, setDeletingWebhook] =
@@ -94,8 +96,11 @@ export default function DiscordContent() {
 
   return (
     <div className="space-y-6">
-      {/* Header with Cyberpunk styling & Add Webhook button */}
-      <DiscordHeader onOpenCreate={handleOpenCreate} />
+      {/* Header with Cyberpunk styling, Add Webhook & Batch Role Sync buttons */}
+      <DiscordHeader
+        onOpenCreate={handleOpenCreate}
+        onOpenRoleSync={() => setIsRoleSyncOpen(true)}
+      />
 
       {/* 4 Stats Cards */}
       <DiscordStats
@@ -133,6 +138,12 @@ export default function DiscordContent() {
         defaultDepartmentId={defaultDeptId}
         defaultPurpose={defaultPurpose}
         defaultScope={defaultScope}
+      />
+
+      {/* Batch Role Sync Modal */}
+      <DiscordRoleSyncModal
+        isOpen={isRoleSyncOpen}
+        onClose={() => setIsRoleSyncOpen(false)}
       />
 
       {/* Delete Confirmation Modal */}

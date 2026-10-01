@@ -90,8 +90,8 @@ export default function InlineSelect({
     }, [open]);
 
     const selected = options.find((o) => o.value === value);
-    const label = selected?.label ?? placeholder;
-    const isPlaceholder = !selected;
+    const label = selected?.value !== null && selected?.label ? selected.label : placeholder;
+    const isPlaceholder = !selected || selected.value === null;
     const selectedIndex = Math.max(
         0,
         options.findIndex((option) => option.value === value),

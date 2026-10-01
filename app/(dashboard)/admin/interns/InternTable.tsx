@@ -15,7 +15,7 @@ import Spinner from "@/components/ui/Spinner";
 import InternRow from "./InternRow";
 
 const COLUMNS =
-    "minmax(180px,1.4fr) minmax(170px,1.2fr) minmax(130px,1fr) minmax(100px,0.65fr) 150px 175px 48px";
+    "minmax(180px,1.3fr) minmax(150px,1.1fr) minmax(120px,0.9fr) minmax(90px,0.6fr) 130px 135px 145px 48px";
 
 export default function InternTable() {
     const t = useTranslations();
@@ -150,6 +150,7 @@ export default function InternTable() {
                     <div>{t("admin.interns.colPosition")}</div>
                     <div>{t("admin.interns.colDuration")}</div>
                     <div>{t("admin.interns.colStatus")}</div>
+                    <div>{t("admin.interns.colDiscord")}</div>
                     <Table.ReloadButton onReload={refetch} isReloading={isFetching} />
                 </Table.Header>
 

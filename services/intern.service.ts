@@ -94,4 +94,11 @@ export const internService = {
         );
         return response.data;
     },
+
+    remindDiscord: async (id: string): Promise<{ success: boolean; message: string }> => {
+        const response = await api.post<{ success: boolean; message: string }>(
+            `/interns/${id}/remind-discord`,
+        );
+        return response.data;
+    },
 };

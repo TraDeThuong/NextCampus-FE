@@ -6,3 +6,5 @@ export * from "./useTestDiscordWebhook";
 export * from "./useDiscordBotStatus";
 export * from "./useProvisionDepartment";
 export * from "./useProvisionAllDepartments";
+export * from "./useBatchSyncRoles";
+export * from "./useRemindUnlinkedDiscord";

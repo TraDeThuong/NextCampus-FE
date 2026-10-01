@@ -55,6 +55,7 @@ const FACTORY_DEFAULTS = {
   DISCORD_BOT_ENABLED: "true",
   DISCORD_BOT_TOKEN: "",
   DISCORD_GUILD_ID: "",
+  DISCORD_INVITE_URL: "https://discord.gg/nexcampus",
 };
 
 const DEADLINE_PRESETS = ["17:00", "17:30", "18:00", "18:30", "19:00"];
@@ -183,6 +184,10 @@ function AdminSettingsFields({
       typeof initialData.DISCORD_GUILD_ID === "string"
         ? initialData.DISCORD_GUILD_ID
         : FACTORY_DEFAULTS.DISCORD_GUILD_ID,
+    DISCORD_INVITE_URL:
+      typeof initialData.DISCORD_INVITE_URL === "string"
+        ? initialData.DISCORD_INVITE_URL
+        : FACTORY_DEFAULTS.DISCORD_INVITE_URL,
   }), [initialData]);
 
   const [formValues, setFormValues] = useState(initialValues);
@@ -296,6 +301,12 @@ function AdminSettingsFields({
       }
     }
 
+    if (formValues.DISCORD_INVITE_URL && formValues.DISCORD_INVITE_URL.trim().length > 0) {
+      if (!/^https:\/\/(discord\.(gg|com\/invite)\/[a-zA-Z0-9-]+)/.test(formValues.DISCORD_INVITE_URL.trim())) {
+        errs.DISCORD_INVITE_URL = t("errors.discordInviteUrlFormat");
+      }
+    }
+
     return errs;
   }, [formValues, t]);
 
@@ -330,6 +341,7 @@ function AdminSettingsFields({
       DISCORD_BOT_ENABLED: formValues.DISCORD_BOT_ENABLED === "true",
       DISCORD_BOT_TOKEN: formValues.DISCORD_BOT_TOKEN.trim(),
       DISCORD_GUILD_ID: formValues.DISCORD_GUILD_ID.trim(),
+      DISCORD_INVITE_URL: formValues.DISCORD_INVITE_URL.trim(),
     };
 
     batchUpdate.mutate(payload);
@@ -991,6 +1003,20 @@ function AdminSettingsFields({
                   `}
                 />
               </div>
+            </div>
+
+            {/* Discord Server Invite URL */}
+            <div className="pt-2">
+              <Input
+                label={t("discordInviteUrlTitle")}
+                type="url"
+                placeholder={t("discordInviteUrlPlaceholder")}
+                value={formValues.DISCORD_INVITE_URL}
+                onChange={(e) => handleChange("DISCORD_INVITE_URL", e.target.value)}
+                disabled={batchUpdate.isPending}
+                error={errors.DISCORD_INVITE_URL}
+                helperText={t("discordInviteUrlDesc")}
+              />
             </div>
 
             {/* Server ID & Bot Token Grid */}

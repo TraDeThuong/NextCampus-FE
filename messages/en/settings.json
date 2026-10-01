@@ -74,6 +74,9 @@
       "discordGuildIdTitle": "Discord Server ID (Guild ID)",
       "discordGuildIdDesc": "The unique snowflake identifier of the NexCampus Discord server (16–21 digits)",
       "discordGuildIdPlaceholder": "e.g. 1554412392673320960",
+      "discordInviteUrlTitle": "Discord Server Invite URL",
+      "discordInviteUrlDesc": "Permanent invite link to the official NexCampus Discord Server. Automatically included in welcome and reminder emails.",
+      "discordInviteUrlPlaceholder": "e.g. https://discord.gg/nexcampus",
       "discordBotTokenTitle": "Discord Bot Token",
       "discordBotTokenDesc": "Secret token granting bot permissions from the Discord Developer Portal (encrypted and secured)",
       "discordBotTokenPlaceholder": "Enter Bot Token (e.g. MTU1NDQ0NzM...)",
@@ -103,6 +106,7 @@
         "taskAttachmentSizeRange": "Task attachment size must be between 1 and 100 MB",
         "applicationSizeRange": "Application file size must be between 1 and 50 MB",
         "discordGuildIdFormat": "Server ID must be a numeric string between 16 and 21 digits",
+        "discordInviteUrlFormat": "Discord invite URL must start with https://discord.gg/ or https://discord.com/invite/",
         "discordTokenRequired": "Discord Bot Token cannot be empty when bot automation is enabled"
       },
       "resetModal": {
@@ -323,7 +327,9 @@
       "reportAttachmentSizeRange": "Report attachment size must be between 1 and 100 MB",
       "reportVideoSizeRange": "Report video size must be between 1 and 100 MB",
       "taskAttachmentSizeRange": "Task attachment size must be between 1 and 100 MB",
-      "applicationSizeRange": "Application file size must be between 1 and 50 MB"
+      "applicationSizeRange": "Application file size must be between 1 and 50 MB",
+      "discordGuildIdFormat": "Discord Server ID must be a sequence of 16 to 21 digits",
+      "discordInviteUrlFormat": "Invalid Discord invite URL (must start with https://discord.gg/ or https://discord.com/invite/)"
     },
     "resetModal": {
       "title": "Confirm Reset to Factory Defaults",

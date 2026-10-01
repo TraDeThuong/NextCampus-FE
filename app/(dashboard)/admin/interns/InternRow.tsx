@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
-import { MoreVertical, Eye, Trash2, Circle, Loader2 } from "lucide-react";
+import { MoreVertical, Eye, Trash2, Circle, Loader2, Mail } from "lucide-react";
+import { SiDiscord } from "react-icons/si";
 import { useState, useRef, useEffect, useCallback, useMemo, useId } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { toast } from "react-hot-toast";
@@ -12,6 +13,7 @@ import { useDeleteIntern } from "@/hooks/intern/useDeleteIntern";
 import { useLeaders } from "@/hooks/leader/useLeaders";
 import { useUpdateIntern } from "@/hooks/intern/useUpdateIntern";
 import { usePositions } from "@/hooks/department/usePositions";
+import { useRemindInternDiscord } from "@/hooks/intern/useRemindInternDiscord";
 import Table from "@/components/ui/Table";
 import Modal from "@/components/ui/Modal";
 import InlineSelect from "@/components/ui/InlineSelect";
@@ -30,9 +32,11 @@ export default function InternRow({ intern }: InternRowProps) {
     const canUpdateIntern = can("INTERN_UPDATE");
     const canDeleteIntern = can("INTERN_DELETE");
     const canViewIntern = can("INTERN_READ");
-    const hasAnyAction = canViewIntern || canDeleteIntern;
+    const canRemindDiscord = !intern.discordUserId && intern.status === "ACTIVE" && canUpdateIntern;
+    const hasAnyAction = canViewIntern || canDeleteIntern || canRemindDiscord;
 
     const { mutate: deleteIntern, isPending: isDeleting } = useDeleteIntern();
+    const remindMutation = useRemindInternDiscord();
     const { data: leadersData } = useLeaders();
     const { mutate: updateIntern } = useUpdateIntern();
     const [updatingField, setUpdatingField] = useState<
@@ -231,6 +235,18 @@ export default function InternRow({ intern }: InternRowProps) {
         [intern.id, updateIntern],
     );
 
+    const handleRemindDiscord = useCallback(async () => {
+        setMenuOpen(false);
+        try {
+            await remindMutation.mutateAsync(intern.id);
+            toast.success(
+                t("admin.interns.remindDiscordSuccess", { name: intern.fullName }),
+            );
+        } catch {
+            toast.error(t("admin.interns.remindDiscordFailed"));
+        }
+    }, [intern.id, intern.fullName, remindMutation, t]);
+
     return (
         <Modal>
             <Table.Row>
@@ -377,6 +393,34 @@ export default function InternRow({ intern }: InternRowProps) {
                     )}
                 </div>
 
+                {/* Discord Status Column */}
+                <div className="flex items-center">
+                    {intern.discordRoleGranted ? (
+                        <span
+                            title={intern.discordUserId ? `Discord ID: ${intern.discordUserId}` : undefined}
+                            className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-100/80 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-500/10 dark:text-emerald-300 shadow-sm"
+                        >
+                            <SiDiscord className="h-3 w-3 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                            <span className="truncate max-w-[95px]">{t("admin.interns.discordGranted")}</span>
+                        </span>
+                    ) : intern.discordUserId ? (
+                        <span
+                            title={`Discord ID: ${intern.discordUserId}`}
+                            className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-100/80 px-2.5 py-1 text-xs font-medium text-amber-700 dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-300 shadow-sm"
+                        >
+                            <SiDiscord className="h-3 w-3 shrink-0 text-amber-600 dark:text-amber-400" />
+                            <span className="truncate max-w-[95px]">{t("admin.interns.discordPending")}</span>
+                        </span>
+                    ) : (
+                        <span
+                            className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-slate-100/80 px-2.5 py-1 text-xs font-medium text-slate-500 dark:border-white/10 dark:bg-white/5 dark:text-muted"
+                        >
+                            <SiDiscord className="h-3 w-3 shrink-0 opacity-40" />
+                            <span className="truncate max-w-[95px]">{t("admin.interns.discordUnlinked")}</span>
+                        </span>
+                    )}
+                </div>
+
                 {/* Standardized Actions Column with Portal Action Menu */}
                 <div className="flex items-center justify-end">
                     {hasAnyAction && (
@@ -415,6 +459,23 @@ export default function InternRow({ intern }: InternRowProps) {
                                     >
                                         <Eye className="h-4 w-4 shrink-0 text-cyan-600 dark:text-cyan-400" />
                                         {t("admin.interns.view")}
+                                    </button>
+                                )}
+
+                                {canRemindDiscord && (
+                                    <button
+                                        type="button"
+                                        role="menuitem"
+                                        onClick={handleRemindDiscord}
+                                        disabled={remindMutation.isPending}
+                                        className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-amber-600 dark:text-amber-400 transition hover:bg-amber-50 dark:hover:bg-amber-500/10 hover:text-amber-700 dark:hover:text-amber-300 active:scale-98 cursor-pointer disabled:opacity-50"
+                                    >
+                                        {remindMutation.isPending ? (
+                                            <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+                                        ) : (
+                                            <Mail className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                                        )}
+                                        {t("admin.interns.remindDiscord")}
                                     </button>
                                 )}
 

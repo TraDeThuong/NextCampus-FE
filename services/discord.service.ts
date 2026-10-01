@@ -1,5 +1,6 @@
 import api from "@/lib/axios";
 import type {
+  BatchSyncRolesResponse,
   CreateDiscordWebhookPayload,
   DiscordBotStatus,
   DiscordBotStatusResponse,
@@ -7,6 +8,7 @@ import type {
   DiscordWebhookListResponse,
   ProvisionAllDepartmentsResponse,
   ProvisionDepartmentResponse,
+  RemindDiscordResponse,
   TestDiscordWebhookPayload,
   TestDiscordWebhookResponse,
   UpdateDiscordWebhookPayload,
@@ -86,6 +88,32 @@ export const discordService = {
   provisionAllDepartments: async (): Promise<ProvisionAllDepartmentsResponse> => {
     const res = await api.post<ProvisionAllDepartmentsResponse>(
       "/integrations/discord/departments/provision-all",
+    );
+    return res.data;
+  },
+
+  batchSyncRoles: async (
+    options?: { force?: boolean },
+  ): Promise<BatchSyncRolesResponse> => {
+    const res = await api.post<BatchSyncRolesResponse>(
+      "/integrations/discord/sync-roles",
+      options,
+    );
+    return res.data;
+  },
+
+  remindUnlinkedDiscord: async (): Promise<RemindDiscordResponse> => {
+    const res = await api.post<RemindDiscordResponse>(
+      "/integrations/discord/remind-unlinked",
+    );
+    return res.data;
+  },
+
+  remindInternDiscord: async (
+    internId: string,
+  ): Promise<RemindDiscordResponse> => {
+    const res = await api.post<RemindDiscordResponse>(
+      `/integrations/discord/remind/${internId}`,
     );
     return res.data;
   },

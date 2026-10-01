@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Plus, RefreshCw, Loader2 } from "lucide-react";
+import { Plus, RefreshCw, Loader2, Users } from "lucide-react";
 import { SiDiscord } from "react-icons/si";
 import { useTranslations } from "next-intl";
 import { toast } from "react-hot-toast";
@@ -11,9 +11,13 @@ import { useDiscordBotStatus, useProvisionAllDepartments } from "@/hooks/discord
 
 interface DiscordHeaderProps {
   onOpenCreate: () => void;
+  onOpenRoleSync: () => void;
 }
 
-export default function DiscordHeader({ onOpenCreate }: DiscordHeaderProps) {
+export default function DiscordHeader({
+  onOpenCreate,
+  onOpenRoleSync,
+}: DiscordHeaderProps) {
   const t = useTranslations("discord");
   const { data: botStatus, isLoading: isBotLoading } = useDiscordBotStatus();
   const provisionAllMutation = useProvisionAllDepartments();
@@ -116,6 +120,32 @@ export default function DiscordHeader({ onOpenCreate }: DiscordHeaderProps) {
                 {provisionAllMutation.isPending ? t("provisioning") : t("provisionAllShort")}
               </span>
             </button>
+
+            {/* Batch Role Sync Button */}
+            <button
+              type="button"
+              onClick={onOpenRoleSync}
+              title={t("syncRolesButton")}
+              className="
+                group inline-flex items-center justify-center gap-2
+                rounded-xl sm:rounded-2xl
+                h-[42px] sm:h-[46px] px-4 sm:px-5
+                border border-indigo-500/30 bg-indigo-500/10 text-indigo-600
+                dark:border-indigo-400/20 dark:bg-indigo-500/10 dark:text-indigo-400
+                text-sm font-semibold
+                hover:bg-indigo-500/20 hover:border-indigo-500/50
+                shadow-[0_0_12px_rgba(99,102,241,0.15)]
+                hover:shadow-[0_0_20px_rgba(99,102,241,0.3)]
+                transition-all duration-300
+                active:scale-[0.98]
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
+                cursor-pointer select-none
+              "
+            >
+              <Users className="h-4 w-4 shrink-0 transition-transform duration-300 group-hover:scale-110" />
+              <span className="hidden sm:inline">{t("syncRolesButtonShort")}</span>
+            </button>
+
             <button
               type="button"
               onClick={onOpenCreate}
