@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import LeaderTaskHeader from "./LeaderTaskHeader";
 import LeaderTaskStats from "./LeaderTaskStats";
@@ -15,6 +16,13 @@ export default function LeaderTasksContent() {
   const pathname = usePathname();
   const reviewAssignmentId = searchParams.get("reviewAssignmentId");
   const reviewExtensionAssignmentId = searchParams.get("reviewExtensionAssignmentId");
+  const taskId = searchParams.get("taskId");
+
+  useEffect(() => {
+    if (taskId) {
+      router.push(`/leader/tasks/${taskId}`);
+    }
+  }, [taskId, router]);
 
   const closeReview = () => {
     const params = new URLSearchParams(searchParams.toString());
@@ -26,6 +34,7 @@ export default function LeaderTasksContent() {
   const closeExtensionReview = () => {
     const params = new URLSearchParams(searchParams.toString());
     params.delete("reviewExtensionAssignmentId");
+    params.delete("requestId");
     const query = params.toString();
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
   };
