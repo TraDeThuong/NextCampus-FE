@@ -1,7 +1,7 @@
 {
   "admin": {
     "dashboard": {
-      "metaTitle": "Tổng quan (Admin)",
+      "metaTitle": "Tổng quan Quản trị",
       "title": "Trung Tâm Điều Hành Ban Quản Trị",
       "badge": "System Admin",
       "subtitle": "Quản trị cấp cao toàn hệ thống • Giám sát sức khỏe tổng thể, nhóm Leader & xử lý tác vụ nhanh",
@@ -9,7 +9,7 @@
       "activeInterns": "TTS Đang Thực Tập",
       "totalInterns": "Tổng Thực Tập Sinh",
       "activeInternsSubtitle": "{active} đang hoạt động",
-      "totalLeaders": "Tổng Quản Lý (Leader)",
+      "totalLeaders": "Tổng Quản Lý",
       "activeTasks": "Số Task Đang Chạy",
       "systemCompletionRate": "Tỷ Lệ Hoàn Thành Hệ Thống",
       "retentionRate": "Tỷ lệ giữ chân: {pct}%",
@@ -44,7 +44,7 @@
       "overdueTasks": "{n} task trễ",
       "recentActivity": "Nhật Ký Hoạt Động Gần Đây",
       "noActivity": "Chưa có hoạt động mới ghi nhận.",
-      "actionAlerts": "Mục Cần Xử Lý Ngay (Action Alerts)",
+      "actionAlerts": "Mục Cần Xử Lý Ngay",
       "pendingAppsCount": "{n} Đơn ứng tuyển chờ xử lý",
       "needApproveReject": "Cần duyệt hoặc từ chối ứng viên mới",
       "overdueTasksCount": "{n} Task quá hạn toàn công ty",
@@ -111,7 +111,7 @@
   },
   "leader": {
     "dashboard": {
-      "metaTitle": "Tổng quan (Leader)",
+      "metaTitle": "Tổng quan Trưởng nhóm",
       "title": "Trung Tâm Điều Hành Nhóm",
       "description": "Quản lý trực tiếp thực tập sinh, duyệt bài nộp & theo dõi tiến độ công việc nhóm",
       "loadError": "Lỗi khi tải dữ liệu thống kê Leader. Vui lòng kiểm tra lại kết nối mạng.",
@@ -277,7 +277,7 @@
       "readAndAcknowledgeNow": "Đọc & Cam kết ngay",
       "agreeTermsCheckbox": "Tôi đã đọc kỹ, hiểu rõ và tự nguyện cam kết tuân thủ nghiêm túc toàn bộ nội quy và quy định thực tập nêu trên.",
       "regulationVersionUpdated": "Phiên bản {version} · Cập nhật ngày {date}",
-      "exportSummaryPdf": "Xuất chứng chỉ (PDF)",
+      "exportSummaryPdf": "Xuất chứng chỉ PDF",
       "close": "Đóng",
       "badge": "Thực Tập Sinh",
       "liveBadge": "Đang trong kỳ thực tập",
@@ -305,7 +305,7 @@
   },
   "dashboard": {
     "admin": {
-      "metaTitle": "Tổng quan (Admin)",
+      "metaTitle": "Tổng quan Quản trị",
       "title": "Trung Tâm Điều Hành Ban Quản Trị",
       "badge": "System Admin",
       "subtitle": "Quản trị cấp cao toàn hệ thống • Giám sát sức khỏe tổng thể, nhóm Leader & xử lý tác vụ nhanh",
@@ -313,7 +313,7 @@
       "activeInterns": "TTS Đang Thực Tập",
       "totalInterns": "Tổng Thực Tập Sinh",
       "activeInternsSubtitle": "{active} đang hoạt động",
-      "totalLeaders": "Tổng Quản Lý (Leader)",
+      "totalLeaders": "Tổng Quản Lý",
       "activeTasks": "Số Task Đang Chạy",
       "systemCompletionRate": "Tỷ Lệ Hoàn Thành Hệ Thống",
       "retentionRate": "Tỷ lệ giữ chân: {pct}%",
@@ -340,7 +340,7 @@
       "overdueTasks": "{n} task trễ",
       "recentActivity": "Nhật Ký Hoạt Động Gần Đây",
       "noActivity": "Chưa có hoạt động mới ghi nhận.",
-      "actionAlerts": "Mục Cần Xử Lý Ngay (Action Alerts)",
+      "actionAlerts": "Mục Cần Xử Lý Ngay",
       "pendingAppsCount": "{n} Đơn ứng tuyển chờ xử lý",
       "needApproveReject": "Cần duyệt hoặc từ chối ứng viên mới",
       "overdueTasksCount": "{n} Task quá hạn toàn công ty",
@@ -385,7 +385,7 @@
       "taskStatusOverdue": "Quá hạn / Nghẽn"
     },
     "leader": {
-      "metaTitle": "Tổng quan (Leader)",
+      "metaTitle": "Tổng quan Trưởng nhóm",
       "title": "Trung Tâm Điều Hành Nhóm",
       "description": "Quản lý trực tiếp thực tập sinh, duyệt bài nộp & theo dõi tiến độ công việc nhóm",
       "loadError": "Lỗi khi tải dữ liệu thống kê Leader. Vui lòng kiểm tra lại kết nối mạng.",
@@ -526,7 +526,7 @@
       "readAndAcknowledgeNow": "Đọc & Cam kết ngay",
       "agreeTermsCheckbox": "Tôi đã đọc kỹ, hiểu rõ và tự nguyện cam kết tuân thủ nghiêm túc toàn bộ nội quy và quy định thực tập nêu trên.",
       "regulationVersionUpdated": "Phiên bản {version} · Cập nhật ngày {date}",
-      "exportSummaryPdf": "Xuất chứng chỉ (PDF)",
+      "exportSummaryPdf": "Xuất chứng chỉ PDF",
       "close": "Đóng"
     }
   }

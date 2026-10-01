@@ -112,8 +112,8 @@
         "CRON_JOB": "Tác vụ Tự động",
         "DEPARTMENT": "Phòng ban",
         "POSITION": "Vị trí Chuyên môn",
-        "LEADER": "Người hướng dẫn (Leader)",
-        "INTERN": "Thực tập sinh (Intern)",
+        "LEADER": "Người hướng dẫn",
+        "INTERN": "Thực tập sinh",
         "APPLICATION": "Hồ sơ Ứng tuyển",
         "APPLICATION_INVITE": "Thư mời Ứng tuyển",
         "TASK_GROUP": "Nhóm Công việc",
@@ -123,7 +123,7 @@
         "MEETING": "Cuộc họp & Điểm danh",
         "DAILY_REPORT": "Báo cáo Tiến độ Ngày",
         "WEEKLY_EVALUATION": "Bảng Đánh giá Tuần",
-        "PDF_EXPORT": "Xuất Báo Cáo & Chứng Nhận (PDF)",
+        "PDF_EXPORT": "Xuất Báo Cáo & Chứng Nhận PDF",
         "REGULATION": "Nội quy & Quy định",
         "STATS": "Thống kê & Báo cáo"
       }
@@ -226,8 +226,8 @@
       "CRON_JOB": "Tác vụ Tự động",
       "DEPARTMENT": "Phòng ban",
       "POSITION": "Vị trí Chuyên môn",
-      "LEADER": "Người hướng dẫn (Leader)",
-      "INTERN": "Thực tập sinh (Intern)",
+      "LEADER": "Người hướng dẫn",
+      "INTERN": "Thực tập sinh",
       "APPLICATION": "Hồ sơ Ứng tuyển",
       "APPLICATION_INVITE": "Thư mời Ứng tuyển",
       "TASK_GROUP": "Nhóm Công việc",
@@ -237,7 +237,7 @@
       "MEETING": "Cuộc họp & Điểm danh",
       "DAILY_REPORT": "Báo cáo Tiến độ Ngày",
       "WEEKLY_EVALUATION": "Bảng Đánh giá Tuần",
-      "PDF_EXPORT": "Xuất Báo Cáo & Chứng Nhận (PDF)",
+      "PDF_EXPORT": "Xuất Báo Cáo & Chứng Nhận PDF",
       "REGULATION": "Nội quy & Quy định",
       "STATS": "Thống kê & Báo cáo"
     }

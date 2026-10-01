@@ -40,31 +40,31 @@ export default function InternStats() {
             title: t("admin.interns.totalInterns"),
             value: allData?.meta?.total ?? 0,
             icon: Users,
-            containerClass: "border-sky-300 bg-sky-100/80 text-sky-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-sky-500/20 dark:to-cyan-400/10 dark:text-sky-300",
+            containerClass: "border-sky-300 bg-sky-100/80 text-sky-700 hover:bg-sky-200/80 dark:border-sky-400/30 dark:bg-sky-500/10 dark:text-sky-300",
         },
         {
             title: t("admin.interns.active"),
             value: activeData?.meta?.total ?? 0,
             icon: Circle,
-            containerClass: "border-emerald-300 bg-emerald-100/80 text-emerald-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-emerald-500/20 dark:to-green-400/10 dark:text-emerald-300",
+            containerClass: "border-emerald-300 bg-emerald-100/80 text-emerald-700 hover:bg-emerald-200/80 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-300",
         },
         {
             title: t("admin.interns.completed"),
             value: completedData?.meta?.total ?? 0,
             icon: CheckCircle2,
-            containerClass: "border-blue-300 bg-blue-100/80 text-blue-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-blue-500/20 dark:to-indigo-400/10 dark:text-blue-300",
+            containerClass: "border-blue-300 bg-blue-100/80 text-blue-700 hover:bg-blue-200/80 dark:border-blue-400/30 dark:bg-blue-500/10 dark:text-blue-300",
         },
         {
             title: t("admin.interns.dropped"),
             value: droppedData?.meta?.total ?? 0,
             icon: XCircle,
-            containerClass: "border-rose-300 bg-rose-100/80 text-rose-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-red-500/20 dark:to-rose-400/10 dark:text-rose-300",
+            containerClass: "border-rose-300 bg-rose-100/80 text-rose-700 hover:bg-rose-200/80 dark:border-rose-400/30 dark:bg-rose-500/10 dark:text-rose-300",
         },
         {
             title: t("admin.interns.newThisMonth"),
             value: newData?.meta?.total ?? 0,
             icon: CalendarPlus,
-            containerClass: "border-violet-300 bg-violet-100/80 text-violet-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-violet-500/20 dark:to-purple-400/10 dark:text-violet-300",
+            containerClass: "border-violet-300 bg-violet-100/80 text-violet-700 hover:bg-violet-200/80 dark:border-violet-400/30 dark:bg-violet-500/10 dark:text-violet-300",
         },
     ];
 

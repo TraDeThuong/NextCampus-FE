@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import {
   X,
   Copy,
@@ -63,6 +64,8 @@ export default function ActivityLogDetailModal({
   const actorName = log.actor?.fullName || log.user?.fullName || t("admin.activityLogs.system");
   const actorEmail = log.actor?.email || log.user?.email || "—";
   const actorRole = log.actor?.role?.name || log.user?.role?.name || null;
+  const actorAvatar = log.actor?.avatarUrl || log.user?.avatarUrl || null;
+  const isSystem = (!log.actor && !log.user?.fullName) || actorName === t("admin.activityLogs.system") || (!log.actorId && !log.userId && actorEmail === "—");
 
   return createPortal(
     <div
@@ -122,19 +125,41 @@ export default function ActivityLogDetailModal({
           {/* Grid Information */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Actor Card */}
-            <div className="rounded-2xl border border-border dark:border-white/5 bg-slate-50/70 dark:bg-white/[0.02] p-4 space-y-2">
+            <div className="rounded-2xl border border-border dark:border-white/5 bg-slate-50/70 dark:bg-white/[0.02] p-4 space-y-3">
               <div className="flex items-center gap-2 text-xs font-semibold text-cyan-600 dark:text-cyan-400">
                 <User className="h-4 w-4 shrink-0" />
                 <span>{t("admin.activityLogs.actorInfo")}</span>
               </div>
-              <div className="space-y-1 text-xs">
-                <p className="font-bold text-foreground truncate">{actorName}</p>
-                <p className="text-muted truncate">{actorEmail}</p>
-                {actorRole && (
-                  <span className="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-md font-medium border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300">
-                    {actorRole}
-                  </span>
+              <div className="flex items-center gap-3">
+                {isSystem ? (
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-cyan-300 bg-cyan-100/80 text-cyan-700 dark:border-cyan-400/30 dark:bg-cyan-500/10 dark:text-cyan-300 shadow-xs">
+                    <Shield className="h-5 w-5 shrink-0" />
+                  </div>
+                ) : actorAvatar ? (
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-white/5 overflow-hidden shadow-xs">
+                    <Image
+                      src={actorAvatar}
+                      alt={actorName}
+                      width={40}
+                      height={40}
+                      unoptimized
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-main to-primary-light text-sm font-bold text-white shadow-xs dark:from-slate-700 dark:to-slate-800 dark:ring-1 dark:ring-white/10">
+                    {actorName.charAt(0).toUpperCase()}
+                  </div>
                 )}
+                <div className="min-w-0 space-y-0.5 text-xs">
+                  <p className="font-bold text-foreground truncate">{actorName}</p>
+                  <p className="text-muted truncate">{actorEmail}</p>
+                  {actorRole && (
+                    <span className="inline-block mt-0.5 text-[10px] px-2 py-0.5 rounded-md font-medium border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300">
+                      {actorRole}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 

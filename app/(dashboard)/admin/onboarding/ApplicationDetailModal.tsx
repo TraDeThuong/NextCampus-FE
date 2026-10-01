@@ -158,9 +158,9 @@ export default function ApplicationDetail({ id, isModal, onClose }: Props) {
   const [localDeptId, setLocalDeptId] = useState<string | null | undefined>(undefined);
   const [localPosId, setLocalPosId] = useState<string | null | undefined>(undefined);
 
-  const [prevDataId, setPrevDataId] = useState(data?.id);
-  if (data?.id !== prevDataId) {
-    setPrevDataId(data?.id);
+  const [prevDataId, setPrevDataId] = useState(data?.data?.id);
+  if (data?.data?.id !== prevDataId) {
+    setPrevDataId(data?.data?.id);
     setLocalDeptId(undefined);
     setLocalPosId(undefined);
   }

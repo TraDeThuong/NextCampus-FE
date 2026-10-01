@@ -118,7 +118,7 @@
         "viewUploaded": "Xem tệp đã tải lên ↗"
       },
       "conflictAlert": {
-        "title": "Cảnh báo trùng hạn chót công việc (Task Deadline Conflict)",
+        "title": "Cảnh báo trùng hạn chót công việc",
         "desc": "Thực tập sinh đang có {count} công việc chưa hoàn thành có Deadline rơi vào đợt nghỉ phép này:",
         "autoExtendLabel": "Tự động gia hạn hạn chót cho các công việc bị trùng",
         "extendDaysLabel": "Số ngày gia hạn thêm",
