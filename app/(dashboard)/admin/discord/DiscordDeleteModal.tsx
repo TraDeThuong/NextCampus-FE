@@ -7,6 +7,7 @@ import { toast } from "react-hot-toast";
 import Modal from "@/components/ui/Modal";
 import type { DiscordWebhookConfig } from "@/types/discord";
 import { useDeleteDiscordWebhook } from "@/hooks/discord";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 interface DiscordDeleteModalProps {
   isOpen: boolean;
@@ -20,6 +21,8 @@ export default function DiscordDeleteModal({
   webhook,
 }: DiscordDeleteModalProps) {
   const t = useTranslations("discord");
+  const { can } = useRBAC();
+  const canManage = can("DISCORD_MANAGE");
   const deleteMutation = useDeleteDiscordWebhook();
 
   const handleDelete = async () => {
@@ -35,7 +38,7 @@ export default function DiscordDeleteModal({
     }
   };
 
-  if (!webhook) return null;
+  if (!webhook || !canManage) return null;
 
   const displayUrl = webhook.webhookUrl || webhook.maskedWebhookUrl;
 

@@ -11,7 +11,12 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function InternAbsencesPage() {
   return (
-    <ProtectedRoute portal="intern" allowedRoles={["INTERN"]}>
+    <ProtectedRoute
+      portal="intern"
+      allowedRoles={["INTERN"]}
+      requiredPermissions={["ABSENCE_READ", "ABSENCE_CREATE"]}
+      permissionMode="ANY"
+    >
       <Suspense fallback={null}>
         <InternAbsencesContent />
       </Suspense>

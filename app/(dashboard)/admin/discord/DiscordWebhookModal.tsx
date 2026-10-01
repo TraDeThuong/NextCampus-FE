@@ -20,6 +20,7 @@ import {
   useUpdateDiscordWebhook,
   useTestDiscordWebhook,
 } from "@/hooks/discord";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 const DISCORD_WEBHOOK_REGEX =
   /^https:\/\/(ptb\.|canary\.)?discord\.com\/api\/webhooks\/\d+\/[A-Za-z0-9_-]+$/;
@@ -52,6 +53,8 @@ function DiscordWebhookFormContent({
   defaultScope,
 }: DiscordWebhookFormProps) {
   const t = useTranslations("discord");
+  const { can } = useRBAC();
+  const canManage = can("DISCORD_MANAGE");
   const createMutation = useCreateDiscordWebhook();
   const updateMutation = useUpdateDiscordWebhook();
   const testMutation = useTestDiscordWebhook();
@@ -271,7 +274,7 @@ function DiscordWebhookFormContent({
         />
 
         {/* Inline Test Ping Button */}
-        {webhookUrl.trim() && (
+        {webhookUrl.trim() && canManage && (
           <div className="flex justify-end">
             <button
               type="button"
@@ -342,26 +345,28 @@ function DiscordWebhookFormContent({
         >
           {t("modal.cancelButton")}
         </button>
-        <button
-          type="submit"
-          disabled={isSaving}
-          className="
-            inline-flex items-center justify-center gap-2 h-[42px] sm:h-[46px] px-5 rounded-xl text-sm font-semibold
-            bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 text-white
-            hover:brightness-110 active:scale-95 transition-all
-            shadow-[0_0_20px_rgba(99,102,241,0.3)]
-            disabled:opacity-50 disabled:pointer-events-none cursor-pointer
-          "
-        >
-          {isSaving ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span>{t("modal.savingButton")}</span>
-            </>
-          ) : (
-            <span>{t("modal.saveButton")}</span>
-          )}
-        </button>
+        {canManage && (
+          <button
+            type="submit"
+            disabled={isSaving}
+            className="
+              inline-flex items-center justify-center gap-2 h-[42px] sm:h-[46px] px-5 rounded-xl text-sm font-semibold
+              bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 text-white
+              hover:brightness-110 active:scale-95 transition-all
+              shadow-[0_0_20px_rgba(99,102,241,0.3)]
+              disabled:opacity-50 disabled:pointer-events-none cursor-pointer
+            "
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>{t("modal.savingButton")}</span>
+              </>
+            ) : (
+              <span>{t("modal.saveButton")}</span>
+            )}
+          </button>
+        )}
       </div>
     </form>
   );
@@ -377,8 +382,9 @@ export default function DiscordWebhookModal({
   defaultScope,
 }: DiscordWebhookModalProps) {
   const t = useTranslations("discord");
+  const { can } = useRBAC();
 
-  if (!isOpen) return null;
+  if (!isOpen || !can("DISCORD_MANAGE")) return null;
 
   const formKey = editingWebhook
     ? `edit-${editingWebhook.id}`

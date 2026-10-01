@@ -15,6 +15,7 @@ import Modal from "@/components/ui/Modal";
 import Badge from "@/components/ui/Badge";
 import { useBatchSyncRoles, useRemindUnlinkedDiscord } from "@/hooks/discord";
 import { useRemindInternDiscord } from "@/hooks/intern/useRemindInternDiscord";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 import type { BatchSyncRolesResponse } from "@/types/discord";
 
 interface DiscordRoleSyncModalProps {
@@ -27,6 +28,8 @@ export default function DiscordRoleSyncModal({
   onClose,
 }: DiscordRoleSyncModalProps) {
   const t = useTranslations("discord");
+  const { can } = useRBAC();
+  const canManage = can("DISCORD_MANAGE");
   const batchSyncMutation = useBatchSyncRoles();
   const remindAllMutation = useRemindUnlinkedDiscord();
   const remindSingleMutation = useRemindInternDiscord();
@@ -94,7 +97,7 @@ export default function DiscordRoleSyncModal({
     });
   }, [syncResult, filterStatus, searchQuery]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !canManage) return null;
 
   return (
     <Modal

@@ -19,6 +19,7 @@ import MetalCard from "@/components/ui/MetalCard";
 import Badge from "@/components/ui/Badge";
 import type { DiscordWebhookConfig, DiscordWebhookPurpose } from "@/types/discord";
 import { useTestDiscordWebhook } from "@/hooks/discord";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 
 interface GlobalDiscordChannelsProps {
   webhooks: DiscordWebhookConfig[];
@@ -34,6 +35,8 @@ export default function GlobalDiscordChannels({
   onOpenDelete,
 }: GlobalDiscordChannelsProps) {
   const t = useTranslations("discord");
+  const { can } = useRBAC();
+  const canManage = can("DISCORD_MANAGE");
   const testMutation = useTestDiscordWebhook();
   const [testingId, setTestingId] = useState<string | null>(null);
 
@@ -175,22 +178,24 @@ export default function GlobalDiscordChannels({
             </div>
           ) : (
             <div className="py-4 text-center rounded-2xl border border-dashed border-border/70 bg-card/40">
-              <p className="text-xs text-muted mb-3">
+              <p className={`text-xs text-muted ${canManage ? "mb-3" : ""}`}>
                 {t("globalSection.notConfigured")}
               </p>
-              <button
-                type="button"
-                onClick={() => onOpenCreateWithPurpose(purpose)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border bg-card hover:bg-card/80 text-xs font-medium text-foreground transition active:scale-95 cursor-pointer shadow-xs"
-              >
-                <Plus className="h-3.5 w-3.5" />
-                <span>{t("globalSection.setupNow")}</span>
-              </button>
+              {canManage && (
+                <button
+                  type="button"
+                  onClick={() => onOpenCreateWithPurpose(purpose)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border bg-card hover:bg-card/80 text-xs font-medium text-foreground transition active:scale-95 cursor-pointer shadow-xs"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  <span>{t("globalSection.setupNow")}</span>
+                </button>
+              )}
             </div>
           )}
 
           {/* Action buttons */}
-          {config && (
+          {canManage && config && (
             <div className="flex items-center justify-between gap-3 pt-3 border-t border-border/50">
               <button
                 type="button"
