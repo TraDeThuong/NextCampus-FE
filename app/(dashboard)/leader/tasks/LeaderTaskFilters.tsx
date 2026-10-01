@@ -19,6 +19,8 @@ export default function LeaderTaskFilters() {
   const paramTitle = searchParams.get("title") ?? "";
   const paramOwner = searchParams.get("owner") ?? "";
   const paramStatus = searchParams.get("status") ?? "";
+  const paramTab = searchParams.get("tab") ?? "";
+  const isExtensionActive = paramStatus === "EXTENSION_PENDING" || paramTab === "extensions";
   const paramPhase = searchParams.get("phase") ?? "";
   const paramDeadlineFrom = searchParams.get("deadlineFrom") ?? "";
   const paramDeadlineTo = searchParams.get("deadlineTo") ?? "";
@@ -162,11 +164,12 @@ export default function LeaderTaskFilters() {
             onClick={() => {
               const params = new URLSearchParams(searchParams.toString());
               params.set("status", "EXTENSION_PENDING");
+              params.set("tab", "extensions");
               params.set("page", "1");
               router.push(`${pathname}?${params.toString()}`);
             }}
             className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold transition active:scale-95 cursor-pointer flex items-center gap-1.5 ${
-              paramStatus === "EXTENSION_PENDING"
+              isExtensionActive
                 ? "bg-amber-500/25 text-amber-300 border border-amber-400/60 shadow-[0_0_14px_rgba(245,158,11,0.25)] animate-pulse"
                 : "border border-amber-500/30 bg-amber-500/10 text-amber-300/80 hover:text-amber-200 hover:bg-amber-500/15"
             }`}
