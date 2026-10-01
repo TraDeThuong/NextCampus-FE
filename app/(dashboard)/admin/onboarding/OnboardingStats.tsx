@@ -58,25 +58,25 @@ export default function OnboardingStats() {
       title: t("admin.onboarding.activeInvites"),
       value: stats.activeInvites,
       icon: Mail,
-      containerClass: "border-sky-300 bg-sky-100/80 text-sky-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-sky-500/20 dark:to-cyan-400/10 dark:text-sky-300",
+      containerClass: "border-sky-300 bg-sky-100/80 text-sky-700 hover:bg-sky-200/80 dark:border-sky-400/30 dark:bg-sky-500/10 dark:text-sky-300",
     },
     {
       title: t("admin.onboarding.pendingApplications"),
       value: stats.pendingApplications,
       icon: Clock,
-      containerClass: "border-amber-300 bg-amber-100/80 text-amber-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-amber-500/20 dark:to-yellow-400/10 dark:text-amber-300",
+      containerClass: "border-amber-300 bg-amber-100/80 text-amber-700 hover:bg-amber-200/80 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-300",
     },
     {
       title: t("admin.onboarding.approvedApplications"),
       value: stats.approvedApplications,
       icon: CheckCircle2,
-      containerClass: "border-emerald-300 bg-emerald-100/80 text-emerald-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-emerald-500/20 dark:to-green-400/10 dark:text-emerald-300",
+      containerClass: "border-emerald-300 bg-emerald-100/80 text-emerald-700 hover:bg-emerald-200/80 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-300",
     },
     {
       title: t("admin.onboarding.rejectedApplications"),
       value: stats.rejectedApplications,
       icon: XCircle,
-      containerClass: "border-rose-300 bg-rose-100/80 text-rose-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-red-500/20 dark:to-rose-400/10 dark:text-rose-300",
+      containerClass: "border-rose-300 bg-rose-100/80 text-rose-700 hover:bg-rose-200/80 dark:border-rose-400/30 dark:bg-rose-500/10 dark:text-rose-300",
     },
   ];
 

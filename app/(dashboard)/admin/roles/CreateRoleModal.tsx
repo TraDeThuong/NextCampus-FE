@@ -25,6 +25,7 @@ const RESOURCE_FALLBACKS: Record<string, string> = {
   MAINTENANCE: "Bảo trì Hệ thống",
   API_KEY: "API Keys",
   WEBHOOK: "Webhooks",
+  DISCORD: "Tích hợp Discord",
   SYSTEM_CONFIG: "Cấu hình Hệ thống",
   CRON_JOB: "Tác vụ Tự động",
   DEPARTMENT: "Phòng ban",

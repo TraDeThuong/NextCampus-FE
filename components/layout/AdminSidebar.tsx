@@ -74,7 +74,7 @@ export default function AdminSidebar() {
         "CRON_JOB_READ",
         "CRON_JOB_MANAGE",
       ],                                                                                                                                                badge: undefined },
-      { name: t("admin.nav.discord"),       href: "/admin/discord",       icon: SiDiscord,            permissions: ["WEBHOOK_READ", "WEBHOOK_MANAGE", "SYSTEM_CONFIG_READ"], badge: undefined },
+      { name: t("admin.nav.discord"),       href: "/admin/discord",       icon: SiDiscord,            permissions: ["DISCORD_READ", "DISCORD_MANAGE"], badge: undefined },
       { name: t("admin.nav.activityLogs"), href: "/admin/activity-logs", icon: History,              permissions: ["AUDIT_LOG_READ"],                badge: undefined },
       { name: t("admin.nav.profile"),       href: "/admin/profile",       icon: UserRoundPen,         permissions: undefined,                         badge: undefined },
     ];

@@ -27,7 +27,7 @@ export default function InternWeeklyEvaluationStats({ stats }: Props) {
         ? t("stats.latestScoreSub", { week: stats.latestWeek })
         : "—",
       icon: Sparkles,
-      containerClass: "border-sky-300 bg-sky-100/80 text-sky-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-sky-500/25 dark:to-cyan-400/10 dark:text-cyan-300",
+      containerClass: "border-sky-300 bg-sky-100/80 text-sky-700 hover:bg-sky-200/80 dark:border-sky-400/30 dark:bg-sky-500/10 dark:text-sky-300",
       accent: "from-sky-400/70",
     },
     {
@@ -35,7 +35,7 @@ export default function InternWeeklyEvaluationStats({ stats }: Props) {
       value: stats.avgScore !== null ? `${stats.avgScore.toFixed(1)} / 10` : "—",
       subtitle: t("stats.avgScoreSub"),
       icon: Award,
-      containerClass: "border-emerald-300 bg-emerald-100/80 text-emerald-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-emerald-500/25 dark:to-teal-400/10 dark:text-emerald-300",
+      containerClass: "border-emerald-300 bg-emerald-100/80 text-emerald-700 hover:bg-emerald-200/80 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-300",
       accent: "from-emerald-400/70",
     },
     {
@@ -43,7 +43,7 @@ export default function InternWeeklyEvaluationStats({ stats }: Props) {
       value: stats.totalEvaluations,
       subtitle: t("stats.totalWeeksSub"),
       icon: TrendingUp,
-      containerClass: "border-purple-300 bg-purple-100/80 text-purple-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-purple-500/25 dark:to-indigo-400/10 dark:text-purple-300",
+      containerClass: "border-purple-300 bg-purple-100/80 text-purple-700 hover:bg-purple-200/80 dark:border-purple-400/30 dark:bg-purple-500/10 dark:text-purple-300",
       accent: "from-purple-400/70",
     },
     {
@@ -54,7 +54,7 @@ export default function InternWeeklyEvaluationStats({ stats }: Props) {
         total: stats.totalEvaluations,
       }),
       icon: CheckCircle2,
-      containerClass: "border-pink-300 bg-pink-100/80 text-pink-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-violet-500/25 dark:to-pink-400/10 dark:text-pink-300",
+      containerClass: "border-pink-300 bg-pink-100/80 text-pink-700 hover:bg-pink-200/80 dark:border-pink-400/30 dark:bg-pink-500/10 dark:text-pink-300",
       accent: "from-violet-400/70",
     },
   ];

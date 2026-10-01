@@ -33,6 +33,7 @@ import Table from "@/components/ui/Table";
 import MetalCard from "@/components/ui/MetalCard";
 import FilterSelect from "@/components/ui/FilterSelect";
 import { useAbsences } from "@/hooks/absence/useAbsences";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 import ReviewAbsenceModal from "./ReviewAbsenceModal";
 import type { Absence, AbsenceStatus, AbsenceDuration, AbsenceReasonType } from "@/types/absence";
 
@@ -45,6 +46,9 @@ export default function LeaderAbsencesContent() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
+
+  const { can } = useRBAC();
+  const canReview = can("ABSENCE_REVIEW");
 
   // URL-first state
   const searchQuery = searchParams.get("search") ?? "";
@@ -509,7 +513,7 @@ export default function LeaderAbsencesContent() {
                 {/* 8. Thao tác */}
                 <div className="flex items-center justify-end">
                   <Button
-                    variant={item.status === "PENDING" ? "primary" : "outline"}
+                    variant={item.status === "PENDING" && canReview ? "primary" : "outline"}
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -517,7 +521,7 @@ export default function LeaderAbsencesContent() {
                     }}
                     className="text-[11px] px-2.5 py-1 flex items-center gap-1"
                   >
-                    {item.status === "PENDING" ? (
+                    {item.status === "PENDING" && canReview ? (
                       <>
                         <CheckSquare className="h-3 w-3" />
                         <span>{t("table.reviewBtn")}</span>

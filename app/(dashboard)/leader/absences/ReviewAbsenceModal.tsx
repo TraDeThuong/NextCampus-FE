@@ -30,6 +30,7 @@ import Badge from "@/components/ui/Badge";
 import Spinner from "@/components/ui/Spinner";
 import { useReviewAbsence } from "@/hooks/absence/useReviewAbsence";
 import { useAbsenceConflicts } from "@/hooks/absence/useAbsenceConflicts";
+import { useRBAC } from "@/hooks/rbac/useRBAC";
 import type { Absence, AbsenceStatus, AbsenceDuration, AbsenceReasonType } from "@/types/absence";
 
 interface ModalProps {
@@ -49,6 +50,9 @@ function ReviewAbsenceFormContent({ absence, onClose, onSuccess }: FormContentPr
   const t = useTranslations("absences");
   const locale = useLocale();
   const reviewMutation = useReviewAbsence();
+  const { can } = useRBAC();
+  const canReview = can("ABSENCE_REVIEW");
+  const isPendingReview = absence.status === "PENDING";
 
   const [reviewNote, setReviewNote] = useState(absence.reviewNote || "");
   const [autoExtendConflictTasks, setAutoExtendConflictTasks] = useState(true);
@@ -214,7 +218,9 @@ function ReviewAbsenceFormContent({ absence, onClose, onSuccess }: FormContentPr
           </div>
           <div className="min-w-0">
             <h2 className="text-lg sm:text-xl font-bold text-foreground tracking-tight truncate">
-              {t("modal.reviewTitle")}
+              {canReview && isPendingReview
+                ? t("modal.reviewTitle")
+                : t("table.detailBtn")}
             </h2>
             <p className="text-xs text-muted mt-0.5 truncate">{t("modal.reviewDesc")}</p>
           </div>
@@ -430,33 +436,44 @@ function ReviewAbsenceFormContent({ absence, onClose, onSuccess }: FormContentPr
           </div>
         ) : null}
 
-        {/* Ô nhập ghi chú của Leader */}
-        <div className="space-y-1.5">
-          <label className="text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center justify-between">
-            <span>{t("modal.form.reviewNoteLabel")}</span>
-            <span className="text-[11px] text-muted font-normal">{t("modal.requiredIfReject")}</span>
-          </label>
-          <textarea
-            rows={3}
-            value={reviewNote}
-            onChange={(e) => {
-              setReviewNote(e.target.value);
-              if (rejectError) setRejectError("");
-            }}
-            placeholder={t("modal.form.reviewNotePlaceholder")}
-            className={`w-full rounded-xl border p-3 text-xs sm:text-sm bg-card text-foreground placeholder:text-muted transition resize-none focus:outline-hidden focus:ring-2 ${
-              rejectError
-                ? "border-destructive focus:ring-destructive/30"
-                : "border-border focus:ring-primary-main/30 dark:focus:ring-cyan-500/30"
-            }`}
-          />
-          {rejectError && (
-            <p className="text-xs text-danger flex items-center gap-1.5 mt-0.5 animate-fadeIn">
-              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-              <span>{rejectError}</span>
-            </p>
-          )}
-        </div>
+        {/* Ô nhập ghi chú của Leader / Phản hồi đã duyệt */}
+        {canReview && isPendingReview ? (
+          <div className="space-y-1.5">
+            <label className="text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center justify-between">
+              <span>{t("modal.form.reviewNoteLabel")}</span>
+              <span className="text-[11px] text-muted font-normal">{t("modal.requiredIfReject")}</span>
+            </label>
+            <textarea
+              rows={3}
+              value={reviewNote}
+              onChange={(e) => {
+                setReviewNote(e.target.value);
+                if (rejectError) setRejectError("");
+              }}
+              placeholder={t("modal.form.reviewNotePlaceholder")}
+              className={`w-full rounded-xl border p-3 text-xs sm:text-sm bg-card text-foreground placeholder:text-muted transition resize-none focus:outline-hidden focus:ring-2 ${
+                rejectError
+                  ? "border-destructive focus:ring-destructive/30"
+                  : "border-border focus:ring-primary-main/30 dark:focus:ring-cyan-500/30"
+              }`}
+            />
+            {rejectError && (
+              <p className="text-xs text-danger flex items-center gap-1.5 mt-0.5 animate-fadeIn">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                <span>{rejectError}</span>
+              </p>
+            )}
+          </div>
+        ) : absence.reviewNote ? (
+          <div className="space-y-1.5">
+            <label className="text-xs sm:text-sm font-medium text-foreground/90 select-none flex items-center gap-1">
+              <span>{t("modal.form.reviewNoteLabel")}</span>
+            </label>
+            <div className="p-3.5 rounded-xl bg-card border border-border text-xs sm:text-sm text-foreground/90 leading-relaxed italic">
+              &quot;{absence.reviewNote}&quot;
+            </div>
+          </div>
+        ) : null}
       </div>
 
       {/* 3. Footer Action Buttons */}
@@ -471,51 +488,53 @@ function ReviewAbsenceFormContent({ absence, onClose, onSuccess }: FormContentPr
           {t("modal.actions.cancel")}
         </Button>
 
-        <div className="flex items-center gap-2">
-          {/* Nút Từ chối */}
-          <Button
-            type="button"
-            variant="danger"
-            size="sm"
-            onClick={() => handleReview("REJECTED")}
-            disabled={isPending}
-            className="flex items-center gap-1.5"
-          >
-            {isPending && reviewMutation.variables?.data.status === "REJECTED" ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>{t("modal.actions.rejecting")}</span>
-              </>
-            ) : (
-              <>
-                <XCircle className="h-4 w-4" />
-                <span>{t("modal.actions.reject")}</span>
-              </>
-            )}
-          </Button>
+        {canReview && isPendingReview && (
+          <div className="flex items-center gap-2">
+            {/* Nút Từ chối */}
+            <Button
+              type="button"
+              variant="danger"
+              size="sm"
+              onClick={() => handleReview("REJECTED")}
+              disabled={isPending}
+              className="flex items-center gap-1.5"
+            >
+              {isPending && reviewMutation.variables?.data.status === "REJECTED" ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>{t("modal.actions.rejecting")}</span>
+                </>
+              ) : (
+                <>
+                  <XCircle className="h-4 w-4" />
+                  <span>{t("modal.actions.reject")}</span>
+                </>
+              )}
+            </Button>
 
-          {/* Nút Phê duyệt */}
-          <Button
-            type="button"
-            variant="primary"
-            size="sm"
-            onClick={() => handleReview("APPROVED")}
-            disabled={isPending}
-            className="flex items-center gap-1.5 shadow-md shadow-primary-main/20"
-          >
-            {isPending && reviewMutation.variables?.data.status === "APPROVED" ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>{t("modal.actions.approving")}</span>
-              </>
-            ) : (
-              <>
-                <CheckCircle2 className="h-4 w-4" />
-                <span>{t("modal.actions.approve")}</span>
-              </>
-            )}
-          </Button>
-        </div>
+            {/* Nút Phê duyệt */}
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              onClick={() => handleReview("APPROVED")}
+              disabled={isPending}
+              className="flex items-center gap-1.5 shadow-md shadow-primary-main/20"
+            >
+              {isPending && reviewMutation.variables?.data.status === "APPROVED" ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>{t("modal.actions.approving")}</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span>{t("modal.actions.approve")}</span>
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

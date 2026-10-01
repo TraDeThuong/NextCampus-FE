@@ -14,8 +14,6 @@ import {
   Phone,
   GraduationCap,
   BookOpen,
-  Building2,
-  Briefcase,
   Clock,
   FileUp,
   FileText,
@@ -41,6 +39,7 @@ import {
 import MetalCard from "@/components/ui/MetalCard";
 import Spinner from "@/components/ui/Spinner";
 import Button from "@/components/ui/Button";
+import Select from "@/components/ui/Select";
 import { DatePicker } from "@/components/ui/DatePicker";
 
 const BUSINESS_TIME_ZONE = "Asia/Ho_Chi_Minh";
@@ -613,67 +612,38 @@ export default function OnboardingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {/* Preferred Department */}
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-slate-300">
-                Phòng ban mong muốn <span className="text-rose-400">*</span>
-              </label>
-              <div className="relative">
-                <Building2 className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-500 shrink-0" />
-                <select
-                  {...register("preferredDepartment")}
-                  onChange={(e) => {
-                    setValue("preferredDepartment", e.target.value, { shouldValidate: true });
-                    setValue("preferredPosition", "");
-                  }}
-                  className={`w-full appearance-none rounded-xl border bg-[#0B1020] py-2.5 pl-10 pr-8 text-sm text-white outline-none transition focus:border-cyan-400/50 ${
-                    errors.preferredDepartment ? "border-rose-500/50" : "border-white/10"
-                  }`}
-                >
-                  <option value="">-- Chọn phòng ban --</option>
-                  {APPLICATION_PREFERRED_DEPARTMENTS.map((dept) => (
-                    <option key={dept} value={dept}>
-                      {dept}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {errors.preferredDepartment && (
-                <p className="mt-1 text-xs text-rose-400 flex items-center gap-1">
-                  <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.preferredDepartment.message}
-                </p>
-              )}
-            </div>
+            <Select
+              label="Phòng ban mong muốn"
+              required
+              error={errors.preferredDepartment?.message}
+              placeholder="-- Chọn phòng ban --"
+              value={selectedDepartment}
+              options={APPLICATION_PREFERRED_DEPARTMENTS.map((dept) => ({
+                value: dept,
+                label: dept,
+              }))}
+              onChange={(val) => {
+                setValue("preferredDepartment", val, { shouldValidate: true });
+                setValue("preferredPosition", "");
+              }}
+            />
 
             {/* Preferred Position */}
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-slate-300">
-                Vị trí mong muốn <span className="text-rose-400">*</span>
-              </label>
-              <div className="relative">
-                <Briefcase className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-500 shrink-0" />
-                <select
-                  {...register("preferredPosition")}
-                  disabled={!selectedDepartment}
-                  className={`w-full appearance-none rounded-xl border bg-[#0B1020] py-2.5 pl-10 pr-8 text-sm text-white outline-none transition focus:border-cyan-400/50 disabled:opacity-50 disabled:cursor-not-allowed ${
-                    errors.preferredPosition ? "border-rose-500/50" : "border-white/10"
-                  }`}
-                >
-                  <option value="">
-                    {!selectedDepartment ? "-- Chọn phòng ban trước --" : "-- Chọn vị trí --"}
-                  </option>
-                  {positions.map((pos) => (
-                    <option key={pos} value={pos}>
-                      {pos}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {errors.preferredPosition && (
-                <p className="mt-1 text-xs text-rose-400 flex items-center gap-1">
-                  <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.preferredPosition.message}
-                </p>
-              )}
-            </div>
+            <Select
+              label="Vị trí mong muốn"
+              required
+              disabled={!selectedDepartment}
+              error={errors.preferredPosition?.message}
+              placeholder={!selectedDepartment ? "-- Chọn phòng ban trước --" : "-- Chọn vị trí --"}
+              value={watch("preferredPosition")}
+              options={positions.map((pos) => ({
+                value: pos,
+                label: pos,
+              }))}
+              onChange={(val) => {
+                setValue("preferredPosition", val, { shouldValidate: true });
+              }}
+            />
 
             {/* Start Date (Weekend + Past Date blocked) */}
             <div>

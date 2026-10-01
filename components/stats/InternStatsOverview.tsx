@@ -329,7 +329,7 @@ export default function InternStatsOverview() {
               </div>
 
               <div className="mt-6">
-                <Table columns="2.2fr 1fr 1.6fr 1fr">
+                <Table columns="2.2fr 1fr 1.6fr 1fr" className="border-0 shadow-none rounded-none bg-transparent">
                   <Table.Header>
                     <span>{t("colTaskName")}</span>
                     <span>{t("colPriority")}</span>

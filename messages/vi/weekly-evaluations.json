@@ -75,7 +75,7 @@
         "assignedMidWeekNotice": "Thực tập sinh mới được giao giữa tuần, không áp dụng đánh giá cho tuần này.",
         "aiSuggestionReceived": "Đã nhận gợi ý từ AI!",
         "criteriaCount": "({count} tiêu chí)",
-        "draftPreviewNotice": "Điểm 12 tiêu chí và nhận xét từ AI đang ở dạng Xem trước (Draft). Bạn có thể tự do điều chỉnh trước khi lưu chính thức.",
+        "draftPreviewNotice": "Điểm 12 tiêu chí và nhận xét từ AI đang ở dạng xem trước. Bạn có thể tự do điều chỉnh trước khi lưu chính thức.",
         "draftBadge": "Bản nháp AI",
         "aiSuggestedBadge": "Gợi ý từ AI"
       },
@@ -312,7 +312,7 @@
       "weekAlreadyExists": "Tuần {week} đã được đánh giá cho thực tập sinh này.",
       "aiSuggestionReceived": "Đã nhận gợi ý từ AI!",
       "criteriaCount": "({count} tiêu chí)",
-      "draftPreviewNotice": "Điểm 12 tiêu chí và nhận xét từ AI đang ở dạng Xem trước (Draft). Bạn có thể tự do điều chỉnh trước khi lưu chính thức.",
+      "draftPreviewNotice": "Điểm 12 tiêu chí và nhận xét từ AI đang ở dạng xem trước. Bạn có thể tự do điều chỉnh trước khi lưu chính thức.",
       "draftBadge": "Bản nháp AI",
       "aiSuggestedBadge": "Gợi ý từ AI"
     },

@@ -89,31 +89,31 @@ export default function InternTaskStats() {
       title: t("totalTasks"),
       value: stats.total,
       icon: CheckSquare,
-      containerClass: "border-sky-300 bg-sky-100/80 text-sky-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-sky-500/20 dark:to-cyan-400/10 dark:text-sky-300",
+      containerClass: "border-sky-300 bg-sky-100/80 text-sky-700 hover:bg-sky-200/80 dark:border-sky-400/30 dark:bg-sky-500/10 dark:text-sky-300",
     },
     {
       title: t("inProgress"),
       value: stats.inProgress,
       icon: Clock,
-      containerClass: "border-blue-300 bg-blue-100/80 text-blue-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-blue-500/20 dark:to-indigo-400/10 dark:text-blue-300",
+      containerClass: "border-blue-300 bg-blue-100/80 text-blue-700 hover:bg-blue-200/80 dark:border-blue-400/30 dark:bg-blue-500/10 dark:text-blue-300",
     },
     {
       title: t.has("overdue") ? t("overdue") : tCommon("overdue"),
       value: stats.overdue,
       icon: AlertTriangle,
-      containerClass: "border-rose-300 bg-rose-100/80 text-rose-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-rose-500/20 dark:to-red-400/10 dark:text-rose-300",
+      containerClass: "border-rose-300 bg-rose-100/80 text-rose-700 hover:bg-rose-200/80 dark:border-rose-400/30 dark:bg-rose-500/10 dark:text-rose-300",
     },
     {
       title: t("completed"),
       value: stats.completed,
       icon: CheckCircle2,
-      containerClass: "border-emerald-300 bg-emerald-100/80 text-emerald-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-emerald-500/20 dark:to-green-400/10 dark:text-emerald-300",
+      containerClass: "border-emerald-300 bg-emerald-100/80 text-emerald-700 hover:bg-emerald-200/80 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-300",
     },
     {
       title: t("completionRate"),
       value: `${stats.rate}%`,
       icon: Percent,
-      containerClass: "border-violet-300 bg-violet-100/80 text-violet-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-violet-500/20 dark:to-purple-400/10 dark:text-violet-300",
+      containerClass: "border-violet-300 bg-violet-100/80 text-violet-700 hover:bg-violet-200/80 dark:border-violet-400/30 dark:bg-violet-500/10 dark:text-violet-300",
     },
   ];
 

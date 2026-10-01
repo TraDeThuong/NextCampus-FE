@@ -21,11 +21,11 @@ type ModalType = "tasks" | "groups" | "done";
 type DateRange = { from: string; to: string; queryFrom: string; queryTo: string };
 
 const STAT_COLOR_STYLES: Record<string, { bg: string; text: string; bar: string }> = {
-  blue: { bg: "border border-sky-300 bg-sky-100/80 text-sky-700 dark:border-white/10 dark:bg-blue-500/10 dark:text-blue-400", text: "text-sky-700 dark:text-blue-400", bar: "bg-sky-500 dark:bg-blue-500/40" },
-  purple: { bg: "border border-purple-300 bg-purple-100/80 text-purple-700 dark:border-white/10 dark:bg-purple-500/10 dark:text-purple-400", text: "text-purple-700 dark:text-purple-400", bar: "bg-purple-500 dark:bg-purple-500/40" },
-  emerald: { bg: "border border-emerald-300 bg-emerald-100/80 text-emerald-700 dark:border-white/10 dark:bg-emerald-500/10 dark:text-emerald-400", text: "text-emerald-700 dark:text-emerald-400", bar: "bg-emerald-500 dark:bg-emerald-500/40" },
-  amber: { bg: "border border-amber-300 bg-amber-100/80 text-amber-700 dark:border-white/10 dark:bg-amber-500/10 dark:text-amber-400", text: "text-amber-700 dark:text-amber-400", bar: "bg-amber-500 dark:bg-amber-500/40" },
-  red: { bg: "border border-rose-300 bg-rose-100/80 text-rose-700 dark:border-white/10 dark:bg-rose-500/10 dark:text-rose-400", text: "text-rose-700 dark:text-rose-400", bar: "bg-rose-500 dark:bg-rose-500/40" },
+  blue: { bg: "border border-sky-300 bg-sky-100/80 text-sky-700 hover:bg-sky-200/80 dark:border-sky-400/30 dark:bg-sky-500/10 dark:text-sky-300", text: "text-sky-700 dark:text-sky-300", bar: "bg-sky-500 dark:bg-sky-500/40" },
+  purple: { bg: "border border-purple-300 bg-purple-100/80 text-purple-700 hover:bg-purple-200/80 dark:border-purple-400/30 dark:bg-purple-500/10 dark:text-purple-300", text: "text-purple-700 dark:text-purple-300", bar: "bg-purple-500 dark:bg-purple-500/40" },
+  emerald: { bg: "border border-emerald-300 bg-emerald-100/80 text-emerald-700 hover:bg-emerald-200/80 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-300", text: "text-emerald-700 dark:text-emerald-300", bar: "bg-emerald-500 dark:bg-emerald-500/40" },
+  amber: { bg: "border border-amber-300 bg-amber-100/80 text-amber-700 hover:bg-amber-200/80 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-300", text: "text-amber-700 dark:text-amber-300", bar: "bg-amber-500 dark:bg-amber-500/40" },
+  red: { bg: "border border-rose-300 bg-rose-100/80 text-rose-700 hover:bg-rose-200/80 dark:border-rose-400/30 dark:bg-rose-500/10 dark:text-rose-300", text: "text-rose-700 dark:text-rose-300", bar: "bg-rose-500 dark:bg-rose-500/40" },
 };
 
 function formatLocalDate(date: Date): string {
@@ -113,7 +113,7 @@ export default function LeaderTaskStats() {
 
   const { data: reviewTasksData, isLoading: reviewLoading } = useTasks({ status: "REVIEW", limit: 10 });
   const reviewTasks = useMemo(() => extractTasks(reviewTasksData?.data), [reviewTasksData]);
-  const reviewTaskCount = reviewTasksData?.meta?.total ?? (reviewTasksData?.data as any)?.meta?.total ?? reviewTasks.length;
+  const reviewTaskCount = reviewTasksData?.meta?.total ?? (reviewTasksData?.data as unknown as { meta?: { total?: number } })?.meta?.total ?? reviewTasks.length;
 
   const overview = analytics?.overview;
   const doneCount = overview?.byStatus ? getStatusCount(overview.byStatus, "DONE") : 0;
@@ -303,7 +303,7 @@ function TaskTable({ filters }: { filters: TaskQueryParams }) {
   const [page, setPage] = useState(1);
   const { data, isLoading, refetch, isFetching } = useTasks({ ...filters, page, limit: 20 });
   const tasks = useMemo(() => extractTasks(data?.data), [data]);
-  const meta = data?.meta ?? (data?.data as any)?.meta;
+  const meta = data?.meta ?? (data?.data as unknown as { meta?: { total: number; page: number; totalPages: number } })?.meta;
   const router = useRouter();
 
   if (isLoading) return <div className="flex justify-center py-8"><Spinner size="sm" /></div>;
@@ -347,7 +347,7 @@ function DoneTaskTable({ filters }: { filters: TaskQueryParams }) {
   const [page, setPage] = useState(1);
   const { data, isLoading, refetch, isFetching } = useTasks({ ...filters, page, limit: 20 });
   const tasks = useMemo(() => extractTasks(data?.data), [data]);
-  const meta = data?.meta ?? (data?.data as any)?.meta;
+  const meta = data?.meta ?? (data?.data as unknown as { meta?: { total: number; page: number; totalPages: number } })?.meta;
   const router = useRouter();
 
   if (isLoading) return <div className="flex justify-center py-8"><Spinner size="sm" /></div>;

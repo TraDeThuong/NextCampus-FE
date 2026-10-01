@@ -26,19 +26,19 @@ export default function DepartmentStats() {
       title: t("admin.department.totalDepartments"),
       value: totalDepartments,
       icon: Building2,
-      containerClass: "border-sky-300 bg-sky-100/80 text-sky-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-sky-500/20 dark:to-cyan-400/10 dark:text-cyan-300",
+      containerClass: "border-sky-300 bg-sky-100/80 text-sky-700 hover:bg-sky-200/80 dark:border-sky-400/30 dark:bg-sky-500/10 dark:text-sky-300",
     },
     {
       title: t("admin.department.totalPositions"),
       value: totalPositions,
       icon: Briefcase,
-      containerClass: "border-emerald-300 bg-emerald-100/80 text-emerald-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-emerald-500/20 dark:to-green-400/10 dark:text-emerald-300",
+      containerClass: "border-emerald-300 bg-emerald-100/80 text-emerald-700 hover:bg-emerald-200/80 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-300",
     },
     {
       title: t("admin.department.assignedLeaders"),
       value: departmentsWithLeader,
       icon: Users,
-      containerClass: "border-purple-300 bg-purple-100/80 text-purple-700 dark:border-white/10 dark:bg-gradient-to-br dark:from-purple-500/20 dark:to-indigo-400/10 dark:text-purple-300",
+      containerClass: "border-purple-300 bg-purple-100/80 text-purple-700 hover:bg-purple-200/80 dark:border-purple-400/30 dark:bg-purple-500/10 dark:text-purple-300",
     },
   ];
 

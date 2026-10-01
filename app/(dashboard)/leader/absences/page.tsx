@@ -12,7 +12,12 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function LeaderAbsencesPage() {
   return (
-    <ProtectedRoute portal="leader" allowedRoles={["LEADER", "ADMIN", "HR"]}>
+    <ProtectedRoute
+      portal="leader"
+      allowedRoles={["LEADER", "ADMIN", "HR"]}
+      requiredPermissions={["ABSENCE_REVIEW", "ABSENCE_READ"]}
+      permissionMode="ANY"
+    >
       <Suspense fallback={<Spinner />}>
         <LeaderAbsencesContent />
       </Suspense>

@@ -11,8 +11,6 @@ import { z } from "zod";
 import {
   Mail,
   Phone,
-  Building2,
-  Briefcase,
   Clock,
   Loader2,
   AlertTriangle,
@@ -25,6 +23,7 @@ import { useVerifyInvite } from "@/hooks/application/useVerifyInvite";
 import { useCreateApplication } from "@/hooks/application/useCreateApplication";
 import { getActiveRegulationService } from "@/services/regulation.service";
 import Spinner from "@/components/ui/Spinner";
+import Select from "@/components/ui/Select";
 import { DatePicker } from "@/components/ui/DatePicker";
 import {
   APPLICATION_PREFERRED_DEPARTMENTS,
@@ -98,8 +97,6 @@ type FormValues = z.infer<typeof formSchema>;
 const inputClass =
   "w-full rounded-2xl border border-zinc-800 bg-zinc-950/50 py-3 pl-11 pr-4 text-sm text-white outline-none transition-all duration-300 hover:border-zinc-700 focus:border-sky-500/50 focus:shadow-[0_0_25px_rgba(21,174,245,0.15)] placeholder:text-zinc-600";
 
-const selectClass = `${inputClass} appearance-none`;
-
 function formatFileSize(bytes: number): string {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -141,6 +138,10 @@ export default function FormPage() {
   const selectedPreferredDepartment = useWatch({
     control,
     name: "preferredDepartment",
+  });
+  const selectedPreferredPosition = useWatch({
+    control,
+    name: "preferredPosition",
   });
   const preferredPositions = getApplicationPreferredPositions(
     selectedPreferredDepartment,
@@ -308,56 +309,45 @@ export default function FormPage() {
           />
         </Field>
 
-        <Field
+        <Select
           label="Preferred Department"
-          icon={Building2}
+          required
           error={errors.preferredDepartment?.message}
-        >
-          <div className="relative">
-            <select
-              {...register("preferredDepartment")}
-              onChange={(event) => {
-                setValue("preferredDepartment", event.target.value, {
-                  shouldValidate: true,
-                });
-                setValue("preferredPosition", "");
-              }}
-              className={selectClass}
-            >
-              <option value="">Select preferred department...</option>
-              {APPLICATION_PREFERRED_DEPARTMENTS.map((department) => (
-                <option key={department} value={department}>
-                  {department}
-                </option>
-              ))}
-            </select>
-          </div>
-        </Field>
+          placeholder="Select preferred department..."
+          value={selectedPreferredDepartment}
+          options={APPLICATION_PREFERRED_DEPARTMENTS.map((department) => ({
+            value: department,
+            label: department,
+          }))}
+          onChange={(value) => {
+            setValue("preferredDepartment", value, {
+              shouldValidate: true,
+            });
+            setValue("preferredPosition", "");
+          }}
+        />
 
-        <Field
+        <Select
           label="Preferred Position"
-          icon={Briefcase}
+          required
+          disabled={!selectedPreferredDepartment}
           error={errors.preferredPosition?.message}
-        >
-          <div className="relative">
-            <select
-              {...register("preferredPosition")}
-              disabled={!selectedPreferredDepartment}
-              className={selectClass}
-            >
-              <option value="">
-                {!selectedPreferredDepartment
-                  ? "Select preferred department first..."
-                  : "Select preferred position..."}
-              </option>
-              {preferredPositions.map((position) => (
-                <option key={position} value={position}>
-                  {position}
-                </option>
-              ))}
-            </select>
-          </div>
-        </Field>
+          placeholder={
+            !selectedPreferredDepartment
+              ? "Select preferred department first..."
+              : "Select preferred position..."
+          }
+          value={selectedPreferredPosition}
+          options={preferredPositions.map((position) => ({
+            value: position,
+            label: position,
+          }))}
+          onChange={(value) => {
+            setValue("preferredPosition", value, {
+              shouldValidate: true,
+            });
+          }}
+        />
 
         <div>
           <DatePicker

@@ -215,17 +215,16 @@ export default function LeaderTableTasks() {
         </MetalCard>
 
         {/* Right: Task Table */}
-        <MetalCard className="min-h-[240px] min-w-0">
-          <div className="min-w-0 p-4 pb-24">
-            <div className="mb-3 flex items-center justify-between">
-              <div className="flex items-center">
-                <h3 className="text-sm font-semibold">
-                  <span className="metal-text">{t("tasks")}</span>
-                  {taskGroupId && groups.find((g) => g.id === taskGroupId) && (
-                    <span className="ml-2 font-normal text-muted">— {groups.find((g) => g.id === taskGroupId)!.name}</span>
-                  )}
-                </h3>
-              </div>
+        <div className="min-h-[240px] min-w-0 flex flex-col space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center">
+              <h3 className="text-sm font-semibold">
+                <span className="metal-text">{t("tasks")}</span>
+                {taskGroupId && groups.find((g) => g.id === taskGroupId) && (
+                  <span className="ml-2 font-normal text-muted">— {groups.find((g) => g.id === taskGroupId)!.name}</span>
+                )}
+              </h3>
+            </div>
               {taskGroupId && can("TASK_ASSIGNMENT_CREATE") && (
                 <Button
                   variant="glass"
@@ -350,10 +349,11 @@ export default function LeaderTableTasks() {
                 </div>
               </>
             ) : (
-              <p className="py-12 text-center text-sm text-muted">{t("noTasksFound")}</p>
+              <MetalCard className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                <p className="text-sm text-muted">{t("noTasksFound")}</p>
+              </MetalCard>
             )}
-          </div>
-        </MetalCard>
+        </div>
       </div>
 
       <Modal.Window name="group-action" size="sm">
