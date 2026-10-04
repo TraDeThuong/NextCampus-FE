@@ -12,6 +12,9 @@ import {
   MoreVertical,
   Edit2,
   Trash2,
+  ShieldAlert,
+  Compass,
+  GraduationCap,
 } from "lucide-react";
 import type { Role } from "@/types/rbac";
 import Table from "@/components/ui/Table";
@@ -165,15 +168,35 @@ export default function RoleRow({
         </div>
       </div>
 
-      {/* 2. Role Type Badge */}
+      {/* 2. Portal Type Badge */}
+      <div className="flex items-center">
+        {role.portalType === "LEADER" ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-300 bg-indigo-100/80 px-2.5 py-1 text-xs font-semibold text-indigo-800 dark:border-indigo-400/30 dark:bg-indigo-500/10 dark:text-indigo-300">
+            <Compass className="h-3 w-3 shrink-0" />
+            <span>{t("admin.roles.table.portalLeader")}</span>
+          </span>
+        ) : role.portalType === "INTERN" ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-100/80 px-2.5 py-1 text-xs font-semibold text-emerald-800 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-300">
+            <GraduationCap className="h-3 w-3 shrink-0" />
+            <span>{t("admin.roles.table.portalIntern")}</span>
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-300 bg-sky-100/80 px-2.5 py-1 text-xs font-semibold text-sky-800 dark:border-sky-400/30 dark:bg-sky-500/10 dark:text-sky-300">
+            <ShieldAlert className="h-3 w-3 shrink-0" />
+            <span>{t("admin.roles.table.portalAdmin")}</span>
+          </span>
+        )}
+      </div>
+
+      {/* 3. Role Type Badge */}
       <div className="flex items-center">
         {role.isSystem ? (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan-300 bg-cyan-100/80 px-2.5 py-1 text-xs font-semibold text-cyan-800 dark:border-cyan-400/30 dark:bg-cyan-500/10 dark:text-cyan-300">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-slate-100/80 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300">
             <Lock className="h-3 w-3 shrink-0" />
             <span>{t("admin.roles.table.systemBadge")}</span>
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-100/80 px-2.5 py-1 text-xs font-semibold text-emerald-800 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-300">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-100/80 px-2.5 py-1 text-xs font-semibold text-amber-800 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-300">
             <Sparkles className="h-3 w-3 shrink-0" />
             <span>{t("admin.roles.table.customBadge")}</span>
           </span>

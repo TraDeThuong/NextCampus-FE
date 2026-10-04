@@ -1,27 +1,63 @@
 export type PortalName = "admin" | "leader" | "intern";
+export type PortalType = "ADMIN" | "LEADER" | "INTERN";
+
+export interface PortalContext {
+  portalType?: string | null;
+  role?: string | null;
+}
 
 /**
- * Determine the base portal for a given role:
- * - "LEADER" -> "leader"
- * - "INTERN" -> "intern"
- * - "ADMIN" or any custom administrative role (e.g. HR_MANAGER, COORDINATOR) -> "admin"
+ * Determine the base portal for a given user context:
+ * - Prioritize portalType ("ADMIN" -> "admin", "LEADER" -> "leader", "INTERN" -> "intern")
+ * - Fallback to role name string if portalType is not yet set
+ * - Defaults to "admin"
  */
-export function getPortalName(role?: string | null): PortalName {
-  if (!role) return "admin";
-  const normalized = role.trim().toUpperCase();
-  if (normalized === "LEADER") return "leader";
-  if (normalized === "INTERN") return "intern";
+export function getPortalName(
+  portalTypeOrContext?: string | PortalContext | null,
+  fallbackRole?: string | null,
+): PortalName {
+  if (!portalTypeOrContext) {
+    if (!fallbackRole) return "admin";
+    const normalizedRole = fallbackRole.trim().toUpperCase();
+    if (normalizedRole === "LEADER") return "leader";
+    if (normalizedRole === "INTERN") return "intern";
+    return "admin";
+  }
+
+  let portalType: string | undefined | null;
+  let role: string | undefined | null;
+
+  if (typeof portalTypeOrContext === "object") {
+    portalType = portalTypeOrContext.portalType;
+    role = portalTypeOrContext.role;
+  } else {
+    portalType = portalTypeOrContext;
+    role = fallbackRole;
+  }
+
+  const normalizedType = portalType?.trim().toUpperCase();
+  if (normalizedType === "ADMIN") return "admin";
+  if (normalizedType === "LEADER") return "leader";
+  if (normalizedType === "INTERN") return "intern";
+
+  const normalizedRole = role?.trim().toUpperCase();
+  if (normalizedRole === "LEADER") return "leader";
+  if (normalizedRole === "INTERN") return "intern";
+
   return "admin";
 }
 
 /**
- * Determine safe dashboard path for any role:
+ * Determine safe dashboard path based on portalType / role:
  * - LEADER -> /leader/dashboard
  * - INTERN -> /intern/dashboard
  * - ADMIN / custom roles -> /admin/dashboard
  */
-export function getDashboardPath(role?: string | null): string {
-  return `/${getPortalName(role)}/dashboard`;
+export function getDashboardPath(
+  portalTypeOrContext?: string | PortalContext | null,
+  fallbackRole?: string | null,
+): string {
+  return `/${getPortalName(portalTypeOrContext, fallbackRole)}/dashboard`;
 }
 
 /**
@@ -65,10 +101,11 @@ export function hasAllPermissions(
  * falling back to the user's profile page which is always accessible.
  */
 export function getFirstAuthorizedPath(
-  role?: string | null,
-  permissions: string[] = []
+  portalTypeOrContext?: string | PortalContext | null,
+  permissions: string[] = [],
+  fallbackRole?: string | null,
 ): string {
-  const portal = getPortalName(role);
+  const portal = getPortalName(portalTypeOrContext, fallbackRole);
 
   if (portal === "admin") {
     if (hasPermission(permissions, "STATS_ADMIN_READ")) return "/admin/dashboard";

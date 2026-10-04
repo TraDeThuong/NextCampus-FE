@@ -16,6 +16,7 @@ export interface LoginUser {
     fullName: string;
     role: string;
     roleId?: string;
+    portalType?: "ADMIN" | "LEADER" | "INTERN";
     permissions?: string[];
     avatarUrl: string | null;
 }
@@ -68,6 +69,7 @@ export interface MeUser {
     fullName: string;
     role: string;
     roleId?: string;
+    portalType?: "ADMIN" | "LEADER" | "INTERN";
     permissions?: string[];
     isActive: boolean;
     avatarUrl: string | null;

@@ -41,8 +41,8 @@ export default function ProtectedRoute({
     if (!state.isAuthenticated || !user) return false;
 
     // Check portal access:
-    // If portal is specified, verify that the user's role maps to this portal
-    if (portal && getPortalName(userRole) !== portal) {
+    // If portal is specified, verify that the user's portalType (or fallback role) maps to this portal
+    if (portal && getPortalName(user.portalType, userRole) !== portal) {
       return false;
     }
 
@@ -85,11 +85,11 @@ export default function ProtectedRoute({
     }
 
     if (!isAuthorized) {
-      const safePath = getFirstAuthorizedPath(userRole, userPermissions);
+      const safePath = getFirstAuthorizedPath(user?.portalType, userPermissions, userRole);
       toast.error(t("unauthorized"));
       router.replace(safePath);
     }
-  }, [state.isLoading, state.isAuthenticated, isAuthorized, userRole, userPermissions, router, t]);
+  }, [state.isLoading, state.isAuthenticated, isAuthorized, user, userRole, userPermissions, router, t]);
 
   if (state.isLoading) {
     return (
