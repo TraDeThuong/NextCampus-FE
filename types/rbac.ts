@@ -13,10 +13,13 @@ export interface Permission {
 
 // ─── Role Entity ─────────────────────────────────────────────────────────
 
+export type PortalType = "ADMIN" | "LEADER" | "INTERN";
+
 export interface Role {
   id: string;
   name: string;
   description: string | null;
+  portalType?: PortalType;
   isSystem: boolean;
   userCount: number;
   permissions: Permission[];
@@ -37,12 +40,14 @@ export interface RoleQueryParams {
 export interface CreateRolePayload {
   name: string;
   description?: string;
+  portalType?: PortalType;
   permissionIds?: string[];
 }
 
 export interface UpdateRolePayload {
   name?: string;
   description?: string;
+  portalType?: PortalType;
 }
 
 export interface SyncRolePermissionsPayload {

@@ -5,7 +5,8 @@ import { useTranslations } from "next-intl";
 import { Edit3, Loader2, Lock, AlertCircle } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import { useUpdateRole } from "@/hooks/rbac/useUpdateRole";
-import type { Role } from "@/types/rbac";
+import type { Role, PortalType } from "@/types/rbac";
+import PortalTypeSelector from "./PortalTypeSelector";
 
 interface EditRoleModalProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ function EditRoleForm({
 }) {
   const t = useTranslations();
   const [name, setName] = useState(role.name);
+  const [portalType, setPortalType] = useState<PortalType>(role.portalType || "ADMIN");
   const [description, setDescription] = useState(role.description || "");
   const [nameError, setNameError] = useState("");
 
@@ -35,7 +37,7 @@ function EditRoleForm({
     e.preventDefault();
     const trimmedName = name.trim().toUpperCase().replace(/\s+/g, "_");
     if (!role.isSystem && !trimmedName) {
-      setNameError("Vui lòng nhập tên vai trò");
+      setNameError(t("admin.roles.editModal.nameRequired"));
       return;
     }
     setNameError("");
@@ -44,6 +46,7 @@ function EditRoleForm({
       id: role.id,
       payload: {
         name: role.isSystem ? undefined : trimmedName,
+        portalType: role.isSystem ? undefined : portalType,
         description: description.trim() || undefined,
       },
     });
@@ -83,7 +86,7 @@ function EditRoleForm({
             {role.isSystem && (
               <span className="inline-flex items-center gap-1 rounded-md border border-amber-400/30 bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-300">
                 <Lock className="h-3 w-3 shrink-0" />
-                <span>Vai trò hệ thống (Cố định tên)</span>
+                <span>{t("admin.roles.editModal.systemRoleNotice")}</span>
               </span>
             )}
           </div>
@@ -111,6 +114,13 @@ function EditRoleForm({
             </p>
           )}
         </div>
+
+        {/* Portal Type 3-Card Selector */}
+        <PortalTypeSelector
+          value={portalType}
+          onChange={setPortalType}
+          disabled={isPending || role.isSystem}
+        />
 
         {/* Description */}
         <div className="flex flex-col gap-1.5">
@@ -177,7 +187,7 @@ export default function EditRoleModal({
   if (!role) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="md">
+    <Modal isOpen={isOpen} onClose={onClose} size="lg">
       <EditRoleForm key={role.id} role={role} onClose={onClose} />
     </Modal>
   );

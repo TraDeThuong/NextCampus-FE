@@ -6,7 +6,8 @@ import { Shield, Loader2, CheckSquare, Square, AlertCircle } from "lucide-react"
 import Modal from "@/components/ui/Modal";
 import { useCreateRole } from "@/hooks/rbac/useCreateRole";
 import { usePermissions } from "@/hooks/rbac/usePermissions";
-import type { Permission } from "@/types/rbac";
+import type { Permission, PortalType } from "@/types/rbac";
+import PortalTypeSelector from "./PortalTypeSelector";
 
 interface CreateRoleModalProps {
   isOpen: boolean;
@@ -50,6 +51,7 @@ export default function CreateRoleModal({ isOpen, onClose }: CreateRoleModalProp
   const t = useTranslations();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [portalType, setPortalType] = useState<PortalType>("ADMIN");
   const [selectedPermissionIds, setSelectedPermissionIds] = useState<string[]>([]);
   const [nameError, setNameError] = useState("");
 
@@ -65,6 +67,7 @@ export default function CreateRoleModal({ isOpen, onClose }: CreateRoleModalProp
   const handleClose = () => {
     setName("");
     setDescription("");
+    setPortalType("ADMIN");
     setSelectedPermissionIds([]);
     setNameError("");
     onClose();
@@ -74,11 +77,11 @@ export default function CreateRoleModal({ isOpen, onClose }: CreateRoleModalProp
     e.preventDefault();
     const trimmedName = name.trim().toUpperCase().replace(/\s+/g, "_");
     if (!trimmedName) {
-      setNameError("Vui lòng nhập tên vai trò");
+      setNameError(t("admin.roles.createModal.nameRequired"));
       return;
     }
     if (trimmedName.length < 2) {
-      setNameError("Tên vai trò tối thiểu 2 ký tự");
+      setNameError(t("admin.roles.createModal.nameMinLength"));
       return;
     }
     setNameError("");
@@ -86,6 +89,7 @@ export default function CreateRoleModal({ isOpen, onClose }: CreateRoleModalProp
     createRole({
       name: trimmedName,
       description: description.trim() || undefined,
+      portalType,
       permissionIds: selectedPermissionIds.length > 0 ? selectedPermissionIds : undefined,
     });
   };
@@ -173,6 +177,13 @@ export default function CreateRoleModal({ isOpen, onClose }: CreateRoleModalProp
               </p>
             )}
           </div>
+
+          {/* Portal Type 3-Card Selector */}
+          <PortalTypeSelector
+            value={portalType}
+            onChange={setPortalType}
+            disabled={isPending}
+          />
 
           {/* Description */}
           <div className="flex flex-col gap-1.5">

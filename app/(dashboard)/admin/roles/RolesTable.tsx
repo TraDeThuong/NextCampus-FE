@@ -27,7 +27,7 @@ import RoleUsersModal from "./RoleUsersModal";
 import CreateRoleModal from "./CreateRoleModal";
 
 const COLUMNS =
-  "minmax(240px, 2.2fr) minmax(130px, 1fr) minmax(130px, 1fr) minmax(140px, 1fr) 48px";
+  "minmax(220px, 2fr) minmax(130px, 1fr) minmax(110px, 0.9fr) minmax(110px, 0.9fr) minmax(120px, 1fr) 48px";
 
 export default function RolesTable() {
   const t = useTranslations();
@@ -124,6 +124,14 @@ export default function RolesTable() {
           <AlertTriangle className="h-6 w-6" />
         </div>
         <p className="text-sm text-rose-300">{t("admin.roles.loadError")}</p>
+        <button
+          type="button"
+          onClick={() => refetch()}
+          className="mt-2 inline-flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2 text-xs font-semibold text-rose-300 transition hover:bg-rose-500/20 active:scale-95 cursor-pointer"
+        >
+          <RotateCcw className="h-3.5 w-3.5" />
+          <span>{t("common.retry")}</span>
+        </button>
       </MetalCard>
     );
   }
@@ -206,6 +214,7 @@ export default function RolesTable() {
       >
         <Table.Header>
           <div>{t("admin.roles.table.colRole")}</div>
+          <div>{t("admin.roles.table.colPortal")}</div>
           <div>{t("admin.roles.table.colType")}</div>
           <div>{t("admin.roles.table.colUsers")}</div>
           <div>{t("admin.roles.table.colPermissions")}</div>

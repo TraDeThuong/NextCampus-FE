@@ -5,6 +5,7 @@ interface JwtPayload {
   id?: string;
   email?: string;
   role?: string;
+  portalType?: string;
   exp?: number;
 }
 
@@ -52,9 +53,9 @@ export function proxy(request: NextRequest) {
     }
   }
 
-  const isAuthenticated = !!payload && !!payload.role;
-  const portal = getPortalName(payload?.role);
-  const targetDashboard = getDashboardPath(payload?.role);
+  const isAuthenticated = !!payload && (!!payload.portalType || !!payload.role);
+  const portal = getPortalName(payload?.portalType, payload?.role);
+  const targetDashboard = getDashboardPath(payload?.portalType, payload?.role);
 
   const isAuthRoute =
     pathname.startsWith("/login") ||
